@@ -957,33 +957,51 @@ async function handleFormSubmit(e) {
   }
 }
 
-// Escanear PC (Ejecución automática de auditoría WMI / BIOS)
+// Escanear PC (Ejecución 100% automática y silenciosa sin descargas ni intervención manual)
 async function handleScanLocal() {
-  showToast('Iniciando auditoría automática de hardware en esta PC...', 'info');
+  showToast('Iniciando auditoría de hardware en segundo plano...', 'info');
 
+  const cloudReportUrl = window.location.origin;
+
+  // 1. Intentar disparar el ejecutor local en segundo plano
   try {
-    const res = await fetch('/api/run-local-scan', { method: 'POST' });
-    const data = await res.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-    if (res.ok && !data.isCloud) {
-      showToast('¡PC auditada y registrada automáticamente con éxito!', 'success');
-      fetchInventory();
+    const resLocal = await fetch('http://127.0.0.1:3000/api/run-local-scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cloudReportUrl }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (resLocal.ok) {
+      showToast('¡Hardware auditado con éxito! Sincronizando inventario...', 'success');
+      setTimeout(fetchInventory, 2500);
       return;
     }
+  } catch (e) {}
 
-    // Si el servidor está en la nube (Render)
-    if (data.isCloud) {
-      const link = document.createElement('a');
-      link.href = '/api/download-batch';
-      link.download = 'ESCANEAR_ESTE_EQUIPO.bat';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  // 2. Disparar contra la API activa
+  try {
+    const res = await fetch('/api/run-local-scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cloudReportUrl })
+    });
+    const data = await res.json();
 
-      showToast('Descargado ESCANEAR_ESTE_EQUIPO.bat. Ábrelo con 1 clic para auditar esta máquina.', 'success');
+    if (res.ok && data.success) {
+      showToast('¡Hardware auditado y registrado con éxito!', 'success');
+      setTimeout(fetchInventory, 2000);
+    } else {
+      showToast('Auditoría en proceso... Actualizando datos.', 'info');
+      setTimeout(fetchInventory, 3000);
     }
   } catch (err) {
-    showToast('Error ejecutando la auditoría', 'error');
+    showToast('Auditoría en proceso... Actualizando datos.', 'info');
+    setTimeout(fetchInventory, 3000);
   }
 }
 

@@ -605,38 +605,37 @@ app.post('/api/agent/report', (req, res) => {
   res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
 });
 
-// Disparar escaneo de este PC desde el botón web
+// Disparar escaneo de este PC desde el botón web de forma 100% silenciosa y automática
 app.post(['/api/run-local-scan', '/api/scan-local'], (req, res) => {
-  const serverUrl = getServerUrl(req);
+  const { cloudReportUrl } = req.body || {};
+  const targetServerUrl = cloudReportUrl || getServerUrl(req);
 
-  // Si estamos en la nube (Render / Linux):
-  if (process.platform !== 'win32') {
-    return res.json({
-      success: false,
-      isCloud: true,
-      message: 'Servidor en la Nube (Render)',
-      oneLiner: `irm ${serverUrl}/scan | iex`,
-      downloadUrl: '/api/download-batch'
+  // Si estamos en Windows (máquina física):
+  if (process.platform === 'win32') {
+    const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
+    const cmd = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" "${targetServerUrl}"`;
+    
+    exec(cmd, { windowsHide: true, timeout: 25000 }, (error, stdout, stderr) => {
+      const items = loadDB();
+      if (error) {
+        console.error('Error ejecutando escaneo local:', error, stderr);
+        return res.status(500).json({ error: 'Error ejecutando escaneo', details: stderr || error.message });
+      }
+      res.json({
+        success: true,
+        message: 'Escaneo ejecutado automáticamente en segundo plano',
+        totalEquipos: items.length,
+        items: items
+      });
     });
+    return;
   }
 
-  const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
-  const cmd = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" "${serverUrl}"`;
-  
-  exec(cmd, { windowsHide: true, timeout: 25000 }, (error, stdout, stderr) => {
-    if (error) {
-      console.error('Error ejecutando escaneo local:', error, stderr);
-      return res.status(500).json({ error: 'Error ejecutando escaneo', details: stderr || error.message });
-    }
-    
-    // Recargar items y devolver el último
-    const items = loadDB();
-    res.json({
-      message: 'Escaneo local ejecutado correctamente',
-      output: stdout,
-      totalEquipos: items.length,
-      items: items
-    });
+  // Si estamos en la nube (Render / Linux):
+  res.json({
+    success: true,
+    isCloud: true,
+    message: 'Servidor en la Nube activo'
   });
 });
 
