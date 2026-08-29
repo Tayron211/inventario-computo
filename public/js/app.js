@@ -56,6 +56,7 @@ function initAuth() {
     if (loginOverlay) loginOverlay.classList.add('hidden');
     const userBox = document.getElementById('userSessionBox');
     if (userBox) userBox.style.display = 'flex';
+    updateAuthUI();
   } else {
     if (loginOverlay) {
       loginOverlay.classList.remove('hidden');
@@ -95,16 +96,19 @@ function initAuth() {
 
         const data = await res.json();
         if (res.ok && data.success) {
-          // Guardar solo en sessionStorage (se borra automáticamente al cerrar la página/navegador)
+          // Guardar en sessionStorage (se borra automáticamente al cerrar la página/navegador)
           sessionStorage.setItem('sysinventario_session_token', data.token);
           sessionStorage.setItem('sysinventario_user', data.user);
+          sessionStorage.setItem('sysinventario_role', data.role || 'admin');
+          sessionStorage.setItem('sysinventario_display', data.displayName || data.user);
           localStorage.removeItem('sysinventario_token');
           
           loginOverlay.classList.add('hidden');
           const userBox = document.getElementById('userSessionBox');
           if (userBox) userBox.style.display = 'flex';
           
-          showToast(`¡Bienvenido al sistema, ${data.user}!`, 'success');
+          updateAuthUI();
+          showToast(`¡Bienvenido, ${data.displayName || data.user}!`, 'success');
           fetchInventory();
         } else {
           if (loginErrorMsg) {
@@ -144,6 +148,28 @@ function initAuth() {
       }
       showToast('Sesión cerrada correctamente', 'info');
     });
+  }
+}
+
+// -------------------------------------------------------------
+// ACTUALIZACIÓN DE INTERFAZ SEGÚN ROL DE USUARIO
+// -------------------------------------------------------------
+function updateAuthUI() {
+  const role = sessionStorage.getItem('sysinventario_role') || 'admin';
+  const username = sessionStorage.getItem('sysinventario_user') || 'admin';
+  
+  const sessionUserName = document.getElementById('sessionUserName');
+  if (sessionUserName) {
+    if (role === 'operador') {
+      sessionUserName.innerHTML = `<i class="fa-solid fa-user-lock" style="color: #60a5fa;"></i> ${escapeHTML(username)} <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 500;">(Operador)</span>`;
+    } else {
+      sessionUserName.innerHTML = `<i class="fa-solid fa-user-shield"></i> ${escapeHTML(username)} <span style="font-size: 0.72rem; color: var(--crimson-glow); font-weight: 500;">(Admin)</span>`;
+    }
+  }
+  
+  const btnOpenManualModal = document.getElementById('btnOpenManualModal');
+  if (btnOpenManualModal) {
+    btnOpenManualModal.style.display = role === 'operador' ? 'none' : 'inline-flex';
   }
 }
 
@@ -739,6 +765,7 @@ function renderData() {
 }
 
 function renderTable(items) {
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
   tableBody.innerHTML = items.map(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
     const tipoClass = typeInfo.class;
@@ -859,12 +886,14 @@ function renderTable(items) {
             <button class="action-btn-mini" onclick="viewDetails('${item.id}')" title="Ver Ficha Técnica Completa">
               <i class="fa-solid fa-eye"></i>
             </button>
+            ${!isOperador ? `
             <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
             <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar Registro">
               <i class="fa-solid fa-trash-can"></i>
             </button>
+            ` : ''}
           </div>
         </td>
       </tr>
@@ -873,6 +902,8 @@ function renderTable(items) {
 }
 
 function renderGrid(items) {
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+
   gridContainer.innerHTML = items.map(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
     const primaryName = item.hostname || item.modelo || 'Equipo';
@@ -916,12 +947,14 @@ function renderGrid(items) {
           <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="viewDetails('${item.id}')">
             <i class="fa-solid fa-eye"></i> Ver Ficha
           </button>
-          <button class="action-btn-mini" onclick="editEquipment('${item.id}')">
+          ${!isOperador ? `
+          <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
-          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(item.modelo)}')">
+          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar">
             <i class="fa-solid fa-trash-can"></i>
           </button>
+          ` : ''}
         </div>
       </div>
     `;

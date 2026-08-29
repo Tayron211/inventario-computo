@@ -341,18 +341,40 @@ function getServerUrl(req) {
   return `http://${ips[0]}:${PORT}`;
 }
 
-// Credenciales de acceso
-const AUTH_USER = 'admin';
-const AUTH_PASS = 'S0p0rt3pp';
+// Credenciales de acceso y roles del sistema
+const USERS = [
+  { username: 'admin', password: 'S0p0rt3pp', role: 'admin', displayName: 'Administrador' },
+  { username: 'user', password: 'solover', role: 'operador', displayName: 'Operador (Solo Lectura)' }
+];
+
+// Función para verificar rol del usuario desde los encabezados
+function getUserRole(req) {
+  const authHeader = req.headers['authorization'] || '';
+  if (authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = Buffer.from(authHeader.split(' ')[1], 'base64').toString('utf8');
+      const parts = decoded.split(':');
+      if (parts.length >= 2) return parts[1]; // role
+    } catch (e) {}
+  }
+  return req.headers['x-user-role'] || 'admin';
+}
 
 // Endpoint para autenticación
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
-  if (username === AUTH_USER && password === AUTH_PASS) {
-    const token = Buffer.from(`${AUTH_USER}:${AUTH_PASS}:${Date.now()}`).toString('base64');
+  const cleanUser = (username || '').trim();
+  const cleanPass = (password || '').trim();
+
+  const foundUser = USERS.find(u => u.username === cleanUser && u.password === cleanPass);
+  
+  if (foundUser) {
+    const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${Date.now()}`).toString('base64');
     return res.json({
       success: true,
-      user: AUTH_USER,
+      user: foundUser.username,
+      role: foundUser.role,
+      displayName: foundUser.displayName,
       token: token,
       message: 'Inicio de sesión exitoso'
     });
@@ -613,8 +635,13 @@ app.post('/api/inventory', (req, res) => {
   res.status(201).json({ message: 'Equipo registrado exitosamente', item: newItem });
 });
 
-// Actualizar equipo
+// Actualizar equipo (Bloqueado para operador)
 app.put('/api/inventory/:id', (req, res) => {
+  const role = getUserRole(req);
+  if (role === 'operador') {
+    return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede editar registros.' });
+  }
+
   const items = loadDB();
   const index = items.findIndex(i => i.id === req.params.id);
   
@@ -635,8 +662,13 @@ app.put('/api/inventory/:id', (req, res) => {
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
 
-// Eliminar equipo
+// Eliminar equipo (Bloqueado para operador)
 app.delete('/api/inventory/:id', (req, res) => {
+  const role = getUserRole(req);
+  if (role === 'operador') {
+    return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede eliminar registros.' });
+  }
+
   let items = loadDB();
   const initialLen = items.length;
   items = items.filter(i => i.id !== req.params.id);
