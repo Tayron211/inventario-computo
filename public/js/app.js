@@ -1070,10 +1070,18 @@ function viewDetails(id) {
   document.getElementById('detailsTitle').textContent = item.modelo || 'Ficha Técnica';
   document.getElementById('detailsSubtitle').textContent = `S/N: ${item.numero_serie || 'N/A'} | Tipo: ${item.tipo_equipo || 'PC'}`;
 
-  // Configurar botón editar desde ficha
+  // Configurar botón editar y eliminar desde ficha
   document.getElementById('btnEditFromDetails').onclick = () => {
     editEquipment(item.id);
   };
+
+  const btnDeleteFromDetails = document.getElementById('btnDeleteFromDetails');
+  if (btnDeleteFromDetails) {
+    btnDeleteFromDetails.onclick = () => {
+      closeModal('detailsModal');
+      deleteEquipment(item.id, item.modelo);
+    };
+  }
 
   // Monitores List
   let monitoresHtml = '<p class="text-gray-400">Sin monitores adicionales registrados</p>';
