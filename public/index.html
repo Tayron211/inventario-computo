@@ -22,6 +22,50 @@
   <div class="glow-orb orb-2"></div>
   <div class="glow-orb orb-3"></div>
 
+  <!-- =================================================================== -->
+  <!-- OVERLAY DE INICIO DE SESIÓN / AUTENTICACIÓN -->
+  <!-- =================================================================== -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-logo">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2>SYSINVENTARIO <span class="badge-crimson">PRO</span></h2>
+        <p>Control de Hardware & Auditoría de Red</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div id="loginErrorMsg" class="login-error" style="display: none;">
+          <i class="fa-solid fa-circle-exclamation"></i> <span id="loginErrorText">Usuario o contraseña incorrectos</span>
+        </div>
+
+        <div class="form-group">
+          <label for="loginUser"><i class="fa-solid fa-user"></i> Usuario</label>
+          <input type="text" id="loginUser" class="form-control" placeholder="admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="loginPass"><i class="fa-solid fa-lock"></i> Contraseña</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-password" id="btnTogglePass" title="Mostrar/Ocultar contraseña">
+              <i class="fa-solid fa-eye" id="togglePassIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-crimson-pulse w-100 mt-4" id="btnLoginSubmit">
+          <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
+        </button>
+      </form>
+
+      <div class="login-footer-hint">
+        <i class="fa-solid fa-lock"></i> Acceso protegido para administradores
+      </div>
+    </div>
+  </div>
+
   <!-- Contenedor Principal -->
   <div class="app-wrapper">
     
@@ -43,7 +87,7 @@
           <div class="network-badge" id="btnShowQr" title="Haz clic para ver el Código QR y conectar tu celular">
             <span class="live-pulse"></span>
             <div class="net-info">
-              <span class="net-label"><i class="fa-solid fa-wifi"></i> RED LOCAL</span>
+              <span class="net-label"><i class="fa-solid fa-wifi"></i> RED</span>
               <span class="net-ip" id="serverIpDisplay">Conectando...</span>
             </div>
             <i class="fa-solid fa-qrcode qr-mini-icon"></i>
@@ -52,25 +96,25 @@
           <!-- Botón Escanear Toda la Red -->
           <button class="btn btn-crimson-pulse" id="btnOpenNetworkScanModal" title="Escanear y auditar todas las PCs de la subred local">
             <i class="fa-solid fa-network-wired"></i>
-            <span>Escanear Toda la Red</span>
+            <span>Escanear Red</span>
           </button>
 
           <!-- Botón Escanear Este Equipo -->
           <button class="btn btn-outline-crimson" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
             <i class="fa-solid fa-bolt"></i>
-            <span>Escanear Este Equipo</span>
+            <span>Escanear PC</span>
           </button>
 
           <!-- Botón Nuevo Registro Manual -->
           <button class="btn btn-secondary" id="btnOpenManualModal">
             <i class="fa-solid fa-plus"></i>
-            <span>Nuevo Registro</span>
+            <span>Nuevo</span>
           </button>
 
           <!-- Botón Exportar Excel -->
           <a href="/api/export-excel" class="btn btn-excel" id="btnExportExcel" download>
             <i class="fa-solid fa-file-excel"></i>
-            <span>Exportar Excel</span>
+            <span>Excel</span>
           </a>
 
           <!-- Botón Modo Claro / Oscuro -->
@@ -79,6 +123,14 @@
             <i class="fa-solid fa-moon icon-moon"></i>
             <span id="themeToggleText">Modo Claro</span>
           </button>
+
+          <!-- Perfil de Usuario y Cerrar Sesión -->
+          <div class="user-session-badge" id="userSessionBox">
+            <span class="user-pill"><i class="fa-solid fa-user-shield"></i> <b id="sessionUserName">admin</b></span>
+            <button class="btn-logout" id="btnLogout" title="Cerrar Sesión">
+              <i class="fa-solid fa-power-off"></i>
+            </button>
+          </div>
         </div>
       </div>
     </header>

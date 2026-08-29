@@ -2160,6 +2160,198 @@ body {
 .mt-4 { margin-top: 18px; }
 
 /* ==============================================================================
+   PANTALLA DE INICIO DE SESIÓN (LOGIN OVERLAY)
+   ============================================================================== */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 10, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+[data-theme="light"] .login-overlay {
+  background: rgba(241, 245, 249, 0.92);
+}
+
+.login-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.login-card {
+  background: var(--bg-card);
+  border: 1px solid var(--crimson-border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(220, 20, 60, 0.2);
+  animation: modalScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] .login-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12), 0 0 24px rgba(220, 20, 60, 0.1);
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-logo {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--crimson-primary), var(--crimson-dark));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  font-size: 1.6rem;
+  color: #fff;
+  box-shadow: var(--shadow-crimson-sm);
+}
+
+.login-brand h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+[data-theme="light"] .login-brand h2 {
+  color: #0f172a;
+}
+
+.login-brand p {
+  font-size: 0.82rem;
+  color: var(--gray-400);
+}
+
+[data-theme="light"] .login-brand p {
+  color: #64748b;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme="light"] .login-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 42px;
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 6px;
+  font-size: 0.95rem;
+  transition: var(--transition-fast);
+}
+
+.btn-toggle-password:hover {
+  color: var(--crimson-glow);
+}
+
+.login-footer-hint {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* User Session Badge en Header */
+.user-session-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220, 20, 60, 0.12);
+  border: 1px solid var(--crimson-border);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+[data-theme="light"] .user-session-badge {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.user-pill {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--crimson-glow);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme="light"] .user-pill {
+  color: #9f1239;
+}
+
+.btn-logout {
+  background: none;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  transition: var(--transition-fast);
+}
+
+.btn-logout:hover {
+  background: var(--crimson-primary);
+  color: #fff;
+}
+
+/* ==============================================================================
    RESPONSIVIDAD MÓVIL Y TABLETS
    ============================================================================== */
 @media (max-width: 992px) {

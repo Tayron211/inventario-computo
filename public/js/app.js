@@ -31,10 +31,112 @@ const equipmentForm = document.getElementById('equipmentForm');
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  initAuth();
   initEventListeners();
   fetchServerInfo();
   fetchInventory();
 });
+
+// -------------------------------------------------------------
+// CONTROL DE AUTENTICACIÓN / SESIÓN
+// -------------------------------------------------------------
+function initAuth() {
+  const loginOverlay = document.getElementById('loginOverlay');
+  const loginForm = document.getElementById('loginForm');
+  const loginUser = document.getElementById('loginUser');
+  const loginPass = document.getElementById('loginPass');
+  const loginErrorMsg = document.getElementById('loginErrorMsg');
+  const btnTogglePass = document.getElementById('btnTogglePass');
+  const togglePassIcon = document.getElementById('togglePassIcon');
+  const btnLogout = document.getElementById('btnLogout');
+  const sessionToken = localStorage.getItem('sysinventario_token');
+
+  // Si ya tiene sesión activa
+  if (sessionToken) {
+    if (loginOverlay) loginOverlay.classList.add('hidden');
+  } else {
+    if (loginOverlay) {
+      loginOverlay.classList.remove('hidden');
+      if (loginUser) loginUser.focus();
+    }
+  }
+
+  // Toggle mostrar contraseña
+  if (btnTogglePass && loginPass) {
+    btnTogglePass.addEventListener('click', () => {
+      const isPass = loginPass.type === 'password';
+      loginPass.type = isPass ? 'text' : 'password';
+      if (togglePassIcon) {
+        togglePassIcon.className = isPass ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+      }
+    });
+  }
+
+  // Submit de Login
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = (loginUser.value || '').trim();
+      const password = (loginPass.value || '').trim();
+      const btnSubmit = document.getElementById('btnLoginSubmit');
+
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verificando...`;
+      if (loginErrorMsg) loginErrorMsg.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem('sysinventario_token', data.token);
+          localStorage.setItem('sysinventario_user', data.user);
+          loginOverlay.classList.add('hidden');
+          showToast(`¡Bienvenido al sistema, ${data.user}!`, 'success');
+          fetchInventory();
+        } else {
+          if (loginErrorMsg) {
+            loginErrorMsg.style.display = 'flex';
+            document.getElementById('loginErrorText').textContent = data.error || 'Usuario o contraseña incorrectos';
+          }
+          if (loginPass) {
+            loginPass.value = '';
+            loginPass.focus();
+          }
+        }
+      } catch (err) {
+        if (loginErrorMsg) {
+          loginErrorMsg.style.display = 'flex';
+          document.getElementById('loginErrorText').textContent = 'Error al conectar con el servidor';
+        }
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión`;
+      }
+    });
+  }
+
+  // Logout
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      localStorage.removeItem('sysinventario_token');
+      localStorage.removeItem('sysinventario_user');
+      if (loginOverlay) {
+        loginOverlay.classList.remove('hidden');
+        if (loginPass) loginPass.value = '';
+        if (loginUser) {
+          loginUser.value = '';
+          loginUser.focus();
+        }
+      }
+      showToast('Sesión cerrada correctamente', 'info');
+    });
+  }
+}
 
 // -------------------------------------------------------------
 // TEMA CLARO / OSCURO

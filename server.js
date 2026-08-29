@@ -234,11 +234,49 @@ function getLocalIPs() {
   return addresses.length > 0 ? addresses : ['127.0.0.1'];
 }
 
+// Helper para obtener la URL pública o local exacta del servidor
+function getServerUrl(req) {
+  if (req) {
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const host = forwardedHost || req.headers.host;
+    const proto = forwardedProto || req.protocol || 'http';
+
+    // Si viene de un dominio público (como Render o túnel)
+    if (host && !host.startsWith('10.') && !host.startsWith('127.0.0.1') && !host.startsWith('localhost:')) {
+      return `${proto}://${host}`;
+    }
+  }
+  const ips = getLocalIPs();
+  return `http://${ips[0]}:${PORT}`;
+}
+
+// Credenciales de acceso
+const AUTH_USER = 'admin';
+const AUTH_PASS = 'S0p0rt3pp';
+
+// Endpoint para autenticación
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body || {};
+  if (username === AUTH_USER && password === AUTH_PASS) {
+    const token = Buffer.from(`${AUTH_USER}:${AUTH_PASS}:${Date.now()}`).toString('base64');
+    return res.json({
+      success: true,
+      user: AUTH_USER,
+      token: token,
+      message: 'Inicio de sesión exitoso'
+    });
+  }
+  return res.status(401).json({
+    success: false,
+    error: 'Usuario o contraseña incorrectos'
+  });
+});
+
 // Servir script para ejecución remota en 1 sola línea (irm http://IP:3000/scan | iex)
 app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
-  const ips = getLocalIPs();
-  const serverUrl = `http://${ips[0]}:${PORT}`;
+  const serverUrl = getServerUrl(req);
   
   try {
     let scriptContent = fs.readFileSync(scriptPath, 'utf8');
@@ -251,11 +289,9 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   }
 });
 
-// Endpoint para descargar el archivo ESCANEAR_ESTE_EQUIPO.bat configurado con la IP actual
+// Endpoint para descargar el archivo ESCANEAR_ESTE_EQUIPO.bat configurado con la URL actual
 app.get(['/api/download-batch', '/download-batch', '/escanear.bat'], (req, res) => {
-  const ips = getLocalIPs();
-  const primaryIP = ips[0];
-  const serverUrl = `http://${primaryIP}:${PORT}`;
+  const serverUrl = getServerUrl(req);
   
   const batContent = `@echo off
 chcp 65001 >nul
@@ -267,7 +303,7 @@ echo ====================================================================
 echo             SISTEMA DE AUDITORIA Y ESCANEO DE HARDWARE
 echo ====================================================================
 echo.
-echo [*] Conectando con servidor local (${serverUrl})...
+echo [*] Conectando con servidor (${serverUrl})...
 echo [*] Escaneando componentes, numeros de serie y perifericos...
 echo.
 
@@ -290,9 +326,9 @@ pause
 app.get('/api/server-info', async (req, res) => {
   const ips = getLocalIPs();
   const primaryIP = ips[0];
-  const url = `http://${primaryIP}:${PORT}`;
+  const url = getServerUrl(req);
   
-  // Calcular la subred base (ej: 192.168.89)
+  // Calcular la subred base
   const parts = primaryIP.split('.');
   const subnetBase = parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '192.168.1';
   
@@ -325,7 +361,8 @@ app.get('/api/server-info', async (req, res) => {
       qrCode: qrDataUrlDark,
       qrCodeDark: qrDataUrlDark,
       qrCodeLight: qrDataUrlLight,
-      hostname: os.hostname()
+      hostname: os.hostname(),
+      isCloud: process.platform !== 'win32'
     });
   } catch (err) {
     res.status(500).json({ error: 'Error generando código QR', details: err.message });
@@ -334,6 +371,19 @@ app.get('/api/server-info', async (req, res) => {
 
 // Disparar escaneo de toda la red local
 app.post('/api/scan-network', (req, res) => {
+  const serverUrl = getServerUrl(req);
+
+  // Si el servidor está en la nube (Render / Linux):
+  if (process.platform !== 'win32') {
+    const items = loadDB();
+    return res.json({
+      message: 'Servidor alojado en la Nube',
+      output: `[✓] SERVIDOR ACTIVO EN LA NUBE (${serverUrl})\n\n[*] Como este servidor está en internet, para auditar cualquier PC o laptop de tu red local y que aparezca en este panel en vivo, abre PowerShell en esa máquina y pega:\n\n    irm ${serverUrl}/scan | iex\n\n[OK] El equipo se registrará automáticamente en tu inventario al instante.`,
+      totalEquipos: items.length,
+      items: items
+    });
+  }
+
   const { subnet } = req.body;
   const ips = getLocalIPs();
   const primaryIP = ips[0];
@@ -342,7 +392,6 @@ app.post('/api/scan-network', (req, res) => {
   const targetSubnet = subnet || defaultSubnet;
   
   const scriptPath = path.join(__dirname, 'scripts', 'scan_network.ps1');
-  const serverUrl = `http://${primaryIP}:${PORT}`;
   const cmd = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" "${serverUrl}" "${targetSubnet}"`;
   
   console.log(`[*] Iniciando escaneo de red local en subred: ${targetSubnet}.0/24...`);
