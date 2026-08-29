@@ -1261,16 +1261,23 @@ let html5QrScanner = null;
 let currentCameraFacing = "environment";
 
 function startCameraScanner(targetInputId = 'formNumeroSerie') {
-  openModal('cameraModal');
-
-  if (typeof Html5Qrcode === 'undefined') {
-    showToast('Iniciando lector de cámara...', 'info');
-    setTimeout(() => startCameraScanner(targetInputId), 400);
-    return;
+  const camModal = document.getElementById('cameraModal');
+  if (camModal) {
+    camModal.classList.add('active');
+    camModal.style.zIndex = '100050';
+    camModal.style.display = 'flex';
   }
 
   const cameraContainer = document.getElementById('cameraPreview');
-  if (cameraContainer) cameraContainer.innerHTML = '';
+  if (cameraContainer) {
+    cameraContainer.innerHTML = '<div class="camera-loading-hint"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><span>Encendiendo cámara y visor...</span></div>';
+  }
+
+  if (typeof Html5Qrcode === 'undefined') {
+    showToast('Iniciando lector de cámara...', 'info');
+    setTimeout(() => startCameraScanner(targetInputId), 350);
+    return;
+  }
 
   if (html5QrScanner) {
     try {
@@ -1280,45 +1287,54 @@ function startCameraScanner(targetInputId = 'formNumeroSerie') {
     } catch (e) {}
   }
 
-  try {
-    html5QrScanner = new Html5Qrcode("cameraPreview");
+  setTimeout(() => {
+    try {
+      html5QrScanner = new Html5Qrcode("cameraPreview");
 
-    const config = {
-      fps: 15,
-      qrbox: (viewfinderWidth, viewfinderHeight) => {
-        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-        return {
-          width: Math.floor(minEdge * 0.85),
-          height: Math.floor(minEdge * 0.6)
-        };
-      },
-      aspectRatio: 1.333334
-    };
+      const config = {
+        fps: 20,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          const width = Math.min(viewfinderWidth * 0.9, 320);
+          const height = Math.min(viewfinderHeight * 0.7, 200);
+          return { width: Math.floor(width), height: Math.floor(height) };
+        },
+        aspectRatio: 1.333334
+      };
 
-    html5QrScanner.start(
-      { facingMode: currentCameraFacing },
-      config,
-      (decodedText) => {
-        const cleanText = (decodedText || '').trim().toUpperCase();
-        if (cleanText) {
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-          const input = document.getElementById(targetInputId);
-          if (input) {
-            input.value = cleanText;
-            input.focus();
+      html5QrScanner.start(
+        { facingMode: currentCameraFacing },
+        config,
+        (decodedText) => {
+          const cleanText = (decodedText || '').trim().toUpperCase();
+          if (cleanText) {
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            const input = document.getElementById(targetInputId);
+            if (input) {
+              input.value = cleanText;
+              input.focus();
+              input.style.borderColor = 'var(--accent-emerald)';
+              input.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.5)';
+              setTimeout(() => {
+                input.style.borderColor = '';
+                input.style.boxShadow = '';
+              }, 2500);
+            }
+            showToast(`¡Código escaneado: ${cleanText}!`, 'success');
+            stopCameraScanner();
           }
-          showToast(`¡Serial escaneado: ${cleanText}!`, 'success');
-          stopCameraScanner();
+        },
+        () => {}
+      ).catch(err => {
+        console.warn('Error accediendo a la cámara:', err);
+        if (cameraContainer) {
+          cameraContainer.innerHTML = '<div class="camera-error-hint"><i class="fa-solid fa-triangle-exclamation text-crimson fa-2x"></i><p>Permite el acceso a la cámara en los permisos de tu navegador</p></div>';
         }
-      },
-      () => {}
-    ).catch(err => {
-      console.warn('Error accediendo a la cámara:', err);
-      showToast('Permite el acceso a la cámara en tu navegador', 'error');
-    });
-  } catch (err) {
-    console.error('Error inicializando escáner:', err);
-  }
+        showToast('Permite el acceso a la cámara en tu navegador', 'error');
+      });
+    } catch (err) {
+      console.error('Error inicializando escáner:', err);
+    }
+  }, 100);
 }
 
 function stopCameraScanner() {
@@ -1332,4 +1348,8 @@ function stopCameraScanner() {
     } catch (e) {}
   }
   closeModal('cameraModal');
+  const camModal = document.getElementById('cameraModal');
+  if (camModal) {
+    camModal.style.display = '';
+  }
 }
