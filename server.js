@@ -645,7 +645,7 @@ app.get('/api/export-excel', async (req, res) => {
   try {
     const items = loadDB();
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Inventario de Cómputo';
+    workbook.creator = 'SYS-INVENTORY';
     workbook.created = new Date();
     
     const worksheet = workbook.addWorksheet('Inventario Hardware', {
