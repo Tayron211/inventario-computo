@@ -158,13 +158,25 @@ function updateAuthUI() {
   const role = sessionStorage.getItem('sysinventario_role') || 'admin';
   const username = sessionStorage.getItem('sysinventario_user') || 'admin';
   
+  const userSessionBox = document.getElementById('userSessionBox');
+  const sessionUserIcon = document.getElementById('sessionUserIcon');
   const sessionUserName = document.getElementById('sessionUserName');
+  
+  if (userSessionBox) {
+    userSessionBox.classList.remove('badge-role-admin', 'badge-role-operador');
+    userSessionBox.classList.add(role === 'operador' ? 'badge-role-operador' : 'badge-role-admin');
+  }
+  
+  if (sessionUserIcon) {
+    sessionUserIcon.innerHTML = role === 'operador' 
+      ? `<i class="fa-solid fa-user-lock"></i>` 
+      : `<i class="fa-solid fa-crown gold-crown-icon"></i>`;
+  }
+  
   if (sessionUserName) {
-    if (role === 'operador') {
-      sessionUserName.innerHTML = `<i class="fa-solid fa-user-lock" style="color: #60a5fa;"></i> ${escapeHTML(username)} <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 500;">(Operador)</span>`;
-    } else {
-      sessionUserName.innerHTML = `<i class="fa-solid fa-user-shield"></i> ${escapeHTML(username)} <span style="font-size: 0.72rem; color: var(--crimson-glow); font-weight: 500;">(Admin)</span>`;
-    }
+    sessionUserName.innerHTML = role === 'operador' 
+      ? `<b>${escapeHTML(username)}</b> <span class="role-sublabel">Operador</span>` 
+      : `<b>${escapeHTML(username)}</b> <span class="role-sublabel">Admin</span>`;
   }
   
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');

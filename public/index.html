@@ -128,8 +128,11 @@
           </button>
 
           <!-- Perfil de Usuario y Cerrar Sesión -->
-          <div class="user-session-badge" id="userSessionBox">
-            <span class="user-pill"><i class="fa-solid fa-user-shield"></i> <b id="sessionUserName">admin</b></span>
+          <div class="user-session-badge badge-role-admin" id="userSessionBox">
+            <span class="user-pill" id="userPill">
+              <span id="sessionUserIcon"><i class="fa-solid fa-crown gold-crown-icon"></i></span>
+              <span id="sessionUserName"><b>admin</b> <span class="role-sublabel">Admin</span></span>
+            </span>
             <button class="btn-logout" id="btnLogout" title="Cerrar Sesión">
               <i class="fa-solid fa-power-off"></i>
             </button>
