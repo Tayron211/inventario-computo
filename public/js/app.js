@@ -277,10 +277,36 @@ function initEventListeners() {
     btnOpenManualModal.addEventListener('click', openManualCreateModal);
   }
 
-  // Botón Escanear Este Equipo / PC
+  // Botón Escanear Este Equipo / PC (Abre autorización transparente)
   const btnScanLocal = document.getElementById('btnScanLocal');
   if (btnScanLocal) {
-    btnScanLocal.addEventListener('click', handleScanLocal);
+    btnScanLocal.addEventListener('click', () => {
+      openModal('agentModal');
+    });
+  }
+
+  // Botón Copiar Comando en Modal de Autorización
+  const btnAuthCopyCmd = document.getElementById('btnAuthCopyCmd');
+  if (btnAuthCopyCmd) {
+    btnAuthCopyCmd.addEventListener('click', () => {
+      const url = (serverInfo && serverInfo.serverUrl) ? serverInfo.serverUrl : window.location.origin;
+      const cmd = `irm ${url}/scan | iex`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(() => {
+          showToast('¡Comando copiado! Abre PowerShell (Ctrl + V) y presiona Enter.', 'success');
+        });
+      } else {
+        prompt('Copia este comando y pégalo en PowerShell:', cmd);
+      }
+    });
+  }
+
+  // Botón Descargar BAT en Modal de Autorización
+  const btnAuthDownloadBat = document.getElementById('btnAuthDownloadBat');
+  if (btnAuthDownloadBat) {
+    btnAuthDownloadBat.addEventListener('click', () => {
+      showToast('Descargando script seguro. Ábrelo con 1 clic para autorizar la auditoría.', 'info');
+    });
   }
 
   // Formulario de Registro Manual
