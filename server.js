@@ -289,32 +289,45 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   }
 });
 
-// Endpoint para descargar el archivo ESCANEAR_ESTE_EQUIPO.bat configurado con la URL actual
+// Endpoint para descargar el archivo ESCANEAR_ESTE_EQUIPO.bat con permisos de Administrador por defecto
 app.get(['/api/download-batch', '/download-batch', '/escanear.bat'], (req, res) => {
   const serverUrl = getServerUrl(req);
   
   const batContent = `@echo off
 chcp 65001 >nul
-title AUDITORIA DE HARDWARE - INVENTARIO DE COMPUTO
+title SYS-INVENTORY - AUDITORIA DE HARDWARE
 color 0C
+
+:: ====================================================================
+:: AUTO-ELEVACION AUTOMATICA A PERMISOS DE ADMINISTRADOR POR DEFECTO
+:: ====================================================================
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [*] Solicitando permisos de Administrador para auditar BIOS y Hardware...
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
+cd /d "%~dp0"
 cls
 
 echo ====================================================================
-echo             SISTEMA DE AUDITORIA Y ESCANEO DE HARDWARE
+echo             SYS-INVENTORY - AUDITORIA TOTAL DE HARDWARE
 echo ====================================================================
 echo.
+echo [*] Permisos de Administrador: [OK - CONCEDIDOS]
 echo [*] Conectando con servidor (${serverUrl})...
-echo [*] Escaneando componentes, numeros de serie y perifericos...
+echo [*] Extrayendo BIOS, Motherboard, CPU, RAM, Discos y Perifericos...
 echo.
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm ${serverUrl}/scan | iex"
 
 echo.
 echo ====================================================================
-echo  [OK] Escaneo finalizado. Revisa el inventario en el panel web.
+echo  [OK] Escaneo completado. Los datos se guardaron en el inventario.
 echo ====================================================================
 echo.
-pause
+timeout /t 5 >nul
 `;
 
   res.setHeader('Content-Type', 'application/x-bat; charset=utf-8');
