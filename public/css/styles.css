@@ -1338,7 +1338,9 @@ body {
   font-size: 0.82rem;
 }
 
-/* CABECERA DE TABLA LIQUID GLASS */
+/* ==============================================================================
+   CABECERA DE TABLA LIQUID GLASS (MODO OSCURO Y CLARO)
+   ============================================================================== */
 .custom-excel-table thead {
   position: sticky;
   top: 0;
@@ -1346,36 +1348,53 @@ body {
 }
 
 .custom-excel-table thead th {
-  background: rgba(18, 18, 30, 0.72);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  color: #ffffff;
+  background: rgba(18, 18, 30, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  color: #ffffff !important;
   font-family: var(--font-main);
   font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   padding: 12px 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-bottom: 2px solid rgba(220, 20, 60, 0.75);
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-bottom: 2px solid rgba(220, 20, 60, 0.85) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.35);
   white-space: nowrap;
   transition: all 0.25s ease;
 }
 
-/* Modo Claro: Liquid Glass translúcido con alto contraste */
+/* Modo Claro: Liquid Glass Esmerilado Blanco Translúcido */
 [data-theme="light"] .custom-excel-table thead th {
-  background: rgba(241, 245, 249, 0.85);
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  color: #0f172a;
-  border-top: 1px solid rgba(255, 255, 255, 0.9);
-  border-bottom: 2px solid #e11d48;
-  border-left: 1px solid rgba(0, 0, 0, 0.06);
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.95), 0 4px 14px rgba(15, 23, 42, 0.07);
+  background: rgba(248, 250, 252, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  color: #0f172a !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 2px solid #e11d48 !important;
+  border-left: 1px solid rgba(203, 213, 225, 0.5) !important;
+  border-right: 1px solid rgba(203, 213, 225, 0.5) !important;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 1), 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .table-header-bar {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+[data-theme="light"] .table-title {
+  color: #e11d48 !important;
+}
+
+[data-theme="light"] .table-stats {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .table-stats b {
+  color: #0f172a !important;
 }
 
 .custom-excel-table thead th .header-filter-icon {
