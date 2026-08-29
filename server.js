@@ -29,36 +29,62 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(SCANS_DIR)) fs.mkdirSync(SCANS_DIR, { recursive: true });
 
 // Conexión e inicialización automática de Base de Datos en la Nube
+let mongoConnecting = false;
+let mongoError = null;
+
 async function initCloudDatabase() {
-  if (MONGODB_URI) {
+  if (MONGODB_URI && !mongoCollection && !mongoConnecting) {
+    mongoConnecting = true;
     try {
       console.log('🔄 Conectando a Base de Datos en la Nube (MongoDB Atlas)...');
-      mongoClient = new MongoClient(MONGODB_URI);
+      mongoClient = new MongoClient(MONGODB_URI, {
+        serverSelectionTimeoutMS: 8000,
+        connectTimeoutMS: 10000
+      });
       await mongoClient.connect();
       const db = mongoClient.db('sys_inventory');
       mongoCollection = db.collection('equipos');
-      console.log('✅ Base de Datos en la Nube conectada. Tus datos no se borrarán nunca.');
+      mongoError = null;
+      console.log('✅ Base de Datos en la Nube (MongoDB Atlas) conectada con éxito.');
 
+      // Cargar todos los equipos existentes en MongoDB
       const cloudItems = await mongoCollection.find({}).toArray();
       if (cloudItems.length > 0) {
-        memoryCache = cloudItems.map(item => {
+        const cleaned = cloudItems.map(item => {
           const { _id, ...clean } = item;
           return clean;
         });
-        saveLocalFile(memoryCache);
+        memoryCache = cleaned;
+        saveLocalFile(cleaned);
+        console.log(`📦 Sincronizados ${cleaned.length} equipos desde MongoDB Atlas a la memoria.`);
       } else {
+        // Si MongoDB está vacío, subir los datos locales iniciales
         const local = loadLocalFile();
         if (local.length > 0) {
           await mongoCollection.insertMany(local);
           memoryCache = local;
+          console.log(`📤 Subidos ${local.length} equipos iniciales a MongoDB Atlas.`);
         }
       }
     } catch (err) {
-      console.error('⚠️ Error conectando a MongoDB Atlas, usando almacenamiento local:', err.message);
+      mongoError = err.message;
+      console.error('⚠️ Error conectando a MongoDB Atlas:', err.message);
+      mongoCollection = null;
+    } finally {
+      mongoConnecting = false;
     }
   }
 }
 initCloudDatabase();
+
+// Reintento periódico de conexión a MongoDB si falló al inicio
+if (MONGODB_URI) {
+  setInterval(() => {
+    if (!mongoCollection) {
+      initCloudDatabase();
+    }
+  }, 30000);
+}
 
 // Datos iniciales de demostración basados en el modelo del usuario
 const DEFAULT_INVENTORY = [
@@ -680,6 +706,17 @@ app.post('/api/agent/report', (req, res) => {
   
   saveDB(items);
   res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
+});
+
+// Diagnóstico de estado de la base de datos (MongoDB vs Local)
+app.get('/api/db-status', (req, res) => {
+  res.json({
+    mongoConfigured: !!MONGODB_URI,
+    mongoConnected: !!mongoCollection,
+    mongoError: mongoError,
+    dbType: mongoCollection ? 'MongoDB Atlas (Persistente)' : 'Almacenamiento Local (Efímero)',
+    totalEquipos: loadDB().length
+  });
 });
 
 // Disparar escaneo de este PC desde el botón web de forma 100% silenciosa y automática
