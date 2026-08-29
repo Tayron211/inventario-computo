@@ -1,0 +1,23 @@
+{
+  "name": "inventario-computo",
+  "version": "1.0.0",
+  "description": "Sistema de inventario de hardware con auto-detección y acceso local/móvil",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "inventario",
+    "hardware",
+    "wmi",
+    "excel"
+  ],
+  "author": "Antigravity",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4"
+  }
+}

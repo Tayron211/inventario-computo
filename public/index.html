@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Inventario de Cómputo & Auditoría de Hardware</title>
+  
+  <!-- Google Fonts: Outfit & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="glow-orb orb-3"></div>
+
+  <!-- Contenedor Principal -->
+  <div class="app-wrapper">
+    
+    <!-- Header Principal -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="brand-section">
+          <div class="logo-icon">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div class="brand-text">
+            <h1>SYSINVENTARIO <span class="badge-crimson">PRO</span></h1>
+            <p>Control de Hardware, Números de Serie & Periféricos</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Live Network IP Badge -->
+          <div class="network-badge" id="btnShowQr" title="Haz clic para ver el Código QR y conectar tu celular">
+            <span class="live-pulse"></span>
+            <div class="net-info">
+              <span class="net-label"><i class="fa-solid fa-wifi"></i> RED LOCAL</span>
+              <span class="net-ip" id="serverIpDisplay">Conectando...</span>
+            </div>
+            <i class="fa-solid fa-qrcode qr-mini-icon"></i>
+          </div>
+
+          <!-- Botón Escanear Toda la Red -->
+          <button class="btn btn-crimson-pulse" id="btnOpenNetworkScanModal" title="Escanear y auditar todas las PCs de la subred local">
+            <i class="fa-solid fa-network-wired"></i>
+            <span>Escanear Toda la Red</span>
+          </button>
+
+          <!-- Botón Escanear Este Equipo -->
+          <button class="btn btn-outline-crimson" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Escanear Este Equipo</span>
+          </button>
+
+          <!-- Botón Nuevo Registro Manual -->
+          <button class="btn btn-secondary" id="btnOpenManualModal">
+            <i class="fa-solid fa-plus"></i>
+            <span>Nuevo Registro</span>
+          </button>
+
+          <!-- Botón Exportar Excel -->
+          <a href="/api/export-excel" class="btn btn-excel" id="btnExportExcel" download>
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Exportar Excel</span>
+          </a>
+
+          <!-- Botón Modo Claro / Oscuro -->
+          <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Alternar entre Modo Claro y Modo Oscuro">
+            <i class="fa-solid fa-sun icon-sun"></i>
+            <i class="fa-solid fa-moon icon-moon"></i>
+            <span id="themeToggleText">Modo Claro</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Body Container -->
+    <main class="main-content">
+      
+      <!-- Metric Cards Grid -->
+      <section class="metrics-grid">
+        <div class="metric-card" data-filter="Todos">
+          <div class="metric-icon total">
+            <i class="fa-solid fa-server"></i>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value" id="statTotal">0</span>
+            <span class="metric-title">Total Equipos</span>
+          </div>
+          <div class="metric-indicator"></div>
+        </div>
+
+        <div class="metric-card clickable" id="cardFilterDesktop" data-filter="PC de Escritorio">
+          <div class="metric-icon desktop">
+            <i class="fa-solid fa-desktop"></i>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value" id="statDesktop">0</span>
+            <span class="metric-title">PCs de Escritorio</span>
+          </div>
+          <div class="metric-tag">Filtrar</div>
+        </div>
+
+        <div class="metric-card clickable" id="cardFilterLaptop" data-filter="Laptop">
+          <div class="metric-icon laptop">
+            <i class="fa-solid fa-laptop"></i>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value" id="statLaptop">0</span>
+            <span class="metric-title">Laptops / Portátiles</span>
+          </div>
+          <div class="metric-tag">Filtrar</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon peripherals">
+            <i class="fa-solid fa-keyboard"></i>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value" id="statPeripherals">0</span>
+            <span class="metric-title">Periféricos / Monitores</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Batch Collector Info Banner -->
+      <section class="banner-quick-agent">
+        <div class="banner-left">
+          <div class="banner-badge"><i class="fa-solid fa-terminal"></i> SCRIPT BATCH AUTO-ESCANER</div>
+          <h3>¿Quieres inventariar otra PC o Laptop en tu red?</h3>
+          <p>Ejecuta el archivo <code>ESCANEAR_ESTE_EQUIPO.bat</code> en cualquier computadora para registrar automáticamente su modelo, número de serie, placa base, procesador, RAM, discos y periféricos.</p>
+        </div>
+        <div class="banner-right">
+          <button class="btn btn-outline-crimson" id="btnShowAgentInstructions">
+            <i class="fa-solid fa-download"></i> Ver Instrucciones del Batch
+          </button>
+        </div>
+      </section>
+
+      <!-- Control Toolbar: Search & Tabs Filters -->
+      <section class="toolbar-section">
+        <div class="search-bar-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="searchInput" placeholder="Buscar por Modelo, Serie, Marca, Tipo, CPU, Hostname o Usuario..." autocomplete="off">
+          <button class="clear-search-btn" id="btnClearSearch" title="Limpiar búsqueda" style="display: none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Filter Pills / Categories -->
+        <div class="filter-pills-group">
+          <button class="pill active" data-category="Todos" data-type="Todos">
+            <i class="fa-solid fa-layer-group"></i> Todos (<span id="countAll">0</span>)
+          </button>
+          <button class="pill" data-category="Computadoras">
+            <i class="fa-solid fa-desktop"></i> Computadoras (<span id="countComputadoras">0</span>)
+          </button>
+          <button class="pill" data-category="Impresoras">
+            <i class="fa-solid fa-print"></i> Impresoras (<span id="countImpresoras">0</span>)
+          </button>
+          <button class="pill" data-category="Redes">
+            <i class="fa-solid fa-network-wired"></i> Red & Wi-Fi (<span id="countRedes">0</span>)
+          </button>
+          <button class="pill" data-category="Periféricos">
+            <i class="fa-solid fa-keyboard"></i> Periféricos & Audio (<span id="countPerifericos">0</span>)
+          </button>
+        </div>
+
+        <!-- Secondary Filters & View Switcher -->
+        <div class="view-and-extra-controls">
+          <!-- Filtro por Tipo Específico -->
+          <div class="custom-select-wrapper">
+            <select id="typeSelectFilter" class="custom-select" title="Filtrar por Tipo de Dispositivo">
+              <option value="Todos">Todos los Dispositivos</option>
+              <optgroup label="💻 Computadoras">
+                <option value="PC de Escritorio">🖥️ PC de Escritorio</option>
+                <option value="Laptop">💻 Laptop / Portátil</option>
+                <option value="All-in-One">🖥️ All-in-One</option>
+                <option value="Mini PC">📦 Mini PC</option>
+                <option value="Servidor">🗄️ Servidor</option>
+              </optgroup>
+              <optgroup label="🖨️ Impresión & Proyección">
+                <option value="Impresora / Multifuncional">🖨️ Impresora / Multifuncional</option>
+                <option value="Proyector">📽️ Proyector</option>
+              </optgroup>
+              <optgroup label="📡 Redes & Conectividad">
+                <option value="Switch de Red">🔀 Switch de Red</option>
+                <option value="Access Point Wi-Fi">📡 Access Point / Router Wi-Fi</option>
+              </optgroup>
+              <optgroup label="⌨️ Periféricos & Accesorios">
+                <option value="Teclado">⌨️ Teclado</option>
+                <option value="Mouse / Puntero">🖱️ Mouse / Puntero</option>
+                <option value="Audífonos / Diadema">🎧 Audífonos / Diadema</option>
+                <option value="Monitor / Pantalla">🖥️ Monitor / Pantalla</option>
+                <option value="Otro Periférico">🔌 Otro Dispositivo</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- Filtro por Estado -->
+          <div class="custom-select-wrapper">
+            <select id="statusFilter" class="custom-select" title="Filtrar por Estado">
+              <option value="Todos">Todos los Estados</option>
+              <option value="Operativo">🟢 Operativo</option>
+              <option value="En Uso">🔵 En Uso</option>
+              <option value="En Mantenimiento">🟡 En Mantenimiento</option>
+              <option value="De Baja">🔴 De Baja</option>
+              <option value="En Bodega">⚪ En Bodega</option>
+            </select>
+          </div>
+
+          <div class="view-switch-group">
+            <button class="view-btn active" id="viewTableBtn" title="Vista Tabla (Excel)">
+              <i class="fa-solid fa-table-list"></i>
+            </button>
+            <button class="view-btn" id="viewGridBtn" title="Vista Tarjetas">
+              <i class="fa-solid fa-grip"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Excel Table Model View Section -->
+      <section class="inventory-table-card" id="tableViewContainer">
+        <div class="table-header-bar">
+          <div class="table-title">
+            <i class="fa-solid fa-list-check"></i>
+            <span>LISTADO MAESTRO DE EQUIPOS Y COMPONENTES</span>
+          </div>
+          <div class="table-stats">
+            Mostrando <b id="visibleCount">0</b> de <b id="totalCount">0</b> registros
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="custom-excel-table" id="inventoryTable">
+            <thead>
+              <tr>
+                <th class="col-modelo">MODELO <i class="fa-solid fa-filter header-filter-icon"></i></th>
+                <th class="col-serie">NÚMERODESERIE <i class="fa-solid fa-filter header-filter-icon"></i></th>
+                <th class="col-placa">PLACABASE <i class="fa-solid fa-filter header-filter-icon"></i></th>
+                <th class="col-tipo">TIPO</th>
+                <th class="col-hardware">ESPECIFICACIONES (CPU / RAM / DISCO)</th>
+                <th class="col-perifericos">PERIFÉRICOS & SERIALES</th>
+                <th class="col-usuario">USUARIO / HOSTNAME</th>
+                <th class="col-estado">ESTADO</th>
+                <th class="col-acciones">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Renderizado dinámico vía JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+          <h3>No se encontraron equipos</h3>
+          <p>Intenta ajustar tus criterios de búsqueda o registra un nuevo equipo con el botón "Nuevo Registro" o "Escanear".</p>
+        </div>
+      </section>
+
+      <!-- Grid Cards View Section (Opcional) -->
+      <section class="inventory-grid-container" id="gridViewContainer" style="display: none;">
+        <!-- Renderizado dinámico de tarjetas -->
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>Sistema de Auditoría & Control de Hardware &copy; 2026 | Desarrollado para gestión local y móvil</p>
+        <div class="footer-links">
+          <span><i class="fa-solid fa-circle-check text-green"></i> Conexión en Red Activa</span>
+          <span><i class="fa-solid fa-shield-halved text-crimson"></i> Auditoría CIM/WMI</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: CONECTAR CELULAR VÍA QR -->
+  <!-- =================================================================== -->
+  <div class="modal-overlay" id="qrModal">
+    <div class="modal-card qr-modal-card">
+      <button class="modal-close-btn" data-close-modal="qrModal">&times;</button>
+      <div class="modal-header-styled">
+        <i class="fa-solid fa-mobile-screen-button header-icon"></i>
+        <h3>Acceso desde tu Teléfono Celular</h3>
+        <p>Conéctate al inventario en tiempo real desde la misma red Wi-Fi</p>
+      </div>
+      <div class="modal-body text-center">
+        <div class="qr-code-wrapper">
+          <img id="qrCodeImage" src="" alt="Código QR de Conexión Local">
+        </div>
+        <div class="qr-instructions">
+          <p class="step-desc">1. Conecta tu celular a la misma red Wi-Fi / LAN.</p>
+          <p class="step-desc">2. Abre la cámara de tu teléfono y escanea el código QR.</p>
+          <p class="step-desc">3. O escribe directamente esta dirección en el navegador de tu móvil:</p>
+          <div class="ip-copy-box">
+            <code id="modalServerUrl">http://192.168.1.X:3000</code>
+            <button class="btn-copy-ip" id="btnCopyUrl" title="Copiar URL"><i class="fa-regular fa-copy"></i> Copiar</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary w-100" data-close-modal="qrModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: NUEVO REGISTRO MANUAL / EDICIÓN -->
+  <!-- =================================================================== -->
+  <div class="modal-overlay" id="manualModal">
+    <div class="modal-card modal-lg">
+      <button class="modal-close-btn" data-close-modal="manualModal">&times;</button>
+      <div class="modal-header-styled">
+        <i class="fa-solid fa-laptop-medical header-icon"></i>
+        <h3 id="modalFormTitle">Registrar Nuevo Equipo de Cómputo</h3>
+        <p>Ingresa manualmente los datos del equipo, números de serie y periféricos</p>
+      </div>
+      
+      <form id="equipmentForm">
+        <input type="hidden" id="formEquipmentId">
+        
+        <div class="modal-body modal-scrollable">
+          
+          <!-- SECCIÓN 1: IDENTIFICACIÓN PRINCIPAL (COMO EN LA IMAGEN) -->
+          <div class="form-section-title">
+            <i class="fa-solid fa-barcode"></i> DATOS PRINCIPALES DE INVENTARIO
+          </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="formModelo">MODELO * <small>(Ej: HP ProStudio 4, Dell OptiPlex 7080)</small></label>
+              <input type="text" id="formModelo" required placeholder="Ej: HP ProStudio 4" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="formNumeroSerie">NÚMERO DE SERIE * <small>(S/N de la PC / Laptop)</small></label>
+              <input type="text" id="formNumeroSerie" required placeholder="Ej: 8CN60500Y3" class="form-control mono-font">
+            </div>
+
+            <div class="form-group">
+              <label for="formPlacaBase">PLACA BASE <small>(Solo PCs/Laptops o N/A)</small></label>
+              <input type="text" id="formPlacaBase" placeholder="Ej: 8D19 o N/A" class="form-control mono-font">
+            </div>
+
+            <div class="form-group">
+              <label for="formTipoEquipo">TIPO DE DISPOSITIVO / EQUIPO *</label>
+              <select id="formTipoEquipo" class="form-control">
+                <optgroup label="💻 Computadoras">
+                  <option value="PC de Escritorio">🖥️ PC de Escritorio</option>
+                  <option value="Laptop">💻 Laptop / Portátil</option>
+                  <option value="All-in-One">🖥️ All-in-One</option>
+                  <option value="Mini PC">📦 Mini PC</option>
+                  <option value="Servidor">🗄️ Servidor</option>
+                </optgroup>
+                <optgroup label="🖨️ Impresión & Proyección">
+                  <option value="Impresora / Multifuncional">🖨️ Impresora / Multifuncional</option>
+                  <option value="Proyector">📽️ Proyector</option>
+                </optgroup>
+                <optgroup label="📡 Redes & Conectividad">
+                  <option value="Switch de Red">🔀 Switch de Red</option>
+                  <option value="Access Point Wi-Fi">📡 Access Point / Router Wi-Fi</option>
+                </optgroup>
+                <optgroup label="⌨️ Periféricos & Accesorios">
+                  <option value="Teclado">⌨️ Teclado</option>
+                  <option value="Mouse / Puntero">🖱️ Mouse / Puntero</option>
+                  <option value="Audífonos / Diadema">🎧 Audífonos / Diadema</option>
+                  <option value="Monitor / Pantalla">🖥️ Monitor / Pantalla</option>
+                  <option value="Otro Periférico">🔌 Otro Dispositivo</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="formFabricante">FABRICANTE / MARCA</label>
+              <input type="text" id="formFabricante" placeholder="Ej: HP, Lenovo, Dell, ASUS" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="formEstado">ESTADO DEL EQUIPO</label>
+              <select id="formEstado" class="form-control">
+                <option value="Operativo">Operativo</option>
+                <option value="En Uso">En Uso</option>
+                <option value="En Mantenimiento">En Mantenimiento</option>
+                <option value="De Baja">De Baja / Obsoleto</option>
+                <option value="En Bodega">En Bodega / Disponible</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: HARDWARE INTERNO -->
+          <div class="form-section-title mt-4">
+            <i class="fa-solid fa-microchip"></i> COMPONENTES DE HARDWARE INTERNO
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="formProcesador">PROCESADOR (CPU)</label>
+              <input type="text" id="formProcesador" placeholder="Ej: Intel Core i7-10700 @ 2.90GHz (8 Núcleos)" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="formRamTotal">MEMORIA RAM</label>
+              <input type="text" id="formRamTotal" placeholder="Ej: 16 GB (2x 8GB DDR4)" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="formAlmacenamiento">ALMACENAMIENTO (DISCO / SSD + SERIAL)</label>
+              <input type="text" id="formAlmacenamiento" placeholder="Ej: NVMe SSD 512GB (S/N: KX9087123)" class="form-control">
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: PERIFÉRICOS Y MONITORES CON SERIALES -->
+          <div class="form-section-title mt-4">
+            <i class="fa-solid fa-keyboard"></i> PERIFÉRICOS Y MONITORES ASOCIADOS
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="formMonitor">MONITOR (MODELO Y SERIAL)</label>
+              <input type="text" id="formMonitor" placeholder="Ej: HP E24 G4 (S/N: CNC1234XYZ)" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="formPerifericos">TECLADO, MOUSE Y OTROS PERIFÉRICOS</label>
+              <input type="text" id="formPerifericos" placeholder="Ej: Teclado HP Slim, Mouse Óptico Logitech" class="form-control">
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: ASIGNACIÓN Y UBICACIÓN -->
+          <div class="form-section-title mt-4">
+            <i class="fa-solid fa-user-tag"></i> ASIGNACIÓN, RED Y UBICACIÓN
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="formHostname">NOMBRE DEL EQUIPO (HOSTNAME)</label>
+              <input type="text" id="formHostname" placeholder="Ej: DESKTOP-HP-01" class="form-control mono-font">
+            </div>
+
+            <div class="form-group">
+              <label for="formUsuario">USUARIO RESPONSABLE</label>
+              <input type="text" id="formUsuario" placeholder="Ej: Juan Pérez / Contabilidad" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="formUbicacion">UBICACIÓN / ÁREA</label>
+              <input type="text" id="formUbicacion" placeholder="Ej: Edificio A - Oficina 204" class="form-control">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="formNotas">NOTAS / OBSERVACIONES</label>
+              <textarea id="formNotas" rows="2" placeholder="Detalles adicionales sobre el estado, periféricos, etc." class="form-control"></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal="manualModal">Cancelar</button>
+          <button type="submit" class="btn btn-crimson" id="btnSaveEquipment">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Equipo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: DETALLES COMPLETOS DEL EQUIPO (FICHA TÉCNICA) -->
+  <!-- =================================================================== -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-card modal-lg">
+      <button class="modal-close-btn" data-close-modal="detailsModal">&times;</button>
+      <div class="modal-header-styled">
+        <i class="fa-solid fa-circle-info header-icon"></i>
+        <h3 id="detailsTitle">Ficha Técnica de Hardware</h3>
+        <p id="detailsSubtitle">Detalles exhaustivos de componentes y números de serie</p>
+      </div>
+
+      <div class="modal-body modal-scrollable" id="detailsContent">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal="detailsModal">Cerrar</button>
+        <button class="btn btn-crimson" id="btnEditFromDetails">
+          <i class="fa-solid fa-pen-to-square"></i> Editar Información
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: INSTRUCCIONES DEL SCRIPT BATCH -->
+  <!-- =================================================================== -->
+  <div class="modal-overlay" id="agentModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" data-close-modal="agentModal">&times;</button>
+      <div class="modal-header-styled">
+        <i class="fa-solid fa-terminal header-icon"></i>
+        <h3>Uso del Escáner Batch en Otras PCs</h3>
+        <p>Cómo auditar automáticamente cualquier máquina en tu empresa o red</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="guide-steps">
+          <div class="guide-step">
+            <div class="step-num">1</div>
+            <div class="step-info">
+              <h4>Descarga o Copia el Script</h4>
+              <p>Haz clic en el botón <b>Descargar .BAT</b> inferior o copia el archivo <code>ESCANEAR_ESTE_EQUIPO.bat</code> a una memoria USB para llevarlo a otras computadoras.</p>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">2</div>
+            <div class="step-info">
+              <h4>Ejecuta con Doble Clic</h4>
+              <p>Haz doble clic sobre <code>ESCANEAR_ESTE_EQUIPO.bat</code> en la computadora que deseas inventariar. No requiere instalación.</p>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <div class="step-num">3</div>
+            <div class="step-info">
+              <h4>Registro Automático Inmediato</h4>
+              <p>El script detecta el fabricante, número de serie, placa base, procesador, módulos de RAM, discos con sus seriales y periféricos USB, y los envía en vivo al servidor local.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; gap: 12px; justify-content: space-between;">
+        <a href="/api/download-batch" class="btn btn-crimson" style="flex: 1;" download="ESCANEAR_ESTE_EQUIPO.bat">
+          <i class="fa-solid fa-download"></i> Descargar .BAT
+        </a>
+        <button class="btn btn-secondary" style="flex: 1;" data-close-modal="agentModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL: ESCÁNER DE TODA LA RED LOCAL (SUBNET DISCOVERY) -->
+  <!-- =================================================================== -->
+  <div class="modal-overlay" id="networkScanModal">
+    <div class="modal-card modal-lg">
+      <button class="modal-close-btn" data-close-modal="networkScanModal">&times;</button>
+      <div class="modal-header-styled">
+        <i class="fa-solid fa-network-wired header-icon"></i>
+        <h3>Escanear y Auditar Toda la Red Local</h3>
+        <p>Descubre automáticamente todas las computadoras conectadas a tu misma red Wi-Fi o cableada</p>
+      </div>
+
+      <div class="modal-body modal-scrollable">
+        
+        <!-- OPCIÓN 1: BARRIDO DE SUBRED AUTOMÁTICO -->
+        <div class="form-section-title">
+          <i class="fa-solid fa-satellite-dish"></i> MÉTODO 1: BARRIDO AUTOMÁTICO DE SUBRED (PING & WMI)
+        </div>
+        
+        <div class="net-scan-box">
+          <p class="mb-3 text-gray-300">El sistema enviará una ráfaga multi-hilo a todas las IPs de tu subred local para detectar equipos activos, resolver nombres de host, direcciones MAC y extraer números de serie de hardware.</p>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="inputSubnet">SUBRED A ESCANEAR</label>
+              <input type="text" id="inputSubnet" placeholder="Ej: 192.168.89" class="form-control mono-font">
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <button class="btn btn-crimson-pulse w-100" id="btnStartSubnetScan">
+                <i class="fa-solid fa-play"></i> Iniciar Escaneo de Red
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress / Terminal Output Log -->
+          <div class="scan-console-box" id="scanConsoleBox" style="display: none;">
+            <div class="console-header">
+              <span><i class="fa-solid fa-terminal"></i> REGISTRO DE DESCUBRIMIENTO EN VIVO</span>
+              <span class="console-spinner" id="consoleSpinner"><i class="fa-solid fa-spinner fa-spin"></i> Escaneando subred...</span>
+            </div>
+            <pre class="console-body" id="scanConsoleLog">Iniciando escaneo...</pre>
+          </div>
+        </div>
+
+        <!-- OPCIÓN 2: COMANDO REMOTO DE 1 SOLA LÍNEA -->
+        <div class="form-section-title mt-4">
+          <i class="fa-solid fa-terminal"></i> MÉTODO 2: COMANDO RÁPIDO DE 1 LÍNEA (SIN INSTALAR NADA)
+        </div>
+
+        <div class="net-scan-box">
+          <p class="mb-3 text-gray-300">En cualquier otra PC o Laptop conectada a tu red, abre <b>PowerShell</b> y pega este comando. Escaneará el 100% de su hardware y lo registrará en este panel al instante:</p>
+          
+          <div class="ip-copy-box" style="padding: 10px 14px;">
+            <code id="oneLinerCmdDisplay" style="font-size: 0.95rem;">irm http://192.168.x.x:3000/scan | iex</code>
+            <button class="btn-copy-ip" id="btnCopyOneLiner" title="Copiar Comando"><i class="fa-regular fa-copy"></i> Copiar Comando</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close-modal="networkScanModal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- App Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>

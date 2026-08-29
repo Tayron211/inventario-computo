@@ -1,0 +1,1028 @@
+// ==============================================================================
+// SISTEMA DE INVENTARIO DE CÓMPUTO & AUDITORÍA DE HARDWARE - APP.JS
+// ==============================================================================
+
+let inventoryData = [];
+let currentCategory = 'Todos';
+let currentSpecificType = 'Todos';
+let currentFilterType = 'Todos';
+let currentFilterStatus = 'Todos';
+let currentSearchQuery = '';
+let currentView = 'table'; // 'table' o 'grid'
+let serverInfo = null;
+
+// Elementos del DOM
+const tableBody = document.getElementById('inventoryTableBody');
+const gridContainer = document.getElementById('gridViewContainer');
+const tableViewContainer = document.getElementById('tableViewContainer');
+const searchInput = document.getElementById('searchInput');
+const btnClearSearch = document.getElementById('btnClearSearch');
+const statusFilter = document.getElementById('statusFilter');
+const typeSelectFilter = document.getElementById('typeSelectFilter');
+const filterPills = document.querySelectorAll('.filter-pills-group .pill');
+const emptyState = document.getElementById('emptyState');
+const visibleCount = document.getElementById('visibleCount');
+const totalCount = document.getElementById('totalCount');
+const serverIpDisplay = document.getElementById('serverIpDisplay');
+const qrCodeImage = document.getElementById('qrCodeImage');
+const modalServerUrl = document.getElementById('modalServerUrl');
+const equipmentForm = document.getElementById('equipmentForm');
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initEventListeners();
+  fetchServerInfo();
+  fetchInventory();
+});
+
+// -------------------------------------------------------------
+// TEMA CLARO / OSCURO
+// -------------------------------------------------------------
+function initTheme() {
+  const savedTheme = localStorage.getItem('sysinventario_theme') || 'dark';
+  setTheme(savedTheme);
+
+  const btnThemeToggle = document.getElementById('btnThemeToggle');
+  if (btnThemeToggle) {
+    btnThemeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    });
+  }
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('sysinventario_theme', theme);
+  const themeToggleText = document.getElementById('themeToggleText');
+  if (themeToggleText) {
+    themeToggleText.textContent = theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
+  }
+  updateQrForTheme(theme);
+}
+
+function updateQrForTheme(theme) {
+  if (serverInfo && qrCodeImage) {
+    qrCodeImage.src = (theme === 'light' && serverInfo.qrCodeLight) 
+      ? serverInfo.qrCodeLight 
+      : (serverInfo.qrCodeDark || serverInfo.qrCode);
+  }
+}
+
+// -------------------------------------------------------------
+// EVENT LISTENERS
+// -------------------------------------------------------------
+function initEventListeners() {
+  // Búsqueda en tiempo real
+  searchInput.addEventListener('input', (e) => {
+    currentSearchQuery = e.target.value.toLowerCase().trim();
+    btnClearSearch.style.display = currentSearchQuery ? 'block' : 'none';
+    renderData();
+  });
+
+  btnClearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    btnClearSearch.style.display = 'none';
+    searchInput.focus();
+    renderData();
+  });
+
+  // Filtros por pestañas (Categorías)
+  filterPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      filterPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentCategory = pill.getAttribute('data-category') || 'Todos';
+      currentFilterType = pill.getAttribute('data-type') || 'Todos';
+      if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+      currentSpecificType = 'Todos';
+      renderData();
+    });
+  });
+
+  // Filtro por Tipo Específico de Dispositivo
+  if (typeSelectFilter) {
+    typeSelectFilter.addEventListener('change', (e) => {
+      currentSpecificType = e.target.value;
+      if (currentSpecificType !== 'Todos') {
+        filterPills.forEach(p => p.classList.remove('active'));
+        currentCategory = 'Todos';
+        currentFilterType = 'Todos';
+      }
+      renderData();
+    });
+  }
+
+  // Filtro por Estado
+  statusFilter.addEventListener('change', (e) => {
+    currentFilterStatus = e.target.value;
+    renderData();
+  });
+
+  // Clic en tarjetas de métricas para filtrar
+  const cardFilterDesktop = document.getElementById('cardFilterDesktop');
+  if (cardFilterDesktop) {
+    cardFilterDesktop.addEventListener('click', () => {
+      setFilterCategory('Computadoras');
+    });
+  }
+  document.getElementById('cardFilterLaptop').addEventListener('click', () => {
+    setFilterPill('Laptop');
+  });
+
+  // Cambio de Vista (Tabla vs Tarjetas)
+  document.getElementById('viewTableBtn').addEventListener('click', () => {
+    setView('table');
+  });
+  document.getElementById('viewGridBtn').addEventListener('click', () => {
+    setView('grid');
+  });
+
+  // Modales
+  document.getElementById('btnShowQr').addEventListener('click', () => {
+    openModal('qrModal');
+  });
+
+  document.getElementById('btnShowAgentInstructions').addEventListener('click', () => {
+    openModal('agentModal');
+  });
+
+  document.getElementById('btnOpenNetworkScanModal').addEventListener('click', () => {
+    if (serverInfo && serverInfo.subnetBase) {
+      document.getElementById('inputSubnet').value = serverInfo.subnetBase;
+    }
+    if (serverInfo && serverInfo.oneLinerCommand) {
+      document.getElementById('oneLinerCmdDisplay').textContent = serverInfo.oneLinerCommand;
+    }
+    openModal('networkScanModal');
+  });
+
+  document.getElementById('btnStartSubnetScan').addEventListener('click', runNetworkScan);
+
+  document.getElementById('btnCopyOneLiner').addEventListener('click', () => {
+    const cmd = document.getElementById('oneLinerCmdDisplay').textContent;
+    navigator.clipboard.writeText(cmd).then(() => {
+      showToast('¡Comando copiado! Pégalo en PowerShell de cualquier PC en tu red.', 'success');
+    });
+  });
+
+  document.getElementById('btnOpenManualModal').addEventListener('click', () => {
+    openManualCreateModal();
+  });
+
+  // Cerrar modales con botones 'data-close-modal' o clic fuera
+  document.querySelectorAll('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modalId = btn.getAttribute('data-close-modal');
+      closeModal(modalId);
+    });
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal(modal.id);
+      }
+    });
+  });
+
+  // Copiar URL local
+  document.getElementById('btnCopyUrl').addEventListener('click', () => {
+    if (serverInfo && serverInfo.serverUrl) {
+      navigator.clipboard.writeText(serverInfo.serverUrl).then(() => {
+        showToast('¡URL copiada al portapapeles!', 'success');
+      });
+    }
+  });
+
+  // Guardar formulario de equipo (Creación / Edición)
+  equipmentForm.addEventListener('submit', handleFormSubmit);
+
+  // Botón Escanear Este Equipo Localmente
+  document.getElementById('btnScanLocal').addEventListener('click', runLocalScan);
+}
+
+function setFilterPill(type) {
+  filterPills.forEach(p => {
+    if (p.getAttribute('data-type') === type) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
+  currentFilterType = type;
+  renderData();
+}
+
+function setView(view) {
+  currentView = view;
+  const tableBtn = document.getElementById('viewTableBtn');
+  const gridBtn = document.getElementById('viewGridBtn');
+
+  if (view === 'table') {
+    tableBtn.classList.add('active');
+    gridBtn.classList.remove('active');
+    tableViewContainer.style.display = 'block';
+    gridContainer.style.display = 'none';
+  } else {
+    tableBtn.classList.remove('active');
+    gridBtn.classList.add('active');
+    tableViewContainer.style.display = 'none';
+    gridContainer.style.display = 'grid';
+  }
+}
+
+// -------------------------------------------------------------
+// COMUNICACIÓN CON API
+// -------------------------------------------------------------
+
+// Obtener info del servidor y QR
+async function fetchServerInfo() {
+  try {
+    const res = await fetch('/api/server-info');
+    if (!res.ok) throw new Error('Error al obtener info de red');
+    serverInfo = await res.json();
+    
+    serverIpDisplay.textContent = `${serverInfo.primaryIP}:${serverInfo.port}`;
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    updateQrForTheme(currentTheme);
+    modalServerUrl.textContent = serverInfo.serverUrl;
+
+    // Auto-detectar y pre-rellenar la subred en el escáner
+    const inputSubnet = document.getElementById('inputSubnet');
+    if (inputSubnet && serverInfo.subnetBase) {
+      inputSubnet.value = serverInfo.subnetBase;
+    }
+  } catch (err) {
+    console.error(err);
+    serverIpDisplay.textContent = 'Modo Local';
+  }
+}
+
+// Obtener Inventario
+async function fetchInventory(silent = false) {
+  try {
+    const res = await fetch('/api/inventory');
+    if (!res.ok) throw new Error('Error al cargar inventario');
+    const data = await res.json();
+    const prevCount = inventoryData.length;
+    inventoryData = data.items || [];
+    updateMetrics();
+    renderData();
+    if (!silent && prevCount > 0 && inventoryData.length > prevCount) {
+      showToast(`¡Nuevo equipo detectado en la red! Total: ${inventoryData.length}`, 'success');
+    }
+  } catch (err) {
+    if (!silent) {
+      console.error(err);
+      showToast('Error al conectar con la base de datos de inventario', 'error');
+    }
+  }
+}
+
+// Sincronización periódica automática (cada 8 segundos)
+setInterval(() => {
+  fetchInventory(true);
+}, 8000);
+
+// Ejecutar escaneo local desde el navegador
+async function runLocalScan() {
+  const btn = document.getElementById('btnScanLocal');
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Escaneando Hardware...</span>`;
+  
+  showToast('Iniciando auditoría de hardware y periféricos...', 'info');
+
+  try {
+    const res = await fetch('/api/run-local-scan', { method: 'POST' });
+    const data = await res.json();
+    
+    if (res.ok) {
+      showToast('¡Hardware y periféricos detectados y registrados con éxito!', 'success');
+      await fetchInventory();
+    } else {
+      showToast(data.error || 'Error al ejecutar escáner', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error de comunicación con el servicio de escaneo', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+}
+
+// Ejecutar escaneo de toda la red local
+async function runNetworkScan() {
+  const btn = document.getElementById('btnStartSubnetScan');
+  const subnetInput = document.getElementById('inputSubnet');
+  const consoleBox = document.getElementById('scanConsoleBox');
+  const consoleLog = document.getElementById('scanConsoleLog');
+  const consoleSpinner = document.getElementById('consoleSpinner');
+
+  const subnet = (subnetInput.value || '').trim();
+  if (!subnet) {
+    showToast('Por favor introduce una subred válida (ej: 192.168.1)', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Escaneando ${subnet}.0/24...`;
+  consoleBox.style.display = 'block';
+  consoleSpinner.style.display = 'inline-block';
+  consoleLog.textContent = `[*] Iniciando barrido multi-hilo en la subred ${subnet}.1 - ${subnet}.254...\n[*] Analizando hosts activos, MACs y nombres de host...`;
+
+  showToast(`Iniciando escaneo de toda la subred ${subnet}.0/24...`, 'info');
+
+  try {
+    const res = await fetch('/api/scan-network', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subnet })
+    });
+
+    const data = await res.json();
+    consoleSpinner.style.display = 'none';
+
+    if (res.ok) {
+      consoleLog.textContent = data.output || 'Escaneo completado con éxito.';
+      showToast(`¡Escaneo de red finalizado! Equipos sincronizados en inventario.`, 'success');
+      await fetchInventory();
+    } else {
+      consoleLog.textContent = `[!] Error durante el escaneo:\n${data.error}\n${data.details || ''}`;
+      showToast(data.error || 'Error durante el barrido de red', 'error');
+    }
+  } catch (err) {
+    consoleSpinner.style.display = 'none';
+    consoleLog.textContent = `[!] Error de comunicación:\n${err.message}`;
+    showToast('Error al comunicar con el escáner de red', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-play"></i> Iniciar Escaneo de Red`;
+  }
+}
+
+// -------------------------------------------------------------
+// HELPER: DETECCIÓN DE TIPO DE EQUIPO Y CATEGORÍA
+// -------------------------------------------------------------
+function getDeviceTypeInfo(tipo) {
+  const t = (tipo || '').toLowerCase();
+  
+  if (t.includes('laptop') || t.includes('notebook') || t.includes('portátil')) {
+    return { icon: 'fa-laptop', class: 'laptop', label: 'Laptop', category: 'Computadoras' };
+  }
+  if (t.includes('all-in-one') || t.includes('aio')) {
+    return { icon: 'fa-tv', class: 'aio', label: 'All-in-One', category: 'Computadoras' };
+  }
+  if (t.includes('mini pc')) {
+    return { icon: 'fa-cube', class: 'desktop', label: 'Mini PC', category: 'Computadoras' };
+  }
+  if (t.includes('impresora') || t.includes('multifuncional') || t.includes('printer')) {
+    return { icon: 'fa-print', class: 'impresora', label: 'Impresora', category: 'Impresoras' };
+  }
+  if (t.includes('switch')) {
+    return { icon: 'fa-network-wired', class: 'switch', label: 'Switch', category: 'Redes' };
+  }
+  if (t.includes('access point') || t.includes('router') || t.includes('ap') || t.includes('wi-fi')) {
+    return { icon: 'fa-wifi', class: 'ap', label: 'Access Point', category: 'Redes' };
+  }
+  if (t.includes('proyector') || t.includes('projector')) {
+    return { icon: 'fa-video', class: 'proyector', label: 'Proyector', category: 'Impresoras' };
+  }
+  if (t.includes('teclado') || t.includes('keyboard')) {
+    return { icon: 'fa-keyboard', class: 'teclado', label: 'Teclado', category: 'Periféricos' };
+  }
+  if (t.includes('mouse') || t.includes('puntero') || t.includes('ratón')) {
+    return { icon: 'fa-mouse', class: 'mouse', label: 'Mouse', category: 'Periféricos' };
+  }
+  if (t.includes('audífono') || t.includes('audifono') || t.includes('diadema') || t.includes('auricular') || t.includes('headphone')) {
+    return { icon: 'fa-headphones', class: 'audifonos', label: 'Audífonos', category: 'Periféricos' };
+  }
+  if (t.includes('monitor') || t.includes('pantalla') || t.includes('display')) {
+    return { icon: 'fa-display', class: 'monitor', label: 'Monitor', category: 'Periféricos' };
+  }
+  if (t.includes('servidor') || t.includes('server')) {
+    return { icon: 'fa-server', class: 'servidor', label: 'Servidor', category: 'Computadoras' };
+  }
+  return { icon: 'fa-desktop', class: 'desktop', label: tipo || 'PC de Escritorio', category: 'Computadoras' };
+}
+
+function setFilterCategory(category) {
+  filterPills.forEach(p => {
+    if (p.getAttribute('data-category') === category) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
+  currentCategory = category;
+  if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+  currentSpecificType = 'Todos';
+  renderData();
+}
+
+// -------------------------------------------------------------
+// RENDERIZADO Y FILTROS
+// -------------------------------------------------------------
+function renderData() {
+  // Aplicar filtros
+  const filtered = inventoryData.filter(item => {
+    const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
+
+    // Filtro por tipo específico dropdown
+    if (currentSpecificType && currentSpecificType !== 'Todos') {
+      if (item.tipo_equipo !== currentSpecificType) {
+        return false;
+      }
+    }
+
+    // Filtro por categoría pills
+    if (currentCategory && currentCategory !== 'Todos') {
+      if (typeInfo.category !== currentCategory) {
+        return false;
+      }
+    }
+
+    // Filtro por estado
+    if (currentFilterStatus !== 'Todos' && item.estado !== currentFilterStatus) {
+      return false;
+    }
+
+    // Filtro por búsqueda de texto
+    if (currentSearchQuery) {
+      const q = currentSearchQuery;
+      const match = (
+        (item.modelo && item.modelo.toLowerCase().includes(q)) ||
+        (item.numero_serie && item.numero_serie.toLowerCase().includes(q)) ||
+        (item.placa_base && item.placa_base.toLowerCase().includes(q)) ||
+        (item.tipo_equipo && item.tipo_equipo.toLowerCase().includes(q)) ||
+        (item.fabricante && item.fabricante.toLowerCase().includes(q)) ||
+        (item.procesador && item.procesador.toLowerCase().includes(q)) ||
+        (item.hostname && item.hostname.toLowerCase().includes(q)) ||
+        (item.usuario_actual && item.usuario_actual.toLowerCase().includes(q)) ||
+        (item.ubicacion && item.ubicacion.toLowerCase().includes(q)) ||
+        (item.almacenamiento_resumen && item.almacenamiento_resumen.toLowerCase().includes(q)) ||
+        (item.notas && item.notas.toLowerCase().includes(q))
+      );
+      if (!match) return false;
+    }
+
+    return true;
+  });
+
+  // Actualizar contadores visibles
+  visibleCount.textContent = filtered.length;
+  totalCount.textContent = inventoryData.length;
+
+  if (filtered.length === 0) {
+    tableBody.innerHTML = '';
+    gridContainer.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+
+  // Renderizar Tabla
+  renderTable(filtered);
+
+  // Renderizar Grid
+  renderGrid(filtered);
+}
+
+function renderTable(items) {
+  tableBody.innerHTML = items.map(item => {
+    const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
+    const tipoClass = typeInfo.class;
+    const tipoIcon = typeInfo.icon;
+
+    // Procesador Completo (Limpio y legible)
+    let cpuText = item.procesador ? item.procesador.replace(/\(R\)/gi, '').replace(/\(TM\)/gi, '').trim() : '';
+
+    // RAM Limpia
+    let ramText = item.ram_total ? item.ram_total.replace(/\(\s*modulo\(s\)\)/gi, '(1 Módulo)').replace(/\(\s*\)/gi, '').trim() : '';
+
+    // Discos detallados con seriales
+    let storageHtml = '';
+    if (item.almacenamiento && item.almacenamiento.length > 0) {
+      storageHtml = item.almacenamiento.map(d => {
+        const serieText = d.serie && d.serie !== 'N/A' ? ` <span class="serial-mini-tag">S/N: ${escapeHTML(d.serie)}</span>` : '';
+        return `<div class="hw-item-line"><i class="fa-solid fa-hard-drive text-crimson"></i> <b>${escapeHTML(d.modelo || d.tipo)}</b> (${escapeHTML(d.capacidad || '')})${serieText}</div>`;
+      }).join('');
+    } else if (item.almacenamiento_resumen) {
+      storageHtml = `<div class="hw-item-line"><i class="fa-solid fa-hard-drive text-crimson"></i> ${escapeHTML(item.almacenamiento_resumen)}</div>`;
+    }
+
+    // Periféricos y Monitores completos
+    let perifericosListHtml = '';
+    
+    // Monitores primero
+    if (item.monitores && item.monitores.length > 0) {
+      item.monitores.forEach(m => {
+        const monSerial = m.serie ? ` <span class="serial-mini-tag">S/N: ${escapeHTML(m.serie)}</span>` : '';
+        perifericosListHtml += `<div class="hw-item-line mon-line"><i class="fa-solid fa-display text-crimson"></i> <b>${escapeHTML(m.modelo || m.fabricante || 'Monitor')}</b>${monSerial}</div>`;
+      });
+    }
+
+    // Periféricos
+    if (item.perifericos && item.perifericos.length > 0) {
+      item.perifericos.forEach(p => {
+        const pTipoIcon = (p.tipo && p.tipo.toLowerCase().includes('mouse')) ? 'fa-mouse' : ((p.tipo && p.tipo.toLowerCase().includes('teclado')) ? 'fa-keyboard' : 'fa-plug');
+        perifericosListHtml += `<div class="hw-item-line"><i class="fa-solid ${pTipoIcon}"></i> ${escapeHTML(p.nombre || p.tipo)}</div>`;
+      });
+    }
+
+    if (!perifericosListHtml) {
+      perifericosListHtml = '<div class="hw-item-line text-gray-400">Estándar / Integrado</div>';
+    }
+
+    // Construir bloque de especificaciones adaptativo
+    let specsHtml = '';
+    if (cpuText || ramText || storageHtml) {
+      specsHtml = `
+        <div class="specs-full-block">
+          ${cpuText ? `<div class="spec-cpu-title"><i class="fa-solid fa-microchip text-crimson"></i> <b>${escapeHTML(cpuText)}</b></div>` : ''}
+          ${ramText ? `<div class="spec-ram-line"><i class="fa-solid fa-memory text-crimson"></i> <b>RAM:</b> ${escapeHTML(ramText)}</div>` : ''}
+          ${storageHtml ? `<div class="spec-storage-block">${storageHtml}</div>` : ''}
+        </div>
+      `;
+    } else {
+      specsHtml = `
+        <div class="specs-full-block">
+          <div class="hw-item-line"><i class="fa-solid ${tipoIcon} text-crimson"></i> <b>${escapeHTML(item.fabricante || 'Dispositivo')}</b> ${escapeHTML(item.tipo_equipo || '')}</div>
+          ${item.notas ? `<div class="hw-item-line text-gray-400"><i class="fa-solid fa-circle-info"></i> ${escapeHTML(item.notas)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    const statusClass = (item.estado || 'Operativo').toLowerCase().replace(/\s+/g, '-');
+
+    return `
+      <tr>
+        <td class="cell-modelo">
+          <div class="col-modelo-val">
+            <div class="modelo-header">
+              <i class="fa-solid ${tipoIcon} text-crimson modelo-type-icon"></i>
+              <strong class="modelo-text">${escapeHTML(item.modelo || 'Sin Modelo')}</strong>
+            </div>
+            ${item.fabricante ? `<span class="fabricante-tag">${escapeHTML(item.fabricante)}</span>` : ''}
+          </div>
+        </td>
+        <td class="cell-serie">
+          <span class="serial-badge" onclick="copyText('${escapeHTML(item.numero_serie)}')" title="Clic para copiar S/N">
+            <i class="fa-solid fa-barcode"></i>
+            ${escapeHTML(item.numero_serie || 'N/A')}
+          </span>
+        </td>
+        <td class="cell-placa">
+          <span class="placa-badge" title="Placa Base">${escapeHTML(item.placa_base || 'N/A')}</span>
+        </td>
+        <td class="cell-tipo">
+          <span class="tipo-badge ${tipoClass}">
+            <i class="fa-solid ${tipoIcon}"></i> ${escapeHTML(item.tipo_equipo || 'Equipo')}
+          </span>
+        </td>
+        <td class="cell-specs">
+          ${specsHtml}
+        </td>
+        <td class="cell-perifericos">
+          <div class="perifericos-full-block">
+            ${perifericosListHtml}
+          </div>
+        </td>
+        <td class="cell-usuario">
+          <div class="user-block">
+            <div class="user-name"><i class="fa-solid fa-user text-crimson"></i> <b>${escapeHTML(item.usuario_actual || 'Sin Asignar')}</b></div>
+            <div class="user-host"><i class="fa-solid fa-network-wired"></i> ${escapeHTML(item.hostname || 'N/A')}</div>
+            ${item.ubicacion ? `<div class="user-loc"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(item.ubicacion)}</div>` : ''}
+          </div>
+        </td>
+        <td class="cell-estado">
+          <span class="status-indicator status-${statusClass}">
+            <span class="status-dot"></span>
+            ${escapeHTML(item.estado || 'Operativo')}
+          </span>
+        </td>
+        <td class="cell-acciones">
+          <div class="table-actions-cell">
+            <button class="action-btn-mini" onclick="viewDetails('${item.id}')" title="Ver Ficha Técnica Completa">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(item.modelo)}')" title="Eliminar Registro">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderGrid(items) {
+  gridContainer.innerHTML = items.map(item => {
+    const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
+
+    return `
+      <div class="grid-card">
+        <div class="grid-card-header">
+          <div>
+            <div class="grid-card-title">${escapeHTML(item.modelo || 'Equipo')}</div>
+            <span class="tipo-badge ${typeInfo.class} mt-4"><i class="fa-solid ${typeInfo.icon}"></i> ${escapeHTML(item.tipo_equipo || 'Equipo')}</span>
+          </div>
+          <span class="serial-badge" onclick="copyText('${escapeHTML(item.numero_serie)}')">
+            <i class="fa-solid fa-barcode"></i> ${escapeHTML(item.numero_serie || 'N/A')}
+          </span>
+        </div>
+
+        <div class="grid-card-specs">
+          <div class="grid-spec-row">
+            <span class="grid-spec-label">Marca / Placa:</span>
+            <span class="grid-spec-val">${escapeHTML(item.fabricante || item.placa_base || 'N/A')}</span>
+          </div>
+          ${item.procesador ? `
+          <div class="grid-spec-row">
+            <span class="grid-spec-label">Procesador:</span>
+            <span class="grid-spec-val">${escapeHTML(item.procesador.substring(0, 24))}...</span>
+          </div>` : ''}
+          ${item.ram_total ? `
+          <div class="grid-spec-row">
+            <span class="grid-spec-label">RAM:</span>
+            <span class="grid-spec-val">${escapeHTML(item.ram_total)}</span>
+          </div>` : ''}
+          <div class="grid-spec-row">
+            <span class="grid-spec-label">Ubicación / Resp:</span>
+            <span class="grid-spec-val">${escapeHTML(item.ubicacion || item.usuario_actual || 'N/A')}</span>
+          </div>
+        </div>
+
+        <div class="table-actions-cell" style="justify-content: flex-end; margin-top: auto;">
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="viewDetails('${item.id}')">
+            <i class="fa-solid fa-eye"></i> Ver Ficha
+          </button>
+          <button class="action-btn-mini" onclick="editEquipment('${item.id}')">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(item.modelo)}')">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// -------------------------------------------------------------
+// ACTUALIZACIÓN DE MÉTRICAS Y CONTADORES DE CATEGORÍA
+// -------------------------------------------------------------
+function updateMetrics() {
+  const total = inventoryData.length;
+  let computadoras = 0;
+  let impresoras = 0;
+  let redes = 0;
+  let perifericos = 0;
+
+  inventoryData.forEach(item => {
+    const info = getDeviceTypeInfo(item.tipo_equipo);
+    if (info.category === 'Computadoras') computadoras++;
+    else if (info.category === 'Impresoras') impresoras++;
+    else if (info.category === 'Redes') redes++;
+    else if (info.category === 'Periféricos') perifericos++;
+  });
+
+  const statTotal = document.getElementById('statTotal');
+  const statDesktop = document.getElementById('statDesktop');
+  if (statTotal) statTotal.textContent = total;
+  if (statDesktop) statDesktop.textContent = computadoras;
+
+  const countAll = document.getElementById('countAll');
+  const countComputadoras = document.getElementById('countComputadoras');
+  const countImpresoras = document.getElementById('countImpresoras');
+  const countRedes = document.getElementById('countRedes');
+  const countPerifericos = document.getElementById('countPerifericos');
+
+  if (countAll) countAll.textContent = total;
+  if (countComputadoras) countComputadoras.textContent = computadoras;
+  if (countImpresoras) countImpresoras.textContent = impresoras;
+  if (countRedes) countRedes.textContent = redes;
+  if (countPerifericos) countPerifericos.textContent = perifericos;
+}
+
+// -------------------------------------------------------------
+// GESTIÓN DE MODALES Y FORMULARIOS
+// -------------------------------------------------------------
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.add('active');
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('active');
+}
+
+function openManualCreateModal() {
+  document.getElementById('modalFormTitle').textContent = 'Registrar Nuevo Equipo de Cómputo';
+  document.getElementById('formEquipmentId').value = '';
+  equipmentForm.reset();
+  openModal('manualModal');
+}
+
+// Editar equipo existente
+function editEquipment(id) {
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById('modalFormTitle').textContent = 'Editar Equipo de Cómputo';
+  document.getElementById('formEquipmentId').value = item.id;
+  document.getElementById('formModelo').value = item.modelo || '';
+  document.getElementById('formNumeroSerie').value = item.numero_serie || '';
+  document.getElementById('formPlacaBase').value = item.placa_base || '';
+  document.getElementById('formTipoEquipo').value = item.tipo_equipo || 'PC de Escritorio';
+  document.getElementById('formFabricante').value = item.fabricante || '';
+  document.getElementById('formEstado').value = item.estado || 'Operativo';
+  document.getElementById('formProcesador').value = item.procesador || '';
+  document.getElementById('formRamTotal').value = item.ram_total || '';
+  document.getElementById('formAlmacenamiento').value = item.almacenamiento_resumen || '';
+  
+  // Monitores & Periféricos
+  const monStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante} (${m.serie || 'S/N: N/A'})`).join(', ');
+  document.getElementById('formMonitor').value = monStr;
+  
+  const perStr = (item.perifericos || []).map(p => p.nombre || p.tipo).join(', ');
+  document.getElementById('formPerifericos').value = perStr;
+
+  document.getElementById('formHostname').value = item.hostname || '';
+  document.getElementById('formUsuario').value = item.usuario_actual || '';
+  document.getElementById('formUbicacion').value = item.ubicacion || '';
+  document.getElementById('formNotas').value = item.notas || '';
+
+  closeModal('detailsModal');
+  openModal('manualModal');
+}
+
+// Enviar Formulario Manual
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const id = document.getElementById('formEquipmentId').value;
+  const payload = {
+    modelo: document.getElementById('formModelo').value,
+    numero_serie: document.getElementById('formNumeroSerie').value,
+    placa_base: document.getElementById('formPlacaBase').value,
+    tipo_equipo: document.getElementById('formTipoEquipo').value,
+    fabricante: document.getElementById('formFabricante').value,
+    estado: document.getElementById('formEstado').value,
+    procesador: document.getElementById('formProcesador').value,
+    ram_total: document.getElementById('formRamTotal').value,
+    almacenamiento_resumen: document.getElementById('formAlmacenamiento').value,
+    hostname: document.getElementById('formHostname').value,
+    usuario_actual: document.getElementById('formUsuario').value,
+    ubicacion: document.getElementById('formUbicacion').value,
+    notas: document.getElementById('formNotas').value
+  };
+
+  const isEdit = !!id;
+  const url = isEdit ? `/api/inventory/${id}` : '/api/inventory';
+  const method = isEdit ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || 'Error al guardar');
+    }
+
+    closeModal('manualModal');
+    showToast(isEdit ? 'Equipo actualizado con éxito' : 'Nuevo equipo registrado con éxito', 'success');
+    fetchInventory();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// Eliminar equipo
+async function deleteEquipment(id, modelo) {
+  if (!confirm(`¿Estás seguro de eliminar el equipo "${modelo}" del inventario?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Error al eliminar');
+
+    showToast('Equipo eliminado del inventario', 'info');
+    fetchInventory();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// -------------------------------------------------------------
+// VER FICHA TÉCNICA DETALLADA
+// -------------------------------------------------------------
+function viewDetails(id) {
+  const item = inventoryData.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById('detailsTitle').textContent = item.modelo || 'Ficha Técnica';
+  document.getElementById('detailsSubtitle').textContent = `S/N: ${item.numero_serie || 'N/A'} | Tipo: ${item.tipo_equipo || 'PC'}`;
+
+  // Configurar botón editar desde ficha
+  document.getElementById('btnEditFromDetails').onclick = () => {
+    editEquipment(item.id);
+  };
+
+  // Monitores List
+  let monitoresHtml = '<p class="text-gray-400">Sin monitores adicionales registrados</p>';
+  if (item.monitores && item.monitores.length > 0) {
+    monitoresHtml = `
+      <ul class="components-list">
+        ${item.monitores.map(m => `
+          <li class="component-item">
+            <strong><i class="fa-solid fa-display"></i> ${escapeHTML(m.modelo || m.fabricante || 'Monitor')}</strong>
+            <br><small class="text-gray-400">Fabricante: ${escapeHTML(m.fabricante || 'N/A')} | S/N: <span class="text-crimson mono-font">${escapeHTML(m.serie || 'N/A')}</span></small>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  // Periféricos List
+  let perifericosHtml = '<p class="text-gray-400">Sin periféricos USB registrados</p>';
+  if (item.perifericos && item.perifericos.length > 0) {
+    perifericosHtml = `
+      <ul class="components-list">
+        ${item.perifericos.map(p => `
+          <li class="component-item">
+            <strong><i class="fa-solid fa-plug"></i> [${escapeHTML(p.tipo || 'USB')}] ${escapeHTML(p.nombre || 'Dispositivo')}</strong>
+            ${p.id_hardware ? `<br><small class="text-gray-400" style="font-family: var(--font-mono); font-size: 0.72rem;">ID: ${escapeHTML(p.id_hardware)}</small>` : ''}
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  // RAM Slots List
+  let ramSlotsHtml = `<div class="spec-box-val">${escapeHTML(item.ram_total || 'N/A')}</div>`;
+  if (item.ram_detalles && item.ram_detalles.length > 0) {
+    ramSlotsHtml += `
+      <ul class="components-list mt-4">
+        ${item.ram_detalles.map(slot => `
+          <li class="component-item" style="font-size: 0.78rem;">
+            <i class="fa-solid fa-memory"></i> ${escapeHTML(slot)}
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  // Discos List
+  let discosHtml = `<div class="spec-box-val">${escapeHTML(item.almacenamiento_resumen || 'N/A')}</div>`;
+  if (item.almacenamiento && item.almacenamiento.length > 0) {
+    discosHtml += `
+      <ul class="components-list mt-4">
+        ${item.almacenamiento.map(d => `
+          <li class="component-item">
+            <strong><i class="fa-solid fa-hard-drive"></i> ${escapeHTML(d.modelo || d.tipo)} (${escapeHTML(d.capacidad || '')})</strong>
+            <br><small class="text-gray-400">Número de Serie: <span class="text-crimson mono-font">${escapeHTML(d.serie || 'N/A')}</span> | Interfaz: ${escapeHTML(d.interfaz || 'N/A')}</small>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  const content = `
+    <div class="form-section-title">
+      <i class="fa-solid fa-circle-check"></i> RESUMEN DEL MODELO Y SERIE (COMO EN EXCEL)
+    </div>
+    
+    <div class="specs-detail-grid">
+      <div class="spec-box">
+        <div class="spec-box-title">MODELO DE EQUIPO</div>
+        <div class="spec-box-val">${escapeHTML(item.modelo || 'N/A')}</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">NÚMERO DE SERIE (S/N)</div>
+        <div class="spec-box-val mono">${escapeHTML(item.numero_serie || 'N/A')}</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">PLACA BASE (MOTHERBOARD)</div>
+        <div class="spec-box-val mono">${escapeHTML(item.placa_base_completa || item.placa_base || 'N/A')}</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">TIPO & ESTADO</div>
+        <div class="spec-box-val">${escapeHTML(item.tipo_equipo || 'PC')} - ${escapeHTML(item.estado || 'Operativo')}</div>
+      </div>
+    </div>
+
+    <div class="form-section-title mt-4">
+      <i class="fa-solid fa-microchip"></i> PROCESADOR, MEMORIA & ALMACENAMIENTO
+    </div>
+
+    <div class="specs-detail-grid">
+      <div class="spec-box" style="grid-column: 1 / -1;">
+        <div class="spec-box-title">PROCESADOR (CPU)</div>
+        <div class="spec-box-val">${escapeHTML(item.procesador || 'N/A')}</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">MEMORIA RAM</div>
+        ${ramSlotsHtml}
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">UNIDADES DE ALMACENAMIENTO</div>
+        ${discosHtml}
+      </div>
+    </div>
+
+    <div class="form-section-title mt-4">
+      <i class="fa-solid fa-keyboard"></i> MONITORES Y PERIFÉRICOS CONECTADOS
+    </div>
+
+    <div class="specs-detail-grid">
+      <div class="spec-box">
+        <div class="spec-box-title">PANTALLAS / MONITORES</div>
+        ${monitoresHtml}
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">PERIFÉRICOS & DISPOSITIVOS USB</div>
+        ${perifericosHtml}
+      </div>
+    </div>
+
+    <div class="form-section-title mt-4">
+      <i class="fa-solid fa-network-wired"></i> DATOS DE RED, ASIGNACIÓN & AUDITORÍA
+    </div>
+
+    <div class="specs-detail-grid">
+      <div class="spec-box">
+        <div class="spec-box-title">HOSTNAME / EQUIPO</div>
+        <div class="spec-box-val mono">${escapeHTML(item.hostname || 'N/A')}</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">USUARIO RESPONSABLE</div>
+        <div class="spec-box-val">${escapeHTML(item.usuario_actual || 'N/A')}</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">DIRECCIÓN IP / MAC</div>
+        <div class="spec-box-val mono">${escapeHTML(item.ip_red || 'N/A')} (${escapeHTML(item.mac_address || 'N/A')})</div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title">ORIGEN Y FECHA</div>
+        <div class="spec-box-val">${escapeHTML(item.origen || 'Manual')} - ${escapeHTML(item.fecha_escaneo || 'N/A')}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailsContent').innerHTML = content;
+  openModal('detailsModal');
+}
+
+// -------------------------------------------------------------
+// UTILIDADES
+// -------------------------------------------------------------
+function copyText(text) {
+  if (!text || text === 'N/A') return;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(`Serial copiado: ${text}`, 'success');
+  });
+}
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  const icon = type === 'success' ? 'fa-circle-check text-green' : (type === 'error' ? 'fa-triangle-exclamation text-crimson' : 'fa-circle-info text-crimson');
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${escapeHTML(message)}</span>`;
+  
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
