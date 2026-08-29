@@ -271,6 +271,23 @@ function initEventListeners() {
     });
   });
 
+  // Botón Nuevo Registro Manual
+  const btnOpenManualModal = document.getElementById('btnOpenManualModal');
+  if (btnOpenManualModal) {
+    btnOpenManualModal.addEventListener('click', openManualCreateModal);
+  }
+
+  // Botón Escanear Este Equipo / PC
+  const btnScanLocal = document.getElementById('btnScanLocal');
+  if (btnScanLocal) {
+    btnScanLocal.addEventListener('click', handleScanLocal);
+  }
+
+  // Formulario de Registro Manual
+  if (equipmentForm) {
+    equipmentForm.addEventListener('submit', handleFormSubmit);
+  }
+
   // Botón Escanear con Cámara en Formulario
   const btnScanSerialCam = document.getElementById('btnScanSerialCam');
   if (btnScanSerialCam) {
@@ -937,6 +954,30 @@ async function handleFormSubmit(e) {
     fetchInventory();
   } catch (err) {
     showToast(err.message, 'error');
+  }
+}
+
+// Escanear PC Local o Nube
+async function handleScanLocal() {
+  if (serverInfo && serverInfo.isCloud) {
+    openModal('agentModal');
+    showToast('Para auditar una PC, copia el comando de PowerShell o descarga el archivo .BAT', 'info');
+    return;
+  }
+
+  showToast('Iniciando auditoría de hardware y periféricos...', 'info');
+  try {
+    const res = await fetch('/api/run-local-scan', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok && !data.isCloud) {
+      showToast('¡Escaneo de PC completado exitosamente!', 'success');
+      fetchInventory();
+    } else {
+      openModal('agentModal');
+      showToast('Descarga el archivo .BAT o ejecuta el comando de 1 línea en tu PC', 'info');
+    }
+  } catch (err) {
+    openModal('agentModal');
   }
 }
 

@@ -606,9 +606,21 @@ app.post('/api/agent/report', (req, res) => {
 });
 
 // Disparar escaneo de este PC desde el botón web
-app.post('/api/run-local-scan', (req, res) => {
+app.post(['/api/run-local-scan', '/api/scan-local'], (req, res) => {
+  const serverUrl = getServerUrl(req);
+
+  // Si estamos en la nube (Render / Linux):
+  if (process.platform !== 'win32') {
+    return res.json({
+      success: false,
+      isCloud: true,
+      message: 'Servidor en la Nube (Render)',
+      oneLiner: `irm ${serverUrl}/scan | iex`,
+      downloadUrl: '/api/download-batch'
+    });
+  }
+
   const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
-  const serverUrl = `http://localhost:${PORT}`;
   const cmd = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" "${serverUrl}"`;
   
   exec(cmd, { windowsHide: true, timeout: 25000 }, (error, stdout, stderr) => {
