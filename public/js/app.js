@@ -253,32 +253,42 @@ function initEventListeners() {
   });
 
   // Modales
-  document.getElementById('btnShowQr').addEventListener('click', () => {
-    openModal('qrModal');
-  });
-
-  document.getElementById('btnShowAgentInstructions').addEventListener('click', () => {
-    openModal('agentModal');
-  });
-
-  document.getElementById('btnOpenNetworkScanModal').addEventListener('click', () => {
-    if (serverInfo && serverInfo.subnetBase) {
-      document.getElementById('inputSubnet').value = serverInfo.subnetBase;
-    }
-    if (serverInfo && serverInfo.oneLinerCommand) {
-      document.getElementById('oneLinerCmdDisplay').textContent = serverInfo.oneLinerCommand;
-    }
-    openModal('networkScanModal');
-  });
-
-  document.getElementById('btnStartSubnetScan').addEventListener('click', runNetworkScan);
-
-  document.getElementById('btnCopyOneLiner').addEventListener('click', () => {
-    const cmd = document.getElementById('oneLinerCmdDisplay').textContent;
-    navigator.clipboard.writeText(cmd).then(() => {
-      showToast('¡Comando copiado! Pégalo en PowerShell de cualquier PC en tu red.', 'success');
+  const btnShowQr = document.getElementById('btnShowQr');
+  if (btnShowQr) {
+    btnShowQr.addEventListener('click', () => {
+      openModal('qrModal');
     });
-  });
+  }
+
+  const btnOpenNetworkScanModal = document.getElementById('btnOpenNetworkScanModal');
+  if (btnOpenNetworkScanModal) {
+    btnOpenNetworkScanModal.addEventListener('click', () => {
+      if (serverInfo && serverInfo.subnetBase) {
+        const inputSubnet = document.getElementById('inputSubnet');
+        if (inputSubnet) inputSubnet.value = serverInfo.subnetBase;
+      }
+      if (serverInfo && serverInfo.oneLinerCommand) {
+        const oneLinerDisplay = document.getElementById('oneLinerCmdDisplay');
+        if (oneLinerDisplay) oneLinerDisplay.textContent = serverInfo.oneLinerCommand;
+      }
+      openModal('networkScanModal');
+    });
+  }
+
+  const btnStartSubnetScan = document.getElementById('btnStartSubnetScan');
+  if (btnStartSubnetScan) {
+    btnStartSubnetScan.addEventListener('click', runNetworkScan);
+  }
+
+  const btnCopyOneLiner = document.getElementById('btnCopyOneLiner');
+  if (btnCopyOneLiner) {
+    btnCopyOneLiner.addEventListener('click', () => {
+      const cmd = document.getElementById('oneLinerCmdDisplay').textContent;
+      navigator.clipboard.writeText(cmd).then(() => {
+        showToast('¡Comando copiado! Pégalo en PowerShell de cualquier PC en tu red.', 'success');
+      });
+    });
+  }
 
   // Botón Nuevo Registro Manual
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
@@ -286,15 +296,19 @@ function initEventListeners() {
     btnOpenManualModal.addEventListener('click', openManualCreateModal);
   }
 
-  // Botón Escanear Este Equipo / PC (Abre autorización transparente)
+  // Botón Escanear Este Equipo / PC (Abre modal con BAT y Comando)
   const btnScanLocal = document.getElementById('btnScanLocal');
   if (btnScanLocal) {
     btnScanLocal.addEventListener('click', () => {
+      const url = (serverInfo && serverInfo.serverUrl) ? serverInfo.serverUrl : window.location.origin;
+      const cmd = `irm ${url}/scan | iex`;
+      const authDisplay = document.getElementById('authCmdDisplay');
+      if (authDisplay) authDisplay.textContent = cmd;
       openModal('agentModal');
     });
   }
 
-  // Botón Copiar Comando en Modal de Autorización
+  // Botón Copiar Comando en Modal de Escaneo
   const btnAuthCopyCmd = document.getElementById('btnAuthCopyCmd');
   if (btnAuthCopyCmd) {
     btnAuthCopyCmd.addEventListener('click', () => {
@@ -310,11 +324,11 @@ function initEventListeners() {
     });
   }
 
-  // Botón Descargar BAT en Modal de Autorización
+  // Botón Descargar BAT en Modal de Escaneo
   const btnAuthDownloadBat = document.getElementById('btnAuthDownloadBat');
   if (btnAuthDownloadBat) {
     btnAuthDownloadBat.addEventListener('click', () => {
-      showToast('Descargando script seguro. Ábrelo con 1 clic para autorizar la auditoría.', 'info');
+      showToast('Descargando script seguro. Ábrelo con 1 clic para auditar la PC.', 'info');
     });
   }
 
@@ -370,19 +384,33 @@ function initEventListeners() {
   });
 
   // Copiar URL local
-  document.getElementById('btnCopyUrl').addEventListener('click', () => {
-    if (serverInfo && serverInfo.serverUrl) {
-      navigator.clipboard.writeText(serverInfo.serverUrl).then(() => {
-        showToast('¡URL copiada al portapapeles!', 'success');
-      });
-    }
-  });
+  const btnCopyUrl = document.getElementById('btnCopyUrl');
+  if (btnCopyUrl) {
+    btnCopyUrl.addEventListener('click', () => {
+      if (serverInfo && serverInfo.serverUrl) {
+        navigator.clipboard.writeText(serverInfo.serverUrl).then(() => {
+          showToast('¡URL copiada al portapapeles!', 'success');
+        });
+      }
+    });
+  }
+}
 
-  // Guardar formulario de equipo (Creación / Edición)
-  equipmentForm.addEventListener('submit', handleFormSubmit);
+// Funciones globales de apertura y cierre de modales
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
 
-  // Botón Escanear Este Equipo Localmente
-  document.getElementById('btnScanLocal').addEventListener('click', runLocalScan);
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
 }
 
 function setFilterPill(type) {
