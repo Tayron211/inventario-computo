@@ -957,19 +957,33 @@ async function handleFormSubmit(e) {
   }
 }
 
-// Escanear PC (Copia el comando de auditoría WMI real de PowerShell)
-function handleScanLocal() {
-  const url = (serverInfo && serverInfo.serverUrl) ? serverInfo.serverUrl : window.location.origin;
-  const cmd = `irm ${url}/scan | iex`;
-  
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(cmd).then(() => {
-      showToast('¡Comando copiado! Abre PowerShell, pega (Ctrl + V) y presiona Enter.', 'success');
-    }).catch(() => {
-      prompt('Copia este comando y pégalo en PowerShell para auditar tu PC:', cmd);
-    });
-  } else {
-    prompt('Copia este comando y pégalo en PowerShell para auditar tu PC:', cmd);
+// Escanear PC (Ejecución automática de auditoría WMI / BIOS)
+async function handleScanLocal() {
+  showToast('Iniciando auditoría automática de hardware en esta PC...', 'info');
+
+  try {
+    const res = await fetch('/api/run-local-scan', { method: 'POST' });
+    const data = await res.json();
+
+    if (res.ok && !data.isCloud) {
+      showToast('¡PC auditada y registrada automáticamente con éxito!', 'success');
+      fetchInventory();
+      return;
+    }
+
+    // Si el servidor está en la nube (Render)
+    if (data.isCloud) {
+      const link = document.createElement('a');
+      link.href = '/api/download-batch';
+      link.download = 'ESCANEAR_ESTE_EQUIPO.bat';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast('Descargado ESCANEAR_ESTE_EQUIPO.bat. Ábrelo con 1 clic para auditar esta máquina.', 'success');
+    }
+  } catch (err) {
+    showToast('Error ejecutando la auditoría', 'error');
   }
 }
 
