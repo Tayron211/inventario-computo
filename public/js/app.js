@@ -444,6 +444,56 @@ function setView(view) {
 }
 
 // -------------------------------------------------------------
+// AUTO-DETECCIÓN DE SUBRED LOCAL DEL DISPOSITIVO
+// -------------------------------------------------------------
+async function detectClientLocalSubnet() {
+  return new Promise((resolve) => {
+    try {
+      const RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+      if (!RTCPeerConnection) {
+        return resolve(fallbackSubnet());
+      }
+      
+      const rtc = new RTCPeerConnection({ iceServers: [] });
+      rtc.createDataChannel('subnet-detect');
+      rtc.createOffer().then(offer => rtc.setLocalDescription(offer)).catch(() => resolve(fallbackSubnet()));
+      
+      let detected = false;
+      rtc.onicecandidate = (evt) => {
+        if (!evt || !evt.candidate || !evt.candidate.candidate) return;
+        const cand = evt.candidate.candidate;
+        const ipMatch = cand.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+        if (ipMatch) {
+          const ip = ipMatch[1];
+          if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+            detected = true;
+            const parts = ip.split('.');
+            resolve(`${parts[0]}.${parts[1]}.${parts[2]}`);
+          }
+        }
+      };
+      
+      setTimeout(() => {
+        if (!detected) resolve(fallbackSubnet());
+      }, 1000);
+    } catch (e) {
+      resolve(fallbackSubnet());
+    }
+  });
+}
+
+function fallbackSubnet() {
+  // Buscar la subred de los equipos activos en el inventario
+  for (const item of inventoryData) {
+    if (item.ip_red) {
+      const match = item.ip_red.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\.[0-9]{1,3}/);
+      if (match) return match[1];
+    }
+  }
+  return (serverInfo && serverInfo.subnetBase) ? serverInfo.subnetBase : '192.168.89';
+}
+
+// -------------------------------------------------------------
 // COMUNICACIÓN CON API
 // -------------------------------------------------------------
 
@@ -466,11 +516,13 @@ async function fetchServerInfo() {
       modalServerUrl.textContent = serverInfo.serverUrl || window.location.origin;
     }
 
-    // Auto-detectar y pre-rellenar la subred en el escáner
-    const inputSubnet = document.getElementById('inputSubnet');
-    if (inputSubnet && serverInfo.subnetBase) {
-      inputSubnet.value = serverInfo.subnetBase;
-    }
+    // Auto-detectar y pre-rellenar la subred local del cliente
+    detectClientLocalSubnet().then(subnet => {
+      const inputSubnet = document.getElementById('inputSubnet');
+      if (inputSubnet && subnet) {
+        inputSubnet.value = subnet;
+      }
+    });
   } catch (err) {
     console.error(err);
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -478,7 +530,6 @@ async function fetchServerInfo() {
     } else {
       serverIpDisplay.textContent = 'Modo Local';
     }
-    // Reintentar en 3 segundos si el servidor estaba despertando
     setTimeout(fetchServerInfo, 3000);
   }
 }
@@ -509,34 +560,6 @@ setInterval(() => {
   fetchInventory(true);
 }, 8000);
 
-// Ejecutar escaneo local desde el navegador
-async function runLocalScan() {
-  const btn = document.getElementById('btnScanLocal');
-  const originalHTML = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Escaneando Hardware...</span>`;
-  
-  showToast('Iniciando auditoría de hardware y periféricos...', 'info');
-
-  try {
-    const res = await fetch('/api/run-local-scan', { method: 'POST' });
-    const data = await res.json();
-    
-    if (res.ok) {
-      showToast('¡Hardware y periféricos detectados y registrados con éxito!', 'success');
-      await fetchInventory();
-    } else {
-      showToast(data.error || 'Error al ejecutar escáner', 'error');
-    }
-  } catch (err) {
-    console.error(err);
-    showToast('Error de comunicación con el servicio de escaneo', 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHTML;
-  }
-}
-
 // Ejecutar escaneo de toda la red local
 async function runNetworkScan() {
   const btn = document.getElementById('btnStartSubnetScan');
@@ -545,19 +568,19 @@ async function runNetworkScan() {
   const consoleLog = document.getElementById('scanConsoleLog');
   const consoleSpinner = document.getElementById('consoleSpinner');
 
-  const subnet = (subnetInput.value || '').trim();
+  let subnet = (subnetInput.value || '').trim();
   if (!subnet) {
-    showToast('Por favor introduce una subred válida (ej: 192.168.1)', 'error');
-    return;
+    subnet = await detectClientLocalSubnet();
+    subnetInput.value = subnet;
   }
 
   btn.disabled = true;
   btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Escaneando ${subnet}.0/24...`;
   consoleBox.style.display = 'block';
   consoleSpinner.style.display = 'inline-block';
-  consoleLog.textContent = `[*] Iniciando barrido multi-hilo en la subred ${subnet}.1 - ${subnet}.254...\n[*] Analizando hosts activos, MACs y nombres de host...`;
+  consoleLog.textContent = `[*] Iniciando barrido multi-hilo en la subred ${subnet}.1 - ${subnet}.254...\n[*] Analizando hosts activos, IPs, MACs y nombres de host...`;
 
-  showToast(`Iniciando escaneo de toda la subred ${subnet}.0/24...`, 'info');
+  showToast(`Iniciando escaneo de la red ${subnet}.0/24...`, 'info');
 
   try {
     const res = await fetch('/api/scan-network', {
@@ -570,7 +593,7 @@ async function runNetworkScan() {
     consoleSpinner.style.display = 'none';
 
     if (res.ok) {
-      consoleLog.textContent = data.output || 'Escaneo completado con éxito.';
+      consoleLog.textContent = data.output || `[✓] Barrido de red ${subnet}.0/24 completado con éxito.`;
       showToast(`¡Escaneo de red finalizado! Equipos sincronizados en inventario.`, 'success');
       await fetchInventory();
     } else {
