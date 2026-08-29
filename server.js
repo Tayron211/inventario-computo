@@ -664,21 +664,22 @@ app.get('/api/export-excel', async (req, res) => {
       views: [{ showGridLines: true }]
     });
 
-    // Definición de columnas con encabezados exactos del modelo
+    // Definición de columnas con HOSTNAME y USUARIO primeros
     worksheet.columns = [
-      { header: 'MODELO', key: 'modelo', width: 26 },
+      { header: 'HOSTNAME', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario_actual', width: 22 },
+      { header: 'MODELO', key: 'modelo', width: 28 },
       { header: 'NÚMERODESERIE', key: 'numero_serie', width: 22 },
       { header: 'PLACABASE', key: 'placa_base', width: 20 },
       { header: 'TIPO DE EQUIPO', key: 'tipo_equipo', width: 18 },
-      { header: 'PROCESADOR', key: 'procesador', width: 38 },
+      { header: 'PROCESADOR', key: 'procesador', width: 36 },
       { header: 'MEMORIA RAM', key: 'ram_total', width: 20 },
-      { header: 'ALMACENAMIENTO', key: 'almacenamiento_resumen', width: 40 },
+      { header: 'ALMACENAMIENTO (DISCOS / SSD)', key: 'almacenamiento_str', width: 44 },
       { header: 'MONITORES (SERIAL)', key: 'monitores_str', width: 32 },
-      { header: 'PERIFÉRICOS CONECTADOS', key: 'perifericos_str', width: 42 },
-      { header: 'HOSTNAME', key: 'hostname', width: 22 },
-      { header: 'USUARIO', key: 'usuario_actual', width: 20 },
+      { header: 'PERIFÉRICOS CONECTADOS', key: 'perifericos_str', width: 40 },
       { header: 'ESTADO', key: 'estado', width: 15 },
-      { header: 'UBICACIÓN', key: 'ubicacion', width: 25 },
+      { header: 'UBICACIÓN', key: 'ubicacion', width: 24 },
+      { header: 'DIRECCIÓN IP', key: 'ip_red', width: 22 },
       { header: 'FECHA REGISTRO', key: 'fecha_escaneo', width: 20 }
     ];
 
@@ -720,20 +721,32 @@ app.get('/api/export-excel', async (req, res) => {
       const monitoresStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante || ''} (S/N: ${m.serie || 'N/A'})`).join('\n') || 'N/A';
       const perifericosStr = (item.perifericos || []).map(p => `${p.nombre || p.tipo || ''}`).join('\n') || 'ESTÁNDAR';
       
+      // Construir almacenamiento detallado legible
+      let almacenamientoStr = '';
+      if (item.almacenamiento && Array.isArray(item.almacenamiento) && item.almacenamiento.length > 0) {
+        almacenamientoStr = item.almacenamiento.map(d => {
+          const serialPart = d.serie && d.serie !== 'N/A' ? ` (S/N: ${d.serie})` : '';
+          return `${d.modelo || d.tipo || 'Disco'} - ${d.capacidad || ''}${serialPart}`;
+        }).join('\n');
+      } else {
+        almacenamientoStr = item.almacenamiento_resumen || 'Disco Principal';
+      }
+
       const row = worksheet.addRow({
+        hostname: toUpper(item.hostname || 'PC-EQUIPO'),
+        usuario_actual: toUpper(item.usuario_actual || 'ADMIN'),
         modelo: toUpper(item.modelo || ''),
         numero_serie: toUpper(item.numero_serie || ''),
         placa_base: toUpper(item.placa_base || ''),
         tipo_equipo: toUpper(item.tipo_equipo || ''),
         procesador: toUpper(item.procesador || ''),
         ram_total: toUpper(item.ram_total || ''),
-        almacenamiento_resumen: toUpper(item.almacenamiento_resumen || ''),
+        almacenamiento_str: toUpper(almacenamientoStr),
         monitores_str: toUpper(monitoresStr),
         perifericos_str: toUpper(perifericosStr),
-        hostname: toUpper(item.hostname || ''),
-        usuario_actual: toUpper(item.usuario_actual || ''),
         estado: toUpper(item.estado || 'OPERATIVO'),
         ubicacion: toUpper(item.ubicacion || ''),
+        ip_red: toUpper(item.ip_red || 'N/A'),
         fecha_escaneo: toUpper(item.fecha_escaneo || '')
       });
 
