@@ -804,6 +804,8 @@ function renderTable(items) {
     }
 
     const statusClass = (item.estado || 'Operativo').toLowerCase().replace(/\s+/g, '-');
+    const primaryName = item.hostname || item.modelo || 'Equipo';
+    const subName = item.hostname ? (item.modelo || '') : '';
 
     return `
       <tr>
@@ -811,8 +813,9 @@ function renderTable(items) {
           <div class="col-modelo-val">
             <div class="modelo-header">
               <i class="fa-solid ${tipoIcon} text-crimson modelo-type-icon"></i>
-              <strong class="modelo-text">${escapeHTML(item.modelo || 'Sin Modelo')}</strong>
+              <strong class="modelo-text">${escapeHTML(primaryName)}</strong>
             </div>
+            ${subName ? `<span style="font-size: 0.74rem; color: var(--gray-400); margin-left: 20px; line-height: 1.2;">${escapeHTML(subName)}</span>` : ''}
             ${item.fabricante ? `<span class="fabricante-tag">${escapeHTML(item.fabricante)}</span>` : ''}
           </div>
         </td>
@@ -841,8 +844,8 @@ function renderTable(items) {
         <td class="cell-usuario">
           <div class="user-block">
             <div class="user-name"><i class="fa-solid fa-user text-crimson"></i> <b>${escapeHTML(item.usuario_actual || 'Sin Asignar')}</b></div>
-            <div class="user-host"><i class="fa-solid fa-network-wired"></i> ${escapeHTML(item.hostname || 'N/A')}</div>
             ${item.ubicacion ? `<div class="user-loc"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(item.ubicacion)}</div>` : ''}
+            ${item.ip_red ? `<div class="user-host"><i class="fa-solid fa-network-wired"></i> ${escapeHTML(item.ip_red.split(',')[0].trim())}</div>` : ''}
           </div>
         </td>
         <td class="cell-estado">
@@ -859,7 +862,7 @@ function renderTable(items) {
             <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
-            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(item.modelo)}')" title="Eliminar Registro">
+            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar Registro">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -872,12 +875,15 @@ function renderTable(items) {
 function renderGrid(items) {
   gridContainer.innerHTML = items.map(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
+    const primaryName = item.hostname || item.modelo || 'Equipo';
+    const subName = item.hostname ? (item.modelo || '') : '';
 
     return `
       <div class="grid-card">
         <div class="grid-card-header">
           <div>
-            <div class="grid-card-title">${escapeHTML(item.modelo || 'Equipo')}</div>
+            <div class="grid-card-title">${escapeHTML(primaryName)}</div>
+            ${subName ? `<div style="font-size: 0.78rem; color: var(--gray-400); margin-top: 2px;">${escapeHTML(subName)}</div>` : ''}
             <span class="tipo-badge ${typeInfo.class} mt-4"><i class="fa-solid ${typeInfo.icon}"></i> ${escapeHTML(item.tipo_equipo || 'Equipo')}</span>
           </div>
           <span class="serial-badge" onclick="copyText('${escapeHTML(item.numero_serie)}')">
@@ -1205,10 +1211,14 @@ function viewDetails(id) {
 
   const content = `
     <div class="form-section-title">
-      <i class="fa-solid fa-circle-check"></i> RESUMEN DEL MODELO Y SERIE (COMO EN EXCEL)
+      <i class="fa-solid fa-circle-check"></i> IDENTIFICACIÓN DEL EQUIPO
     </div>
     
     <div class="specs-detail-grid">
+      <div class="spec-box">
+        <div class="spec-box-title">NOMBRE DE EQUIPO (HOSTNAME)</div>
+        <div class="spec-box-val mono" style="color: #fff; font-weight: 700; font-size: 1.05rem;">${escapeHTML(item.hostname || 'N/A')}</div>
+      </div>
       <div class="spec-box">
         <div class="spec-box-title">MODELO DE EQUIPO</div>
         <div class="spec-box-val">${escapeHTML(item.modelo || 'N/A')}</div>
@@ -1220,10 +1230,6 @@ function viewDetails(id) {
       <div class="spec-box">
         <div class="spec-box-title">PLACA BASE (MOTHERBOARD)</div>
         <div class="spec-box-val mono">${escapeHTML(item.placa_base_completa || item.placa_base || 'N/A')}</div>
-      </div>
-      <div class="spec-box">
-        <div class="spec-box-title">TIPO & ESTADO</div>
-        <div class="spec-box-val">${escapeHTML(item.tipo_equipo || 'PC')} - ${escapeHTML(item.estado || 'Operativo')}</div>
       </div>
     </div>
 
