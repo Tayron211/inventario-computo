@@ -91,8 +91,12 @@ foreach ($ram in $ramModules) {
 $totalRamGB = [Math]::Round($totalRamBytes / 1GB)
 $ramResumen = "${totalRamGB} GB (" + (@($ramModules).Count) + " modulo(s))"
 
-# 6. ALMACENAMIENTO (DISCOS Y NUMEROS DE SERIE)
-$disks = Get-CimInstance Win32_DiskDrive
+# 6. ALMACENAMIENTO (SOLO DISCOS INTERNOS, EXCLUYENDO USB / EXTERNOS)
+$disks = Get-CimInstance Win32_DiskDrive | Where-Object {
+    $_.InterfaceType -ne "USB" -and
+    $_.MediaType -notmatch "External|Removable" -and
+    $_.CapabilityDescriptions -notcontains "Removable Media"
+}
 $almacenamientoDetalles = @()
 $almacenamientoResumenList = @()
 foreach ($d in $disks) {
