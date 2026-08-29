@@ -49,11 +49,13 @@ function initAuth() {
   const btnTogglePass = document.getElementById('btnTogglePass');
   const togglePassIcon = document.getElementById('togglePassIcon');
   const btnLogout = document.getElementById('btnLogout');
-  const sessionToken = localStorage.getItem('sysinventario_token');
+  const sessionToken = sessionStorage.getItem('sysinventario_session_token');
 
-  // Si ya tiene sesión activa
+  // Si ya tiene sesión activa en esta pestaña/ventana
   if (sessionToken) {
     if (loginOverlay) loginOverlay.classList.add('hidden');
+    const userBox = document.getElementById('userSessionBox');
+    if (userBox) userBox.style.display = 'flex';
   } else {
     if (loginOverlay) {
       loginOverlay.classList.remove('hidden');
@@ -93,9 +95,15 @@ function initAuth() {
 
         const data = await res.json();
         if (res.ok && data.success) {
-          localStorage.setItem('sysinventario_token', data.token);
-          localStorage.setItem('sysinventario_user', data.user);
+          // Guardar solo en sessionStorage (se borra automáticamente al cerrar la página/navegador)
+          sessionStorage.setItem('sysinventario_session_token', data.token);
+          sessionStorage.setItem('sysinventario_user', data.user);
+          localStorage.removeItem('sysinventario_token');
+          
           loginOverlay.classList.add('hidden');
+          const userBox = document.getElementById('userSessionBox');
+          if (userBox) userBox.style.display = 'flex';
+          
           showToast(`¡Bienvenido al sistema, ${data.user}!`, 'success');
           fetchInventory();
         } else {
@@ -120,9 +128,10 @@ function initAuth() {
     });
   }
 
-  // Logout
+  // Logout (Cerrar Sesión)
   if (btnLogout) {
     btnLogout.addEventListener('click', () => {
+      sessionStorage.clear();
       localStorage.removeItem('sysinventario_token');
       localStorage.removeItem('sysinventario_user');
       if (loginOverlay) {
