@@ -766,14 +766,14 @@ body {
   flex-wrap: wrap;
 }
 
-/* Network Badge / QR Trigger */
+/* Network Badge / QR Trigger - COMPACTO */
 .network-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--crimson-border);
-  padding: 6px 14px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: var(--transition-fast);
@@ -787,11 +787,11 @@ body {
 }
 
 .live-pulse {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: var(--accent-emerald);
-  box-shadow: 0 0 10px var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
   animation: pulse-green 2s infinite;
 }
 
@@ -804,24 +804,26 @@ body {
 .net-info {
   display: flex;
   flex-direction: column;
+  line-height: 1.1;
 }
 
 .net-label {
-  font-size: 0.65rem;
+  font-size: 0.56rem;
   font-weight: 700;
   color: var(--gray-400);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .net-ip {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #fff;
 }
 
 .qr-mini-icon {
-  font-size: 1rem;
+  font-size: 0.78rem;
   color: var(--crimson-glow);
 }
 
