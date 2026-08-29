@@ -271,15 +271,41 @@ function initEventListeners() {
     });
   });
 
-  document.getElementById('btnOpenManualModal').addEventListener('click', () => {
-    openManualCreateModal();
-  });
+  // Botón Escanear con Cámara en Formulario
+  const btnScanSerialCam = document.getElementById('btnScanSerialCam');
+  if (btnScanSerialCam) {
+    btnScanSerialCam.addEventListener('click', () => {
+      startCameraScanner('formNumeroSerie');
+    });
+  }
+
+  const btnCloseCamera = document.getElementById('btnCloseCamera');
+  if (btnCloseCamera) {
+    btnCloseCamera.addEventListener('click', stopCameraScanner);
+  }
+
+  const btnCloseCameraX = document.getElementById('btnCloseCameraX');
+  if (btnCloseCameraX) {
+    btnCloseCameraX.addEventListener('click', stopCameraScanner);
+  }
+
+  const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+  if (btnSwitchCamera) {
+    btnSwitchCamera.addEventListener('click', () => {
+      currentCameraFacing = currentCameraFacing === 'environment' ? 'user' : 'environment';
+      startCameraScanner('formNumeroSerie');
+    });
+  }
 
   // Cerrar modales con botones 'data-close-modal' o clic fuera
   document.querySelectorAll('[data-close-modal]').forEach(btn => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-close-modal');
-      closeModal(modalId);
+      if (modalId === 'cameraModal') {
+        stopCameraScanner();
+      } else {
+        closeModal(modalId);
+      }
     });
   });
 
@@ -1127,4 +1153,84 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+// -------------------------------------------------------------
+// ESCÁNER DE CÓDIGO DE BARRAS & QR CON CÁMARA (CELULAR)
+// -------------------------------------------------------------
+let html5QrScanner = null;
+let currentCameraFacing = "environment";
+
+function startCameraScanner(targetInputId = 'formNumeroSerie') {
+  openModal('cameraModal');
+
+  if (typeof Html5Qrcode === 'undefined') {
+    showToast('Iniciando lector de cámara...', 'info');
+    setTimeout(() => startCameraScanner(targetInputId), 400);
+    return;
+  }
+
+  const cameraContainer = document.getElementById('cameraPreview');
+  if (cameraContainer) cameraContainer.innerHTML = '';
+
+  if (html5QrScanner) {
+    try {
+      html5QrScanner.stop().catch(() => {}).finally(() => {
+        try { html5QrScanner.clear(); } catch(e) {}
+      });
+    } catch (e) {}
+  }
+
+  try {
+    html5QrScanner = new Html5Qrcode("cameraPreview");
+
+    const config = {
+      fps: 15,
+      qrbox: (viewfinderWidth, viewfinderHeight) => {
+        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        return {
+          width: Math.floor(minEdge * 0.85),
+          height: Math.floor(minEdge * 0.6)
+        };
+      },
+      aspectRatio: 1.333334
+    };
+
+    html5QrScanner.start(
+      { facingMode: currentCameraFacing },
+      config,
+      (decodedText) => {
+        const cleanText = (decodedText || '').trim().toUpperCase();
+        if (cleanText) {
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+          const input = document.getElementById(targetInputId);
+          if (input) {
+            input.value = cleanText;
+            input.focus();
+          }
+          showToast(`¡Serial escaneado: ${cleanText}!`, 'success');
+          stopCameraScanner();
+        }
+      },
+      () => {}
+    ).catch(err => {
+      console.warn('Error accediendo a la cámara:', err);
+      showToast('Permite el acceso a la cámara en tu navegador', 'error');
+    });
+  } catch (err) {
+    console.error('Error inicializando escáner:', err);
+  }
+}
+
+function stopCameraScanner() {
+  if (html5QrScanner) {
+    try {
+      html5QrScanner.stop().then(() => {
+        try { html5QrScanner.clear(); } catch(e) {}
+      }).catch(() => {
+        try { html5QrScanner.clear(); } catch(e) {}
+      });
+    } catch (e) {}
+  }
+  closeModal('cameraModal');
 }

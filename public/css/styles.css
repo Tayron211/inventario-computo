@@ -1701,13 +1701,14 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -1725,6 +1726,7 @@ body {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 540px;
+  max-height: calc(100dvh - 32px);
   max-height: 88vh;
   display: flex;
   flex-direction: column;
@@ -1818,6 +1820,81 @@ body {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+}
+
+/* INPUT CON BOTÓN DE ACCIÓN (ESCANEAR CON CÁMARA) */
+.input-with-action {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input-with-action input {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-input-action {
+  background: var(--crimson-primary);
+  border: 1px solid var(--crimson-border);
+  color: #fff;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.btn-input-action:hover {
+  background: var(--crimson-dark);
+  box-shadow: 0 0 10px rgba(220, 20, 60, 0.4);
+}
+
+/* MODAL CÁMARA CELULAR */
+.modal-camera-card {
+  max-width: 480px;
+}
+
+.camera-preview-container {
+  width: 100%;
+  min-height: 260px;
+  background: #000;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--crimson-border);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.camera-preview-container video {
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.camera-scanner-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.camera-scan-tip {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+[data-theme="light"] .camera-scan-tip {
+  color: #475569;
 }
 
 /* QR MODAL ESPECÍFICO */
@@ -2372,11 +2449,12 @@ body {
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 16px;
+    padding: 12px;
   }
 
   .metrics-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .form-grid {
@@ -2389,7 +2467,8 @@ body {
   }
 
   .header-actions {
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap;
   }
 
   .header-actions .btn span {
@@ -2397,7 +2476,7 @@ body {
   }
 
   .header-actions .btn {
-    padding: 10px 14px;
+    padding: 8px 12px;
   }
 
   .filter-pills-group {
@@ -2410,6 +2489,57 @@ body {
     flex-direction: column;
     text-align: center;
     gap: 8px;
+  }
+
+  /* MODALES PERFECTOS EN CELULARES */
+  .modal-overlay {
+    padding: 6px;
+    align-items: flex-end;
+  }
+
+  .modal-card {
+    max-height: calc(100dvh - 12px);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  .modal-header-styled {
+    padding: 12px 14px;
+  }
+
+  .modal-header-styled h3 {
+    font-size: 1rem;
+  }
+
+  .modal-body {
+    padding: 12px 14px;
+  }
+
+  .modal-scrollable {
+    padding: 12px 14px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    gap: 8px;
+    background: var(--bg-surface-elevated);
+    border-top: 1px solid var(--gray-700);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    padding: 11px 12px;
+    font-size: 0.88rem;
+    justify-content: center;
+    min-height: 44px;
   }
 }
 
@@ -2424,5 +2554,9 @@ body {
 
   .network-badge .net-label {
     display: none;
+  }
+
+  .modal-card {
+    max-height: 94dvh;
   }
 }

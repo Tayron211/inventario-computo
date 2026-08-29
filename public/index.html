@@ -13,6 +13,9 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
+  <!-- HTML5 QR & Barcode Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -342,6 +345,34 @@
   </div>
 
   <!-- =================================================================== -->
+  <!-- MODAL: ESCÁNER CON CÁMARA (CÓDIGO DE BARRAS & QR PARA CELULAR) -->
+  <!-- =================================================================== -->
+  <div class="modal-overlay" id="cameraModal">
+    <div class="modal-card modal-camera-card">
+      <button class="modal-close-btn" data-close-modal="cameraModal" id="btnCloseCameraX">&times;</button>
+      <div class="modal-header-styled">
+        <i class="fa-solid fa-camera header-icon"></i>
+        <h3>Escáner de Código de Barras & S/N</h3>
+        <p>Apunta la cámara a la etiqueta del equipo o caja</p>
+      </div>
+      <div class="modal-body text-center">
+        <div id="cameraPreview" class="camera-preview-container">
+          <!-- Visor de la cámara con escáner interactivo -->
+        </div>
+        <div class="camera-scanner-controls">
+          <button class="btn btn-outline-crimson btn-sm" id="btnSwitchCamera" title="Cambiar cámara">
+            <i class="fa-solid fa-arrows-rotate"></i> Cambiar Cámara
+          </button>
+        </div>
+        <p class="camera-scan-tip"><i class="fa-solid fa-barcode"></i> Centra el código de barras o QR de la etiqueta</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary w-100" data-close-modal="cameraModal" id="btnCloseCamera">Cerrar Cámara</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
   <!-- MODAL: CONECTAR CELULAR VÍA QR -->
   <!-- =================================================================== -->
   <div class="modal-overlay" id="qrModal">
@@ -401,8 +432,13 @@
             </div>
 
             <div class="form-group">
-              <label for="formNumeroSerie">NÚMERO DE SERIE * <small>(S/N de la PC / Laptop)</small></label>
-              <input type="text" id="formNumeroSerie" required placeholder="Ej: 8CN60500Y3" class="form-control mono-font">
+              <label for="formNumeroSerie">NÚMERO DE SERIE * <small>(S/N del equipo o periférico)</small></label>
+              <div class="input-with-action">
+                <input type="text" id="formNumeroSerie" required placeholder="Ej: 8CN60500Y3" class="form-control mono-font">
+                <button type="button" class="btn-input-action" id="btnScanSerialCam" title="Escanear código de barras con la cámara del celular">
+                  <i class="fa-solid fa-camera"></i> <span>Escanear</span>
+                </button>
+              </div>
             </div>
 
             <div class="form-group">
