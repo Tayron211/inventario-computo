@@ -417,10 +417,17 @@ async function fetchServerInfo() {
     if (!res.ok) throw new Error('Error al obtener info de red');
     serverInfo = await res.json();
     
-    serverIpDisplay.textContent = `${serverInfo.primaryIP}:${serverInfo.port}`;
+    if (serverInfo.isCloud || window.location.hostname.includes('onrender.com')) {
+      serverIpDisplay.textContent = 'Nube Activa (Online)';
+    } else {
+      serverIpDisplay.textContent = `${serverInfo.primaryIP}:${serverInfo.port}`;
+    }
+    
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     updateQrForTheme(currentTheme);
-    modalServerUrl.textContent = serverInfo.serverUrl;
+    if (modalServerUrl) {
+      modalServerUrl.textContent = serverInfo.serverUrl || window.location.origin;
+    }
 
     // Auto-detectar y pre-rellenar la subred en el escáner
     const inputSubnet = document.getElementById('inputSubnet');
@@ -429,7 +436,13 @@ async function fetchServerInfo() {
     }
   } catch (err) {
     console.error(err);
-    serverIpDisplay.textContent = 'Modo Local';
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      serverIpDisplay.textContent = 'Nube Activa';
+    } else {
+      serverIpDisplay.textContent = 'Modo Local';
+    }
+    // Reintentar en 3 segundos si el servidor estaba despertando
+    setTimeout(fetchServerInfo, 3000);
   }
 }
 
