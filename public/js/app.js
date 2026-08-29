@@ -1432,3 +1432,57 @@ function stopCameraScanner() {
     camModal.style.display = '';
   }
 }
+
+// -------------------------------------------------------------
+// RESPALDO Y RESTAURACIÓN DE INVENTARIO JSON
+// -------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const btnTriggerRestore = document.getElementById('btnTriggerRestore');
+  const fileRestoreInput = document.getElementById('fileRestoreInput');
+
+  if (btnTriggerRestore && fileRestoreInput) {
+    btnTriggerRestore.addEventListener('click', () => {
+      fileRestoreInput.click();
+    });
+
+    fileRestoreInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+
+        if (!Array.isArray(json)) {
+          showToast('El archivo debe contener una lista de equipos en formato JSON válido', 'error');
+          return;
+        }
+
+        const confirmRestore = confirm(`¿Deseas restaurar ${json.length} equipos en tu inventario?`);
+        if (!confirmRestore) return;
+
+        showToast('Restaurando base de datos...', 'info');
+
+        const res = await fetch('/api/restore-json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(json)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showToast(`¡Restauración exitosa! Total: ${data.total} equipos`, 'success');
+          await loadInventory();
+        } else {
+          showToast('Error al restaurar: ' + (data.error || 'Desconocido'), 'error');
+        }
+      } catch (err) {
+        console.error('Error procesando archivo JSON:', err);
+        showToast('Error leyendo el archivo JSON: ' + err.message, 'error');
+      } finally {
+        fileRestoreInput.value = '';
+      }
+    });
+  }
+});
+

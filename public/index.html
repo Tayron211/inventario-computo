@@ -120,6 +120,19 @@
             <span>Excel</span>
           </a>
 
+          <!-- Botón Respaldo JSON -->
+          <a href="/api/backup-json" class="btn btn-secondary" id="btnDownloadBackup" title="Descargar Copia de Seguridad JSON de todos los equipos" download>
+            <i class="fa-solid fa-cloud-arrow-down"></i>
+            <span>Backup</span>
+          </a>
+
+          <!-- Botón Restaurar Respaldo -->
+          <button class="btn btn-secondary" id="btnTriggerRestore" title="Restaurar inventario desde un archivo JSON de respaldo">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Restaurar</span>
+          </button>
+          <input type="file" id="fileRestoreInput" accept=".json" style="display: none;">
+
           <!-- Botón Modo Claro / Oscuro -->
           <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Alternar entre Modo Claro y Modo Oscuro">
             <i class="fa-solid fa-sun icon-sun"></i>

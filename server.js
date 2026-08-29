@@ -652,6 +652,52 @@ app.post(['/api/run-local-scan', '/api/scan-local'], (req, res) => {
   });
 });
 
+// Descargar Copia de Seguridad JSON completa
+app.get('/api/backup-json', (req, res) => {
+  const items = loadDB();
+  const dateStr = new Date().toISOString().slice(0, 10);
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="SYS_INVENTORY_BACKUP_${dateStr}.json"`);
+  res.send(JSON.stringify(items, null, 2));
+});
+
+// Restaurar Copia de Seguridad JSON
+app.post('/api/restore-json', (req, res) => {
+  try {
+    const newItems = req.body;
+    if (!Array.isArray(newItems)) {
+      return res.status(400).json({ error: 'Formato inválido. Se espera un array de equipos.' });
+    }
+    
+    const current = loadDB();
+    const map = new Map();
+    
+    // Indexar actuales
+    current.forEach(item => {
+      const key = item.numero_serie && item.numero_serie !== 'N/A' ? item.numero_serie : (item.id || item.hostname);
+      map.set(key, item);
+    });
+
+    // Fusionar nuevos
+    newItems.forEach(item => {
+      const key = item.numero_serie && item.numero_serie !== 'N/A' ? item.numero_serie : (item.id || item.hostname);
+      map.set(key, { ...map.get(key), ...item });
+    });
+
+    const merged = Array.from(map.values());
+    saveDB(merged);
+
+    res.json({
+      success: true,
+      message: `Copia de seguridad restaurada con éxito. Total equipos: ${merged.length}`,
+      total: merged.length,
+      items: merged
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error restaurando respaldo', details: err.message });
+  }
+});
+
 // Exportación a Excel con el formato exacto del modelo proporcionado
 app.get('/api/export-excel', async (req, res) => {
   try {
