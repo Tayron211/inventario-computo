@@ -187,20 +187,6 @@
         </div>
       </section>
 
-      <!-- Batch Collector Info Banner -->
-      <section class="banner-quick-agent">
-        <div class="banner-left">
-          <div class="banner-badge"><i class="fa-solid fa-terminal"></i> SCRIPT BATCH AUTO-ESCANER</div>
-          <h3>¿Quieres inventariar otra PC o Laptop en tu red?</h3>
-          <p>Ejecuta el archivo <code>ESCANEAR_ESTE_EQUIPO.bat</code> en cualquier computadora para registrar automáticamente su modelo, número de serie, placa base, procesador, RAM, discos y periféricos.</p>
-        </div>
-        <div class="banner-right">
-          <button class="btn btn-outline-crimson" id="btnShowAgentInstructions">
-            <i class="fa-solid fa-download"></i> Ver Instrucciones del Batch
-          </button>
-        </div>
-      </section>
-
       <!-- Control Toolbar: Search & Tabs Filters -->
       <section class="toolbar-section">
         <div class="search-bar-wrapper">
@@ -598,79 +584,36 @@
   </div>
 
   <!-- =================================================================== -->
-  <!-- MODAL: AUTORIZACIÓN Y ESCANEO TRANSPARENTE DE HARDWARE -->
+  <!-- MODAL: ESCANEAR ESTA PC (DESCARGAR .BAT O COPIAR COMANDO) -->
   <!-- =================================================================== -->
   <div class="modal-overlay" id="agentModal">
-    <div class="modal-card modal-lg">
+    <div class="modal-card" style="max-width: 500px;">
       <button class="modal-close-btn" data-close-modal="agentModal">&times;</button>
       <div class="modal-header-styled">
-        <i class="fa-solid fa-shield-halved header-icon"></i>
-        <h3>Autorización para Auditar este Equipo</h3>
-        <p>Transparencia y Privacidad en la Extracción de Hardware</p>
+        <i class="fa-solid fa-bolt header-icon"></i>
+        <h3>Auditoría de Hardware de PC</h3>
+        <p>Selecciona tu opción para auditar y registrar esta computadora</p>
       </div>
 
-      <div class="modal-body modal-scrollable">
-        <div class="auth-notice-card mb-3">
-          <div class="notice-header">
-            <i class="fa-solid fa-circle-info text-crimson"></i>
-            <h4>¿Por qué se solicita esta autorización?</h4>
-          </div>
-          <p>Para extraer los <b>números de serie de fábrica reales (BIOS, Placa Madre, RAM, Discos y Pantallas)</b> con 100% de precisión, Windows requiere que confirmes la ejecución del recolector seguro.</p>
-        </div>
+      <div class="modal-body">
+        <p style="font-size: 0.84rem; color: var(--gray-300); margin-bottom: 14px;">
+          Pega este comando en <b>PowerShell</b> o descarga el archivo <b>.BAT</b> para extraer todo el hardware real al instante:
+        </p>
 
-        <div class="form-section-title">
-          <i class="fa-solid fa-list-check"></i> DATOS TÉCNICOS QUE SE CONSULTARÁN
-        </div>
-
-        <div class="specs-preview-list">
-          <div class="spec-preview-item">
-            <i class="fa-solid fa-barcode text-crimson"></i>
-            <div>
-              <b>Número de Serie y Modelo BIOS</b>
-              <p>Identificación oficial del fabricante del equipo.</p>
-            </div>
+        <div class="ip-copy-box mb-3" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <code id="authCmdDisplay" style="flex: 1; font-size: 0.78rem; word-break: break-all;">irm https://inventario-computo.onrender.com/scan | iex</code>
+            <button class="btn-copy-ip" id="btnAuthCopyCmd" title="Copiar Comando">
+              <i class="fa-regular fa-copy"></i> Copiar
+            </button>
           </div>
-          <div class="spec-preview-item">
-            <i class="fa-solid fa-microchip text-crimson"></i>
-            <div>
-              <b>Procesador (CPU) y Placa Madre</b>
-              <p>Modelo, núcleos, velocidad y revisión de placa base.</p>
-            </div>
-          </div>
-          <div class="spec-preview-item">
-            <i class="fa-solid fa-memory text-crimson"></i>
-            <div>
-              <b>Memoria RAM y Discos Duros/SSD</b>
-              <p>Capacidades, frecuencias y números de serie físicos.</p>
-            </div>
-          </div>
-          <div class="spec-preview-item">
-            <i class="fa-solid fa-display text-crimson"></i>
-            <div>
-              <b>Monitores y Periféricos Conectados</b>
-              <p>Resolución, serial del monitor y teclados/mouse USB.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="privacy-guarantee-box mt-3">
-          <i class="fa-solid fa-lock text-green"></i>
-          <span><b>Garantía de Privacidad:</b> Este proceso NO accede a archivos personales, fotos, contraseñas ni historial web. Solo consulta especificaciones de hardware.</span>
-        </div>
-
-        <div class="audit-waiting-box mt-3" id="auditWaitingStatus">
-          <i class="fa-solid fa-circle-notch fa-spin"></i>
-          <span>Esperando autorización... Los datos se registrarán en cuanto autorices el escaneo.</span>
         </div>
       </div>
 
-      <div class="modal-footer" style="display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap;">
-        <a href="/api/download-batch" class="btn btn-crimson" id="btnAuthDownloadBat" download="ESCANEAR_ESTE_EQUIPO.bat" style="flex: 1;">
-          <i class="fa-solid fa-download"></i> <span>Descargar & Autorizar (.BAT)</span>
+      <div class="modal-footer" style="display: flex; gap: 10px; justify-content: space-between;">
+        <a href="/api/download-batch" class="btn btn-crimson" id="btnAuthDownloadBat" download="ESCANEAR_ESTE_EQUIPO.bat" style="flex: 1; justify-content: center;">
+          <i class="fa-solid fa-download"></i> Descargar .BAT
         </a>
-        <button class="btn btn-outline-crimson" id="btnAuthCopyCmd" style="flex: 1;">
-          <i class="fa-solid fa-terminal"></i> <span>Copiar Comando PowerShell</span>
-        </button>
         <button class="btn btn-secondary" data-close-modal="agentModal">Cerrar</button>
       </div>
     </div>
