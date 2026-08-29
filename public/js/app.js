@@ -1217,7 +1217,7 @@ function viewDetails(id) {
     <div class="specs-detail-grid">
       <div class="spec-box">
         <div class="spec-box-title">NOMBRE DE EQUIPO (HOSTNAME)</div>
-        <div class="spec-box-val mono" style="color: #fff; font-weight: 700; font-size: 1.05rem;">${escapeHTML(item.hostname || 'N/A')}</div>
+        <div class="spec-box-val mono hostname-highlight" style="font-weight: 700; font-size: 1.05rem;">${escapeHTML(item.hostname || 'N/A')}</div>
       </div>
       <div class="spec-box">
         <div class="spec-box-title">MODELO DE EQUIPO</div>
