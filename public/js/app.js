@@ -1023,6 +1023,11 @@ function closeModal(modalId) {
 }
 
 function openManualCreateModal() {
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  if (isOperador) {
+    showToast('Acceso denegado: El usuario operador no tiene permisos para registrar equipos.', 'error');
+    return;
+  }
   document.getElementById('modalFormTitle').textContent = 'Registrar Nuevo Equipo de Cómputo';
   document.getElementById('formEquipmentId').value = '';
   equipmentForm.reset();
@@ -1031,6 +1036,12 @@ function openManualCreateModal() {
 
 // Editar equipo existente
 function editEquipment(id) {
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  if (isOperador) {
+    showToast('Acceso denegado: El usuario operador no tiene permisos para editar equipos.', 'error');
+    return;
+  }
+
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
@@ -1157,6 +1168,12 @@ async function handleScanLocal() {
 
 // Eliminar equipo
 async function deleteEquipment(id, modelo) {
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  if (isOperador) {
+    showToast('Acceso denegado: El usuario operador no tiene permisos para eliminar registros.', 'error');
+    return;
+  }
+
   if (!confirm(`¿Estás seguro de eliminar el equipo "${modelo}" del inventario?`)) {
     return;
   }
@@ -1179,19 +1196,27 @@ function viewDetails(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  document.getElementById('detailsTitle').textContent = item.modelo || 'Ficha Técnica';
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+
+  document.getElementById('detailsTitle').textContent = item.hostname || item.modelo || 'Ficha Técnica';
   document.getElementById('detailsSubtitle').textContent = `S/N: ${item.numero_serie || 'N/A'} | Tipo: ${item.tipo_equipo || 'PC'}`;
 
-  // Configurar botón editar y eliminar desde ficha
-  document.getElementById('btnEditFromDetails').onclick = () => {
-    editEquipment(item.id);
-  };
-
+  // Configurar botones de editar y eliminar desde ficha técnica
+  const btnEditFromDetails = document.getElementById('btnEditFromDetails');
   const btnDeleteFromDetails = document.getElementById('btnDeleteFromDetails');
+
+  if (btnEditFromDetails) {
+    btnEditFromDetails.style.display = isOperador ? 'none' : 'inline-flex';
+    btnEditFromDetails.onclick = () => {
+      editEquipment(item.id);
+    };
+  }
+
   if (btnDeleteFromDetails) {
+    btnDeleteFromDetails.style.display = isOperador ? 'none' : 'inline-flex';
     btnDeleteFromDetails.onclick = () => {
       closeModal('detailsModal');
-      deleteEquipment(item.id, item.modelo);
+      deleteEquipment(item.id, item.hostname || item.modelo);
     };
   }
 

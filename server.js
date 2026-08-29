@@ -595,8 +595,13 @@ app.get('/api/inventory/:id', (req, res) => {
   res.json(item);
 });
 
-// Crear registro manual
+// Crear registro manual (Bloqueado para operador)
 app.post('/api/inventory', (req, res) => {
+  const role = getUserRole(req);
+  if (role === 'operador') {
+    return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede crear registros.' });
+  }
+
   const items = loadDB();
   const body = req.body;
   
