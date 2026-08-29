@@ -6,9 +6,15 @@ const os = require('os');
 const { exec } = require('child_process');
 const QRCode = require('qrcode');
 const ExcelJS = require('exceljs');
+const { MongoClient } = require('mongodb');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI;
+
+let mongoClient = null;
+let mongoCollection = null;
+let memoryCache = null;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -21,6 +27,38 @@ const SCANS_DIR = path.join(__dirname, 'scans');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(SCANS_DIR)) fs.mkdirSync(SCANS_DIR, { recursive: true });
+
+// Conexión e inicialización automática de Base de Datos en la Nube
+async function initCloudDatabase() {
+  if (MONGODB_URI) {
+    try {
+      console.log('🔄 Conectando a Base de Datos en la Nube (MongoDB Atlas)...');
+      mongoClient = new MongoClient(MONGODB_URI);
+      await mongoClient.connect();
+      const db = mongoClient.db('sys_inventory');
+      mongoCollection = db.collection('equipos');
+      console.log('✅ Base de Datos en la Nube conectada. Tus datos no se borrarán nunca.');
+
+      const cloudItems = await mongoCollection.find({}).toArray();
+      if (cloudItems.length > 0) {
+        memoryCache = cloudItems.map(item => {
+          const { _id, ...clean } = item;
+          return clean;
+        });
+        saveLocalFile(memoryCache);
+      } else {
+        const local = loadLocalFile();
+        if (local.length > 0) {
+          await mongoCollection.insertMany(local);
+          memoryCache = local;
+        }
+      }
+    } catch (err) {
+      console.error('⚠️ Error conectando a MongoDB Atlas, usando almacenamiento local:', err.message);
+    }
+  }
+}
+initCloudDatabase();
 
 // Datos iniciales de demostración basados en el modelo del usuario
 const DEFAULT_INVENTORY = [
@@ -182,25 +220,51 @@ const DEFAULT_INVENTORY = [
   }
 ];
 
-function loadDB() {
+function loadLocalFile() {
   try {
     if (fs.existsSync(DB_FILE)) {
       const data = fs.readFileSync(DB_FILE, 'utf8');
       return JSON.parse(data);
     }
   } catch (err) {
-    console.error('Error leyendo base de datos:', err);
+    console.error('Error leyendo base de datos local:', err);
   }
-  // Si no existe, guardar datos iniciales
-  saveDB(DEFAULT_INVENTORY);
+  saveLocalFile(DEFAULT_INVENTORY);
   return DEFAULT_INVENTORY;
 }
 
-function saveDB(data) {
+function saveLocalFile(data) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error guardando base de datos:', err);
+    console.error('Error guardando base de datos local:', err);
+  }
+}
+
+function loadDB() {
+  if (memoryCache && Array.isArray(memoryCache)) {
+    return memoryCache;
+  }
+  const data = loadLocalFile();
+  memoryCache = data;
+  return data;
+}
+
+function saveDB(data) {
+  memoryCache = data;
+  saveLocalFile(data);
+  
+  if (mongoCollection) {
+    (async () => {
+      try {
+        await mongoCollection.deleteMany({});
+        if (data.length > 0) {
+          await mongoCollection.insertMany(data);
+        }
+      } catch (err) {
+        console.error('⚠️ Error sincronizando en MongoDB Atlas:', err.message);
+      }
+    })();
   }
 }
 
