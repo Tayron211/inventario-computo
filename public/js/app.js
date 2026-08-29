@@ -957,28 +957,16 @@ async function handleFormSubmit(e) {
   }
 }
 
-// Escanear PC Local o Nube
-async function handleScanLocal() {
-  if (serverInfo && serverInfo.isCloud) {
-    openModal('agentModal');
-    showToast('Para auditar una PC, copia el comando de PowerShell o descarga el archivo .BAT', 'info');
-    return;
-  }
+// Escanear PC (Descarga directa de archivo .BAT para ejecución en 1 clic)
+function handleScanLocal() {
+  const link = document.createElement('a');
+  link.href = '/api/download-batch';
+  link.download = 'ESCANEAR_ESTE_EQUIPO.bat';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-  showToast('Iniciando auditoría de hardware y periféricos...', 'info');
-  try {
-    const res = await fetch('/api/run-local-scan', { method: 'POST' });
-    const data = await res.json();
-    if (res.ok && !data.isCloud) {
-      showToast('¡Escaneo de PC completado exitosamente!', 'success');
-      fetchInventory();
-    } else {
-      openModal('agentModal');
-      showToast('Descarga el archivo .BAT o ejecuta el comando de 1 línea en tu PC', 'info');
-    }
-  } catch (err) {
-    openModal('agentModal');
-  }
+  showToast('Descargando ESCANEAR_ESTE_EQUIPO.bat. ¡Haz doble clic para auditar esta PC!', 'success');
 }
 
 // Eliminar equipo
