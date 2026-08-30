@@ -750,7 +750,14 @@ app.put('/api/inventory/:id', (req, res) => {
   }
 
   const items = loadDB();
-  const index = items.findIndex(i => i.id === req.params.id);
+  const targetId = req.params.id;
+  const decodedId = decodeURIComponent(targetId);
+  const targetSerial = (req.body && req.body.numero_serie) ? req.body.numero_serie.trim().toLowerCase() : '';
+  
+  let index = items.findIndex(i => i.id === targetId || i.id === decodedId);
+  if (index === -1 && targetSerial) {
+    index = items.findIndex(i => (i.numero_serie || '').trim().toLowerCase() === targetSerial);
+  }
   
   if (index === -1) {
     return res.status(404).json({ error: 'Equipo no encontrado' });

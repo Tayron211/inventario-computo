@@ -1355,7 +1355,14 @@ function editEquipment(id) {
 async function handleFormSubmit(e) {
   e.preventDefault();
 
-  const id = document.getElementById('formEquipmentId').value;
+  const btnSubmit = document.getElementById('btnSaveEquipment') || e.target.querySelector('button[type="submit"]');
+  const oldBtnHtml = btnSubmit ? btnSubmit.innerHTML : '';
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`;
+  }
+
+  const id = (document.getElementById('formEquipmentId').value || '').trim();
   const formBloqueVal = document.getElementById('formBloque') ? document.getElementById('formBloque').value : '';
   let finalUbicacion = document.getElementById('formUbicacion') ? document.getElementById('formUbicacion').value : '';
   const formUbicacionCustom = document.getElementById('formUbicacionCustom');
@@ -1364,43 +1371,84 @@ async function handleFormSubmit(e) {
     finalUbicacion = (formUbicacionCustom ? formUbicacionCustom.value.trim() : '') || 'Sin Asignar';
   }
 
+  const monitorVal = document.getElementById('formMonitor') ? document.getElementById('formMonitor').value.trim() : '';
+  let parsedMonitores = undefined;
+  if (monitorVal) {
+    const match = monitorVal.match(/^(.*?)(?:\s*\((?:S\/N:?\s*)?([^)]+)\))?$/);
+    const mod = match && match[1] ? match[1].trim() : monitorVal;
+    const ser = match && match[2] ? match[2].trim() : '';
+    parsedMonitores = [{
+      modelo: mod,
+      fabricante: mod.split(' ')[0] || 'Genérico',
+      serie: ser || 'N/A'
+    }];
+  }
+
+  const perifsVal = document.getElementById('formPerifericos') ? document.getElementById('formPerifericos').value.trim() : '';
+  let parsedPerifericos = undefined;
+  if (perifsVal) {
+    parsedPerifericos = perifsVal.split(',').map(p => {
+      const pName = p.trim();
+      return {
+        nombre: pName,
+        tipo: /teclado|keyboard/i.test(pName) ? 'Teclado' : (/mouse|rat/i.test(pName) ? 'Mouse / Puntero' : 'Accesorio'),
+        es_marca: true
+      };
+    }).filter(p => p.nombre);
+  }
+
   const payload = {
-    modelo: document.getElementById('formModelo').value,
-    numero_serie: document.getElementById('formNumeroSerie').value,
-    placa_base: document.getElementById('formPlacaBase').value,
+    modelo: (document.getElementById('formModelo').value || '').trim(),
+    numero_serie: (document.getElementById('formNumeroSerie').value || '').trim(),
+    placa_base: (document.getElementById('formPlacaBase').value || '').trim(),
     tipo_equipo: document.getElementById('formTipoEquipo').value,
-    fabricante: document.getElementById('formFabricante').value,
+    fabricante: (document.getElementById('formFabricante').value || '').trim(),
     estado: document.getElementById('formEstado').value,
-    procesador: document.getElementById('formProcesador').value,
-    ram_total: document.getElementById('formRamTotal').value,
-    almacenamiento_resumen: document.getElementById('formAlmacenamiento').value,
-    hostname: document.getElementById('formHostname').value,
-    usuario_actual: document.getElementById('formUsuario').value,
+    procesador: (document.getElementById('formProcesador').value || '').trim(),
+    ram_total: (document.getElementById('formRamTotal').value || '').trim(),
+    almacenamiento_resumen: (document.getElementById('formAlmacenamiento').value || '').trim(),
+    hostname: (document.getElementById('formHostname').value || '').trim(),
+    usuario_actual: (document.getElementById('formUsuario').value || '').trim(),
     ubicacion: finalUbicacion,
-    notas: document.getElementById('formNotas').value
+    notas: (document.getElementById('formNotas').value || '').trim()
   };
 
-  const isEdit = !!id;
-  const url = isEdit ? `/api/inventory/${id}` : '/api/inventory';
+  if (parsedMonitores !== undefined) {
+    payload.monitores = parsedMonitores;
+  }
+  if (parsedPerifericos !== undefined) {
+    payload.perifericos = parsedPerifericos;
+  }
+
+  const isEdit = Boolean(id && id !== '');
+  const url = isEdit ? `/api/inventory/${encodeURIComponent(id)}` : '/api/inventory';
   const method = isEdit ? 'PUT' : 'POST';
 
   try {
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('sysinventario_session_token') || ''}`
+      },
       body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
-      const errData = await res.json();
+      const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || 'Error al guardar');
     }
 
     closeModal('manualModal');
-    showToast(isEdit ? 'Equipo actualizado con éxito' : 'Nuevo equipo registrado con éxito', 'success');
-    fetchInventory();
+    showToast(isEdit ? '¡Equipo actualizado con éxito!' : '¡Nuevo equipo registrado con éxito!', 'success');
+    await fetchInventory();
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(err.message || 'Error al guardar los cambios', 'error');
+  } finally {
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = oldBtnHtml;
+    }
   }
 }
 
