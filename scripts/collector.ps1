@@ -3,7 +3,8 @@
 # ==============================================================================
 
 param(
-    [string]$ServerUrl = "https://ivt.onrender.com"
+    [string]$ServerUrl = "https://ivt.onrender.com",
+    [string]$Ubicacion = "CAE"
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -232,6 +233,7 @@ $hardwarePayload = [ordered]@{
     perifericos = $perifericosDetalles
     hostname = $hostname
     usuario_actual = $usuario
+    ubicacion = $Ubicacion
     sistema_operativo = "$osName ($osArch)"
     ip_red = $ipPrincipal
     mac_address = $macPrincipal

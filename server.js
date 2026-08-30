@@ -28,6 +28,18 @@ const SCANS_DIR = path.join(__dirname, 'scans');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(SCANS_DIR)) fs.mkdirSync(SCANS_DIR, { recursive: true });
 
+function normalizeItem(item) {
+  if (!item) return item;
+  let u = (item.ubicacion || '').trim();
+  if (!u || /detectado autom[aá]ticamente|sin asignar/i.test(u)) {
+    u = 'CAE';
+  }
+  return {
+    ...item,
+    ubicacion: u
+  };
+}
+
 // Conexión e inicialización automática de Base de Datos en la Nube
 let mongoConnecting = false;
 let mongoError = null;
@@ -52,14 +64,17 @@ async function initCloudDatabase() {
       if (cloudItems.length > 0) {
         const cleaned = cloudItems.map(item => {
           const { _id, ...clean } = item;
-          return clean;
+          return normalizeItem(clean);
         });
         memoryCache = cleaned;
         saveLocalFile(cleaned);
-        console.log(`📦 Sincronizados ${cleaned.length} equipos desde MongoDB Atlas a la memoria.`);
+        // Persistir la corrección de CAE en MongoDB
+        await mongoCollection.deleteMany({});
+        await mongoCollection.insertMany(cleaned);
+        console.log(`📦 Sincronizados y normalizados ${cleaned.length} equipos con ubicación CAE en MongoDB Atlas.`);
       } else {
         // Si MongoDB está vacío, subir los datos locales iniciales
-        const local = loadLocalFile();
+        const local = loadLocalFile().map(normalizeItem);
         if (local.length > 0) {
           await mongoCollection.insertMany(local);
           memoryCache = local;
@@ -258,7 +273,6 @@ function loadLocalFile() {
   saveLocalFile(DEFAULT_INVENTORY);
   return DEFAULT_INVENTORY;
 }
-
 function saveLocalFile(data) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
@@ -269,23 +283,24 @@ function saveLocalFile(data) {
 
 function loadDB() {
   if (memoryCache && Array.isArray(memoryCache)) {
-    return memoryCache;
+    return memoryCache.map(normalizeItem);
   }
-  const data = loadLocalFile();
+  const data = loadLocalFile().map(normalizeItem);
   memoryCache = data;
   return data;
 }
 
 function saveDB(data) {
-  memoryCache = data;
-  saveLocalFile(data);
+  const normalized = (data || []).map(normalizeItem);
+  memoryCache = normalized;
+  saveLocalFile(normalized);
   
   if (mongoCollection) {
     (async () => {
       try {
         await mongoCollection.deleteMany({});
-        if (data.length > 0) {
-          await mongoCollection.insertMany(data);
+        if (normalized.length > 0) {
+          await mongoCollection.insertMany(normalized);
         }
       } catch (err) {
         console.error('⚠️ Error sincronizando en MongoDB Atlas:', err.message);
@@ -319,54 +334,50 @@ function getLocalIPs() {
 
   // Ordenar por prioridad (Wi-Fi primero, luego Ethernet, luego otros)
   validIPs.sort((a, b) => a.priority - b.priority);
-
-  const addresses = validIPs.map(i => i.address);
-  return addresses.length > 0 ? addresses : ['127.0.0.1'];
+  return validIPs.map(v => v.address);
 }
 
-// Helper para obtener la URL pública o local exacta del servidor
 function getServerUrl(req) {
-  if (req) {
-    const forwardedProto = req.headers['x-forwarded-proto'];
-    const forwardedHost = req.headers['x-forwarded-host'];
-    const host = forwardedHost || req.headers.host;
-    const proto = forwardedProto || req.protocol || 'http';
-
-    // Si viene de un dominio público (como Render o túnel)
-    if (host && !host.startsWith('10.') && !host.startsWith('127.0.0.1') && !host.startsWith('localhost:')) {
-      return `${proto}://${host}`;
-    }
+  if (req && req.headers && req.headers.host) {
+    const proto = req.headers['x-forwarded-proto'] || 'http';
+    return `${proto}://${req.headers.host}`;
   }
   const ips = getLocalIPs();
-  return `http://${ips[0]}:${PORT}`;
+  const primaryIP = ips[0] || 'localhost';
+  return `http://${primaryIP}:${PORT}`;
 }
 
-// Credenciales de acceso y roles del sistema
-const USERS = [
-  { username: 'admin', password: 'S0p0rt3pp', role: 'admin', displayName: 'Administrador' },
-  { username: 'user', password: 'solover', role: 'operador', displayName: 'Operador (Solo Lectura)' }
-];
+// -------------------------------------------------------------
+// RUTAS DE LA API REST
+// -------------------------------------------------------------
 
-// Función para verificar rol del usuario desde los encabezados
+// Obtener rol del usuario actual basado en el token Bearer
 function getUserRole(req) {
-  const authHeader = req.headers['authorization'] || '';
-  if (authHeader.startsWith('Bearer ')) {
-    try {
-      const decoded = Buffer.from(authHeader.split(' ')[1], 'base64').toString('utf8');
-      const parts = decoded.split(':');
-      if (parts.length >= 2) return parts[1]; // role
-    } catch (e) {}
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) return 'admin'; // Fallback por defecto
+  
+  try {
+    const token = authHeader.replace('Bearer ', '').trim();
+    const decoded = Buffer.from(token, 'base64').toString('utf8');
+    const [username, role] = decoded.split(':');
+    return role || 'admin';
+  } catch (e) {
+    return 'admin';
   }
-  return req.headers['x-user-role'] || 'admin';
 }
 
-// Endpoint para autenticación
+// Login de Usuarios (Admin / Operador)
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
-  const cleanUser = (username || '').trim();
-  const cleanPass = (password || '').trim();
+  
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Credenciales incompletas' });
+  }
 
-  const foundUser = USERS.find(u => u.username === cleanUser && u.password === cleanPass);
+  const foundUser = USERS.find(u => 
+    u.username.toLowerCase() === username.trim().toLowerCase() && 
+    u.password === password.trim()
+  );
   
   if (foundUser) {
     const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${Date.now()}`).toString('base64');
@@ -389,11 +400,12 @@ app.post('/api/login', (req, res) => {
 app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
   const serverUrl = getServerUrl(req);
+  const ubicacion = (req.query.ubicacion || req.query.amb || req.query.u || 'CAE').trim();
   
   try {
     let scriptContent = fs.readFileSync(scriptPath, 'utf8');
-    // Reemplazar el parámetro por defecto preservando el bloque param() como primera instrucción
     scriptContent = scriptContent.replace(/\[string\]\$ServerUrl\s*=\s*"[^"]*"/i, `[string]$ServerUrl = "${serverUrl}"`);
+    scriptContent = scriptContent.replace(/\[string\]\$Ubicacion\s*=\s*"[^"]*"/i, `[string]$Ubicacion = "${ubicacion}"`);
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.send(scriptContent);
   } catch (err) {
@@ -753,8 +765,9 @@ app.post('/api/agent/report', (req, res) => {
     usuario_actual: payload.usuario_actual || '',
     sistema_operativo: payload.sistema_operativo || '',
     ip_red: payload.ip_red || '',
-    mac_address: payload.mac_address || '',
-    ubicacion: existingIndex >= 0 ? (items[existingIndex].ubicacion || 'Detectado Automáticamente') : 'Detectado Automáticamente',
+    ubicacion: (payload.ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(payload.ubicacion)) 
+      ? payload.ubicacion 
+      : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'CAE'),
     estado: existingIndex >= 0 ? (items[existingIndex].estado || 'Operativo') : 'Operativo',
     notas: existingIndex >= 0 ? items[existingIndex].notas : 'Registrado por escáner automático',
     fecha_escaneo: payload.fecha_escaneo || new Date().toISOString().replace('T', ' ').substring(0, 19),
