@@ -929,11 +929,12 @@ function renderTable(items) {
     // Periféricos y Monitores completos
     let perifericosListHtml = '';
     
-    // Monitores primero
+    // Monitores primero (con marca comercial y modelo)
     if (item.monitores && item.monitores.length > 0) {
       item.monitores.forEach(m => {
-        const monSerial = m.serie ? ` <span class="serial-mini-tag">S/N: ${highlightMatch(m.serie, currentSearchQuery)}</span>` : '';
-        perifericosListHtml += `<div class="hw-item-line mon-line"><i class="fa-solid fa-display text-crimson"></i> <b>${highlightMatch(m.modelo || m.fabricante || 'Monitor', currentSearchQuery)}</b>${monSerial}</div>`;
+        const monDisplayName = formatMonitorDisplayName(m);
+        const monSerial = m.serie && m.serie !== 'PNP-ID' && m.serie !== 'N/A' && m.serie !== 'No reportado por EDID' ? ` <span class="serial-mini-tag">S/N: ${highlightMatch(m.serie, currentSearchQuery)}</span>` : '';
+        perifericosListHtml += `<div class="hw-item-line mon-line"><i class="fa-solid fa-display text-crimson"></i> <b>${highlightMatch(monDisplayName, currentSearchQuery)}</b>${monSerial}</div>`;
       });
     }
 
@@ -1840,10 +1841,38 @@ const RECOGNIZED_PERIPHERAL_BRANDS = [
   'Logitech', 'HP', 'Dell', 'Lenovo', 'Microsoft', 'Corsair', 'Razer', 
   'HyperX', 'Kingston', 'Redragon', 'Genius', 'ASUS', 'Samsung', 'LG', 
   'AOC', 'ViewSonic', 'JBL', 'Sony', 'Jabra', 'Poly', 'Plantronics', 
-  'SteelSeries', 'Trust', 'Targus', 'Kensington', 'BenQ', 'Philips', 
   'Epson', 'Canon', 'Brother', 'Apple', 'Huawei', 'Xiaomi', 'Wacom', 'A4Tech', 'Cougar',
   'Teraware', 'Halion', 'Micronics', 'Antryx', 'Marvo', 'Gamemax', 'Fantech', 'VSG'
 ];
+
+const EDID_BRAND_MAP = {
+  'HPN': 'HP', 'HWP': 'HP', 'HEW': 'HP', 'HP': 'HP',
+  'DEL': 'Dell', 'DLL': 'Dell', 'DELL': 'Dell',
+  'LEN': 'Lenovo', 'LNK': 'Lenovo', 'LENOVO': 'Lenovo',
+  'SAM': 'Samsung', 'SEC': 'Samsung', 'SAMSUNG': 'Samsung',
+  'GSM': 'LG', 'LGD': 'LG', 'LGE': 'LG', 'LG': 'LG',
+  'AOC': 'AOC',
+  'VSC': 'ViewSonic', 'VIEWSONIC': 'ViewSonic',
+  'BNQ': 'BenQ', 'BENQ': 'BenQ',
+  'PHL': 'Philips', 'PHILIPS': 'Philips',
+  'ASU': 'ASUS', 'ACI': 'ASUS', 'ASUS': 'ASUS',
+  'ACR': 'Acer', 'ACER': 'Acer',
+  'APP': 'Apple', 'APPLE': 'Apple',
+  'MSI': 'MSI', 'GIG': 'Gigabyte', 'SONY': 'Sony',
+  'TER': 'Teraware', 'NEC': 'NEC', 'EIZ': 'Eizo'
+};
+
+function formatMonitorDisplayName(m) {
+  if (!m) return 'Monitor';
+  const rawManuf = (m.fabricante || '').trim().toUpperCase();
+  const brand = EDID_BRAND_MAP[rawManuf] || (m.fabricante || '').trim();
+  let model = (m.modelo || 'Monitor').trim();
+  
+  if (brand && brand !== 'Estándar' && brand !== 'Monitor Integrado' && !model.toLowerCase().includes(brand.toLowerCase())) {
+    return `${brand} ${model}`;
+  }
+  return model;
+}
 
 function isValidProprietaryPeripheral(p) {
   if (!p) return false;

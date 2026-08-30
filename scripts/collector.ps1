@@ -131,20 +131,42 @@ foreach ($d in $disks) {
 }
 $almacenamientoResumen = $almacenamientoResumenList -join " | "
 
-# 7. MONITORES (CON DEDICACIÓN Y SERIALES)
+# 7. MONITORES (CON DEDICACIÓN, MARCA Y SERIALES)
 $monitores = @()
+$edidVendors = @{
+    'HPN' = 'HP'; 'HWP' = 'HP'; 'HEW' = 'HP'; 'HP' = 'HP'
+    'DEL' = 'Dell'; 'DLL' = 'Dell'; 'DELL' = 'Dell'
+    'LEN' = 'Lenovo'; 'LNK' = 'Lenovo'; 'LENOVO' = 'Lenovo'
+    'SAM' = 'Samsung'; 'SEC' = 'Samsung'; 'SAMSUNG' = 'Samsung'
+    'GSM' = 'LG'; 'LGD' = 'LG'; 'LGE' = 'LG'; 'LG' = 'LG'
+    'AOC' = 'AOC'
+    'VSC' = 'ViewSonic'; 'VIEWSONIC' = 'ViewSonic'
+    'BNQ' = 'BenQ'; 'BENQ' = 'BenQ'
+    'PHL' = 'Philips'; 'PHILIPS' = 'Philips'
+    'ASU' = 'ASUS'; 'ACI' = 'ASUS'; 'ASUS' = 'ASUS'
+    'ACR' = 'Acer'; 'ACER' = 'Acer'
+    'APP' = 'Apple'; 'APPLE' = 'Apple'
+    'MSI' = 'MSI'; 'GIG' = 'Gigabyte'; 'SNY' = 'Sony'
+    'TER' = 'Teraware'; 'NEC' = 'NEC'; 'EIZ' = 'Eizo'
+}
+
 try {
     $monitorsWmi = Get-CimInstance -Namespace root\wmi -ClassName WmiMonitorID -ErrorAction SilentlyContinue
     if ($monitorsWmi) {
         foreach ($mon in $monitorsWmi) {
-            $monManuf = [System.Text.Encoding]::ASCII.GetString($mon.ManufacturerName -ne 0).Trim()
-            $monModel = [System.Text.Encoding]::ASCII.GetString($mon.UserFriendlyName -ne 0).Trim()
+            $rawManuf = [System.Text.Encoding]::ASCII.GetString($mon.ManufacturerName -ne 0).Trim()
+            $rawModel = [System.Text.Encoding]::ASCII.GetString($mon.UserFriendlyName -ne 0).Trim()
             $monSerial = [System.Text.Encoding]::ASCII.GetString($mon.SerialNumberID -ne 0).Trim()
-            if (-not $monModel) { $monModel = "Monitor Generico" }
+            
+            $monManuf = if ($edidVendors.ContainsKey($rawManuf.ToUpper())) { $edidVendors[$rawManuf.ToUpper()] } elseif ($rawManuf) { $rawManuf } else { "Monitor" }
+            if (-not $rawModel) { $rawModel = "Display HD" }
             if (-not $monSerial) { $monSerial = "No reportado por EDID" }
+
+            $fullMonModel = if ($monManuf -and $rawModel -notmatch "(?i)$monManuf") { "$monManuf $rawModel" } else { $rawModel }
+
             $monitores += @{
                 fabricante = $monManuf
-                modelo = $monModel
+                modelo = $fullMonModel
                 serie = $monSerial
             }
         }
@@ -157,7 +179,7 @@ if ($monitores.Count -eq 0) {
         $monName = ($m.Name -replace '\s+', ' ').Trim()
         if ($monName) {
             $monitores += @{
-                fabricante = "Estándar"
+                fabricante = "Monitor Integrado"
                 modelo = $monName
                 serie = "PNP-ID"
             }
@@ -291,6 +313,12 @@ Write-Host "  - TIPO DE EQUIPO:   $tipoEquipo" -ForegroundColor White
 Write-Host "  - PROCESADOR:       $cpuName" -ForegroundColor White
 Write-Host "  - MEMORIA RAM:      $ramResumen" -ForegroundColor White
 Write-Host "  - DISCOS:           $almacenamientoResumen" -ForegroundColor White
+$monResumen = ($monitores | ForEach-Object { "$($_.modelo) (S/N: $($_.serie))" }) -join " | "
+if (-not $monResumen) { $monResumen = "Pantalla Integrada / Estándar" }
+Write-Host "  - MONITORES:        $monResumen" -ForegroundColor White
+$perifResumen = ($perifericosDetalles | ForEach-Object { "$($_.tipo): $($_.nombre)" }) -join " | "
+if (-not $perifResumen) { $perifResumen = "Estándar / Integrado" }
+Write-Host "  - PERIFERICOS:      $perifResumen" -ForegroundColor White
 Write-Host "  - HOSTNAME / IP:    $hostname ($ipPrincipal)" -ForegroundColor White
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "[+] Copia local guardada en: $filePath" -ForegroundColor DarkGray
