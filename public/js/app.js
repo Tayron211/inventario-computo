@@ -176,7 +176,7 @@ function updateAuthUI() {
   if (sessionUserName) {
     sessionUserName.innerHTML = role === 'operador' 
       ? `<b>${escapeHTML(username)}</b> <span class="role-sublabel">Operador</span>` 
-      : `<b>${escapeHTML(username)}</b> <span class="role-sublabel">Admin</span>`;
+      : `<b>${escapeHTML(username)}</b>`;
   }
   
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
