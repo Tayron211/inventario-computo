@@ -308,15 +308,19 @@ function saveLocalFile(data) {
   }
 }
 
+const PROPRIETARY_BRANDS_PATTERN = /logitech|hp|dell|lenovo|microsoft|corsair|razer|hyperx|kingston|redragon|genius|asus|rog|samsung|lg|aoc|viewsonic|jbl|sony|jabra|poly|plantronics|steelseries|trust|targus|kensington|benq|philips|epson|canon|brother|apple|huawei|xiaomi|wacom|a4tech|bloody|cougar|audio-technica|sennheiser|epos|t-force|crucial|western digital|seagate|sandisk|teraware|halion|micronics|antryx|marvo|gamemax|fantech|vsg|evga|msi|gigabyte|zotac|elgato|anker|ugreen|baseus|startech|belkin|kyocera|ricoh|zebra/i;
 const isInternalAudioDriver = /realtek|intel.*audio|nvidia.*audio|amd.*audio|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
-const isGenericStub = /dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|usb input device|hid keyboard device|hid-compliant/i;
+const isGenericStub = /dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|dispositivo port[aá]til|controles de radio|dispositivo de almacenamiento|ideacamera|usb input device|hid keyboard device|hid-compliant/i;
 
 function normalizeItem(item) {
   if (!item) return item;
   if (item.perifericos && Array.isArray(item.perifericos)) {
     item.perifericos = item.perifericos.filter(p => {
-      const n = (p.nombre || p.tipo || '').trim();
-      return n && !isInternalAudioDriver.test(n) && !isGenericStub.test(n);
+      const n = (p.nombre || '').trim();
+      const f = (p.fabricante || '').trim();
+      if (!n || isInternalAudioDriver.test(n) || isGenericStub.test(n)) return false;
+      if (f && (isInternalAudioDriver.test(f) || isGenericStub.test(f))) return false;
+      return PROPRIETARY_BRANDS_PATTERN.test(n) || PROPRIETARY_BRANDS_PATTERN.test(f) || p.es_marca === true;
     });
   }
   return item;
@@ -821,8 +825,11 @@ app.post('/api/agent/report', (req, res) => {
     almacenamiento: payload.almacenamiento || [],
     monitores: payload.monitores || [],
     perifericos: (payload.perifericos || []).filter(p => {
-      const name = (p.nombre || p.tipo || '').trim();
-      return name && !/^(dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|usb input device|hid keyboard device|hid-compliant device|hid-compliant mouse)$/i.test(name);
+      const n = (p.nombre || '').trim();
+      const f = (p.fabricante || '').trim();
+      if (!n || isInternalAudioDriver.test(n) || isGenericStub.test(n)) return false;
+      if (f && (isInternalAudioDriver.test(f) || isGenericStub.test(f))) return false;
+      return PROPRIETARY_BRANDS_PATTERN.test(n) || PROPRIETARY_BRANDS_PATTERN.test(f) || p.es_marca === true;
     }),
     hostname: recordHostname,
     usuario_actual: payload.usuario_actual || '',

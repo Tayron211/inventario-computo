@@ -163,20 +163,20 @@ if ($monitores.Count -eq 0) {
     }
 }
 
-# 8. PERIFÉRICOS IDENTIFICADOS CON DRIVER/MARCA (EXCLUYENDO CHIPSETS DE AUDIO Y ENTRADAS GENÉRICAS)
+# 8. PERIFÉRICOS PROPIETARIOS / DE MARCA CON DRIVER DEL FABRICANTE
 $perifericosDetalles = @()
-$marcasReconocidasPattern = 'Logitech|HP|Dell|Lenovo|Microsoft|Corsair|Razer|HyperX|Kingston|Redragon|Genius|ASUS|Samsung|LG|AOC|ViewSonic|JBL|Sony|Jabra|Poly|Plantronics|SteelSeries|Trust|Targus|Kensington|BenQ|Philips|Epson|Canon|Brother|Apple|Huawei|Xiaomi|Wacom|A4Tech|Cougar|Audio-Technica|Sennheiser'
+$marcasReconocidasPattern = 'Logitech|HP|Dell|Lenovo|Microsoft|Corsair|Razer|HyperX|Kingston|Redragon|Genius|ASUS|ROG|Samsung|LG|AOC|ViewSonic|JBL|Sony|Jabra|Poly|Plantronics|SteelSeries|Trust|Targus|Kensington|BenQ|Philips|Epson|Canon|Brother|Apple|Huawei|Xiaomi|Wacom|A4Tech|Bloody|Cougar|Audio-Technica|Sennheiser|EPOS|T-Force|Crucial|Western Digital|Seagate|SanDisk|Teraware|Halion|Micronics|Antryx|Marvo|Gamemax|Fantech|VSG|EVGA|MSI|Gigabyte|ZOTAC|Elgato|Anker|Ugreen|Baseus|StarTech|Belkin|Kyocera|Ricoh|Zebra'
 
-# Excluir drivers de audio interno de placa base y adaptadores genéricos de Windows
+# Excluir drivers de audio interno, adaptadores genéricos de Windows y stubs virtuales
 $audioChipsetsExcluir = 'Realtek|High Definition Audio|Intel|NVIDIA|AMD|Sonido Intel|Dispositivo de audio|Audio digital|Mezcla est|Altavoces|Micr[oó]fono|Audio Endpoint|Audio del sistema|Controlador de audio|Wave|Stereo Mix|S/PDIF'
-$genericosExcluir = 'Dispositivo de entrada USB|Dispositivo de teclado HID|Dispositivo de mouse HID|Dispositivo compatible con HID|Dispositivo de control|Dispositivo definido por el proveedor|Dispositivo del sistema|Dispositivo de interfaz|USB Input Device|HID Keyboard Device|HID-compliant device|HID-compliant mouse|HID-compliant|PS/2 Compatible|Dispositivo de almacenamiento'
+$genericosExcluir = 'Dispositivo de entrada USB|Dispositivo de teclado HID|Dispositivo de mouse HID|Dispositivo compatible con HID|Dispositivo de control|Dispositivo definido por el proveedor|Dispositivo del sistema|Dispositivo de interfaz|USB Input Device|HID Keyboard Device|HID-compliant device|HID-compliant mouse|HID-compliant|PS/2 Compatible|Dispositivo de almacenamiento|IdeaCamera|Virtual|Generic|Standard|Controlador|Composite'
 
 $pnpPeripherals = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue | Where-Object { 
     $_.Name -and $_.Status -eq 'OK' -and 
     ($_.PNPClass -in @('Keyboard', 'Mouse', 'USB', 'HIDClass', 'Camera', 'Image')) -and
     $_.Name -notmatch $genericosExcluir -and
     $_.Name -notmatch $audioChipsetsExcluir -and
-    $_.Name -notmatch 'Hub|Controlador|Root|Generic|Host|Standard|Virtual|Software|Composite|Intel|NVIDIA High Definition'
+    $_.Name -notmatch 'Hub|Root|Host|Standard|Virtual|Software|Composite'
 }
 
 $seenPeripherals = @{}
@@ -184,8 +184,17 @@ $seenPeripherals = @{}
 foreach ($dev in $pnpPeripherals) {
     $devName = ($dev.Name -replace '\s+', ' ').Trim()
     $devClass = $dev.PNPClass
+    $devManuf = if ($dev.Manufacturer) { ($dev.Manufacturer -replace '\s+', ' ').Trim() } else { '' }
     
+    # Descartar si el nombre o fabricante es genérico
     if (-not $devName -or $devName -match $genericosExcluir -or $devName -match $audioChipsetsExcluir) { continue }
+    if ($devManuf -match '^\(Dispositivos estándar|^Microsoft$|^Generic$|^Standard$' -and $devName -match $genericosExcluir) { continue }
+
+    # Verificar si es de marca comercial/propietaria reconocida
+    $esMarcaReconocida = ($devName -match $marcasReconocidasPattern) -or ($devManuf -and $devManuf -match $marcasReconocidasPattern)
+    
+    # REGLA ESTRICTA: Omitir cualquier driver genérico. Solo registrar si es propietario/marca reconocida
+    if (-not $esMarcaReconocida) { continue }
 
     # Determinar tipo amigable
     $tipo = "Dispositivo USB"
@@ -194,18 +203,15 @@ foreach ($dev in $pnpPeripherals) {
     elseif ($devClass -eq "Camera" -or $devName -match "Webcam|Camera|Cámara") { $tipo = "Cámara Web" }
     elseif ($devName -match "Headset|Aud[ií]fono|Auricular|Diadema|HyperX|Jabra|Poly|Plantronics|Kraken|Void|Quantum|Sennheiser") { $tipo = "Audífonos / Diadema" }
 
-    # Verificar si es de marca comercial reconocida
-    $esMarcaReconocida = $devName -match $marcasReconocidasPattern -or ($dev.Manufacturer -and $dev.Manufacturer -match $marcasReconocidasPattern)
-    
     $uniqueKey = "$tipo-$devName"
     if (-not $seenPeripherals.ContainsKey($uniqueKey)) {
         $seenPeripherals[$uniqueKey] = $true
         $perifericosDetalles += @{
             tipo = $tipo
             nombre = $devName
-            fabricante = $dev.Manufacturer
+            fabricante = if ($devManuf) { $devManuf } else { "OEM / Propietario" }
             id_hardware = $dev.DeviceID
-            es_marca = [bool]$esMarcaReconocida
+            es_marca = $true
         }
     }
 }
