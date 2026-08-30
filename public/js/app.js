@@ -169,13 +169,13 @@ function updateAuthUI() {
   
   if (sessionUserIcon) {
     sessionUserIcon.innerHTML = role === 'operador' 
-      ? `<i class="fa-solid fa-user-lock"></i>` 
+      ? `<i class="fa-solid fa-eye text-cyan"></i>` 
       : `<i class="fa-solid fa-crown gold-crown-icon"></i>`;
   }
   
   if (sessionUserName) {
     sessionUserName.innerHTML = role === 'operador' 
-      ? `<b>${escapeHTML(username)}</b> <span class="role-sublabel">Operador</span>` 
+      ? `<b>OBSERVADOR</b>` 
       : `<b>${escapeHTML(username)}</b>`;
   }
   

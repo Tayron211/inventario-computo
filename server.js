@@ -381,7 +381,7 @@ function getServerUrl(req) {
 // Credenciales de acceso y roles del sistema
 const USERS = [
   { username: 'admin', password: 'S0p0rt3pp', role: 'admin', displayName: 'Administrador' },
-  { username: 'user', password: 'solover', role: 'operador', displayName: 'Operador' }
+  { username: 'user', password: 'solover', role: 'operador', displayName: 'Observador' }
 ];
 
 // Obtener rol del usuario actual basado en el token Bearer
