@@ -308,20 +308,24 @@ function saveLocalFile(data) {
   }
 }
 
+const GENERIC_DRIVER_EXCLUDE_REGEX = /compatible con hid|hid-compliant|dispositivo de |dispositivo del |dispositivo definido|dispositivo port[aá]til|controles de radio|dispositivo de interfaz|usb input device|hid keyboard|hid mouse|touchpad|trackpoint|button driver|wireless button|ideacamera|virtual|composite|dispositivo del sistema|realtek|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
+
 const PROPRIETARY_BRANDS_PATTERN = /logitech|hp|dell|lenovo|microsoft|corsair|razer|hyperx|kingston|redragon|genius|asus|rog|samsung|lg|aoc|viewsonic|jbl|sony|jabra|poly|plantronics|steelseries|trust|targus|kensington|benq|philips|epson|canon|brother|apple|huawei|xiaomi|wacom|a4tech|bloody|cougar|audio-technica|sennheiser|epos|t-force|crucial|western digital|seagate|sandisk|teraware|halion|micronics|antryx|marvo|gamemax|fantech|vsg|evga|msi|gigabyte|zotac|elgato|anker|ugreen|baseus|startech|belkin|kyocera|ricoh|zebra/i;
-const isInternalAudioDriver = /realtek|intel.*audio|nvidia.*audio|amd.*audio|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
-const isGenericStub = /dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|dispositivo port[aá]til|controles de radio|dispositivo de almacenamiento|ideacamera|usb input device|hid keyboard device|hid-compliant/i;
+
+function isValidPeripheral(p) {
+  if (!p) return false;
+  const n = (p.nombre || '').trim();
+  const f = (p.fabricante || '').trim();
+  const t = (p.tipo || '').trim();
+  const full = `${f} ${n} ${t}`.trim();
+  if (!n || GENERIC_DRIVER_EXCLUDE_REGEX.test(full)) return false;
+  return PROPRIETARY_BRANDS_PATTERN.test(full) || p.es_marca === true;
+}
 
 function normalizeItem(item) {
   if (!item) return item;
   if (item.perifericos && Array.isArray(item.perifericos)) {
-    item.perifericos = item.perifericos.filter(p => {
-      const n = (p.nombre || '').trim();
-      const f = (p.fabricante || '').trim();
-      if (!n || isInternalAudioDriver.test(n) || isGenericStub.test(n)) return false;
-      if (f && (isInternalAudioDriver.test(f) || isGenericStub.test(f))) return false;
-      return PROPRIETARY_BRANDS_PATTERN.test(n) || PROPRIETARY_BRANDS_PATTERN.test(f) || p.es_marca === true;
-    });
+    item.perifericos = item.perifericos.filter(isValidPeripheral);
   }
   return item;
 }
@@ -1235,14 +1239,8 @@ app.get('/api/export-excel', async (req, res) => {
         });
       });
 
-      // 3. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS (Filtrando drivers de audio y stubs genéricos)
-      const isInternalAudioDriver = /realtek|intel.*audio|nvidia.*audio|amd.*audio|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
-      const isGenericStub = /dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|usb input device|hid keyboard device|hid-compliant/i;
-
-      const validPerifericos = (item.perifericos || []).filter(p => {
-        const n = (p.nombre || p.tipo || '').toLowerCase();
-        return !isInternalAudioDriver.test(n) && !isGenericStub.test(n);
-      });
+      // 3. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS (Solo hardware propietario/marca)
+      const validPerifericos = (item.perifericos || []).filter(isValidPeripheral);
 
       validPerifericos.forEach(p => {
         const pName = toUpper(p.nombre || p.tipo || '');

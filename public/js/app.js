@@ -938,12 +938,9 @@ function renderTable(items) {
     }
 
     // Periféricos
-    if (item.perifericos && item.perifericos.length > 0) {
-      item.perifericos.forEach(p => {
-        const pName = (p.nombre || p.tipo || '').trim();
-        if (/^(dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|usb input device|hid keyboard device|hid-compliant device|hid-compliant mouse)$/i.test(pName)) {
-          return;
-        }
+    const validPerifs = (item.perifericos || []).filter(isValidProprietaryPeripheral);
+    if (validPerifs.length > 0) {
+      validPerifs.forEach(p => {
         const pTipoIcon = (p.tipo && p.tipo.toLowerCase().includes('mouse')) ? 'fa-mouse' : ((p.tipo && p.tipo.toLowerCase().includes('teclado')) ? 'fa-keyboard' : 'fa-plug');
         perifericosListHtml += `<div class="hw-item-line"><i class="fa-solid ${pTipoIcon}"></i> ${highlightMatch(p.nombre || p.tipo, currentSearchQuery)}</div>`;
       });
@@ -1837,16 +1834,29 @@ function filterByStatus(statusName) {
   if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
 }
 
+const GENERIC_DRIVER_EXCLUDE_REGEX = /compatible con hid|hid-compliant|dispositivo de |dispositivo del |dispositivo definido|dispositivo port[aá]til|controles de radio|dispositivo de interfaz|usb input device|hid keyboard|hid mouse|touchpad|trackpoint|button driver|wireless button|ideacamera|virtual|composite|dispositivo del sistema|realtek|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
+
 const RECOGNIZED_PERIPHERAL_BRANDS = [
   'Logitech', 'HP', 'Dell', 'Lenovo', 'Microsoft', 'Corsair', 'Razer', 
   'HyperX', 'Kingston', 'Redragon', 'Genius', 'ASUS', 'Samsung', 'LG', 
   'AOC', 'ViewSonic', 'JBL', 'Sony', 'Jabra', 'Poly', 'Plantronics', 
   'SteelSeries', 'Trust', 'Targus', 'Kensington', 'BenQ', 'Philips', 
-  'Epson', 'Canon', 'Brother', 'Apple', 'Huawei', 'Xiaomi', 'Wacom', 'A4Tech', 'Cougar'
+  'Epson', 'Canon', 'Brother', 'Apple', 'Huawei', 'Xiaomi', 'Wacom', 'A4Tech', 'Cougar',
+  'Teraware', 'Halion', 'Micronics', 'Antryx', 'Marvo', 'Gamemax', 'Fantech', 'VSG'
 ];
+
+function isValidProprietaryPeripheral(p) {
+  if (!p) return false;
+  const rawName = (typeof p === 'string' ? p : `${p.fabricante || ''} ${p.nombre || ''} ${p.modelo || ''} ${p.tipo || ''}`).trim();
+  if (!rawName || GENERIC_DRIVER_EXCLUDE_REGEX.test(rawName)) return false;
+  return getPeripheralBrandInfo(p).isRecognized || p.es_marca === true;
+}
 
 function getPeripheralBrandInfo(p) {
   const rawName = (typeof p === 'string' ? p : `${p.fabricante || ''} ${p.nombre || ''} ${p.modelo || ''}`).trim();
+  if (GENERIC_DRIVER_EXCLUDE_REGEX.test(rawName)) {
+    return { brand: null, isRecognized: false, fullName: rawName };
+  }
   for (const brand of RECOGNIZED_PERIPHERAL_BRANDS) {
     const regex = new RegExp(`\\b${brand}\\b`, 'i');
     if (regex.test(rawName)) {
