@@ -4,6 +4,11 @@
 
 param(
     [string]$ServerUrl = "https://ivt.onrender.com",
+    # Ambientes disponibles:
+    # Bloque A: Topico, Lactario, Guarderia, Psicopedagogico, ATP, Admision, Finanzas, Defensoria, Garita
+    # Bloque B: Auditorio, Direccion, Counter, GTH, Coordinacion Academica, Retencion, SSOMA, DTC, Sala de Reuniones, Comedor
+    # Bloque C: Vida Universitaria, Promocion, Marketing, Infraestructura, Logistica, Sala Gamer
+    # General: CAE
     [string]$Ubicacion = "CAE"
 )
 

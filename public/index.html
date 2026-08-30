@@ -679,42 +679,42 @@
 
             <div class="form-group">
               <label for="formUbicacion">UBICACIÓN / AMBIENTE *</label>
-              <input type="text" id="formUbicacion" list="ambientesList" placeholder="Selecciona o escribe el ambiente..." class="form-control" required>
-              <datalist id="ambientesList">
-                <!-- Bloque A - Administrativo -->
-                <option value="Tópico">🏢 Bloque A - Tópico</option>
-                <option value="Lactario">🏢 Bloque A - Lactario</option>
-                <option value="Guardería">🏢 Bloque A - Guardería</option>
-                <option value="Psicopedagógico">🏢 Bloque A - Psicopedagógico</option>
-                <option value="ATP">🏢 Bloque A - ATP</option>
-                <option value="Admisión">🏢 Bloque A - Admisión</option>
-                <option value="Finanzas">🏢 Bloque A - Finanzas</option>
-                <option value="Defensoría">🏢 Bloque A - Defensoría</option>
-                <option value="Garita">🏢 Bloque A - Garita</option>
-
-                <!-- Bloque B - Administrativo -->
-                <option value="Auditorio">🏢 Bloque B - Auditorio</option>
-                <option value="Dirección">🏢 Bloque B - Dirección</option>
-                <option value="Counter">🏢 Bloque B - Counter</option>
-                <option value="GTH">🏢 Bloque B - GTH</option>
-                <option value="Coordinación Académica">🏢 Bloque B - Coordinación Académica</option>
-                <option value="Retención">🏢 Bloque B - Retención</option>
-                <option value="SSOMA">🏢 Bloque B - SSOMA</option>
-                <option value="DTC">🏢 Bloque B - DTC</option>
-                <option value="Sala de Reuniones">🏢 Bloque B - Sala de Reuniones</option>
-                <option value="Comedor">🏢 Bloque B - Comedor</option>
-
-                <!-- Bloque C - Administrativo -->
-                <option value="Vida Universitaria">🏢 Bloque C - Vida Universitaria</option>
-                <option value="Promoción">🏢 Bloque C - Promoción</option>
-                <option value="Marketing">🏢 Bloque C - Marketing</option>
-                <option value="Infraestructura">🏢 Bloque C - Infraestructura</option>
-                <option value="Logística">🏢 Bloque C - Logística</option>
-                <option value="Sala Gamer">🏢 Bloque C - Sala Gamer</option>
-
-                <!-- General -->
-                <option value="CAE">🏢 CAE - Centro de Atención</option>
-              </datalist>
+              <select id="formUbicacion" class="form-control" required>
+                <optgroup label="🏢 Bloque A (Área Administrativa)">
+                  <option value="Tópico">📍 Tópico</option>
+                  <option value="Lactario">📍 Lactario</option>
+                  <option value="Guardería">📍 Guardería</option>
+                  <option value="Psicopedagógico">📍 Psicopedagógico</option>
+                  <option value="ATP">📍 ATP</option>
+                  <option value="Admisión">📍 Admisión</option>
+                  <option value="Finanzas">📍 Finanzas</option>
+                  <option value="Defensoría">📍 Defensoría</option>
+                  <option value="Garita">📍 Garita</option>
+                </optgroup>
+                <optgroup label="🏢 Bloque B (Área Administrativa)">
+                  <option value="Auditorio">📍 Auditorio</option>
+                  <option value="Dirección">📍 Dirección</option>
+                  <option value="Counter">📍 Counter</option>
+                  <option value="GTH">📍 GTH</option>
+                  <option value="Coordinación Académica">📍 Coordinación Académica</option>
+                  <option value="Retención">📍 Retención</option>
+                  <option value="SSOMA">📍 SSOMA</option>
+                  <option value="DTC">📍 DTC</option>
+                  <option value="Sala de Reuniones">📍 Sala de Reuniones</option>
+                  <option value="Comedor">📍 Comedor</option>
+                </optgroup>
+                <optgroup label="🏢 Bloque C (Área Administrativa)">
+                  <option value="Vida Universitaria">📍 Vida Universitaria</option>
+                  <option value="Promoción">📍 Promoción</option>
+                  <option value="Marketing">📍 Marketing</option>
+                  <option value="Infraestructura">📍 Infraestructura</option>
+                  <option value="Logística">📍 Logística</option>
+                  <option value="Sala Gamer">📍 Sala Gamer</option>
+                </optgroup>
+                <optgroup label="🏢 General / Atención">
+                  <option value="CAE" selected>📍 CAE</option>
+                </optgroup>
+              </select>
             </div>
 
             <div class="form-group full-width">
