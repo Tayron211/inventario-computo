@@ -1271,25 +1271,24 @@ app.get('/api/export-excel', async (req, res) => {
       });
     });
 
-    // Aplicar estilos a todas las hojas creadas
+    // Aplicar estilos y auto-ajustar anchos a todas las hojas creadas
     [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras, wsGeneral].forEach(ws => {
       styleDataRows(ws);
-    });
-
-    // Auto-ajustar el ancho de cada columna al contenido real completo (mínimo 18 dígitos, adaptado para que todo entre en 1 sola línea)
-    worksheet.columns.forEach((column) => {
-      let maxLen = 0;
-      column.eachCell({ includeEmpty: true }, (cell) => {
-        const val = cell.value ? cell.value.toString() : '';
-        const lines = val.split(/\r\n|\r|\n/);
-        lines.forEach(line => {
-          if (line.length > maxLen) {
-            maxLen = line.length;
-          }
+      if (ws.columns) {
+        ws.columns.forEach((column) => {
+          let maxLen = 0;
+          column.eachCell({ includeEmpty: true }, (cell) => {
+            const val = cell.value ? cell.value.toString() : '';
+            const lines = val.split(/\r\n|\r|\n/);
+            lines.forEach(line => {
+              if (line.length > maxLen) {
+                maxLen = line.length;
+              }
+            });
+          });
+          column.width = Math.min(Math.max(maxLen + 4, 18), 65);
         });
-      });
-      // El ancho se adapta al contenido más largo (+4 caracteres de margen), con un mínimo de 18 dígitos y hasta 65
-      column.width = Math.min(Math.max(maxLen + 4, 18), 65);
+      }
     });
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
