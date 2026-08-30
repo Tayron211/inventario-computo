@@ -351,6 +351,12 @@ function getServerUrl(req) {
 // RUTAS DE LA API REST
 // -------------------------------------------------------------
 
+// Credenciales de acceso y roles del sistema
+const USERS = [
+  { username: 'admin', password: 'S0p0rt3pp', role: 'admin', displayName: 'Administrador' },
+  { username: 'user', password: 'solover', role: 'operador', displayName: 'Operador' }
+];
+
 // Obtener rol del usuario actual basado en el token Bearer
 function getUserRole(req) {
   const authHeader = req.headers['authorization'];
