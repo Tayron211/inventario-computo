@@ -388,7 +388,8 @@ function getLocalIPs() {
 
 function getServerUrl(req) {
   if (req && req.headers && req.headers.host) {
-    const proto = req.headers['x-forwarded-proto'] || 'http';
+    const isRender = req.headers.host.includes('.onrender.com');
+    const proto = isRender ? 'https' : (req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http'));
     return `${proto}://${req.headers.host}`;
   }
   const ips = getLocalIPs();
