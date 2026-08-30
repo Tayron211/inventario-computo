@@ -348,6 +348,30 @@ function initEventListeners() {
     equipmentForm.addEventListener('submit', handleFormSubmit);
   }
 
+  // Selectores dependientes de Bloque y Aula/Ambiente
+  const formBloque = document.getElementById('formBloque');
+  const formUbicacion = document.getElementById('formUbicacion');
+  const formUbicacionCustom = document.getElementById('formUbicacionCustom');
+
+  if (formBloque) {
+    formBloque.addEventListener('change', (e) => {
+      populateFormAmbientes(e.target.value);
+    });
+  }
+
+  if (formUbicacion) {
+    formUbicacion.addEventListener('change', (e) => {
+      if (e.target.value === '__custom__') {
+        if (formUbicacionCustom) {
+          formUbicacionCustom.style.display = 'block';
+          formUbicacionCustom.focus();
+        }
+      } else {
+        if (formUbicacionCustom) formUbicacionCustom.style.display = 'none';
+      }
+    });
+  }
+
   // Botón Escanear con Cámara en Formulario
   const btnScanSerialCam = document.getElementById('btnScanSerialCam');
   if (btnScanSerialCam) {
@@ -1071,6 +1095,74 @@ function closeModal(modalId) {
   if (modal) modal.classList.remove('active');
 }
 
+function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
+  const formUbicacion = document.getElementById('formUbicacion');
+  const formUbicacionCustom = document.getElementById('formUbicacionCustom');
+  if (!formUbicacion) return;
+
+  const bloquesMap = {
+    'Bloque A (Aulas y Laboratorios)': [
+      'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204', 'Aula 205', 'Aula 206', 
+      '207 (Sala SUM)', 'Aula 301', 'Aula 302', 'Aula 303', 'Laboratorio 304', 
+      'Laboratorio 305', 'Aula 306', 'Centro de Información', 'Aula 401', 
+      'Aula 402', 'Aula 403', 'Aula 404', 'Aula 405', 'Aula 406', 'Aula 407', 
+      'Aula 408', 'Aula 409', 'Aula 501', 'Aula 502', 'Aula 503', 'Aula 504', 
+      'Aula 505', 'Aula 506', 'Aula 507', 'Aula 508', 'Aula 509', 'Aula 601', 
+      'Aula 602', 'Aula 603', 'Aula 604', 'Aula 605', 'Aula 606', 'Aula 607', 
+      'Aula 608', 'Aula 609'
+    ],
+    'Bloque A (Área Administrativa)': [
+      'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+      'Admisión', 'Finanzas', 'Defensoría', 'Garita'
+    ],
+    'Bloque B (Área Administrativa)': [
+      'Auditorio', 'Dirección', 'Counter', 'GTH', 'Coordinación Académica', 
+      'Retención', 'SSOMA', 'DTC', 'Sala de Reuniones', 'Comedor'
+    ],
+    'Bloque C (Área Administrativa)': [
+      'Vida Universitaria', 'Promoción', 'Marketing', 'Infraestructura', 
+      'Logística', 'Sala Gamer'
+    ],
+    'General / Atención': [
+      'CAE'
+    ]
+  };
+
+  if (selectedBloque === 'Personalizado') {
+    formUbicacion.style.display = 'none';
+    if (formUbicacionCustom) {
+      formUbicacionCustom.style.display = 'block';
+      formUbicacionCustom.required = true;
+      if (currentAmbienteValue) formUbicacionCustom.value = currentAmbienteValue;
+    }
+    return;
+  }
+
+  formUbicacion.style.display = 'block';
+  if (formUbicacionCustom) {
+    formUbicacionCustom.style.display = 'none';
+    formUbicacionCustom.required = false;
+  }
+
+  const list = bloquesMap[selectedBloque] || [];
+  formUbicacion.innerHTML = list.map(amb => {
+    const icon = amb.startsWith('Aula') ? '🎓' : (amb.startsWith('Lab') ? '🔬' : (amb.startsWith('Centro') ? '📚' : '📍'));
+    return `<option value="${escapeHTML(amb)}">${icon} ${escapeHTML(amb)}</option>`;
+  }).join('') + '<option value="__custom__">✏️ Escribir otro ambiente...</option>';
+
+  if (currentAmbienteValue && list.includes(currentAmbienteValue)) {
+    formUbicacion.value = currentAmbienteValue;
+  } else if (currentAmbienteValue) {
+    formUbicacion.value = '__custom__';
+    if (formUbicacionCustom) {
+      formUbicacionCustom.style.display = 'block';
+      formUbicacionCustom.value = currentAmbienteValue;
+    }
+  } else if (list.length > 0) {
+    formUbicacion.value = list[0];
+  }
+}
+
 function openManualCreateModal() {
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
   if (isOperador) {
@@ -1080,6 +1172,13 @@ function openManualCreateModal() {
   document.getElementById('modalFormTitle').textContent = 'Registrar Nuevo Equipo de Cómputo';
   document.getElementById('formEquipmentId').value = '';
   equipmentForm.reset();
+
+  const formBloque = document.getElementById('formBloque');
+  if (formBloque) {
+    formBloque.value = 'Bloque A (Aulas y Laboratorios)';
+    populateFormAmbientes('Bloque A (Aulas y Laboratorios)', 'Aula 201');
+  }
+
   openModal('manualModal');
 }
 
@@ -1115,7 +1214,23 @@ function editEquipment(id) {
 
   document.getElementById('formHostname').value = item.hostname || '';
   document.getElementById('formUsuario').value = item.usuario_actual || '';
-  document.getElementById('formUbicacion').value = item.ubicacion || '';
+
+  const currentUbicacion = item.ubicacion || 'CAE';
+  const blockBadge = getBlockBadgeForAmbiente(currentUbicacion);
+  let matchingBloque = 'General / Atención';
+
+  if (blockBadge.class === 'block-a-aulas') matchingBloque = 'Bloque A (Aulas y Laboratorios)';
+  else if (blockBadge.class === 'block-a') matchingBloque = 'Bloque A (Área Administrativa)';
+  else if (blockBadge.class === 'block-b') matchingBloque = 'Bloque B (Área Administrativa)';
+  else if (blockBadge.class === 'block-c') matchingBloque = 'Bloque C (Área Administrativa)';
+  else matchingBloque = 'General / Atención';
+
+  const formBloque = document.getElementById('formBloque');
+  if (formBloque) {
+    formBloque.value = matchingBloque;
+    populateFormAmbientes(matchingBloque, currentUbicacion);
+  }
+
   document.getElementById('formNotas').value = item.notas || '';
 
   closeModal('detailsModal');
@@ -1127,6 +1242,14 @@ async function handleFormSubmit(e) {
   e.preventDefault();
 
   const id = document.getElementById('formEquipmentId').value;
+  const formBloqueVal = document.getElementById('formBloque') ? document.getElementById('formBloque').value : '';
+  let finalUbicacion = document.getElementById('formUbicacion') ? document.getElementById('formUbicacion').value : '';
+  const formUbicacionCustom = document.getElementById('formUbicacionCustom');
+
+  if (finalUbicacion === '__custom__' || formBloqueVal === 'Personalizado') {
+    finalUbicacion = (formUbicacionCustom ? formUbicacionCustom.value.trim() : '') || 'Sin Asignar';
+  }
+
   const payload = {
     modelo: document.getElementById('formModelo').value,
     numero_serie: document.getElementById('formNumeroSerie').value,
@@ -1139,7 +1262,7 @@ async function handleFormSubmit(e) {
     almacenamiento_resumen: document.getElementById('formAlmacenamiento').value,
     hostname: document.getElementById('formHostname').value,
     usuario_actual: document.getElementById('formUsuario').value,
-    ubicacion: document.getElementById('formUbicacion').value,
+    ubicacion: finalUbicacion,
     notas: document.getElementById('formNotas').value
   };
 

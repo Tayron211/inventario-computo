@@ -678,86 +678,23 @@
             </div>
 
             <div class="form-group">
-              <label for="formUbicacion">UBICACIÓN / AMBIENTE *</label>
-              <select id="formUbicacion" class="form-control" required>
-                <optgroup label="🏢 Bloque A (Área Administrativa)">
-                  <option value="Tópico">📍 Tópico</option>
-                  <option value="Lactario">📍 Lactario</option>
-                  <option value="Guardería">📍 Guardería</option>
-                  <option value="Psicopedagógico">📍 Psicopedagógico</option>
-                  <option value="ATP">📍 ATP</option>
-                  <option value="Admisión">📍 Admisión</option>
-                  <option value="Finanzas">📍 Finanzas</option>
-                  <option value="Defensoría">📍 Defensoría</option>
-                  <option value="Garita">📍 Garita</option>
-                </optgroup>
-                <optgroup label="🎓 Bloque A (Aulas y Laboratorios)">
-                  <option value="Aula 201">🎓 Aula 201</option>
-                  <option value="Aula 202">🎓 Aula 202</option>
-                  <option value="Aula 203">🎓 Aula 203</option>
-                  <option value="Aula 204">🎓 Aula 204</option>
-                  <option value="Aula 205">🎓 Aula 205</option>
-                  <option value="Aula 206">🎓 Aula 206</option>
-                  <option value="207 (Sala SUM)">🎓 207 (Sala SUM)</option>
-                  <option value="Aula 301">🎓 Aula 301</option>
-                  <option value="Aula 302">🎓 Aula 302</option>
-                  <option value="Aula 303">🎓 Aula 303</option>
-                  <option value="Laboratorio 304">🔬 Laboratorio 304</option>
-                  <option value="Laboratorio 305">🔬 Laboratorio 305</option>
-                  <option value="Aula 306">🎓 Aula 306</option>
-                  <option value="Centro de Información">📚 Centro de Información</option>
-                  <option value="Aula 401">🎓 Aula 401</option>
-                  <option value="Aula 402">🎓 Aula 402</option>
-                  <option value="Aula 403">🎓 Aula 403</option>
-                  <option value="Aula 404">🎓 Aula 404</option>
-                  <option value="Aula 405">🎓 Aula 405</option>
-                  <option value="Aula 406">🎓 Aula 406</option>
-                  <option value="Aula 407">🎓 Aula 407</option>
-                  <option value="Aula 408">🎓 Aula 408</option>
-                  <option value="Aula 409">🎓 Aula 409</option>
-                  <option value="Aula 501">🎓 Aula 501</option>
-                  <option value="Aula 502">🎓 Aula 502</option>
-                  <option value="Aula 503">🎓 Aula 503</option>
-                  <option value="Aula 504">🎓 Aula 504</option>
-                  <option value="Aula 505">🎓 Aula 505</option>
-                  <option value="Aula 506">🎓 Aula 506</option>
-                  <option value="Aula 507">🎓 Aula 507</option>
-                  <option value="Aula 508">🎓 Aula 508</option>
-                  <option value="Aula 509">🎓 Aula 509</option>
-                  <option value="Aula 601">🎓 Aula 601</option>
-                  <option value="Aula 602">🎓 Aula 602</option>
-                  <option value="Aula 603">🎓 Aula 603</option>
-                  <option value="Aula 604">🎓 Aula 604</option>
-                  <option value="Aula 605">🎓 Aula 605</option>
-                  <option value="Aula 606">🎓 Aula 606</option>
-                  <option value="Aula 607">🎓 Aula 607</option>
-                  <option value="Aula 608">🎓 Aula 608</option>
-                  <option value="Aula 609">🎓 Aula 609</option>
-                </optgroup>
-                <optgroup label="🏢 Bloque B (Área Administrativa)">
-                  <option value="Auditorio">📍 Auditorio</option>
-                  <option value="Dirección">📍 Dirección</option>
-                  <option value="Counter">📍 Counter</option>
-                  <option value="GTH">📍 GTH</option>
-                  <option value="Coordinación Académica">📍 Coordinación Académica</option>
-                  <option value="Retención">📍 Retención</option>
-                  <option value="SSOMA">📍 SSOMA</option>
-                  <option value="DTC">📍 DTC</option>
-                  <option value="Sala de Reuniones">📍 Sala de Reuniones</option>
-                  <option value="Comedor">📍 Comedor</option>
-                </optgroup>
-                <optgroup label="🏢 Bloque C (Área Administrativa)">
-                  <option value="Vida Universitaria">📍 Vida Universitaria</option>
-                  <option value="Promoción">📍 Promoción</option>
-                  <option value="Marketing">📍 Marketing</option>
-                  <option value="Infraestructura">📍 Infraestructura</option>
-                  <option value="Logística">📍 Logística</option>
-                  <option value="Sala Gamer">📍 Sala Gamer</option>
-                </optgroup>
-                <optgroup label="🏢 General / Atención">
-                  <option value="CAE" selected>📍 CAE</option>
-                </optgroup>
+              <label for="formBloque">1. BLOQUE / ÁREA PRINCIPAL *</label>
+              <select id="formBloque" class="form-control">
+                <option value="Bloque A (Aulas y Laboratorios)">🎓 Bloque A - Aulas y Laboratorios</option>
+                <option value="Bloque A (Área Administrativa)">🏢 Bloque A - Área Administrativa</option>
+                <option value="Bloque B (Área Administrativa)">🏢 Bloque B - Área Administrativa</option>
+                <option value="Bloque C (Área Administrativa)">🏢 Bloque C - Área Administrativa</option>
+                <option value="General / Atención" selected>🏢 General / Centro de Atención (CAE)</option>
+                <option value="Personalizado">✏️ Otro Bloque / Personalizado</option>
               </select>
+            </div>
+
+            <div class="form-group">
+              <label for="formUbicacion">2. AULA / AMBIENTE ESPECÍFICO *</label>
+              <select id="formUbicacion" class="form-control" required>
+                <option value="CAE" selected>📍 CAE</option>
+              </select>
+              <input type="text" id="formUbicacionCustom" placeholder="Escribe el nombre del aula o ambiente..." class="form-control mt-2" style="display: none;">
             </div>
 
             <div class="form-group full-width">
