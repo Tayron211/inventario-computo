@@ -758,108 +758,107 @@ app.delete('/api/inventory/:id', (req, res) => {
 
 // Endpoint receptor para el Agente Escaneador de Hardware (.bat / PowerShell)
 app.post('/api/agent/report', (req, res) => {
-  const payload = req.body;
-  if (!payload || !payload.modelo) {
-    return res.status(400).json({ error: 'Payload de escaneo inválido' });
+  try {
+    const payload = req.body;
+    if (!payload || !payload.modelo) {
+      return res.status(400).json({ error: 'Payload de escaneo inválido' });
+    }
+    
+    const items = loadDB();
+    
+    const serialNormalized = (payload.numero_serie || '').trim();
+    const macNormalized = (payload.mac_address || '').trim().toLowerCase();
+    const mbSerialNormalized = (payload.placa_base_serial || '').trim().toLowerCase();
+
+    // Lista de seriales genéricos o no disponibles que NO deben usarse para reemplazar equipos distintos
+    const isGenericSerial = !serialNormalized || 
+      /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serialNormalized);
+
+    let existingIndex = -1;
+
+    // 1. Coincidencia por número de serie físico válido (NO genérico)
+    if (!isGenericSerial) {
+      existingIndex = items.findIndex(i => {
+        const itemSerial = (i.numero_serie || '').trim().toLowerCase();
+        return itemSerial && itemSerial === serialNormalized.toLowerCase();
+      });
+    }
+
+    // 2. Si el serial es genérico o no coincidió, buscar por intersección de MAC Address física
+    if (existingIndex === -1 && macNormalized && macNormalized !== 'n/a' && macNormalized !== '') {
+      const reportMacs = macNormalized.split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
+      existingIndex = items.findIndex(i => {
+        const itemMacs = (i.mac_address || '').trim().toLowerCase().split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
+        return reportMacs.some(rm => itemMacs.includes(rm));
+      });
+    }
+
+    // 3. Si el serial de la placa base es único y válido (no genérico), verificar coincidencia
+    if (existingIndex === -1 && mbSerialNormalized && !/^(default string|none|n\/a|0|to be filled by o\.e\.m\.)$/i.test(mbSerialNormalized)) {
+      existingIndex = items.findIndex(i => {
+        const itemMb = (i.placa_base_serial || '').trim().toLowerCase();
+        return itemMb && itemMb === mbSerialNormalized;
+      });
+    }
+
+    // 4. Si el Hostname coincide Y (la Placa Base coincide O el Procesador coincide), es la MISMA máquina física re-escaneada
+    if (existingIndex === -1 && payload.hostname) {
+      const cleanHost = payload.hostname.trim().toLowerCase();
+      existingIndex = items.findIndex(i => {
+        const itemHost = (i.hostname || '').trim().toLowerCase();
+        if (itemHost && itemHost === cleanHost) {
+          const sameMb = (i.placa_base || '').trim().toLowerCase() === (payload.placa_base || '').trim().toLowerCase();
+          const sameCpu = (i.procesador || '').trim().toLowerCase().substring(0, 25) === (payload.procesador || '').trim().toLowerCase().substring(0, 25);
+          return sameMb || sameCpu;
+        }
+        return false;
+      });
+    }
+
+    const recordHostname = payload.hostname || 'DESKTOP-EQUIPO';
+
+    const record = {
+      id: existingIndex >= 0 ? items[existingIndex].id : `item-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      modelo: payload.modelo,
+      numero_serie: payload.numero_serie || 'S/N NO DISPONIBLE',
+      placa_base: payload.placa_base || 'N/A',
+      placa_base_completa: payload.placa_base_completa || payload.placa_base,
+      placa_base_serial: payload.placa_base_serial || '',
+      tipo_equipo: payload.tipo_equipo || 'PC de Escritorio',
+      fabricante: payload.fabricante || '',
+      procesador: payload.procesador || '',
+      ram_total: payload.ram_total || '',
+      ram_detalles: payload.ram_detalles || [],
+      almacenamiento_resumen: payload.almacenamiento_resumen || '',
+      almacenamiento: payload.almacenamiento || [],
+      monitores: payload.monitores || [],
+      perifericos: (payload.perifericos || []).filter(isValidPeripheral),
+      hostname: recordHostname,
+      usuario_actual: payload.usuario_actual || '',
+      sistema_operativo: payload.sistema_operativo || '',
+      ip_red: payload.ip_red || '',
+      ubicacion: (payload.ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(payload.ubicacion)) 
+        ? payload.ubicacion 
+        : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'Soporte Técnico'),
+      estado: existingIndex >= 0 ? (items[existingIndex].estado || 'Operativo') : 'Operativo',
+      notas: existingIndex >= 0 ? items[existingIndex].notas : 'Registrado por escáner automático',
+      fecha_escaneo: payload.fecha_escaneo || new Date().toISOString().replace('T', ' ').substring(0, 19),
+      origen: 'Escáner Batch/PowerShell'
+    };
+    
+    if (existingIndex >= 0) {
+      items[existingIndex] = record;
+    } else {
+      items.unshift(record);
+    }
+    
+    saveDB(items);
+    console.log(`[✓] Equipo procesado: "${record.hostname}" (S/N: ${record.numero_serie}) - Acción: ${existingIndex >= 0 ? 'Actualizado' : 'Nuevo Registro Creado'}`);
+    res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
+  } catch (err) {
+    console.error('Error procesando reporte de agente:', err);
+    res.status(500).json({ error: 'Error interno procesando escaneo', detalle: err.message });
   }
-  
-  const items = loadDB();
-  
-  const serialNormalized = (payload.numero_serie || '').trim();
-  const macNormalized = (payload.mac_address || '').trim().toLowerCase();
-  const mbSerialNormalized = (payload.placa_base_serial || '').trim().toLowerCase();
-
-  // Lista de seriales genéricos o no disponibles que NO deben usarse para reemplazar equipos distintos
-  const isGenericSerial = !serialNormalized || 
-    /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serialNormalized);
-
-  let existingIndex = -1;
-
-  // 1. Coincidencia por número de serie físico válido (NO genérico)
-  if (!isGenericSerial) {
-    existingIndex = items.findIndex(i => {
-      const itemSerial = (i.numero_serie || '').trim().toLowerCase();
-      return itemSerial && itemSerial === serialNormalized.toLowerCase();
-    });
-  }
-
-  // 2. Si el serial es genérico o no coincidió, buscar por intersección de MAC Address física
-  if (existingIndex === -1 && macNormalized && macNormalized !== 'n/a' && macNormalized !== '') {
-    const reportMacs = macNormalized.split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
-    existingIndex = items.findIndex(i => {
-      const itemMacs = (i.mac_address || '').trim().toLowerCase().split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
-      return reportMacs.some(rm => itemMacs.includes(rm));
-    });
-  }
-
-  // 3. Si el serial de la placa base es único y válido (no genérico), verificar coincidencia
-  if (existingIndex === -1 && mbSerialNormalized && !/^(default string|none|n\/a|0|to be filled by o\.e\.m\.)$/i.test(mbSerialNormalized)) {
-    existingIndex = items.findIndex(i => {
-      const itemMb = (i.placa_base_serial || '').trim().toLowerCase();
-      return itemMb && itemMb === mbSerialNormalized;
-    });
-  }
-
-  // 4. Si el Hostname coincide Y (la Placa Base coincide O el Procesador coincide), es la MISMA máquina física re-escaneada
-  if (existingIndex === -1 && payload.hostname) {
-    const cleanHost = payload.hostname.trim().toLowerCase();
-    existingIndex = items.findIndex(i => {
-      const itemHost = (i.hostname || '').trim().toLowerCase();
-      if (itemHost && itemHost === cleanHost) {
-        const sameMb = (i.placa_base || '').trim().toLowerCase() === (payload.placa_base || '').trim().toLowerCase();
-        const sameCpu = (i.procesador || '').trim().toLowerCase().substring(0, 25) === (payload.procesador || '').trim().toLowerCase().substring(0, 25);
-        return sameMb || sameCpu;
-      }
-      return false;
-    });
-  }
-
-  const recordHostname = payload.hostname || 'DESKTOP-EQUIPO';
-
-  const record = {
-    id: existingIndex >= 0 ? items[existingIndex].id : `item-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-    modelo: payload.modelo,
-    numero_serie: payload.numero_serie || 'S/N NO DISPONIBLE',
-    placa_base: payload.placa_base || 'N/A',
-    placa_base_completa: payload.placa_base_completa || payload.placa_base,
-    placa_base_serial: payload.placa_base_serial || '',
-    tipo_equipo: payload.tipo_equipo || 'PC de Escritorio',
-    fabricante: payload.fabricante || '',
-    procesador: payload.procesador || '',
-    ram_total: payload.ram_total || '',
-    ram_detalles: payload.ram_detalles || [],
-    almacenamiento_resumen: payload.almacenamiento_resumen || '',
-    almacenamiento: payload.almacenamiento || [],
-    monitores: payload.monitores || [],
-    perifericos: (payload.perifericos || []).filter(p => {
-      const n = (p.nombre || '').trim();
-      const f = (p.fabricante || '').trim();
-      if (!n || isInternalAudioDriver.test(n) || isGenericStub.test(n)) return false;
-      if (f && (isInternalAudioDriver.test(f) || isGenericStub.test(f))) return false;
-      return PROPRIETARY_BRANDS_PATTERN.test(n) || PROPRIETARY_BRANDS_PATTERN.test(f) || p.es_marca === true;
-    }),
-    hostname: recordHostname,
-    usuario_actual: payload.usuario_actual || '',
-    sistema_operativo: payload.sistema_operativo || '',
-    ip_red: payload.ip_red || '',
-    ubicacion: (payload.ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(payload.ubicacion)) 
-      ? payload.ubicacion 
-      : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'Soporte Técnico'),
-    estado: existingIndex >= 0 ? (items[existingIndex].estado || 'Operativo') : 'Operativo',
-    notas: existingIndex >= 0 ? items[existingIndex].notas : 'Registrado por escáner automático',
-    fecha_escaneo: payload.fecha_escaneo || new Date().toISOString().replace('T', ' ').substring(0, 19),
-    origen: 'Escáner Batch/PowerShell'
-  };
-  
-  if (existingIndex >= 0) {
-    items[existingIndex] = record;
-  } else {
-    items.unshift(record);
-  }
-  
-  saveDB(items);
-  console.log(`[✓] Equipo procesado: "${record.hostname}" (S/N: ${record.numero_serie}) - Acción: ${existingIndex >= 0 ? 'Actualizado' : 'Nuevo Registro Creado'}`);
-  res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
 });
 
 // Diagnóstico de estado de la base de datos (MongoDB vs Local)
