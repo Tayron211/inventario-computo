@@ -21,7 +21,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=3.5">
+  <link rel="stylesheet" href="css/styles.css?v=4.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -89,6 +89,18 @@
           </div>
         </div>
 
+        <!-- Navegación Multi-Página -->
+        <nav class="app-nav-tabs" id="appNavTabs">
+          <button class="nav-tab-btn active" id="tabNavInventory" title="Ver Listado y Tabla de Inventario">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Inventario Maestro</span>
+          </button>
+          <button class="nav-tab-btn" id="tabNavDashboard" title="Ver Estadísticas, Ambientes y Periféricos">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard & Ambientes</span>
+          </button>
+        </nav>
+
         <div class="header-actions">
           <!-- Botón Escanear Este Equipo -->
           <button class="btn btn-crimson-pulse" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
@@ -132,180 +144,318 @@
     <!-- Main Body Container -->
     <main class="main-content">
       
-      <!-- Metric Cards Grid -->
-      <section class="metrics-grid">
-        <div class="metric-card" data-filter="Todos">
-          <div class="metric-icon total">
-            <i class="fa-solid fa-server"></i>
+      <!-- ======================================================= -->
+      <!-- PÁGINA 1: INVENTARIO MAESTRO (TABLA Y TARJETAS) -->
+      <!-- ======================================================= -->
+      <div id="pageInventoryView" class="page-view-container active">
+        <!-- Metric Cards Grid -->
+        <section class="metrics-grid">
+          <div class="metric-card" data-filter="Todos">
+            <div class="metric-icon total">
+              <i class="fa-solid fa-server"></i>
+            </div>
+            <div class="metric-data">
+              <span class="metric-value" id="statTotal">0</span>
+              <span class="metric-title">Total Equipos</span>
+            </div>
+            <div class="metric-indicator"></div>
           </div>
-          <div class="metric-data">
-            <span class="metric-value" id="statTotal">0</span>
-            <span class="metric-title">Total Equipos</span>
-          </div>
-          <div class="metric-indicator"></div>
-        </div>
 
-        <div class="metric-card clickable" id="cardFilterDesktop" data-filter="PC de Escritorio">
-          <div class="metric-icon desktop">
-            <i class="fa-solid fa-desktop"></i>
+          <div class="metric-card clickable" id="cardFilterDesktop" data-filter="PC de Escritorio">
+            <div class="metric-icon desktop">
+              <i class="fa-solid fa-desktop"></i>
+            </div>
+            <div class="metric-data">
+              <span class="metric-value" id="statDesktop">0</span>
+              <span class="metric-title">PCs de Escritorio</span>
+            </div>
+            <div class="metric-tag">Filtrar</div>
           </div>
-          <div class="metric-data">
-            <span class="metric-value" id="statDesktop">0</span>
-            <span class="metric-title">PCs de Escritorio</span>
-          </div>
-          <div class="metric-tag">Filtrar</div>
-        </div>
 
-        <div class="metric-card clickable" id="cardFilterLaptop" data-filter="Laptop">
-          <div class="metric-icon laptop">
-            <i class="fa-solid fa-laptop"></i>
+          <div class="metric-card clickable" id="cardFilterLaptop" data-filter="Laptop">
+            <div class="metric-icon laptop">
+              <i class="fa-solid fa-laptop"></i>
+            </div>
+            <div class="metric-data">
+              <span class="metric-value" id="statLaptop">0</span>
+              <span class="metric-title">Laptops</span>
+            </div>
+            <div class="metric-tag">Filtrar</div>
           </div>
-          <div class="metric-data">
-            <span class="metric-value" id="statLaptop">0</span>
-            <span class="metric-title">Laptops / Portátiles</span>
+
+          <div class="metric-card clickable" id="cardFilterMonitor" data-filter="Monitor">
+            <div class="metric-icon monitors">
+              <i class="fa-solid fa-display"></i>
+            </div>
+            <div class="metric-data">
+              <span class="metric-value" id="statMonitors">0</span>
+              <span class="metric-title">Monitores / Displays</span>
+            </div>
+            <div class="metric-tag">Filtrar</div>
           </div>
-          <div class="metric-tag">Filtrar</div>
-        </div>
 
-        <div class="metric-card">
-          <div class="metric-icon peripherals">
-            <i class="fa-solid fa-keyboard"></i>
+          <div class="metric-card clickable" id="cardFilterPerifericos" data-filter="Periféricos">
+            <div class="metric-icon peripherals">
+              <i class="fa-solid fa-keyboard"></i>
+            </div>
+            <div class="metric-data">
+              <span class="metric-value" id="statPeripherals">0</span>
+              <span class="metric-title">Periféricos & USB</span>
+            </div>
+            <div class="metric-tag">Filtrar</div>
           </div>
-          <div class="metric-data">
-            <span class="metric-value" id="statPeripherals">0</span>
-            <span class="metric-title">Periféricos / Monitores</span>
+        </section>
+
+        <!-- Search, Filters and View Controls -->
+        <section class="controls-card">
+          <div class="search-bar-wrapper">
+            <div class="search-input-group">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="searchInput" placeholder="Buscar por Hostname, serie, modelo, procesador, ambiente, usuario..." autocomplete="off">
+              <button class="btn-clear-search" id="btnClearSearch" title="Limpiar búsqueda">&times;</button>
+            </div>
+            <button class="btn btn-secondary btn-icon-only" id="btnScanBarcodeInput" title="Escanear Código de Barras con la Cámara">
+              <i class="fa-solid fa-barcode"></i>
+            </button>
           </div>
-        </div>
-      </section>
 
-      <!-- Control Toolbar: Search & Tabs Filters -->
-      <section class="toolbar-section">
-        <div class="search-bar-wrapper">
-          <i class="fa-solid fa-magnifying-glass search-icon"></i>
-          <input type="text" id="searchInput" placeholder="Buscar por Modelo, Serie, Marca, Tipo, CPU, Hostname o Usuario..." autocomplete="off">
-          <button class="clear-search-btn" id="btnClearSearch" title="Limpiar búsqueda" style="display: none;">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+          <div class="filters-and-views">
+            <!-- Categorías rápidas -->
+            <div class="category-pills">
+              <button class="pill-btn active" data-category="Todos">
+                <span>Todos</span> <span class="pill-count" id="countAll">0</span>
+              </button>
+              <button class="pill-btn" data-category="Computadoras">
+                <i class="fa-solid fa-computer"></i> <span>Computadoras</span> <span class="pill-count" id="countComputadoras">0</span>
+              </button>
+              <button class="pill-btn" data-category="Periféricos">
+                <i class="fa-solid fa-keyboard"></i> <span>Periféricos</span> <span class="pill-count" id="countPerifericos">0</span>
+              </button>
+              <button class="pill-btn" data-category="Impresoras">
+                <i class="fa-solid fa-print"></i> <span>Impresoras</span> <span class="pill-count" id="countImpresoras">0</span>
+              </button>
+              <button class="pill-btn" data-category="Redes">
+                <i class="fa-solid fa-network-wired"></i> <span>Redes</span> <span class="pill-count" id="countRedes">0</span>
+              </button>
+            </div>
 
-        <!-- Filter Pills / Categories -->
-        <div class="filter-pills-group">
-          <button class="pill active" data-category="Todos" data-type="Todos">
-            <i class="fa-solid fa-layer-group"></i> Todos (<span id="countAll">0</span>)
-          </button>
-          <button class="pill" data-category="Computadoras">
-            <i class="fa-solid fa-desktop"></i> Computadoras (<span id="countComputadoras">0</span>)
-          </button>
-          <button class="pill" data-category="Impresoras">
-            <i class="fa-solid fa-print"></i> Impresoras (<span id="countImpresoras">0</span>)
-          </button>
-          <button class="pill" data-category="Redes">
-            <i class="fa-solid fa-network-wired"></i> Red & Wi-Fi (<span id="countRedes">0</span>)
-          </button>
-          <button class="pill" data-category="Periféricos">
-            <i class="fa-solid fa-keyboard"></i> Periféricos & Audio (<span id="countPerifericos">0</span>)
-          </button>
-        </div>
+            <!-- Filtro por Tipo Específico -->
+            <div class="custom-select-wrapper">
+              <select id="typeSelectFilter" class="custom-select" title="Filtrar por Tipo de Dispositivo">
+                <option value="Todos">Todos los Dispositivos</option>
+                <optgroup label="💻 Computadoras">
+                  <option value="PC de Escritorio">🖥️ PC de Escritorio</option>
+                  <option value="Laptop">💻 Laptop / Notebook</option>
+                  <option value="Mini PC">📦 Mini PC</option>
+                  <option value="All-in-One">🖥️ All-in-One</option>
+                  <option value="Servidor">🗄️ Servidor</option>
+                </optgroup>
+                <optgroup label="⌨️ Periféricos & Accesorios">
+                  <option value="Teclado">⌨️ Teclado</option>
+                  <option value="Mouse / Puntero">🖱️ Mouse / Puntero</option>
+                  <option value="Audífonos / Diadema">🎧 Audífonos / Diadema</option>
+                  <option value="Monitor / Pantalla">🖥️ Monitor / Pantalla</option>
+                  <option value="Otro Periférico">🔌 Otro Dispositivo</option>
+                </optgroup>
+              </select>
+            </div>
 
-        <!-- Secondary Filters & View Switcher -->
-        <div class="view-and-extra-controls">
-          <!-- Filtro por Tipo Específico -->
-          <div class="custom-select-wrapper">
-            <select id="typeSelectFilter" class="custom-select" title="Filtrar por Tipo de Dispositivo">
-              <option value="Todos">Todos los Dispositivos</option>
-              <optgroup label="💻 Computadoras">
+            <!-- Filtro por Estado -->
+            <div class="custom-select-wrapper">
+              <select id="statusFilter" class="custom-select" title="Filtrar por Estado">
+                <option value="Todos">Todos los Estados</option>
+                <option value="Operativo">🟢 Operativo</option>
+                <option value="En Uso">🔵 En Uso</option>
+                <option value="En Mantenimiento">🟡 En Mantenimiento</option>
+                <option value="De Baja">🔴 De Baja</option>
+                <option value="En Bodega">⚪ En Bodega</option>
+              </select>
+            </div>
+
+            <div class="view-switch-group">
+              <button class="view-btn active" id="viewTableBtn" title="Vista Tabla (Excel)">
+                <i class="fa-solid fa-table-list"></i>
+              </button>
+              <button class="view-btn" id="viewGridBtn" title="Vista Tarjetas">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Excel Table Model View Section -->
+        <section class="inventory-table-card" id="tableViewContainer">
+          <div class="table-header-bar">
+            <div class="table-title">
+              <i class="fa-solid fa-list-check"></i>
+              <span>LISTADO MAESTRO DE EQUIPOS Y COMPONENTES</span>
+            </div>
+            <div class="table-stats">
+              Mostrando <b id="visibleCount">0</b> de <b id="totalCount">0</b> registros
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="custom-excel-table" id="inventoryTable">
+              <thead>
+                <tr>
+                  <th class="col-modelo">HOSTNAME / MODELO</th>
+                  <th class="col-serie">NÚMERO DE SERIE</th>
+                  <th class="col-ambiente">AMBIENTE / UBICACIÓN</th>
+                  <th class="col-placa">PLACA BASE</th>
+                  <th class="col-tipo">TIPO</th>
+                  <th class="col-hardware">ESPECIFICACIONES (CPU / RAM / DISCO)</th>
+                  <th class="col-perifericos">PERIFÉRICOS & SERIALES</th>
+                  <th class="col-usuario">USUARIO / RED</th>
+                  <th class="col-estado">ESTADO</th>
+                  <th class="col-acciones">ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <!-- Renderizado dinámico vía JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <h3>No se encontraron equipos</h3>
+            <p>Intenta ajustar tus criterios de búsqueda o registra un nuevo equipo con el botón "Nuevo" o "Escanear PC".</p>
+          </div>
+        </section>
+
+        <!-- Grid Cards View Section (Opcional) -->
+        <section class="inventory-grid-container" id="gridViewContainer" style="display: none;">
+          <!-- Renderizado dinámico de tarjetas -->
+        </section>
+      </div>
+
+      <!-- ======================================================= -->
+      <!-- PÁGINA 2: DASHBOARD ANALÍTICO & AMBIENTES HUB -->
+      <!-- ======================================================= -->
+      <div id="pageDashboardView" class="page-view-container" style="display: none;">
+        
+        <!-- Dashboard Top Control & Quick Filters -->
+        <section class="dashboard-filter-bar">
+          <div class="dash-title-block">
+            <div class="dash-icon"><i class="fa-solid fa-chart-pie"></i></div>
+            <div>
+              <h2>Dashboard de Control y Distribución</h2>
+              <p>Monitoreo en tiempo real de Ambientes, Modelos, Tipos de PC y Periféricos</p>
+            </div>
+          </div>
+
+          <div class="dash-quick-filters">
+            <div class="custom-select-wrapper">
+              <select id="dashFilterAmbiente" class="custom-select" title="Filtrar estadísticas por Ambiente">
+                <option value="Todos">🏢 Todos los Ambientes</option>
+              </select>
+            </div>
+            <div class="custom-select-wrapper">
+              <select id="dashFilterTipo" class="custom-select" title="Filtrar por Tipo">
+                <option value="Todos">💻 Todos los Tipos</option>
                 <option value="PC de Escritorio">🖥️ PC de Escritorio</option>
-                <option value="Laptop">💻 Laptop / Portátil</option>
+                <option value="Laptop">💻 Laptops</option>
+                <option value="Mini PC">📦 Mini PCs</option>
                 <option value="All-in-One">🖥️ All-in-One</option>
-                <option value="Mini PC">📦 Mini PC</option>
-                <option value="Servidor">🗄️ Servidor</option>
-              </optgroup>
-              <optgroup label="🖨️ Impresión & Proyección">
-                <option value="Impresora / Multifuncional">🖨️ Impresora / Multifuncional</option>
-                <option value="Proyector">📽️ Proyector</option>
-              </optgroup>
-              <optgroup label="📡 Redes & Conectividad">
-                <option value="Switch de Red">🔀 Switch de Red</option>
-                <option value="Access Point Wi-Fi">📡 Access Point / Router Wi-Fi</option>
-              </optgroup>
-              <optgroup label="⌨️ Periféricos & Accesorios">
-                <option value="Teclado">⌨️ Teclado</option>
-                <option value="Mouse / Puntero">🖱️ Mouse / Puntero</option>
-                <option value="Audífonos / Diadema">🎧 Audífonos / Diadema</option>
-                <option value="Monitor / Pantalla">🖥️ Monitor / Pantalla</option>
-                <option value="Otro Periférico">🔌 Otro Dispositivo</option>
-              </optgroup>
-            </select>
+                <option value="Periféricos">⌨️ Periféricos</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- KPI Summary Cards -->
+        <section class="dash-kpi-grid">
+          <div class="dash-kpi-card">
+            <div class="kpi-icon icon-emerald"><i class="fa-solid fa-building-user"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-num" id="dashTotalAmbientes">0</span>
+              <span class="kpi-label">Ambientes / Áreas</span>
+            </div>
+          </div>
+          <div class="dash-kpi-card">
+            <div class="kpi-icon icon-crimson"><i class="fa-solid fa-desktop"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-num" id="dashTotalPCs">0</span>
+              <span class="kpi-label">Computadoras (PC/Laptop)</span>
+            </div>
+          </div>
+          <div class="dash-kpi-card">
+            <div class="kpi-icon icon-blue"><i class="fa-solid fa-display"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-num" id="dashTotalMonitores">0</span>
+              <span class="kpi-label">Monitores Registrados</span>
+            </div>
+          </div>
+          <div class="dash-kpi-card">
+            <div class="kpi-icon icon-purple"><i class="fa-solid fa-keyboard"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-num" id="dashTotalPerifericos">0</span>
+              <span class="kpi-label">Periféricos Conectados</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Grid de Secciones Analíticas -->
+        <div class="dash-sections-grid">
+          
+          <!-- SECCIÓN: DISTRIBUCIÓN POR AMBIENTES / ÁREAS -->
+          <div class="dash-card-panel full-width">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-layer-group text-crimson"></i>
+                <span>MATRIZ DE AMBIENTES Y EQUIPOS ASIGNADOS</span>
+              </div>
+              <span class="panel-subtitle">Haz clic en cualquier ambiente para ver sus computadoras</span>
+            </div>
+            <div class="ambientes-cards-grid" id="ambientesCardsGrid">
+              <!-- Renderizado dinámico vía JS -->
+            </div>
           </div>
 
-          <!-- Filtro por Estado -->
-          <div class="custom-select-wrapper">
-            <select id="statusFilter" class="custom-select" title="Filtrar por Estado">
-              <option value="Todos">Todos los Estados</option>
-              <option value="Operativo">🟢 Operativo</option>
-              <option value="En Uso">🔵 En Uso</option>
-              <option value="En Mantenimiento">🟡 En Mantenimiento</option>
-              <option value="De Baja">🔴 De Baja</option>
-              <option value="En Bodega">⚪ En Bodega</option>
-            </select>
+          <!-- SECCIÓN: TIPOS DE PC & MODELOS DE FABRICANTE -->
+          <div class="dash-card-panel">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-laptop-code text-crimson"></i>
+                <span>DISTRIBUCIÓN POR MODELO Y TIPO</span>
+              </div>
+            </div>
+            <div class="modelos-breakdown-list" id="modelosBreakdownList">
+              <!-- Renderizado dinámico de barras de porcentaje vía JS -->
+            </div>
           </div>
 
-          <div class="view-switch-group">
-            <button class="view-btn active" id="viewTableBtn" title="Vista Tabla (Excel)">
-              <i class="fa-solid fa-table-list"></i>
-            </button>
-            <button class="view-btn" id="viewGridBtn" title="Vista Tarjetas">
-              <i class="fa-solid fa-grip"></i>
-            </button>
+          <!-- SECCIÓN: INVENTARIO DE PERIFÉRICOS Y ACCESORIOS -->
+          <div class="dash-card-panel">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-plug-circle-bolt text-crimson"></i>
+                <span>INVENTARIO GENERAL DE PERIFÉRICOS</span>
+              </div>
+            </div>
+            <div class="perifericos-breakdown-list" id="perifericosBreakdownList">
+              <!-- Renderizado dinámico vía JS -->
+            </div>
           </div>
+
+          <!-- SECCIÓN: ESTADO OPERATIVO DEL PARQUE INFORMÁTICO -->
+          <div class="dash-card-panel full-width">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-heart-pulse text-crimson"></i>
+                <span>ESTADO OPERATIVO & SALUD DEL HARDWARE</span>
+              </div>
+            </div>
+            <div class="health-status-grid" id="healthStatusGrid">
+              <!-- Renderizado dinámico vía JS -->
+            </div>
+          </div>
+
         </div>
-      </section>
 
-      <!-- Excel Table Model View Section -->
-      <section class="inventory-table-card" id="tableViewContainer">
-        <div class="table-header-bar">
-          <div class="table-title">
-            <i class="fa-solid fa-list-check"></i>
-            <span>LISTADO MAESTRO DE EQUIPOS Y COMPONENTES</span>
-          </div>
-          <div class="table-stats">
-            Mostrando <b id="visibleCount">0</b> de <b id="totalCount">0</b> registros
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          <table class="custom-excel-table" id="inventoryTable">
-            <thead>
-              <tr>
-                <th class="col-modelo">HOSTNAME / MODELO</th>
-                <th class="col-serie">NÚMERO DE SERIE</th>
-                <th class="col-placa">PLACA BASE</th>
-                <th class="col-tipo">TIPO</th>
-                <th class="col-hardware">ESPECIFICACIONES (CPU / RAM / DISCO)</th>
-                <th class="col-perifericos">PERIFÉRICOS & SERIALES</th>
-                <th class="col-usuario">USUARIO / RED</th>
-                <th class="col-estado">ESTADO</th>
-                <th class="col-acciones">ACCIONES</th>
-              </tr>
-            </thead>
-            <tbody id="inventoryTableBody">
-              <!-- Renderizado dinámico vía JavaScript -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Empty State -->
-        <div class="empty-state" id="emptyState" style="display: none;">
-          <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-          <h3>No se encontraron equipos</h3>
-          <p>Intenta ajustar tus criterios de búsqueda o registra un nuevo equipo con el botón "Nuevo Registro" o "Escanear".</p>
-        </div>
-      </section>
-
-      <!-- Grid Cards View Section (Opcional) -->
-      <section class="inventory-grid-container" id="gridViewContainer" style="display: none;">
-        <!-- Renderizado dinámico de tarjetas -->
-      </section>
+      </div>
 
     </main>
 
@@ -614,6 +764,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=2.6"></script>
+  <script src="js/app.js?v=3.0"></script>
 </body>
 </html>

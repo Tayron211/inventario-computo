@@ -224,6 +224,9 @@ function updateQrForTheme(theme) {
 // EVENT LISTENERS
 // -------------------------------------------------------------
 function initEventListeners() {
+  // Inicializar Navegación Multi-Página
+  initMultiPageNav();
+
   // Búsqueda en tiempo real
   searchInput.addEventListener('input', (e) => {
     currentSearchQuery = e.target.value.toLowerCase().trim();
@@ -833,6 +836,9 @@ function renderTable(items) {
             <i class="fa-solid fa-barcode"></i>
             ${escapeHTML(item.numero_serie || 'N/A')}
           </span>
+        </td>
+        <td class="cell-ambiente">
+          <div class="user-loc" title="Ambiente / Ubicación"><i class="fa-solid fa-location-dot text-crimson"></i> <b>${escapeHTML(item.ubicacion || 'Sin Asignar')}</b></div>
         </td>
         <td class="cell-placa">
           <span class="placa-badge" title="Placa Base">${escapeHTML(item.placa_base || 'N/A')}</span>
@@ -1470,6 +1476,311 @@ function stopCameraScanner() {
   const camModal = document.getElementById('cameraModal');
   if (camModal) {
     camModal.style.display = '';
+  }
+}
+
+// ==============================================================================
+// NAVEGACIÓN MULTI-PÁGINA (INVENTARIO MAESTRO vs DASHBOARD & AMBIENTES)
+// ==============================================================================
+function initMultiPageNav() {
+  const tabNavInventory = document.getElementById('tabNavInventory');
+  const tabNavDashboard = document.getElementById('tabNavDashboard');
+
+  if (tabNavInventory && tabNavDashboard) {
+    tabNavInventory.addEventListener('click', () => switchPage('inventory'));
+    tabNavDashboard.addEventListener('click', () => switchPage('dashboard'));
+  }
+
+  const dashFilterAmbiente = document.getElementById('dashFilterAmbiente');
+  if (dashFilterAmbiente) {
+    dashFilterAmbiente.addEventListener('change', () => renderDashboard());
+  }
+
+  const dashFilterTipo = document.getElementById('dashFilterTipo');
+  if (dashFilterTipo) {
+    dashFilterTipo.addEventListener('change', () => renderDashboard());
+  }
+}
+
+function switchPage(pageName) {
+  const tabNavInventory = document.getElementById('tabNavInventory');
+  const tabNavDashboard = document.getElementById('tabNavDashboard');
+  const pageInventoryView = document.getElementById('pageInventoryView');
+  const pageDashboardView = document.getElementById('pageDashboardView');
+
+  if (pageName === 'dashboard') {
+    if (tabNavDashboard) tabNavDashboard.classList.add('active');
+    if (tabNavInventory) tabNavInventory.classList.remove('active');
+    if (pageDashboardView) pageDashboardView.style.display = 'block';
+    if (pageInventoryView) pageInventoryView.style.display = 'none';
+    renderDashboard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    if (tabNavInventory) tabNavInventory.classList.add('active');
+    if (tabNavDashboard) tabNavDashboard.classList.remove('active');
+    if (pageInventoryView) pageInventoryView.style.display = 'block';
+    if (pageDashboardView) pageDashboardView.style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function filterByAmbiente(ambienteName) {
+  switchPage('inventory');
+  if (searchInput) {
+    searchInput.value = ambienteName;
+    currentSearchQuery = ambienteName.toLowerCase().trim();
+    if (btnClearSearch) btnClearSearch.style.display = 'block';
+  }
+  renderData();
+  showToast(`Filtrando inventario por: "${ambienteName}"`, 'info');
+  const tableCard = document.getElementById('tableViewContainer');
+  if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterByStatus(statusName) {
+  switchPage('inventory');
+  if (statusFilter) {
+    statusFilter.value = statusName;
+    currentFilterStatus = statusName;
+  }
+  renderData();
+  showToast(`Filtrando inventario por estado: "${statusName}"`, 'info');
+  const tableCard = document.getElementById('tableViewContainer');
+  if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderDashboard() {
+  const dashFilterAmbiente = document.getElementById('dashFilterAmbiente');
+  const dashFilterTipo = document.getElementById('dashFilterTipo');
+
+  const selectedAmbiente = dashFilterAmbiente ? dashFilterAmbiente.value : 'Todos';
+  const selectedTipo = dashFilterTipo ? dashFilterTipo.value : 'Todos';
+
+  // 1. Poblar el selector de ambientes únicos
+  if (dashFilterAmbiente && (dashFilterAmbiente.options.length <= 1 || dashFilterAmbiente.options.length !== (new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim())).size + 1))) {
+    const uniqueAmbientes = Array.from(new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim()))).filter(Boolean).sort();
+    const prevVal = dashFilterAmbiente.value;
+    dashFilterAmbiente.innerHTML = '<option value="Todos">🏢 Todos los Ambientes</option>';
+    uniqueAmbientes.forEach(amb => {
+      const opt = document.createElement('option');
+      opt.value = amb;
+      opt.textContent = `📍 ${amb}`;
+      dashFilterAmbiente.appendChild(opt);
+    });
+    if (prevVal && uniqueAmbientes.includes(prevVal)) {
+      dashFilterAmbiente.value = prevVal;
+    }
+  }
+
+  // Filtrar datos para el dashboard según selección
+  let filteredData = inventoryData;
+  if (selectedAmbiente !== 'Todos') {
+    filteredData = filteredData.filter(i => (i.ubicacion || 'Sin Asignar').trim().toLowerCase() === selectedAmbiente.toLowerCase());
+  }
+  if (selectedTipo !== 'Todos') {
+    filteredData = filteredData.filter(i => {
+      if (selectedTipo === 'PC de Escritorio') return i.tipo_equipo === 'PC de Escritorio' || i.tipo_equipo === 'Desktop';
+      if (selectedTipo === 'Laptop') return i.tipo_equipo === 'Laptop' || i.tipo_equipo === 'Notebook';
+      if (selectedTipo === 'Periféricos') return (i.perifericos && i.perifericos.length > 0) || (i.monitores && i.monitores.length > 0);
+      return i.tipo_equipo === selectedTipo;
+    });
+  }
+
+  // 2. Calcular KPIs
+  const allAmbientes = new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim()).filter(Boolean));
+  const totalPCs = filteredData.filter(i => i.tipo_equipo === 'PC de Escritorio' || i.tipo_equipo === 'Laptop' || i.tipo_equipo === 'Mini PC' || i.tipo_equipo === 'All-in-One').length;
+  
+  let totalMonitores = 0;
+  let totalPerifericos = 0;
+  filteredData.forEach(item => {
+    totalMonitores += (item.monitores || []).length;
+    totalPerifericos += (item.perifericos || []).length;
+  });
+
+  const dashTotalAmbientes = document.getElementById('dashTotalAmbientes');
+  const dashTotalPCs = document.getElementById('dashTotalPCs');
+  const dashTotalMonitores = document.getElementById('dashTotalMonitores');
+  const dashTotalPerifericos = document.getElementById('dashTotalPerifericos');
+
+  if (dashTotalAmbientes) dashTotalAmbientes.textContent = allAmbientes.size;
+  if (dashTotalPCs) dashTotalPCs.textContent = totalPCs;
+  if (dashTotalMonitores) dashTotalMonitores.textContent = totalMonitores;
+  if (dashTotalPerifericos) dashTotalPerifericos.textContent = totalPerifericos;
+
+  // 3. Renderizar Tarjetas de Ambientes (Distribución Espacial)
+  const ambientesGrid = document.getElementById('ambientesCardsGrid');
+  if (ambientesGrid) {
+    const ambientesMap = new Map();
+    inventoryData.forEach(item => {
+      const ambName = (item.ubicacion || 'Sin Asignar / Bodega').trim();
+      if (!ambientesMap.has(ambName)) {
+        ambientesMap.set(ambName, {
+          nombre: ambName,
+          equipos: [],
+          desktops: 0,
+          laptops: 0,
+          monitores: 0,
+          perifericos: 0,
+          usuarios: new Set()
+        });
+      }
+      const data = ambientesMap.get(ambName);
+      data.equipos.push(item);
+      if (item.tipo_equipo === 'Laptop') data.laptops++;
+      else data.desktops++;
+      data.monitores += (item.monitores || []).length;
+      data.perifericos += (item.perifericos || []).length;
+      if (item.usuario_actual) data.usuarios.add(item.usuario_actual);
+    });
+
+    const ambientesList = Array.from(ambientesMap.values());
+    if (ambientesList.length === 0) {
+      ambientesGrid.innerHTML = '<p class="text-gray-400">No hay ambientes registrados aún.</p>';
+    } else {
+      ambientesGrid.innerHTML = ambientesList.map(amb => {
+        const userListStr = Array.from(amb.usuarios).slice(0, 3).join(', ') || 'No asignado';
+        const isSelected = selectedAmbiente === amb.nombre;
+
+        return `
+          <div class="ambiente-card ${isSelected ? 'selected-ambiente' : ''}">
+            <div class="ambiente-card-header">
+              <div class="ambiente-title-box">
+                <i class="fa-solid fa-location-dot text-crimson"></i>
+                <h4>${escapeHTML(amb.nombre)}</h4>
+              </div>
+              <span class="ambiente-total-badge">${amb.equipos.length} equipos</span>
+            </div>
+
+            <div class="ambiente-card-stats">
+              <div class="amb-stat-chip"><i class="fa-solid fa-desktop text-crimson"></i> <b>${amb.desktops}</b> PCs</div>
+              <div class="amb-stat-chip"><i class="fa-solid fa-laptop text-blue"></i> <b>${amb.laptops}</b> Laptops</div>
+              <div class="amb-stat-chip"><i class="fa-solid fa-display text-emerald"></i> <b>${amb.monitores}</b> Pantallas</div>
+              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericos}</b> Periféricos</div>
+            </div>
+
+            <div class="ambiente-user-list">
+              <i class="fa-solid fa-users text-gray-400"></i>
+              <span><b>Responsables:</b> ${escapeHTML(userListStr)}${amb.usuarios.size > 3 ? '...' : ''}</span>
+            </div>
+
+            <div class="ambiente-card-footer">
+              <button class="btn btn-secondary btn-sm w-100" onclick="filterByAmbiente('${escapeHTML(amb.nombre)}')">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Ver Equipos de este Ambiente
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // 4. Renderizar Desglose por Modelos y Tipos
+  const modelosListContainer = document.getElementById('modelosBreakdownList');
+  if (modelosListContainer) {
+    const modelosCount = {};
+    filteredData.forEach(item => {
+      const modeloKey = `${item.fabricante ? item.fabricante + ' ' : ''}${item.modelo || 'Equipo Estándar'}`.trim();
+      modelosCount[modeloKey] = (modelosCount[modeloKey] || 0) + 1;
+    });
+
+    const sortedModelos = Object.entries(modelosCount).sort((a, b) => b[1] - a[1]);
+    const maxCount = sortedModelos[0] ? sortedModelos[0][1] : 1;
+
+    modelosListContainer.innerHTML = sortedModelos.map(([modelo, count]) => {
+      const percent = Math.round((count / (filteredData.length || 1)) * 100);
+      return `
+        <div class="breakdown-row" onclick="filterByAmbiente('${escapeHTML(modelo)}')" title="Clic para filtrar por este modelo">
+          <div class="breakdown-label">
+            <span class="breakdown-name"><i class="fa-solid fa-microchip text-crimson"></i> ${escapeHTML(modelo)}</span>
+            <span class="breakdown-count"><b>${count}</b> (${percent}%)</span>
+          </div>
+          <div class="breakdown-bar-bg">
+            <div class="breakdown-bar-fill fill-crimson" style="width: ${percent}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('') || '<p class="text-gray-400">No hay modelos registrados</p>';
+  }
+
+  // 5. Renderizar Inventario de Periféricos
+  const perifericosContainer = document.getElementById('perifericosBreakdownList');
+  if (perifericosContainer) {
+    const perCatCount = {
+      'Monitores': 0,
+      'Teclados': 0,
+      'Mouse / Punteros': 0,
+      'Audífonos / Diademas': 0,
+      'Webcams / Cámaras': 0,
+      'Otros Dispositivos USB': 0
+    };
+
+    filteredData.forEach(item => {
+      (item.monitores || []).forEach(() => perCatCount['Monitores']++);
+      (item.perifericos || []).forEach(p => {
+        const t = (p.tipo || p.nombre || '').toLowerCase();
+        if (t.includes('teclado') || t.includes('keyboard')) perCatCount['Teclados']++;
+        else if (t.includes('mouse') || t.includes('ratón')) perCatCount['Mouse / Punteros']++;
+        else if (t.includes('audífono') || t.includes('headset') || t.includes('diadema')) perCatCount['Audífonos / Diademas']++;
+        else if (t.includes('camera') || t.includes('webcam') || t.includes('cámara')) perCatCount['Webcams / Cámaras']++;
+        else perCatCount['Otros Dispositivos USB']++;
+      });
+    });
+
+    const totalPerifs = Object.values(perCatCount).reduce((a, b) => a + b, 0);
+
+    perifericosContainer.innerHTML = Object.entries(perCatCount).map(([cat, count]) => {
+      const percent = totalPerifs > 0 ? Math.round((count / totalPerifs) * 100) : 0;
+      let icon = 'fa-plug';
+      if (cat === 'Monitores') icon = 'fa-display';
+      else if (cat === 'Teclados') icon = 'fa-keyboard';
+      else if (cat === 'Mouse / Punteros') icon = 'fa-mouse';
+      else if (cat === 'Audífonos / Diademas') icon = 'fa-headphones';
+      else if (cat === 'Webcams / Cámaras') icon = 'fa-video';
+
+      return `
+        <div class="breakdown-row" onclick="filterByAmbiente('${cat === 'Monitores' ? 'Monitor' : 'Periféricos'}')">
+          <div class="breakdown-label">
+            <span class="breakdown-name"><i class="fa-solid ${icon} text-crimson"></i> ${cat}</span>
+            <span class="breakdown-count"><b>${count}</b> unidades</span>
+          </div>
+          <div class="breakdown-bar-bg">
+            <div class="breakdown-bar-fill fill-blue" style="width: ${percent}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 6. Renderizar Estado Operativo & Salud
+  const healthGrid = document.getElementById('healthStatusGrid');
+  if (healthGrid) {
+    const states = {
+      'Operativo': { count: 0, icon: 'fa-circle-check', color: '#10b981', label: 'Operativos' },
+      'En Uso': { count: 0, icon: 'fa-user-check', color: '#3b82f6', label: 'En Uso Activo' },
+      'En Mantenimiento': { count: 0, icon: 'fa-screwdriver-wrench', color: '#f59e0b', label: 'En Mantenimiento' },
+      'En Bodega': { count: 0, icon: 'fa-boxes-packing', color: '#94a3b8', label: 'En Bodega / Almacén' },
+      'De Baja': { count: 0, icon: 'fa-ban', color: '#ef4444', label: 'De Baja / Retirados' }
+    };
+
+    filteredData.forEach(item => {
+      const st = item.estado || 'Operativo';
+      if (states[st]) states[st].count++;
+      else states['Operativo'].count++;
+    });
+
+    healthGrid.innerHTML = Object.entries(states).map(([name, data]) => {
+      return `
+        <div class="health-card" onclick="filterByStatus('${name}')">
+          <div class="health-card-icon" style="color: ${data.color}; background: ${data.color}22; border: 1px solid ${data.color}44;">
+            <i class="fa-solid ${data.icon}"></i>
+          </div>
+          <div class="health-card-data">
+            <span class="health-num" style="color: ${data.color};">${data.count}</span>
+            <span class="health-label">${data.label}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 }
 

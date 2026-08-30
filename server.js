@@ -875,10 +875,11 @@ app.get('/api/export-excel', async (req, res) => {
       views: [{ showGridLines: true }]
     });
 
-    // Definición de columnas con HOSTNAME y USUARIO primeros
+    // Definición de columnas con HOSTNAME, USUARIO y AMBIENTE / UBICACIÓN en primeras posiciones
     worksheet.columns = [
       { header: 'HOSTNAME', key: 'hostname', width: 24 },
       { header: 'USUARIO', key: 'usuario_actual', width: 22 },
+      { header: 'AMBIENTE / UBICACIÓN', key: 'ubicacion', width: 26 },
       { header: 'MODELO', key: 'modelo', width: 28 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
       { header: 'PLACA BASE', key: 'placa_base', width: 20 },
@@ -889,7 +890,6 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'MONITORES (SERIAL)', key: 'monitores_str', width: 32 },
       { header: 'PERIFÉRICOS CONECTADOS', key: 'perifericos_str', width: 40 },
       { header: 'ESTADO', key: 'estado', width: 15 },
-      { header: 'UBICACIÓN', key: 'ubicacion', width: 24 },
       { header: 'DIRECCIÓN IP', key: 'ip_red', width: 22 },
       { header: 'FECHA REGISTRO', key: 'fecha_escaneo', width: 20 }
     ];
@@ -946,17 +946,17 @@ app.get('/api/export-excel', async (req, res) => {
       const row = worksheet.addRow({
         hostname: toUpper(item.hostname || 'PC-EQUIPO'),
         usuario_actual: toUpper(item.usuario_actual || 'ADMIN'),
+        ubicacion: toUpper(item.ubicacion || 'SIN ASIGNAR'),
         modelo: toUpper(item.modelo || ''),
         numero_serie: toUpper(item.numero_serie || ''),
-        placa_base: toUpper(item.placa_base || ''),
-        tipo_equipo: toUpper(item.tipo_equipo || ''),
-        procesador: toUpper(item.procesador || ''),
-        ram_total: toUpper(item.ram_total || ''),
+        placa_base: toUpper(item.placa_base_completa || item.placa_base || 'N/A'),
+        tipo_equipo: toUpper(item.tipo_equipo || 'PC'),
+        procesador: toUpper(item.procesador || 'N/A'),
+        ram_total: toUpper(item.ram_total || 'N/A'),
         almacenamiento_str: toUpper(almacenamientoStr),
         monitores_str: toUpper(monitoresStr),
         perifericos_str: toUpper(perifericosStr),
         estado: toUpper(item.estado || 'OPERATIVO'),
-        ubicacion: toUpper(item.ubicacion || ''),
         ip_red: toUpper(item.ip_red || 'N/A'),
         fecha_escaneo: toUpper(item.fecha_escaneo || '')
       });
