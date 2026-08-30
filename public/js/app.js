@@ -1678,6 +1678,16 @@ const ORGANIZATIONAL_BLOCKS = {
     'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
     'Admisión', 'Finanzas', 'Defensoría', 'Garita'
   ],
+  '🎓 Bloque A (Aulas y Laboratorios)': [
+    'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204', 'Aula 205', 'Aula 206', 
+    '207 (Sala SUM)', 'Aula 301', 'Aula 302', 'Aula 303', 'Laboratorio 304', 
+    'Laboratorio 305', 'Aula 306', 'Centro de Información', 'Aula 401', 
+    'Aula 402', 'Aula 403', 'Aula 404', 'Aula 405', 'Aula 406', 'Aula 407', 
+    'Aula 408', 'Aula 409', 'Aula 501', 'Aula 502', 'Aula 503', 'Aula 504', 
+    'Aula 505', 'Aula 506', 'Aula 507', 'Aula 508', 'Aula 509', 'Aula 601', 
+    'Aula 602', 'Aula 603', 'Aula 604', 'Aula 605', 'Aula 606', 'Aula 607', 
+    'Aula 608', 'Aula 609'
+  ],
   '🏢 Bloque B (Área Administrativa)': [
     'Auditorio', 'Dirección', 'Counter', 'GTH', 'Coordinación Académica', 
     'Retención', 'SSOMA', 'DTC', 'Sala de Reuniones', 'Comedor'
@@ -1692,7 +1702,11 @@ function getBlockBadgeForAmbiente(ambName) {
   if (!ambName) return { label: 'General', class: 'block-general', full: 'Área General' };
   const clean = ambName.trim().toLowerCase();
   for (const [blockTitle, list] of Object.entries(ORGANIZATIONAL_BLOCKS)) {
-    if (list.some(item => clean === item.toLowerCase() || clean.includes(item.toLowerCase()))) {
+    if (list.some(item => {
+      const itemClean = item.toLowerCase();
+      return clean === itemClean || clean.includes(itemClean) || (itemClean.startsWith('aula ') && clean === itemClean.replace('aula ', ''));
+    })) {
+      if (blockTitle.includes('Aulas')) return { label: 'Bloque A - Aulas', class: 'block-a-aulas', full: 'Bloque A - Aulas y Labs' };
       if (blockTitle.includes('Bloque A')) return { label: 'Bloque A', class: 'block-a', full: 'Bloque A - Administrativo' };
       if (blockTitle.includes('Bloque B')) return { label: 'Bloque B', class: 'block-b', full: 'Bloque B - Administrativo' };
       if (blockTitle.includes('Bloque C')) return { label: 'Bloque C', class: 'block-c', full: 'Bloque C - Administrativo' };
