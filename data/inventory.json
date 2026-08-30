@@ -1,5 +1,56 @@
 [
   {
+    "id": "item-1788069993895-9852",
+    "modelo": "HP Laptop 15-bs1xx",
+    "numero_serie": "CND80448TH",
+    "placa_base": "832A",
+    "placa_base_completa": "HP 832A",
+    "placa_base_serial": "PGULKB41VAEH6H",
+    "tipo_equipo": "Laptop",
+    "fabricante": "HP",
+    "procesador": "Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz (4 Nucleos / 8 Hilos)",
+    "ram_total": "8 GB (1 modulo(s))",
+    "ram_detalles": [
+      "Bottom-slot 2(right) - 8GB @ 2400MHz (S/N: 32B3B05C - Modelo: HMA81GS6CJR8N-VK)"
+    ],
+    "almacenamiento_resumen": "TOSHIBA MQ01ABD100 (932 GB, S/N: Y7SHT385T)",
+    "almacenamiento": [
+      {
+        "serie": "Y7SHT385T",
+        "tipo": "Disco",
+        "capacidad": "932 GB",
+        "interfaz": "IDE",
+        "modelo": "TOSHIBA MQ01ABD100"
+      }
+    ],
+    "monitores": [
+      {
+        "serie": "0",
+        "fabricante": "CMN",
+        "modelo": "CMN \u0001"
+      }
+    ],
+    "perifericos": [
+      {
+        "fabricante": "Microsoft",
+        "nombre": "HP TrueVision HD Camera",
+        "tipo": "Cámara Web",
+        "es_marca": true,
+        "id_hardware": "USB\\VID_1BCF&PID_2C9B&MI_00\\6&33C74D74&0&0000"
+      }
+    ],
+    "hostname": "DESKTOP-6S90FTV",
+    "usuario_actual": "Arianny",
+    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
+    "ip_red": "192.168.18.187, fe80::cc58:fcfb:ed60:b456",
+    "ubicacion": "Soporte Técnico",
+    "estado": "Operativo",
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-30 01:06:32",
+    "origen": "Escáner Batch/PowerShell",
+    "_id": "6a93cec1d93bacbe3b39576d"
+  },
+  {
     "id": "item-1788030640878",
     "modelo": "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
     "numero_serie": "8CN60500YC",
@@ -32,532 +83,413 @@
     ],
     "perifericos": [
       {
-        "tipo": "Cámara Web",
+        "fabricante": "SunplusIT",
         "nombre": "HP 5MP Camera",
-        "fabricante": "HP",
-        "es_marca": true
+        "tipo": "CÃ¡mara Web",
+        "es_marca": true,
+        "id_hardware": "USB\\VID_04F2&PID_B795&MI_00\\6&2A0629BB&0&0000"
       }
     ],
     "hostname": "PC-SOPORTE04",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
     "ip_red": "192.168.89.76, fe80::ed60:be2a:82f5:69cc",
-    "mac_address": "40:D1:33:8F:11:64",
-    "ubicacion": "Soporte Técnico",
+    "ubicacion": "Soporte TÃ©cnico",
     "estado": "Operativo",
-    "notas": "Equipo All-in-One auditado por escáner de hardware",
-    "fecha_escaneo": "2026-08-30 01:14:08",
-    "origen": "Escáner Batch/PowerShell"
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-30 01:32:35",
+    "origen": "Escáner Batch/PowerShell",
+    "_id": "6a93cec1d93bacbe3b39576e"
   },
   {
-    "id": "item-gamer-01",
-    "modelo": "ASUS TUF Gaming Station GT501",
-    "numero_serie": "ASUS-GM2026-01",
-    "placa_base": "TUF GAMING B760-PLUS WIFI",
-    "placa_base_completa": "ASUS TUF GAMING B760-PLUS Motherboard",
-    "placa_base_serial": "MBASUS99881",
+    "id": "item-1788050236641-4842",
+    "modelo": "HP ProDesk 600 G2 SFF",
+    "numero_serie": "MXL6062528",
+    "placa_base": "805D",
+    "placa_base_completa": "HP 805D",
+    "placa_base_serial": "PETKD0BCY9M9Y8",
+    "tipo_equipo": "PC de Escritorio",
+    "fabricante": "HP",
+    "procesador": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz (4 Nucleos / 8 Hilos)",
+    "ram_total": "24 GB (3 modulo(s))",
+    "ram_detalles": [
+      "DIMM1 - 8GB @ 2133MHz (S/N: 1104DC58 - Modelo: 16ATF1G64AZ-2G1A2)",
+      "DIMM2 - 8GB @ 2133MHz (S/N: 110438DC - Modelo: 16ATF1G64AZ-2G1A2)",
+      "DIMM3 - 8GB @ 2133MHz (S/N: 110438E2 - Modelo: 16ATF1G64AZ-2G1A2)"
+    ],
+    "almacenamiento_resumen": "KINGSTON SA400S37240G (224 GB, S/N: 50026B72830D7707) | ST1000DM003-1ER162 (932 GB, S/N: Z4Y62WJW)",
+    "almacenamiento": [
+      {
+        "serie": "50026B72830D7707",
+        "tipo": "Disco",
+        "capacidad": "224 GB",
+        "interfaz": "IDE",
+        "modelo": "KINGSTON SA400S37240G"
+      },
+      {
+        "serie": "Z4Y62WJW",
+        "tipo": "Disco",
+        "capacidad": "932 GB",
+        "interfaz": "IDE",
+        "modelo": "ST1000DM003-1ER162"
+      }
+    ],
+    "monitores": [
+      {
+        "serie": "80700",
+        "fabricante": "LG",
+        "modelo": "LG FHD"
+      }
+    ],
+    "perifericos": [],
+    "hostname": "DESKTOP-I557FLQ",
+    "usuario_actual": "EZEQUIEL",
+    "sistema_operativo": "Microsoft Windows 10 Pro (64 bits)",
+    "ip_red": "192.168.1.20, fe80::2f76:3c9:55fd:8ea8",
+    "mac_address": "50:65:F3:4A:85:37",
+    "ubicacion": "Infraestructura",
+    "estado": "Operativo",
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 19:37:15",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:44:13",
+    "_id": "6a93cec1d93bacbe3b39576f"
+  },
+  {
+    "id": "item-1788050010372-5116",
+    "modelo": "System Product Name",
+    "numero_serie": "System Serial Number",
+    "placa_base": "PRIME X870-P WIFI",
+    "placa_base_completa": "ASUSTeK COMPUTER INC. PRIME X870-P WIFI",
+    "placa_base_serial": "241247964701392",
     "tipo_equipo": "PC de Escritorio",
     "fabricante": "ASUS",
-    "procesador": "Intel Core i7-13700KF @ 3.40GHz (16 Núcleos / 24 Hilos)",
-    "ram_total": "32 GB (2x 16GB DDR5)",
+    "procesador": "AMD Ryzen 9 9900X 12-Core Processor (12 Nucleos / 24 Hilos)",
+    "ram_total": "64 GB (4 modulo(s))",
     "ram_detalles": [
-      "Slot 1: 16GB DDR5-6000 Kingston Fury (S/N: KF560001)",
-      "Slot 2: 16GB DDR5-6000 Kingston Fury (S/N: KF560002)"
+      "DIMM 0 - 16GB @ 5600MHz (S/N: 01045A98 - Modelo: UD5-7600)",
+      "DIMM 1 - 16GB @ 5600MHz (S/N: 01045A97 - Modelo: UD5-7600)",
+      "DIMM 0 - 16GB @ 5600MHz (S/N: 01045A8A - Modelo: UD5-7600)",
+      "DIMM 1 - 16GB @ 5600MHz (S/N: 01045948 - Modelo: UD5-7600)"
     ],
-    "almacenamiento_resumen": "Kingston KC3000 NVMe 1TB (S/N: KG1000992)",
+    "almacenamiento_resumen": "KINGSTON SFYRS1000G (932 GB, S/N: 0000_0000_0000_0000_0026_B768_727F_6FC5.)",
     "almacenamiento": [
       {
-        "modelo": "Kingston KC3000 PCIe 4.0 NVMe",
-        "serie": "KG1000992",
-        "capacidad": "1000 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
+        "serie": "0000_0000_0000_0000_0026_B768_727F_6FC5.",
+        "tipo": "Disco",
+        "capacidad": "932 GB",
+        "interfaz": "SCSI",
+        "modelo": "KINGSTON SFYRS1000G"
       }
     ],
     "monitores": [
       {
-        "fabricante": "ASUS",
-        "modelo": "ASUS TUF Gaming VG27AQ 27\" 165Hz",
-        "serie": "ASUS-27VG-001"
+        "serie": "80695",
+        "fabricante": "LG",
+        "modelo": "LG FHD"
       }
     ],
     "perifericos": [
       {
-        "tipo": "Teclado",
-        "nombre": "HyperX Alloy Origins Mechanical Keyboard",
-        "fabricante": "HyperX",
-        "es_marca": true
+        "nombre": "EPSON Printer Utility 116E",
+        "tipo": "USB",
+        "id_hardware": "USB\\VID_04B8&PID_116E&MI_05\\9&25B61AB0&1&C005"
       },
       {
-        "tipo": "Mouse",
-        "nombre": "Razer DeathAdder V2 Gaming Mouse",
-        "fabricante": "Razer",
-        "es_marca": true
-      },
-      {
-        "tipo": "Audífonos / Diadema",
-        "nombre": "HyperX Cloud II Gaming Headset",
-        "fabricante": "HyperX",
-        "es_marca": true
+        "nombre": "EPSON L14150 Series FAX",
+        "tipo": "USB",
+        "id_hardware": "USB\\VID_04B8&PID_116E&MI_03\\9&25B61AB0&1&0003"
       }
     ],
-    "hostname": "PC-GAMER01",
-    "usuario_actual": "Coordinador Gamer",
+    "hostname": "DESKTOP-SK8G14I",
+    "usuario_actual": "autonoma",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.105",
-    "mac_address": "04:D4:C4:5E:22:90",
+    "ip_red": "192.168.1.51, fe80::1372:4649:6c81:7a8d",
+    "mac_address": "A8:E2:91:0A:F5:F0",
+    "ubicacion": "Infraestructura",
+    "estado": "Operativo",
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 19:33:30",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:44:27",
+    "_id": "6a93cec1d93bacbe3b395770"
+  },
+  {
+    "id": "item-1788049839894-6493",
+    "modelo": "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
+    "numero_serie": "8CN60402VG",
+    "placa_base": "8D19",
+    "placa_base_completa": "HP 8D19",
+    "placa_base_serial": "PUNNL0CWBLW0BV",
+    "tipo_equipo": "All-in-One",
+    "fabricante": "HP",
+    "procesador": "Intel(R) Core(TM) Ultra 7 265 (20 Nucleos / 20 Hilos)",
+    "ram_total": "16 GB (1 modulo(s))",
+    "ram_detalles": [
+      "DIMM1 - 16GB @ 5600MHz (S/N: 1508E0D3 - Modelo: M425R2GA3EB0-CWMOD)"
+    ],
+    "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_FB99.)",
+    "almacenamiento": [
+      {
+        "serie": "8CE3_8E10_0728_FB99.",
+        "tipo": "Disco",
+        "capacidad": "477 GB",
+        "interfaz": "SCSI",
+        "modelo": "KBG60ZNV512G KIOXIA"
+      }
+    ],
+    "monitores": [
+      {
+        "serie": "8CN60402VG",
+        "fabricante": "HP",
+        "modelo": "HP ProStudio 4"
+      }
+    ],
+    "perifericos": [],
+    "hostname": "DESKTOP-4T6RKVO",
+    "usuario_actual": "AUTONOMA",
+    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
+    "ip_red": "192.168.1.205, fe80::e3d3:2532:f557:27d4, fd20:9fa8:3d5b:8:584b:7ce3:cde8:d804, 2803:9810:6014:1408:584b:7ce3:cde8:d804, fd20:9fa8:3d5b:8:8052:2de2:b227:2a84, 2803:9810:6014:1408:33f1:bb8:993d:107c",
+    "mac_address": "C8:95:CE:1B:9D:1A",
     "ubicacion": "Sala Gamer",
     "estado": "Operativo",
-    "notas": "Estación de alto rendimiento en Sala Gamer",
-    "fecha_escaneo": "2026-08-30 01:00:00",
-    "origen": "Manual"
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 19:30:39",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:44:43",
+    "_id": "6a93cec1d93bacbe3b395771"
   },
   {
-    "id": "item-1",
-    "modelo": "HP ProStudio 4",
-    "numero_serie": "8CN60500Y3",
-    "placa_base": "8D19",
-    "placa_base_completa": "HP 8D19 Motherboard",
-    "placa_base_serial": "PB8D190011",
+    "id": "item-1788049727863-770",
+    "modelo": "System Product Name",
+    "numero_serie": "System Serial Number",
+    "placa_base": "TUF GAMING B760M-PLUS WIFI II",
+    "placa_base_completa": "ASUSTeK COMPUTER INC. TUF GAMING B760M-PLUS WIFI II",
+    "placa_base_serial": "250453668800116",
     "tipo_equipo": "PC de Escritorio",
-    "fabricante": "HP",
-    "procesador": "Intel Core i7-10700 @ 2.90GHz (8 Núcleos / 16 Hilos)",
-    "ram_total": "16 GB (2x 8GB DDR4)",
+    "fabricante": "ASUS",
+    "procesador": "Intel(R) Core(TM) i7-14700F (20 Nucleos / 28 Hilos)",
+    "ram_total": "32 GB (2 modulo(s))",
     "ram_detalles": [
-      "Slot 1: 8GB DDR4-3200 (S/N: HP8GB001)",
-      "Slot 2: 8GB DDR4-3200 (S/N: HP8GB002)"
+      "Controller0-DIMM0 - 16GB @ 4000MHz (S/N: 46056329 - Modelo: KF556C40-16)",
+      "Controller1-DIMM0 - 16GB @ 4000MHz (S/N: 41055A59 - Modelo: KF556C40-16)"
     ],
-    "almacenamiento_resumen": "KIOXIA NVMe SSD 512GB (S/N: KX9087123)",
+    "almacenamiento_resumen": "KINGSTON SNV3S2000G (1863 GB, S/N: 0000_0000_0000_0000_0026_B768_76B2_9A25.)",
     "almacenamiento": [
       {
-        "modelo": "KIOXIA NVMe SSD",
-        "serie": "KX9087123",
-        "capacidad": "512 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
+        "serie": "0000_0000_0000_0000_0026_B768_76B2_9A25.",
+        "tipo": "Disco",
+        "capacidad": "1863 GB",
+        "interfaz": "SCSI",
+        "modelo": "KINGSTON SNV3S2000G"
       }
     ],
     "monitores": [
       {
-        "fabricante": "HP",
-        "modelo": "HP E24 G4 FHD",
-        "serie": "CNC1234XYZ"
+        "serie": "TCLMTF142784",
+        "fabricante": "ASUS",
+        "modelo": "ASUS VY279HGR"
       }
     ],
-    "perifericos": [
+    "perifericos": [],
+    "hostname": "PC-GAMER01",
+    "usuario_actual": "AUTONOMA",
+    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
+    "ip_red": "192.168.1.46, fe80::2956:30e1:5334:81f",
+    "mac_address": "A0:AD:9F:07:3F:5A",
+    "ubicacion": "Sala Gamer",
+    "estado": "Operativo",
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 19:28:49",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:44:52",
+    "_id": "6a93cec1d93bacbe3b395772"
+  },
+  {
+    "id": "item-1788047956358",
+    "modelo": "System Product Name",
+    "numero_serie": "System Serial Number",
+    "placa_base": "PRIME B760M-A AX",
+    "placa_base_completa": "ASUSTeK COMPUTER INC. PRIME B760M-A AX",
+    "placa_base_serial": "250556321000196",
+    "tipo_equipo": "PC de Escritorio",
+    "fabricante": "ASUS",
+    "procesador": "Intel(R) Core(TM) i7-14700F (20 Nucleos / 28 Hilos)",
+    "ram_total": "32 GB (2 modulo(s))",
+    "ram_detalles": [
+      "Controller0-DIMM1 - 16GB @ 6000MHz (S/N: E45060FD - Modelo: F5-6000J3636F16G)",
+      "Controller1-DIMM1 - 16GB @ 6000MHz (S/N: 125352F6 - Modelo: F5-6000J3636F16G)"
+    ],
+    "almacenamiento_resumen": "Lexar SSD NM610 PRO 500GB (466 GB, S/N: 0000_0006_2505_3005_CAF2_5B03_8000_015F.) | Yotta (1908 GB, S/N: 0000_0000_0000_0000_0C82_D509_0400_0900.)",
+    "almacenamiento": [
       {
-        "tipo": "Teclado",
-        "nombre": "HP Business Slim USB Keyboard",
-        "fabricante": "HP",
-        "es_marca": true
+        "serie": "0000_0006_2505_3005_CAF2_5B03_8000_015F.",
+        "tipo": "SATA SSD",
+        "capacidad": "466 GB",
+        "interfaz": "SCSI",
+        "modelo": "Lexar SSD NM610 PRO 500GB"
       },
       {
-        "tipo": "Mouse",
-        "nombre": "HP Optical USB Mouse",
-        "fabricante": "HP",
-        "es_marca": true
+        "serie": "0000_0000_0000_0000_0C82_D509_0400_0900.",
+        "tipo": "Disco",
+        "capacidad": "1908 GB",
+        "interfaz": "SCSI",
+        "modelo": "Yotta"
       }
     ],
-    "hostname": "DESKTOP-HP-ADM01",
-    "usuario_actual": "Atención CAE",
+    "monitores": [
+      {
+        "serie": "505TOVC1W727",
+        "fabricante": "LG",
+        "modelo": "LG FHD"
+      }
+    ],
+    "perifericos": [],
+    "hostname": "DESKTOP-CM42MCR",
+    "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.50",
-    "mac_address": "40:D1:33:8F:11:01",
+    "ip_red": "192.168.1.119, fe80::524:51ce:d74:58d6",
+    "mac_address": "A0:AD:9F:88:B5:78",
+    "ubicacion": "Sala Gamer",
+    "estado": "Operativo",
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 19:15:40",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:45:02",
+    "_id": "6a93cec1d93bacbe3b395773"
+  },
+  {
+    "id": "item-1788047921973",
+    "modelo": "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
+    "numero_serie": "8CN60402VX",
+    "placa_base": "8D19",
+    "placa_base_completa": "HP 8D19",
+    "placa_base_serial": "PUNNL0CWBLW0DK",
+    "tipo_equipo": "All-in-One",
+    "fabricante": "HP",
+    "procesador": "Intel(R) Core(TM) Ultra 7 265 (20 Nucleos / 20 Hilos)",
+    "ram_total": "16 GB (1 modulo(s))",
+    "ram_detalles": [
+      "DIMM1 - 16GB @ 5600MHz (S/N: 1508E697 - Modelo: M425R2GA3EB0-CWMOD)"
+    ],
+    "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_EFB5.)",
+    "almacenamiento": [
+      {
+        "serie": "8CE3_8E10_0728_EFB5.",
+        "tipo": "Disco",
+        "capacidad": "477 GB",
+        "interfaz": "SCSI",
+        "modelo": "KBG60ZNV512G KIOXIA"
+      }
+    ],
+    "monitores": [
+      {
+        "serie": "8CN60402VX",
+        "fabricante": "HP",
+        "modelo": "HP ProStudio 4"
+      }
+    ],
+    "perifericos": [],
+    "hostname": "DESKTOP-4T6RKVO",
+    "usuario_actual": "AUTONOMA",
+    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
+    "ip_red": "192.168.1.124, fe80::c2bd:7a6a:5ffd:9fdf",
+    "mac_address": "5C:28:86:1F:73:75",
     "ubicacion": "CAE",
     "estado": "Operativo",
-    "notas": "Equipo de atención al estudiante",
-    "fecha_escaneo": "2026-08-28 10:15:00",
-    "origen": "Manual"
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 19:19:17",
+    "origen": "Escáner Batch/PowerShell",
+    "_id": "6a93cec1d93bacbe3b395774"
   },
   {
-    "id": "item-2",
-    "modelo": "HP ProStudio 4",
-    "numero_serie": "8CN60500X9",
+    "id": "item-1788046978633",
+    "modelo": "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
+    "numero_serie": "8CN60402VK",
     "placa_base": "8D19",
-    "placa_base_completa": "HP 8D19 Motherboard",
-    "placa_base_serial": "PB8D190012",
-    "tipo_equipo": "PC de Escritorio",
+    "placa_base_completa": "HP 8D19",
+    "placa_base_serial": "PUNNL0DWBLY0OH",
+    "tipo_equipo": "All-in-One",
     "fabricante": "HP",
-    "procesador": "Intel Core i7-10700 @ 2.90GHz (8 Núcleos / 16 Hilos)",
-    "ram_total": "16 GB (2x 8GB DDR4)",
+    "procesador": "Intel(R) Core(TM) Ultra 7 265 (20 Nucleos / 20 Hilos)",
+    "ram_total": "16 GB (1 modulo(s))",
     "ram_detalles": [
-      "Slot 1: 8GB DDR4-3200 (S/N: HP8GB003)",
-      "Slot 2: 8GB DDR4-3200 (S/N: HP8GB004)"
+      "DIMM1 - 16GB @ 5600MHz (S/N: 1508D34C - Modelo: M425R2GA3EB0-CWMOD)"
     ],
-    "almacenamiento_resumen": "Samsung NVMe 980 500GB (S/N: S98000912)",
+    "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_DF2D.)",
     "almacenamiento": [
       {
-        "modelo": "Samsung SSD 980 500GB",
-        "serie": "S98000912",
-        "capacidad": "500 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
+        "serie": "8CE3_8E10_0728_DF2D.",
+        "tipo": "Disco",
+        "capacidad": "477 GB",
+        "interfaz": "SCSI",
+        "modelo": "KBG60ZNV512G KIOXIA"
       }
     ],
     "monitores": [
       {
+        "serie": "8CN60402VK",
         "fabricante": "HP",
-        "modelo": "HP E24 G4 FHD",
-        "serie": "CNC1234ABC"
+        "modelo": "HP ProStudio 4"
       }
     ],
-    "perifericos": [
-      {
-        "tipo": "Teclado",
-        "nombre": "HP Business Slim USB Keyboard",
-        "fabricante": "HP",
-        "es_marca": true
-      },
-      {
-        "tipo": "Mouse",
-        "nombre": "HP Optical USB Mouse",
-        "fabricante": "HP",
-        "es_marca": true
-      }
-    ],
-    "hostname": "PC-FINANZAS01",
-    "usuario_actual": "Contabilidad",
+    "perifericos": [],
+    "hostname": "NUEVO-ADM",
+    "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.51",
-    "mac_address": "40:D1:33:8F:11:02",
-    "ubicacion": "Finanzas",
+    "ip_red": "192.168.91.150, fe80::a04a:3994:f496:6b8f",
+    "mac_address": "C8:95:CE:1B:88:66",
+    "ubicacion": "Soporte Técnico",
     "estado": "Operativo",
-    "notas": "Equipo para análisis financiero",
-    "fecha_escaneo": "2026-08-28 10:20:00",
-    "origen": "Manual"
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 18:42:59",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:45:16",
+    "_id": "6a93cec1d93bacbe3b395775"
   },
   {
-    "id": "item-admision",
-    "modelo": "Dell OptiPlex 7090 Tower",
-    "numero_serie": "DEL-7090-ADM01",
-    "placa_base": "0N0K24",
-    "placa_base_completa": "Dell OptiPlex 7090 Motherboard",
-    "placa_base_serial": "CN0N0K241234",
-    "tipo_equipo": "PC de Escritorio",
-    "fabricante": "Dell",
-    "procesador": "Intel Core i7-11700 @ 2.50GHz (8 Núcleos / 16 Hilos)",
-    "ram_total": "16 GB (2x 8GB DDR4)",
-    "ram_detalles": [
-      "Slot 1: 8GB DDR4-3200 (S/N: DEL8GB001)",
-      "Slot 2: 8GB DDR4-3200 (S/N: DEL8GB002)"
-    ],
-    "almacenamiento_resumen": "Kioxia NVMe 512GB (S/N: KX512DEL)",
-    "almacenamiento": [
-      {
-        "modelo": "Kioxia NVMe SSD 512GB",
-        "serie": "KX512DEL",
-        "capacidad": "512 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
-      }
-    ],
-    "monitores": [
-      {
-        "fabricante": "Dell",
-        "modelo": "Dell P2419H 24\" FHD",
-        "serie": "CN-0P24-001"
-      }
-    ],
-    "perifericos": [
-      {
-        "tipo": "Teclado",
-        "nombre": "Dell KB216 Wired Keyboard",
-        "fabricante": "Dell",
-        "es_marca": true
-      },
-      {
-        "tipo": "Mouse",
-        "nombre": "Dell MS116 Optical Mouse",
-        "fabricante": "Dell",
-        "es_marca": true
-      }
-    ],
-    "hostname": "PC-ADMISION01",
-    "usuario_actual": "Admisión",
-    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.52",
-    "mac_address": "18:66:DA:4C:11:22",
-    "ubicacion": "Admisión",
-    "estado": "Operativo",
-    "notas": "Estación de atención y registro de postulantes",
-    "fecha_escaneo": "2026-08-28 10:22:00",
-    "origen": "Manual"
-  },
-  {
-    "id": "item-3",
-    "modelo": "HP ProStudio 4",
-    "numero_serie": "8CN60500WT",
+    "id": "item-1788045639053",
+    "modelo": "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
+    "numero_serie": "8CN60402VN",
     "placa_base": "8D19",
-    "placa_base_completa": "HP 8D19 Motherboard",
-    "placa_base_serial": "PB8D190013",
-    "tipo_equipo": "PC de Escritorio",
+    "placa_base_completa": "HP 8D19",
+    "placa_base_serial": "PUNNL0CWBLW0BZ",
+    "tipo_equipo": "All-in-One",
     "fabricante": "HP",
-    "procesador": "Intel Core i5-10500 @ 3.10GHz (6 Núcleos / 12 Hilos)",
-    "ram_total": "8 GB (1x 8GB DDR4)",
+    "procesador": "Intel(R) Core(TM) Ultra 7 265 (20 Nucleos / 20 Hilos)",
+    "ram_total": "16 GB (1 modulo(s))",
     "ram_detalles": [
-      "Slot 1: 8GB DDR4-2666 (S/N: HP8GB005)"
+      "DIMM1 - 16GB @ 5600MHz (S/N: 1508E7B2 - Modelo: M425R2GA3EB0-CWMOD)"
     ],
-    "almacenamiento_resumen": "Kingston SSD 480GB (S/N: KG4801123)",
+    "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_EFB9.)",
     "almacenamiento": [
       {
-        "modelo": "Kingston A400 480GB",
-        "serie": "KG4801123",
-        "capacidad": "480 GB",
-        "tipo": "SATA SSD",
-        "interfaz": "SATA"
+        "serie": "8CE3_8E10_0728_EFB9.",
+        "tipo": "Disco",
+        "capacidad": "477 GB",
+        "interfaz": "SCSI",
+        "modelo": "KBG60ZNV512G KIOXIA"
       }
     ],
     "monitores": [
       {
+        "serie": "8CN60402VN",
         "fabricante": "HP",
-        "modelo": "HP V22 FHD",
-        "serie": "CNC7899XYZ"
+        "modelo": "HP ProStudio 4"
       }
     ],
-    "perifericos": [
-      {
-        "tipo": "Teclado",
-        "nombre": "Genius USB Keyboard",
-        "fabricante": "Genius",
-        "es_marca": true
-      },
-      {
-        "tipo": "Mouse",
-        "nombre": "Logitech B100 Optical Mouse",
-        "fabricante": "Logitech",
-        "es_marca": true
-      }
-    ],
-    "hostname": "PC-TOPICO01",
-    "usuario_actual": "Médico de Guardia",
+    "perifericos": [],
+    "hostname": "PC-CAMARASOP",
+    "usuario_actual": "Camaritas",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.53",
-    "mac_address": "40:D1:33:8F:11:03",
-    "ubicacion": "Tópico",
+    "ip_red": "176.100.0.253, fe80::5223:8735:7882:4fd0",
+    "mac_address": "5C:28:86:1F:73:3C",
+    "ubicacion": "Soporte Técnico",
     "estado": "Operativo",
-    "notas": "Estación médica y de triaje",
-    "fecha_escaneo": "2026-08-28 10:25:00",
-    "origen": "Manual"
-  },
-  {
-    "id": "item-psico",
-    "modelo": "Dell OptiPlex 3080",
-    "numero_serie": "DEL-3080-PSI01",
-    "placa_base": "0WJ41K",
-    "placa_base_completa": "Dell OptiPlex 3080 Motherboard",
-    "placa_base_serial": "CN0WJ41K1122",
-    "tipo_equipo": "PC de Escritorio",
-    "fabricante": "Dell",
-    "procesador": "Intel Core i5-10500 @ 3.10GHz (6 Núcleos / 12 Hilos)",
-    "ram_total": "16 GB (2x 8GB DDR4)",
-    "ram_detalles": [
-      "Slot 1: 8GB DDR4-2666",
-      "Slot 2: 8GB DDR4-2666"
-    ],
-    "almacenamiento_resumen": "Samsung 870 EVO 500GB (S/N: S870PSI01)",
-    "almacenamiento": [
-      {
-        "modelo": "Samsung 870 EVO 500GB",
-        "serie": "S870PSI01",
-        "capacidad": "500 GB",
-        "tipo": "SATA SSD",
-        "interfaz": "SATA"
-      }
-    ],
-    "monitores": [
-      {
-        "fabricante": "Dell",
-        "modelo": "Dell E2216H 22\" FHD",
-        "serie": "CN-0E22-002"
-      }
-    ],
-    "perifericos": [
-      {
-        "tipo": "Teclado",
-        "nombre": "Logitech K120 USB Keyboard",
-        "fabricante": "Logitech",
-        "es_marca": true
-      },
-      {
-        "tipo": "Mouse",
-        "nombre": "Logitech M90 Optical Mouse",
-        "fabricante": "Logitech",
-        "es_marca": true
-      }
-    ],
-    "hostname": "PC-PSICO01",
-    "usuario_actual": "Psicología",
-    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.54",
-    "mac_address": "18:66:DA:4C:11:33",
-    "ubicacion": "Psicopedagógico",
-    "estado": "Operativo",
-    "notas": "Estación de evaluación psicopedagógica",
-    "fecha_escaneo": "2026-08-28 10:28:00",
-    "origen": "Manual"
-  },
-  {
-    "id": "item-4",
-    "modelo": "HP ProStudio 4",
-    "numero_serie": "8CN60500YQ",
-    "placa_base": "8D19",
-    "placa_base_completa": "HP 8D19 Motherboard",
-    "placa_base_serial": "PB8D190014",
-    "tipo_equipo": "PC de Escritorio",
-    "fabricante": "HP",
-    "procesador": "Intel Core i7-10700 @ 2.90GHz (8 Núcleos / 16 Hilos)",
-    "ram_total": "32 GB (2x 16GB DDR4)",
-    "ram_detalles": [
-      "Slot 1: 16GB DDR4-3200",
-      "Slot 2: 16GB DDR4-3200"
-    ],
-    "almacenamiento_resumen": "WD Black SN770 1TB (S/N: WDB1000998)",
-    "almacenamiento": [
-      {
-        "modelo": "WD Black SN770 1TB NVMe",
-        "serie": "WDB1000998",
-        "capacidad": "1000 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
-      }
-    ],
-    "monitores": [
-      {
-        "fabricante": "HP",
-        "modelo": "HP EliteDisplay E243 23.8\" FHD",
-        "serie": "CN-HPE24-304"
-      }
-    ],
-    "perifericos": [
-      {
-        "tipo": "Teclado",
-        "nombre": "Logitech MX Keys Wireless",
-        "fabricante": "Logitech",
-        "es_marca": true
-      },
-      {
-        "tipo": "Mouse",
-        "nombre": "Logitech MX Master 3",
-        "fabricante": "Logitech",
-        "es_marca": true
-      }
-    ],
-    "hostname": "PC-LAB304-01",
-    "usuario_actual": "Profesor Lab 304",
-    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.55",
-    "mac_address": "40:D1:33:8F:11:04",
-    "ubicacion": "Laboratorio 304",
-    "estado": "Operativo",
-    "notas": "Estación principal de Laboratorio 304",
-    "fecha_escaneo": "2026-08-28 10:30:00",
-    "origen": "Manual"
-  },
-  {
-    "id": "item-lab305",
-    "modelo": "Lenovo ThinkCentre M70s Gen 3",
-    "numero_serie": "LNV-M70S-LAB305",
-    "placa_base": "3190",
-    "placa_base_completa": "Lenovo ThinkCentre M70s Motherboard",
-    "placa_base_serial": "LNV319001",
-    "tipo_equipo": "PC de Escritorio",
-    "fabricante": "Lenovo",
-    "procesador": "Intel Core i7-12700 @ 2.10GHz (12 Núcleos / 20 Hilos)",
-    "ram_total": "16 GB (2x 8GB DDR4)",
-    "ram_detalles": [
-      "Slot 1: 8GB DDR4-3200",
-      "Slot 2: 8GB DDR4-3200"
-    ],
-    "almacenamiento_resumen": "Micron NVMe SSD 512GB (S/N: MC512LNV)",
-    "almacenamiento": [
-      {
-        "modelo": "Micron NVMe SSD 512GB",
-        "serie": "MC512LNV",
-        "capacidad": "512 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
-      }
-    ],
-    "monitores": [
-      {
-        "fabricante": "Lenovo",
-        "modelo": "Lenovo ThinkVision T24i 23.8\" FHD",
-        "serie": "LNV-TV24-001"
-      }
-    ],
-    "perifericos": [
-      {
-        "tipo": "Teclado",
-        "nombre": "Lenovo Calliope USB Keyboard",
-        "fabricante": "Lenovo",
-        "es_marca": true
-      },
-      {
-        "tipo": "Mouse",
-        "nombre": "Lenovo USB Optical Mouse",
-        "fabricante": "Lenovo",
-        "es_marca": true
-      }
-    ],
-    "hostname": "PC-LAB305-01",
-    "usuario_actual": "Profesor Lab 305",
-    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.56",
-    "mac_address": "54:05:DB:8C:99:01",
-    "ubicacion": "Laboratorio 305",
-    "estado": "Operativo",
-    "notas": "Estación de laboratorio para informática avanzada",
-    "fecha_escaneo": "2026-08-28 10:35:00",
-    "origen": "Manual"
-  },
-  {
-    "id": "item-5",
-    "modelo": "Lenovo ThinkPad T14 Gen 2",
-    "numero_serie": "PF29X8YZ",
-    "placa_base": "20W0005VUS",
-    "placa_base_completa": "Lenovo ThinkPad T14 Motherboard",
-    "placa_base_serial": "LNV009817",
-    "tipo_equipo": "Laptop",
-    "fabricante": "Lenovo",
-    "procesador": "Intel Core i7-1165G7 @ 2.80GHz (4 Núcleos / 8 Hilos)",
-    "ram_total": "16 GB (Soldada + 8GB DDR4)",
-    "ram_detalles": [
-      "Slot 1: 16GB DDR4-3200"
-    ],
-    "almacenamiento_resumen": "Samsung NVMe 512GB (S/N: S512998811)",
-    "almacenamiento": [
-      {
-        "modelo": "Samsung PM991a NVMe 512GB",
-        "serie": "S512998811",
-        "capacidad": "512 GB",
-        "tipo": "NVMe SSD",
-        "interfaz": "PCIe"
-      }
-    ],
-    "monitores": [
-      {
-        "fabricante": "Lenovo",
-        "modelo": "Lenovo Pantalla Integrada 14\" FHD IPS",
-        "serie": "LEN40A0"
-      }
-    ],
-    "perifericos": [
-      {
-        "tipo": "Mouse",
-        "nombre": "Logitech Wireless Mouse M185",
-        "fabricante": "Logitech",
-        "es_marca": true
-      }
-    ],
-    "hostname": "LAPTOP-LNV-DIR01",
-    "usuario_actual": "Dirección General",
-    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.57",
-    "mac_address": "54:05:DB:8C:99:02",
-    "ubicacion": "Dirección",
-    "estado": "En Uso",
-    "notas": "Laptop asignada a dirección general para movilidad",
-    "fecha_escaneo": "2026-08-28 11:00:00",
-    "origen": "Manual"
+    "notas": "Registrado por escáner automático",
+    "fecha_escaneo": "2026-08-29 18:20:38",
+    "origen": "Escáner Batch/PowerShell",
+    "fecha_modificacion": "2026-08-30 03:45:24",
+    "_id": "6a93cec1d93bacbe3b395776"
   }
 ]
