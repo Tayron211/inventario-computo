@@ -5,15 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>SYS-INVENTORY | Control & Auditoría de Hardware</title>
   
-  <!-- PWA & Mobile Status Bar Color Integration -->
+  <!-- PWA & Mobile Status Bar Color Integration (Blanco puro en Modo Claro, Negro en Modo Oscuro) -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#08080c" id="metaThemeColor">
+  <meta name="theme-color" content="#ffffff" id="metaThemeColor">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" id="metaAppleStatus">
   <meta name="apple-mobile-web-app-title" content="SYS-INVENTORY PRO">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="msapplication-navbutton-color" content="#08080c">
-  <meta name="msapplication-TileColor" content="#08080c">
+  <meta name="msapplication-navbutton-color" content="#ffffff" id="metaMsNav">
+  <meta name="msapplication-TileColor" content="#ffffff">
+
+  <!-- Sincronización instantánea de tema antes de renderizar para evitar destellos -->
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('sysinventario_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        var color = theme === 'light' ? '#ffffff' : '#08080c';
+        var mTheme = document.getElementById('metaThemeColor');
+        if (mTheme) mTheme.setAttribute('content', color);
+        var mMs = document.getElementById('metaMsNav');
+        if (mMs) mMs.setAttribute('content', color);
+        var mApple = document.getElementById('metaAppleStatus');
+        if (mApple) mApple.setAttribute('content', theme === 'light' ? 'default' : 'black-translucent');
+      } catch (e) {}
+    })();
+  </script>
   
   <!-- Favicon & Apple Touch Icons -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">

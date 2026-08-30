@@ -210,10 +210,27 @@ function setTheme(theme) {
     themeToggleText.textContent = theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
   }
 
+  const color = theme === 'light' ? '#ffffff' : '#08080c';
+
   const metaThemeColor = document.getElementById('metaThemeColor');
   if (metaThemeColor) {
-    metaThemeColor.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0b0e14');
+    metaThemeColor.setAttribute('content', color);
   }
+
+  const metaMsNav = document.getElementById('metaMsNav');
+  if (metaMsNav) {
+    metaMsNav.setAttribute('content', color);
+  }
+
+  const metaAppleStatus = document.getElementById('metaAppleStatus');
+  if (metaAppleStatus) {
+    metaAppleStatus.setAttribute('content', theme === 'light' ? 'default' : 'black-translucent');
+  }
+
+  // Actualizar cualquier otra etiqueta theme-color
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
+    m.setAttribute('content', color);
+  });
 
   updateQrForTheme(theme);
 }
