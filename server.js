@@ -308,6 +308,20 @@ function saveLocalFile(data) {
   }
 }
 
+const isInternalAudioDriver = /realtek|intel.*audio|nvidia.*audio|amd.*audio|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
+const isGenericStub = /dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|usb input device|hid keyboard device|hid-compliant/i;
+
+function normalizeItem(item) {
+  if (!item) return item;
+  if (item.perifericos && Array.isArray(item.perifericos)) {
+    item.perifericos = item.perifericos.filter(p => {
+      const n = (p.nombre || p.tipo || '').trim();
+      return n && !isInternalAudioDriver.test(n) && !isGenericStub.test(n);
+    });
+  }
+  return item;
+}
+
 function loadDB() {
   if (memoryCache && Array.isArray(memoryCache)) {
     return memoryCache.map(normalizeItem);
@@ -1214,8 +1228,16 @@ app.get('/api/export-excel', async (req, res) => {
         });
       });
 
-      // 3. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS
-      (item.perifericos || []).forEach(p => {
+      // 3. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS (Filtrando drivers de audio y stubs genéricos)
+      const isInternalAudioDriver = /realtek|intel.*audio|nvidia.*audio|amd.*audio|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
+      const isGenericStub = /dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|usb input device|hid keyboard device|hid-compliant/i;
+
+      const validPerifericos = (item.perifericos || []).filter(p => {
+        const n = (p.nombre || p.tipo || '').toLowerCase();
+        return !isInternalAudioDriver.test(n) && !isGenericStub.test(n);
+      });
+
+      validPerifericos.forEach(p => {
         const pName = toUpper(p.nombre || p.tipo || '');
         const pType = (p.tipo || '').toLowerCase();
         const pNameLower = pName.toLowerCase();
@@ -1238,7 +1260,7 @@ app.get('/api/export-excel', async (req, res) => {
             ubicacion: amb,
             estado: status
           });
-        } else if (/aud[ií]fono|diadema|headset|auricular|audio/i.test(pType) || /aud[ií]fono|diadema|headset|auricular|audio/i.test(pNameLower)) {
+        } else if (/aud[ií]fono|diadema|headset|auricular|hyperx|jabra|poly|plantronics|kraken|void|quantum|sennheiser|audio-technica/i.test(pNameLower) || /aud[ií]fono|diadema|headset|auricular/i.test(pType)) {
           wsAudifonos.addRow({
             dispositivo: pName,
             hostname: host,
@@ -1252,7 +1274,7 @@ app.get('/api/export-excel', async (req, res) => {
 
       // 4. Inventario General
       const monitoresStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante || ''} (S/N: ${m.serie || 'N/A'})`).join('\n') || 'N/A';
-      const perifericosStr = (item.perifericos || []).map(p => `${p.nombre || p.tipo || ''}`).join('\n') || 'ESTÁNDAR';
+      const perifericosStr = validPerifericos.map(p => `${p.nombre || p.tipo || ''}`).join('\n') || 'ESTÁNDAR';
 
       wsGeneral.addRow({
         hostname: host,

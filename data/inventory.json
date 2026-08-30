@@ -30,68 +30,7 @@
         "modelo": "ProStudio 4"
       }
     ],
-    "perifericos": [
-      {
-        "nombre": "Dispositivo de teclado HID",
-        "tipo": "Teclado",
-        "id_hardware": "HID\\CONVERTEDDEVICE&COL01\\5&32FED25&0&0000"
-      },
-      {
-        "nombre": "Dispositivo de entrada USB",
-        "tipo": "Teclado",
-        "id_hardware": "USB\\VID_0461&PID_554A&MI_00\\6&18780B94&0&0000"
-      },
-      {
-        "nombre": "Dispositivo de teclado HID",
-        "tipo": "Teclado",
-        "id_hardware": "HID\\INTC816&COL01\\3&125F27AF&0&0000"
-      },
-      {
-        "nombre": "Dispositivo de entrada USB",
-        "tipo": "Mouse / Puntero",
-        "id_hardware": "USB\\VID_03F0&PID_584A\\5&2713CBC8&0&3"
-      },
-      {
-        "nombre": "Varios micrófonos (Realtek(R) Audio)",
-        "tipo": "AudioEndpoint",
-        "id_hardware": "SWD\\MMDEVAPI\\{0.0.1.00000000}.{F28B5A22-9E5C-429E-A167-7D5A224FF3A6}"
-      },
-      {
-        "nombre": "Controles de radio inalámbrica compatibles con HID",
-        "tipo": "HIDClass",
-        "id_hardware": "HID\\INTC816&COL02\\3&125F27AF&0&0001"
-      },
-      {
-        "nombre": "Dispositivo de control del consumidor compatible con HID",
-        "tipo": "HIDClass",
-        "id_hardware": "HID\\INTC816&COL07\\3&125F27AF&0&0006"
-      },
-      {
-        "nombre": "Dispositivo de control del consumidor compatible con HID",
-        "tipo": "HIDClass",
-        "id_hardware": "HID\\INTC816&COL0A\\3&125F27AF&0&0009"
-      },
-      {
-        "nombre": "Dispositivo de control de dispositivo portátil convertido",
-        "tipo": "HIDClass",
-        "id_hardware": "BUTTONCONVERTER\\CONVERTEDDEVICE\\4&2FC29DA9&0&0"
-      },
-      {
-        "nombre": "Dispositivo de entrada USB",
-        "tipo": "HIDClass",
-        "id_hardware": "USB\\VID_0461&PID_554A&MI_01\\6&18780B94&0&0001"
-      },
-      {
-        "nombre": "Altavoces (Realtek(R) Audio)",
-        "tipo": "AudioEndpoint",
-        "id_hardware": "SWD\\MMDEVAPI\\{0.0.0.00000000}.{92C0138A-6E69-4DAB-9911-5A8CE1E61923}"
-      },
-      {
-        "nombre": "IdeaCamera(App)",
-        "tipo": "Camera",
-        "id_hardware": "ROOT\\CAMERA\\0000"
-      }
-    ],
+    "perifericos": [],
     "hostname": "PC-SOPORTE04",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
