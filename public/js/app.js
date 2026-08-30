@@ -887,6 +887,10 @@ function renderTable(items) {
     // Periféricos
     if (item.perifericos && item.perifericos.length > 0) {
       item.perifericos.forEach(p => {
+        const pName = (p.nombre || p.tipo || '').trim();
+        if (/^(dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|usb input device|hid keyboard device|hid-compliant device|hid-compliant mouse)$/i.test(pName)) {
+          return;
+        }
         const pTipoIcon = (p.tipo && p.tipo.toLowerCase().includes('mouse')) ? 'fa-mouse' : ((p.tipo && p.tipo.toLowerCase().includes('teclado')) ? 'fa-keyboard' : 'fa-plug');
         perifericosListHtml += `<div class="hw-item-line"><i class="fa-solid ${pTipoIcon}"></i> ${highlightMatch(p.nombre || p.tipo, currentSearchQuery)}</div>`;
       });

@@ -163,14 +163,17 @@ if ($monitores.Count -eq 0) {
     }
 }
 
-# 8. PERIFÉRICOS DE MARCA RECONOCIDA (LOGITECH, HP, DELL, LENOVO, ETC.)
+# 8. PERIFÉRICOS IDENTIFICADOS CON DRIVER/MARCA (EXCLUYENDO ENTRADAS GENÉRICAS HID/USB)
 $perifericosDetalles = @()
-$marcasReconocidasPattern = 'Logitech|HP|Dell|Lenovo|Microsoft|Corsair|Razer|HyperX|Kingston|Redragon|Genius|ASUS|Samsung|LG|AOC|ViewSonic|JBL|Sony|Jabra|Poly|Plantronics|SteelSeries|Trust|Targus|Kensington|BenQ|Philips|Epson|Canon|Brother|Apple|Huawei|Xiaomi|Wacom|A4Tech|Cougar'
+$marcasReconocidasPattern = 'Logitech|HP|Dell|Lenovo|Microsoft|Corsair|Razer|HyperX|Kingston|Redragon|Genius|ASUS|Samsung|LG|AOC|ViewSonic|JBL|Sony|Jabra|Poly|Plantronics|SteelSeries|Trust|Targus|Kensington|BenQ|Philips|Epson|Canon|Brother|Apple|Huawei|Xiaomi|Wacom|A4Tech|Cougar|Realtek|Creative|Audio-Technica|Sennheiser'
+
+$genericosExcluir = 'Dispositivo de entrada USB|Dispositivo de teclado HID|Dispositivo de mouse HID|Dispositivo compatible con HID|Dispositivo de control|Dispositivo definido por el proveedor|Dispositivo del sistema|Dispositivo de interfaz|Dispositivo de audio USB|USB Input Device|HID Keyboard Device|HID-compliant device|HID-compliant mouse|HID-compliant|PS/2 Compatible|Dispositivo de almacenamiento'
 
 $pnpPeripherals = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue | Where-Object { 
     $_.Name -and $_.Status -eq 'OK' -and 
     ($_.PNPClass -in @('Keyboard', 'Mouse', 'USB', 'HIDClass', 'Camera', 'AudioEndpoint', 'Media', 'Image')) -and
-    $_.Name -notmatch 'Hub|Controlador|Root|Generic|Host|Standard|Virtual|Software|Composite|Dispositivo del sistema|Audio de Intel|NVIDIA High Definition'
+    $_.Name -notmatch $genericosExcluir -and
+    $_.Name -notmatch 'Hub|Controlador|Root|Generic|Host|Standard|Virtual|Software|Composite|Intel|NVIDIA High Definition'
 }
 
 $seenPeripherals = @{}
@@ -179,6 +182,8 @@ foreach ($dev in $pnpPeripherals) {
     $devName = ($dev.Name -replace '\s+', ' ').Trim()
     $devClass = $dev.PNPClass
     
+    if (-not $devName -or $devName -match $genericosExcluir) { continue }
+
     # Determinar tipo amigable
     $tipo = "Dispositivo USB"
     if ($devClass -eq "Keyboard" -or $devName -match "Keyboard|Teclado") { $tipo = "Teclado" }
@@ -189,17 +194,15 @@ foreach ($dev in $pnpPeripherals) {
     # Verificar si es de marca comercial reconocida
     $esMarcaReconocida = $devName -match $marcasReconocidasPattern -or ($dev.Manufacturer -and $dev.Manufacturer -match $marcasReconocidasPattern)
     
-    if ($esMarcaReconocida -or ($tipo -in @('Teclado', 'Mouse', 'Cámara Web', 'Audio / Diadema') -and $devName -notmatch 'HID-compliant|compatible con HID|PS/2|Estándar|Dispositivo de')) {
-        $uniqueKey = "$tipo-$devName"
-        if (-not $seenPeripherals.ContainsKey($uniqueKey)) {
-            $seenPeripherals[$uniqueKey] = $true
-            $perifericosDetalles += @{
-                tipo = $tipo
-                nombre = $devName
-                fabricante = $dev.Manufacturer
-                id_hardware = $dev.DeviceID
-                es_marca = [bool]$esMarcaReconocida
-            }
+    $uniqueKey = "$tipo-$devName"
+    if (-not $seenPeripherals.ContainsKey($uniqueKey)) {
+        $seenPeripherals[$uniqueKey] = $true
+        $perifericosDetalles += @{
+            tipo = $tipo
+            nombre = $devName
+            fabricante = $dev.Manufacturer
+            id_hardware = $dev.DeviceID
+            es_marca = [bool]$esMarcaReconocida
         }
     }
 }

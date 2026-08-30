@@ -806,7 +806,10 @@ app.post('/api/agent/report', (req, res) => {
     almacenamiento_resumen: payload.almacenamiento_resumen || '',
     almacenamiento: payload.almacenamiento || [],
     monitores: payload.monitores || [],
-    perifericos: payload.perifericos || [],
+    perifericos: (payload.perifericos || []).filter(p => {
+      const name = (p.nombre || p.tipo || '').trim();
+      return name && !/^(dispositivo de entrada usb|dispositivo de teclado hid|dispositivo de mouse hid|dispositivo compatible con hid|dispositivo de control|dispositivo definido por el proveedor|dispositivo del sistema|dispositivo de interfaz|usb input device|hid keyboard device|hid-compliant device|hid-compliant mouse)$/i.test(name);
+    }),
     hostname: recordHostname,
     usuario_actual: payload.usuario_actual || '',
     sistema_operativo: payload.sistema_operativo || '',
