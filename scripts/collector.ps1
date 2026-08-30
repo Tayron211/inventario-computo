@@ -296,6 +296,11 @@ Write-Host "==========================================================" -Foregro
 Write-Host "[+] Copia local guardada en: $filePath" -ForegroundColor DarkGray
 
 # ENVIAR AL SERVIDOR VIA REST API CON RETRY Y TIMEOUT EXTENDIDO (PARA DESPERTAR SERVIDOR CLOUD)
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls
+try {
+    [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+} catch {}
+
 $urlsToTry = @($ServerUrl)
 if ($ServerUrl -match 'ivt\.onrender\.com') {
     $urlsToTry += "https://inventario-computo.onrender.com"
@@ -304,22 +309,34 @@ if ($ServerUrl -match 'ivt\.onrender\.com') {
 }
 
 $sentSuccess = $false
+$payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonPayload)
 
 foreach ($targetUrl in $urlsToTry) {
     if ($sentSuccess) { break }
+    $apiUrl = "$targetUrl/api/agent/report"
     Write-Host "[*] Enviando datos al sistema de inventario ($targetUrl)..." -ForegroundColor Yellow
 
     for ($attempt = 1; $attempt -le 3; $attempt++) {
         try {
-            $apiUrl = "$targetUrl/api/agent/report"
-            $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
+            $wc = New-Object System.Net.WebClient
+            $wc.Encoding = [System.Text.Encoding]::UTF8
+            $wc.Headers.Add("Content-Type", "application/json; charset=utf-8")
+            $responseBytes = $wc.UploadData($apiUrl, "POST", $payloadBytes)
+            $responseStr = [System.Text.Encoding]::UTF8.GetString($responseBytes)
             Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
             $sentSuccess = $true
             break
         } catch {
-            if ($attempt -lt 3) {
-                Write-Host "    [*] Despertando servidor en la nube... reintentando en 3s (intento $attempt/3)..." -ForegroundColor Yellow
-                Start-Sleep -Seconds 3
+            try {
+                $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $payloadBytes -ContentType "application/json; charset=utf-8" -TimeoutSec 60
+                Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
+                $sentSuccess = $true
+                break
+            } catch {
+                if ($attempt -lt 3) {
+                    Write-Host "    [*] Despertando servidor en la nube... reintentando en 3s (intento $attempt/3)..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds 3
+                }
             }
         }
     }
