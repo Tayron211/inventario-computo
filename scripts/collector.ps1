@@ -292,16 +292,39 @@ Write-Host "  - HOSTNAME / IP:    $hostname ($ipPrincipal)" -ForegroundColor Whi
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "[+] Copia local guardada en: $filePath" -ForegroundColor DarkGray
 
-# ENVIAR AL SERVIDOR LOCAL VIA REST API
-Write-Host "[*] Enviando datos al sistema de inventario ($ServerUrl)..." -ForegroundColor Yellow
-try {
-    $apiUrl = "$ServerUrl/api/agent/report"
-    $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 5
-    Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
-    Write-Host "     ID Registro: $($response.item.id)" -ForegroundColor DarkCyan
-} catch {
-    Write-Host "[!] El servidor web no respondio en $ServerUrl." -ForegroundColor Yellow
-    Write-Host "    (No te preocupes: el archivo JSON quedo guardado para importarlo en el sistema)." -ForegroundColor Gray
+# ENVIAR AL SERVIDOR VIA REST API CON RETRY Y TIMEOUT EXTENDIDO (PARA DESPERTAR SERVIDOR CLOUD)
+$urlsToTry = @($ServerUrl)
+if ($ServerUrl -match 'ivt\.onrender\.com') {
+    $urlsToTry += "https://inventario-computo.onrender.com"
+} elseif ($ServerUrl -match 'inventario-computo\.onrender\.com') {
+    $urlsToTry += "https://ivt.onrender.com"
+}
+
+$sentSuccess = $false
+
+foreach ($targetUrl in $urlsToTry) {
+    if ($sentSuccess) { break }
+    Write-Host "[*] Enviando datos al sistema de inventario ($targetUrl)..." -ForegroundColor Yellow
+
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        try {
+            $apiUrl = "$targetUrl/api/agent/report"
+            $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
+            Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
+            $sentSuccess = $true
+            break
+        } catch {
+            if ($attempt -lt 3) {
+                Write-Host "    [*] Despertando servidor en la nube... reintentando en 3s (intento $attempt/3)..." -ForegroundColor Yellow
+                Start-Sleep -Seconds 3
+            }
+        }
+    }
+}
+
+if (-not $sentSuccess) {
+    Write-Host "[!] El servidor web no respondió tras varios intentos." -ForegroundColor Yellow
+    Write-Host "    (No te preocupes: el archivo JSON quedó guardado localmente en $filePath)." -ForegroundColor Gray
 }
 
 Write-Host ""
