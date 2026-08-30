@@ -707,21 +707,46 @@ function renderData() {
       return false;
     }
 
-    // Filtro por búsqueda de texto
+    // Filtro por búsqueda de texto profunda
     if (currentSearchQuery) {
       const q = currentSearchQuery;
+
+      const inMonitores = (item.monitores || []).some(m => 
+        (m.modelo && m.modelo.toLowerCase().includes(q)) ||
+        (m.fabricante && m.fabricante.toLowerCase().includes(q)) ||
+        (m.serie && m.serie.toLowerCase().includes(q))
+      );
+
+      const inPerifericos = (item.perifericos || []).some(p => 
+        (p.nombre && p.nombre.toLowerCase().includes(q)) ||
+        (p.tipo && p.tipo.toLowerCase().includes(q)) ||
+        (p.fabricante && p.fabricante.toLowerCase().includes(q))
+      );
+
+      const inDiscos = (item.almacenamiento || []).some(d => 
+        (d.modelo && d.modelo.toLowerCase().includes(q)) ||
+        (d.serie && d.serie.toLowerCase().includes(q)) ||
+        (d.tipo && d.tipo.toLowerCase().includes(q))
+      );
+
       const match = (
         (item.modelo && item.modelo.toLowerCase().includes(q)) ||
         (item.numero_serie && item.numero_serie.toLowerCase().includes(q)) ||
         (item.placa_base && item.placa_base.toLowerCase().includes(q)) ||
+        (item.placa_base_completa && item.placa_base_completa.toLowerCase().includes(q)) ||
         (item.tipo_equipo && item.tipo_equipo.toLowerCase().includes(q)) ||
         (item.fabricante && item.fabricante.toLowerCase().includes(q)) ||
         (item.procesador && item.procesador.toLowerCase().includes(q)) ||
         (item.hostname && item.hostname.toLowerCase().includes(q)) ||
         (item.usuario_actual && item.usuario_actual.toLowerCase().includes(q)) ||
         (item.ubicacion && item.ubicacion.toLowerCase().includes(q)) ||
+        (item.ip_red && item.ip_red.toLowerCase().includes(q)) ||
+        (item.mac_address && item.mac_address.toLowerCase().includes(q)) ||
         (item.almacenamiento_resumen && item.almacenamiento_resumen.toLowerCase().includes(q)) ||
-        (item.notas && item.notas.toLowerCase().includes(q))
+        (item.notas && item.notas.toLowerCase().includes(q)) ||
+        inMonitores ||
+        inPerifericos ||
+        inDiscos
       );
       if (!match) return false;
     }
@@ -1524,21 +1549,53 @@ function switchPage(pageName) {
   }
 }
 
-function filterByAmbiente(ambienteName) {
+function filterByAmbiente(searchTerm) {
   switchPage('inventory');
+
+  // Resetear filtros para que la búsqueda sea global y no quede bloqueada por una categoría previa
+  currentCategory = 'Todos';
+  currentFilterType = 'Todos';
+  currentSpecificType = 'Todos';
+  currentFilterStatus = 'Todos';
+  
+  if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+  if (statusFilter) statusFilter.value = 'Todos';
+
+  document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+    if (p.getAttribute('data-category') === 'Todos') p.classList.add('active');
+    else p.classList.remove('active');
+  });
+
   if (searchInput) {
-    searchInput.value = ambienteName;
-    currentSearchQuery = ambienteName.toLowerCase().trim();
+    searchInput.value = searchTerm;
+    currentSearchQuery = searchTerm.toLowerCase().trim();
     if (btnClearSearch) btnClearSearch.style.display = 'block';
   }
+
   renderData();
-  showToast(`Filtrando inventario por: "${ambienteName}"`, 'info');
+  showToast(`Filtrando inventario por: "${searchTerm}"`, 'info');
   const tableCard = document.getElementById('tableViewContainer');
   if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
 }
 
 function filterByStatus(statusName) {
   switchPage('inventory');
+  
+  currentCategory = 'Todos';
+  currentFilterType = 'Todos';
+  currentSpecificType = 'Todos';
+  if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+  if (searchInput) {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    if (btnClearSearch) btnClearSearch.style.display = 'none';
+  }
+
+  document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+    if (p.getAttribute('data-category') === 'Todos') p.classList.add('active');
+    else p.classList.remove('active');
+  });
+
   if (statusFilter) {
     statusFilter.value = statusName;
     currentFilterStatus = statusName;
@@ -1728,7 +1785,12 @@ function renderDashboard() {
   if (modelosListContainer) {
     const modelosCount = {};
     filteredData.forEach(item => {
-      const modeloKey = `${item.fabricante ? item.fabricante + ' ' : ''}${item.modelo || 'Equipo Estándar'}`.trim();
+      const m = (item.modelo || 'Equipo Estándar').trim();
+      const f = (item.fabricante || '').trim();
+      let modeloKey = m;
+      if (f && !m.toLowerCase().startsWith(f.toLowerCase())) {
+        modeloKey = `${f} ${m}`;
+      }
       modelosCount[modeloKey] = (modelosCount[modeloKey] || 0) + 1;
     });
 
