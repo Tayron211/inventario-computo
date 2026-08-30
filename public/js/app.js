@@ -1549,6 +1549,25 @@ function filterByStatus(statusName) {
   if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
 }
 
+const RECOGNIZED_PERIPHERAL_BRANDS = [
+  'Logitech', 'HP', 'Dell', 'Lenovo', 'Microsoft', 'Corsair', 'Razer', 
+  'HyperX', 'Kingston', 'Redragon', 'Genius', 'ASUS', 'Samsung', 'LG', 
+  'AOC', 'ViewSonic', 'JBL', 'Sony', 'Jabra', 'Poly', 'Plantronics', 
+  'SteelSeries', 'Trust', 'Targus', 'Kensington', 'BenQ', 'Philips', 
+  'Epson', 'Canon', 'Brother', 'Apple', 'Huawei', 'Xiaomi', 'Wacom', 'A4Tech', 'Cougar'
+];
+
+function getPeripheralBrandInfo(p) {
+  const rawName = (typeof p === 'string' ? p : `${p.fabricante || ''} ${p.nombre || ''} ${p.modelo || ''}`).trim();
+  for (const brand of RECOGNIZED_PERIPHERAL_BRANDS) {
+    const regex = new RegExp(`\\b${brand}\\b`, 'i');
+    if (regex.test(rawName)) {
+      return { brand, isRecognized: true, fullName: rawName };
+    }
+  }
+  return { brand: null, isRecognized: false, fullName: rawName };
+}
+
 function renderDashboard() {
   const dashFilterAmbiente = document.getElementById('dashFilterAmbiente');
   const dashFilterTipo = document.getElementById('dashFilterTipo');
@@ -1586,16 +1605,41 @@ function renderDashboard() {
     });
   }
 
-  // 2. Calcular KPIs
+  // 2. Extraer Periféricos y Monitores de Marcas Reconocidas
+  let totalMonitoresReconocidos = 0;
+  let totalPerifericosReconocidos = 0;
+  const brandPeripheralsMap = {}; // { 'Logitech': { count: 0, items: [] }, ... }
+
+  filteredData.forEach(item => {
+    // Monitores (con marca o modelo específico)
+    (item.monitores || []).forEach(m => {
+      const monName = `${m.fabricante || ''} ${m.modelo || ''}`.trim();
+      const brandInfo = getPeripheralBrandInfo(monName);
+      if (brandInfo.isRecognized || (m.serie && m.serie !== 'PNP-ID' && m.serie !== 'N/A')) {
+        totalMonitoresReconocidos++;
+        const brandKey = brandInfo.brand || (m.fabricante && m.fabricante !== 'Estándar' ? m.fabricante : 'Display Certificado');
+        if (!brandPeripheralsMap[brandKey]) brandPeripheralsMap[brandKey] = { count: 0, tipo: 'Monitor', hosts: new Set() };
+        brandPeripheralsMap[brandKey].count++;
+        if (item.hostname) brandPeripheralsMap[brandKey].hosts.add(item.hostname);
+      }
+    });
+
+    // Periféricos USB / HID (Solo marcas reconocidas como Logitech, etc.)
+    (item.perifericos || []).forEach(p => {
+      const brandInfo = getPeripheralBrandInfo(p);
+      if (brandInfo.isRecognized) {
+        totalPerifericosReconocidos++;
+        const brandKey = brandInfo.brand;
+        if (!brandPeripheralsMap[brandKey]) brandPeripheralsMap[brandKey] = { count: 0, tipo: p.tipo || 'Accesorio', hosts: new Set() };
+        brandPeripheralsMap[brandKey].count++;
+        if (item.hostname) brandPeripheralsMap[brandKey].hosts.add(item.hostname);
+      }
+    });
+  });
+
+  // 3. Calcular KPIs
   const allAmbientes = new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim()).filter(Boolean));
   const totalPCs = filteredData.filter(i => i.tipo_equipo === 'PC de Escritorio' || i.tipo_equipo === 'Laptop' || i.tipo_equipo === 'Mini PC' || i.tipo_equipo === 'All-in-One').length;
-  
-  let totalMonitores = 0;
-  let totalPerifericos = 0;
-  filteredData.forEach(item => {
-    totalMonitores += (item.monitores || []).length;
-    totalPerifericos += (item.perifericos || []).length;
-  });
 
   const dashTotalAmbientes = document.getElementById('dashTotalAmbientes');
   const dashTotalPCs = document.getElementById('dashTotalPCs');
@@ -1604,10 +1648,10 @@ function renderDashboard() {
 
   if (dashTotalAmbientes) dashTotalAmbientes.textContent = allAmbientes.size;
   if (dashTotalPCs) dashTotalPCs.textContent = totalPCs;
-  if (dashTotalMonitores) dashTotalMonitores.textContent = totalMonitores;
-  if (dashTotalPerifericos) dashTotalPerifericos.textContent = totalPerifericos;
+  if (dashTotalMonitores) dashTotalMonitores.textContent = totalMonitoresReconocidos;
+  if (dashTotalPerifericos) dashTotalPerifericos.textContent = totalPerifericosReconocidos;
 
-  // 3. Renderizar Tarjetas de Ambientes (Distribución Espacial)
+  // 4. Renderizar Tarjetas de Ambientes (Distribución Espacial)
   const ambientesGrid = document.getElementById('ambientesCardsGrid');
   if (ambientesGrid) {
     const ambientesMap = new Map();
@@ -1620,7 +1664,7 @@ function renderDashboard() {
           desktops: 0,
           laptops: 0,
           monitores: 0,
-          perifericos: 0,
+          perifericosMarca: 0,
           usuarios: new Set()
         });
       }
@@ -1629,7 +1673,12 @@ function renderDashboard() {
       if (item.tipo_equipo === 'Laptop') data.laptops++;
       else data.desktops++;
       data.monitores += (item.monitores || []).length;
-      data.perifericos += (item.perifericos || []).length;
+      
+      // Contar solo periféricos de marca
+      (item.perifericos || []).forEach(p => {
+        if (getPeripheralBrandInfo(p).isRecognized) data.perifericosMarca++;
+      });
+
       if (item.usuario_actual) data.usuarios.add(item.usuario_actual);
     });
 
@@ -1655,7 +1704,7 @@ function renderDashboard() {
               <div class="amb-stat-chip"><i class="fa-solid fa-desktop text-crimson"></i> <b>${amb.desktops}</b> PCs</div>
               <div class="amb-stat-chip"><i class="fa-solid fa-laptop text-blue"></i> <b>${amb.laptops}</b> Laptops</div>
               <div class="amb-stat-chip"><i class="fa-solid fa-display text-emerald"></i> <b>${amb.monitores}</b> Pantallas</div>
-              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericos}</b> Periféricos</div>
+              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericosMarca}</b> Accesorios de Marca</div>
             </div>
 
             <div class="ambiente-user-list">
@@ -1674,7 +1723,7 @@ function renderDashboard() {
     }
   }
 
-  // 4. Renderizar Desglose por Modelos y Tipos
+  // 5. Renderizar Desglose por Modelos y Tipos de PC
   const modelosListContainer = document.getElementById('modelosBreakdownList');
   if (modelosListContainer) {
     const modelosCount = {};
@@ -1684,7 +1733,6 @@ function renderDashboard() {
     });
 
     const sortedModelos = Object.entries(modelosCount).sort((a, b) => b[1] - a[1]);
-    const maxCount = sortedModelos[0] ? sortedModelos[0][1] : 1;
 
     modelosListContainer.innerHTML = sortedModelos.map(([modelo, count]) => {
       const percent = Math.round((count / (filteredData.length || 1)) * 100);
@@ -1702,56 +1750,46 @@ function renderDashboard() {
     }).join('') || '<p class="text-gray-400">No hay modelos registrados</p>';
   }
 
-  // 5. Renderizar Inventario de Periféricos
+  // 6. Renderizar Inventario de Periféricos (SOLO MARCAS RECONOCIDAS)
   const perifericosContainer = document.getElementById('perifericosBreakdownList');
   if (perifericosContainer) {
-    const perCatCount = {
-      'Monitores': 0,
-      'Teclados': 0,
-      'Mouse / Punteros': 0,
-      'Audífonos / Diademas': 0,
-      'Webcams / Cámaras': 0,
-      'Otros Dispositivos USB': 0
-    };
+    const sortedBrands = Object.entries(brandPeripheralsMap).sort((a, b) => b[1].count - a[1].count);
 
-    filteredData.forEach(item => {
-      (item.monitores || []).forEach(() => perCatCount['Monitores']++);
-      (item.perifericos || []).forEach(p => {
-        const t = (p.tipo || p.nombre || '').toLowerCase();
-        if (t.includes('teclado') || t.includes('keyboard')) perCatCount['Teclados']++;
-        else if (t.includes('mouse') || t.includes('ratón')) perCatCount['Mouse / Punteros']++;
-        else if (t.includes('audífono') || t.includes('headset') || t.includes('diadema')) perCatCount['Audífonos / Diademas']++;
-        else if (t.includes('camera') || t.includes('webcam') || t.includes('cámara')) perCatCount['Webcams / Cámaras']++;
-        else perCatCount['Otros Dispositivos USB']++;
-      });
-    });
-
-    const totalPerifs = Object.values(perCatCount).reduce((a, b) => a + b, 0);
-
-    perifericosContainer.innerHTML = Object.entries(perCatCount).map(([cat, count]) => {
-      const percent = totalPerifs > 0 ? Math.round((count / totalPerifs) * 100) : 0;
-      let icon = 'fa-plug';
-      if (cat === 'Monitores') icon = 'fa-display';
-      else if (cat === 'Teclados') icon = 'fa-keyboard';
-      else if (cat === 'Mouse / Punteros') icon = 'fa-mouse';
-      else if (cat === 'Audífonos / Diademas') icon = 'fa-headphones';
-      else if (cat === 'Webcams / Cámaras') icon = 'fa-video';
-
-      return `
-        <div class="breakdown-row" onclick="filterByAmbiente('${cat === 'Monitores' ? 'Monitor' : 'Periféricos'}')">
-          <div class="breakdown-label">
-            <span class="breakdown-name"><i class="fa-solid ${icon} text-crimson"></i> ${cat}</span>
-            <span class="breakdown-count"><b>${count}</b> unidades</span>
-          </div>
-          <div class="breakdown-bar-bg">
-            <div class="breakdown-bar-fill fill-blue" style="width: ${percent}%;"></div>
-          </div>
+    if (sortedBrands.length === 0) {
+      perifericosContainer.innerHTML = `
+        <div class="empty-brand-box">
+          <i class="fa-solid fa-tag text-gray-400 fa-2x mb-2"></i>
+          <p class="text-gray-400 mb-1">No se detectaron periféricos con marca comercial registrada aún (ej: Logitech, HP, Dell).</p>
+          <small class="text-gray-500">Al escanear PCs con teclados/mouse Logitech o auriculares USB se indexarán automáticamente aquí.</small>
         </div>
       `;
-    }).join('');
+    } else {
+      const maxBrandCount = sortedBrands[0] ? sortedBrands[0][1].count : 1;
+      perifericosContainer.innerHTML = sortedBrands.map(([brand, data]) => {
+        const percent = Math.round((data.count / maxBrandCount) * 100);
+        const hostList = Array.from(data.hosts).slice(0, 2).join(', ');
+
+        return `
+          <div class="breakdown-row" onclick="filterByAmbiente('${escapeHTML(brand)}')" title="Clic para ver computadoras con periféricos ${escapeHTML(brand)}">
+            <div class="breakdown-label">
+              <span class="breakdown-name">
+                <span class="brand-badge-icon"><i class="fa-solid fa-tag"></i></span>
+                <b>${escapeHTML(brand)}</b>
+                <span class="brand-sub-type">(${escapeHTML(data.tipo)})</span>
+              </span>
+              <span class="breakdown-count"><b class="text-blue">${data.count}</b> unid.</span>
+            </div>
+            <div class="breakdown-bar-bg">
+              <div class="breakdown-bar-fill fill-blue" style="width: ${percent}%;"></div>
+            </div>
+            ${hostList ? `<div class="brand-hosts-hint"><i class="fa-solid fa-desktop"></i> En: ${escapeHTML(hostList)}${data.hosts.size > 2 ? '...' : ''}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
   }
 
-  // 6. Renderizar Estado Operativo & Salud
+  // 7. Renderizar Estado Operativo & Salud
   const healthGrid = document.getElementById('healthStatusGrid');
   if (healthGrid) {
     const states = {

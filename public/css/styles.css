@@ -3458,3 +3458,42 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Brand badges for Peripherals Matrix */
+.brand-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.18);
+  color: #60a5fa;
+  font-size: 0.72rem;
+  margin-right: 4px;
+}
+
+.brand-sub-type {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--gray-400);
+  margin-left: 4px;
+}
+
+.brand-hosts-hint {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.empty-brand-box {
+  text-align: center;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
