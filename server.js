@@ -455,7 +455,7 @@ app.post('/api/login', (req, res) => {
 app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
   const serverUrl = getServerUrl(req);
-  const ubicacion = (req.query.ubicacion || req.query.amb || req.query.u || 'CAE').trim();
+  const ubicacion = (req.query.ubicacion || req.query.amb || req.query.u || 'Soporte Técnico').trim();
   
   try {
     let scriptContent = fs.readFileSync(scriptPath, 'utf8');
@@ -841,7 +841,7 @@ app.post('/api/agent/report', (req, res) => {
     ip_red: payload.ip_red || '',
     ubicacion: (payload.ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(payload.ubicacion)) 
       ? payload.ubicacion 
-      : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'CAE'),
+      : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'Soporte Técnico'),
     estado: existingIndex >= 0 ? (items[existingIndex].estado || 'Operativo') : 'Operativo',
     notas: existingIndex >= 0 ? items[existingIndex].notas : 'Registrado por escáner automático',
     fecha_escaneo: payload.fecha_escaneo || new Date().toISOString().replace('T', ' ').substring(0, 19),

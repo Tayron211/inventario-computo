@@ -8,9 +8,8 @@ param(
     # Bloque A (Admin): Topico, Lactario, Guarderia, Psicopedagogico, ATP, Admision, Finanzas, Defensoria, Garita
     # Bloque A (Aulas y Labs): Aula 201-206, 207 (Sala SUM), Aula 301-303, Laboratorio 304, Laboratorio 305, Aula 306, Centro de Informacion, Aula 401-409, Aula 501-509, Aula 601-609
     # Bloque B (Admin): Auditorio, Direccion, Counter, GTH, Coordinacion Academica, Retencion, SSOMA, DTC, Sala de Reuniones, Comedor
-    # Bloque C (Admin): Vida Universitaria, Promocion, Marketing, Infraestructura, Logistica, Sala Gamer
-    # General: CAE
-    [string]$Ubicacion = "CAE"
+    # Bloque A (Admin): Soporte Técnico, CAE, Topico, Lactario, Guarderia, Psicopedagogico, ATP, Admision, Finanzas, Defensoria, Garita
+    [string]$Ubicacion = "Soporte Técnico"
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
