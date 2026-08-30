@@ -1911,7 +1911,7 @@ const EDID_BRAND_MAP = {
   'VSC': 'ViewSonic', 'VIEWSONIC': 'ViewSonic',
   'BNQ': 'BenQ', 'BENQ': 'BenQ',
   'PHL': 'Philips', 'PHILIPS': 'Philips',
-  'ASU': 'ASUS', 'ACI': 'ASUS', 'ASUS': 'ASUS',
+  'ASU': 'ASUS', 'AUS': 'ASUS', 'ACI': 'ASUS', 'ASUS': 'ASUS',
   'ACR': 'Acer', 'ACER': 'Acer',
   'APP': 'Apple', 'APPLE': 'Apple',
   'MSI': 'MSI', 'GIG': 'Gigabyte', 'SONY': 'Sony',
@@ -2056,11 +2056,21 @@ function renderDashboard() {
   filteredData.forEach(item => {
     // Monitores (con marca o modelo específico)
     (item.monitores || []).forEach(m => {
-      const monName = `${m.fabricante || ''} ${m.modelo || ''}`.trim();
+      const rawManuf = (m.fabricante || '').trim().toUpperCase();
+      const edidBrand = EDID_BRAND_MAP[rawManuf];
+      const monName = `${edidBrand || m.fabricante || ''} ${m.modelo || ''}`.trim();
       const brandInfo = getPeripheralBrandInfo(monName);
-      if (brandInfo.isRecognized || (m.serie && m.serie !== 'PNP-ID' && m.serie !== 'N/A')) {
+      
+      if (brandInfo.isRecognized || edidBrand || (m.serie && m.serie !== 'PNP-ID' && m.serie !== 'N/A')) {
         totalMonitoresReconocidos++;
-        const brandKey = brandInfo.brand || (m.fabricante && m.fabricante !== 'Estándar' ? m.fabricante : 'Display Certificado');
+        let brandKey = edidBrand || brandInfo.brand || (m.fabricante && m.fabricante !== 'Estándar' && m.fabricante !== 'Monitor Integrado' ? m.fabricante : 'Display Certificado');
+        if (brandKey === 'HPN' || brandKey === 'HWP' || brandKey === 'HEW') brandKey = 'HP';
+        if (brandKey === 'AUS' || brandKey === 'ASU' || brandKey === 'ACI') brandKey = 'ASUS';
+        if (brandKey === 'SAM' || brandKey === 'SEC') brandKey = 'Samsung';
+        if (brandKey === 'DEL' || brandKey === 'DLL') brandKey = 'Dell';
+        if (brandKey === 'LEN' || brandKey === 'LNK') brandKey = 'Lenovo';
+        if (brandKey === 'GSM' || brandKey === 'LGD' || brandKey === 'LGE') brandKey = 'LG';
+
         if (!brandPeripheralsMap[brandKey]) brandPeripheralsMap[brandKey] = { count: 0, tipo: 'Monitor', hosts: new Set() };
         brandPeripheralsMap[brandKey].count++;
         if (item.hostname) brandPeripheralsMap[brandKey].hosts.add(item.hostname);

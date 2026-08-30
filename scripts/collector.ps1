@@ -143,7 +143,7 @@ $edidVendors = @{
     'VSC' = 'ViewSonic'; 'VIEWSONIC' = 'ViewSonic'
     'BNQ' = 'BenQ'; 'BENQ' = 'BenQ'
     'PHL' = 'Philips'; 'PHILIPS' = 'Philips'
-    'ASU' = 'ASUS'; 'ACI' = 'ASUS'; 'ASUS' = 'ASUS'
+    'ASU' = 'ASUS'; 'AUS' = 'ASUS'; 'ACI' = 'ASUS'; 'ASUS' = 'ASUS'
     'ACR' = 'Acer'; 'ACER' = 'Acer'
     'APP' = 'Apple'; 'APPLE' = 'Apple'
     'MSI' = 'MSI'; 'GIG' = 'Gigabyte'; 'SNY' = 'Sony'
