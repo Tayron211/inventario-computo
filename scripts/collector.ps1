@@ -193,7 +193,7 @@ $marcasReconocidasPattern = 'Logitech|HP|Dell|Lenovo|Microsoft|Corsair|Razer|Hyp
 
 # Excluir drivers de audio interno, adaptadores genéricos de Windows y stubs virtuales
 $audioChipsetsExcluir = 'Realtek|High Definition Audio|Intel|NVIDIA|AMD|Sonido Intel|Dispositivo de audio|Audio digital|Mezcla est|Altavoces|Micr[oó]fono|Audio Endpoint|Audio del sistema|Controlador de audio|Wave|Stereo Mix|S/PDIF'
-$genericosExcluir = 'Dispositivo de entrada USB|Dispositivo de teclado HID|Dispositivo de mouse HID|Dispositivo compatible con HID|Dispositivo de control|Dispositivo definido por el proveedor|Dispositivo del sistema|Dispositivo de interfaz|USB Input Device|HID Keyboard Device|HID-compliant device|HID-compliant mouse|HID-compliant|PS/2 Compatible|Dispositivo de almacenamiento|IdeaCamera|Virtual|Generic|Standard|Controlador|Composite'
+$genericosExcluir = 'compatible con hid|hid-compliant|dispositivo de |dispositivo del |dispositivo definido|dispositivo port[aá]til|controles de radio|dispositivo de interfaz|usb input device|hid keyboard|hid mouse|touchpad|trackpoint|button driver|wireless button|ideacamera|virtual|composite|dispositivo del sistema|ps/2 compatible|dispositivo de almacenamiento|standard|gen[eé]ric'
 
 $pnpPeripherals = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue | Where-Object { 
     $_.Name -and $_.Status -eq 'OK' -and 
