@@ -1,0 +1,18 @@
+{
+  "name": "SYS-INVENTORY PRO",
+  "short_name": "SysInventory",
+  "description": "Sistema de Control de Hardware, Números de Serie & Auditoría",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08080c",
+  "theme_color": "#08080c",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
