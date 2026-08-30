@@ -728,6 +728,8 @@ app.post('/api/inventory', (req, res) => {
     monitores: body.monitores || [],
     perifericos: body.perifericos || [],
     hostname: body.hostname || '',
+    mac_address: body.mac_address || '',
+    ip_red: body.ip_red || '',
     usuario_actual: body.usuario_actual || '',
     ubicacion: body.ubicacion || 'Sin asignar',
     estado: body.estado || 'Operativo',

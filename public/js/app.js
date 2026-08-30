@@ -451,6 +451,14 @@ function initEventListeners() {
     });
   }
 
+  // Selector dependiente de Tipo de Dispositivo (Adapta los campos del formulario según categoría)
+  const formTipoEquipo = document.getElementById('formTipoEquipo');
+  if (formTipoEquipo) {
+    formTipoEquipo.addEventListener('change', (e) => {
+      adaptFormFieldsByType(e.target.value);
+    });
+  }
+
   // Botón Escanear con Cámara en Formulario
   const btnScanSerialCam = document.getElementById('btnScanSerialCam');
   if (btnScanSerialCam) {
@@ -1277,15 +1285,89 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
   }
 }
 
+function adaptFormFieldsByType(selectedType) {
+  const t = (selectedType || '').toLowerCase();
+
+  const groupPlacaBase = document.getElementById('formGroupPlacaBase');
+  const sectionHardware = document.getElementById('formSectionHardware');
+  const sectionPerifericos = document.getElementById('formSectionPerifericos');
+  const groupMacAddress = document.getElementById('formGroupMacAddress');
+  const labelHostname = document.getElementById('labelFormHostname');
+  const inputHostname = document.getElementById('formHostname');
+  const labelUsuario = document.getElementById('labelFormUsuario');
+  const inputUsuario = document.getElementById('formUsuario');
+
+  const isComputer = t.includes('pc de escritorio') || t.includes('laptop') || t.includes('all-in-one') || t.includes('mini pc') || t.includes('servidor') || t.includes('computadora');
+  const isPrinterOrProjector = t.includes('impresora') || t.includes('proyector');
+  const isNetwork = t.includes('switch') || t.includes('access point') || t.includes('router') || t.includes('red');
+  const isPeripheral = t.includes('teclado') || t.includes('mouse') || t.includes('audífono') || t.includes('audifono') || t.includes('monitor') || t.includes('otro periférico') || t.includes('periférico');
+
+  // 1. Placa Base (Solo en computadoras)
+  if (groupPlacaBase) {
+    groupPlacaBase.style.display = isComputer ? 'block' : 'none';
+  }
+
+  // 2. Hardware Interno (CPU, RAM, Discos - Solo en computadoras)
+  if (sectionHardware) {
+    sectionHardware.style.display = isComputer ? 'block' : 'none';
+  }
+
+  // 3. Periféricos y Monitores Asociados (Solo en computadoras)
+  if (sectionPerifericos) {
+    sectionPerifericos.style.display = isComputer ? 'block' : 'none';
+  }
+
+  // 4. Campo MAC Address (Visible para Dispositivos de Red, Impresoras y PCs)
+  if (groupMacAddress) {
+    groupMacAddress.style.display = (isNetwork || isPrinterOrProjector || isComputer) ? 'block' : 'none';
+  }
+
+  // 5. Adaptar textos y placeholders contextuales
+  if (labelHostname && inputHostname) {
+    if (isNetwork) {
+      labelHostname.textContent = 'NOMBRE / IP DEL EQUIPO DE RED';
+      inputHostname.placeholder = 'Ej: SWITCH-CORE-01, AP-AULA201 o 192.168.89.254';
+    } else if (isPrinterOrProjector) {
+      labelHostname.textContent = 'NOMBRE / IP EN RED DEL DISPOSITIVO';
+      inputHostname.placeholder = 'Ej: IMP-CAE-01, PROY-AULA301 o 192.168.89.40';
+    } else if (isPeripheral) {
+      labelHostname.textContent = 'CONECTADO A (HOSTNAME DE PC)';
+      inputHostname.placeholder = 'Ej: PC-SOPORTE04 o Sin Asignar';
+    } else {
+      labelHostname.textContent = 'NOMBRE DEL EQUIPO (HOSTNAME / IP)';
+      inputHostname.placeholder = 'Ej: DESKTOP-HP-01 o 192.168.89.50';
+    }
+  }
+
+  if (labelUsuario && inputUsuario) {
+    if (isNetwork) {
+      labelUsuario.textContent = 'ADMINISTRADOR / RESPONSABLE TI';
+      inputUsuario.placeholder = 'Ej: Administrador de Red / Soporte TI';
+    } else if (isPeripheral) {
+      labelUsuario.textContent = 'USUARIO ASIGNADO';
+      inputUsuario.placeholder = 'Ej: Docente Aula / Libre';
+    } else {
+      labelUsuario.textContent = 'USUARIO / RESPONSABLE';
+      inputUsuario.placeholder = 'Ej: Juan Pérez / Contabilidad';
+    }
+  }
+}
+
 function openManualCreateModal() {
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
   if (isOperador) {
     showToast('Acceso denegado: El usuario operador no tiene permisos para registrar equipos.', 'error');
     return;
   }
-  document.getElementById('modalFormTitle').textContent = 'Registrar Nuevo Equipo de Cómputo';
+  document.getElementById('modalFormTitle').textContent = 'Registrar Nuevo Dispositivo / Equipo';
   document.getElementById('formEquipmentId').value = '';
   equipmentForm.reset();
+
+  const formTipoEquipo = document.getElementById('formTipoEquipo');
+  if (formTipoEquipo) {
+    formTipoEquipo.value = 'PC de Escritorio';
+    adaptFormFieldsByType('PC de Escritorio');
+  }
 
   const formBloque = document.getElementById('formBloque');
   if (formBloque) {
@@ -1307,12 +1389,18 @@ function editEquipment(id) {
   const item = inventoryData.find(i => i.id === id);
   if (!item) return;
 
-  document.getElementById('modalFormTitle').textContent = 'Editar Equipo de Cómputo';
+  document.getElementById('modalFormTitle').textContent = `Editar: ${item.modelo || item.tipo_equipo || 'Equipo'}`;
   document.getElementById('formEquipmentId').value = item.id;
   document.getElementById('formModelo').value = item.modelo || '';
   document.getElementById('formNumeroSerie').value = item.numero_serie || '';
   document.getElementById('formPlacaBase').value = item.placa_base || '';
-  document.getElementById('formTipoEquipo').value = item.tipo_equipo || 'PC de Escritorio';
+  
+  const formTipoEquipo = document.getElementById('formTipoEquipo');
+  if (formTipoEquipo) {
+    formTipoEquipo.value = item.tipo_equipo || 'PC de Escritorio';
+    adaptFormFieldsByType(item.tipo_equipo || 'PC de Escritorio');
+  }
+  
   document.getElementById('formFabricante').value = item.fabricante || '';
   document.getElementById('formEstado').value = item.estado || 'Operativo';
   document.getElementById('formProcesador').value = item.procesador || '';
@@ -1327,6 +1415,10 @@ function editEquipment(id) {
   document.getElementById('formPerifericos').value = perStr;
 
   document.getElementById('formHostname').value = item.hostname || '';
+  
+  const formMacAddress = document.getElementById('formMacAddress');
+  if (formMacAddress) formMacAddress.value = item.mac_address || '';
+  
   document.getElementById('formUsuario').value = item.usuario_actual || '';
 
   const currentUbicacion = item.ubicacion || 'CAE';
@@ -1408,6 +1500,7 @@ async function handleFormSubmit(e) {
     ram_total: (document.getElementById('formRamTotal').value || '').trim(),
     almacenamiento_resumen: (document.getElementById('formAlmacenamiento').value || '').trim(),
     hostname: (document.getElementById('formHostname').value || '').trim(),
+    mac_address: (document.getElementById('formMacAddress') ? document.getElementById('formMacAddress').value : '').trim(),
     usuario_actual: (document.getElementById('formUsuario').value || '').trim(),
     ubicacion: finalUbicacion,
     notas: (document.getElementById('formNotas').value || '').trim()
