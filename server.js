@@ -42,6 +42,60 @@ const SCANS_DIR = path.join(__dirname, 'scans');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(SCANS_DIR)) fs.mkdirSync(SCANS_DIR, { recursive: true });
 
+const GENERIC_DRIVER_EXCLUDE_REGEX = /compatible con hid|hid-compliant|dispositivo de |dispositivo del |dispositivo definido|dispositivo port[aá]til|controles de radio|dispositivo de interfaz|usb input device|hid keyboard|hid mouse|touchpad|trackpoint|button driver|wireless button|ideacamera|virtual|composite|dispositivo del sistema|realtek|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
+
+const PROPRIETARY_BRANDS_PATTERN = /logitech|hp|dell|lenovo|microsoft|corsair|razer|hyperx|kingston|redragon|genius|asus|rog|tuf|samsung|lg|aoc|viewsonic|jbl|sony|jabra|poly|plantronics|steelseries|trust|targus|kensington|benq|philips|epson|canon|brother|apple|huawei|xiaomi|wacom|a4tech|bloody|cougar|audio-technica|sennheiser|epos|t-force|crucial|western digital|seagate|sandisk|teraware|halion|micronics|antryx|marvo|gamemax|fantech|vsg|evga|msi|gigabyte|zotac|elgato|anker|ugreen|baseus|startech|belkin|kyocera|ricoh|zebra/i;
+
+const EDID_BRAND_MAP = {
+  'HPN': 'HP', 'HWP': 'HP', 'HEW': 'HP', 'HP': 'HP',
+  'DEL': 'Dell', 'DLL': 'Dell', 'DELL': 'Dell',
+  'LEN': 'Lenovo', 'LNK': 'Lenovo', 'LENOVO': 'Lenovo',
+  'SAM': 'Samsung', 'SEC': 'Samsung', 'SAMSUNG': 'Samsung',
+  'GSM': 'LG', 'LGD': 'LG', 'LGE': 'LG', 'LG': 'LG',
+  'AOC': 'AOC',
+  'VSC': 'ViewSonic', 'VIEWSONIC': 'ViewSonic',
+  'BNQ': 'BenQ', 'BENQ': 'BenQ',
+  'PHL': 'Philips', 'PHILIPS': 'Philips',
+  'ASU': 'ASUS', 'AUS': 'ASUS', 'ACI': 'ASUS', 'ASUS': 'ASUS',
+  'ACR': 'Acer', 'ACER': 'Acer',
+  'APP': 'Apple', 'APPLE': 'Apple',
+  'MSI': 'MSI', 'GIG': 'Gigabyte', 'SONY': 'Sony',
+  'TER': 'Teraware', 'NEC': 'NEC', 'EIZ': 'Eizo'
+};
+
+function isValidPeripheral(p) {
+  if (!p) return false;
+  const n = (p.nombre || '').trim();
+  const f = (p.fabricante || '').trim();
+  const t = (p.tipo || '').trim();
+  const full = `${f} ${n} ${t}`.trim();
+  if (!n || GENERIC_DRIVER_EXCLUDE_REGEX.test(full)) return false;
+  return PROPRIETARY_BRANDS_PATTERN.test(full) || p.es_marca === true;
+}
+
+function normalizeItem(item) {
+  if (!item) return item;
+  if (item.monitores && Array.isArray(item.monitores)) {
+    item.monitores = item.monitores.map(m => {
+      const rawManuf = (m.fabricante || '').trim().toUpperCase();
+      const brand = EDID_BRAND_MAP[rawManuf] || (m.fabricante || '').trim();
+      let model = (m.modelo || 'Monitor').trim();
+      if (brand && brand !== 'Estándar' && brand !== 'Monitor Integrado' && !model.toLowerCase().includes(brand.toLowerCase())) {
+        model = `${brand} ${model}`;
+      }
+      return {
+        ...m,
+        fabricante: brand,
+        modelo: model
+      };
+    });
+  }
+  if (item.perifericos && Array.isArray(item.perifericos)) {
+    item.perifericos = item.perifericos.filter(isValidPeripheral);
+  }
+  return item;
+}
+
 function deduplicateInventory(items) {
   const uniqueList = [];
   const seen = new Set();
@@ -308,58 +362,6 @@ function saveLocalFile(data) {
   } catch (err) {
     console.error('Error guardando base de datos local:', err);
   }
-}
-
-const GENERIC_DRIVER_EXCLUDE_REGEX = /compatible con hid|hid-compliant|dispositivo de |dispositivo del |dispositivo definido|dispositivo port[aá]til|controles de radio|dispositivo de interfaz|usb input device|hid keyboard|hid mouse|touchpad|trackpoint|button driver|wireless button|ideacamera|virtual|composite|dispositivo del sistema|realtek|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
-
-const EDID_BRAND_MAP = {
-  'HPN': 'HP', 'HWP': 'HP', 'HEW': 'HP', 'HP': 'HP',
-  'DEL': 'Dell', 'DLL': 'Dell', 'DELL': 'Dell',
-  'LEN': 'Lenovo', 'LNK': 'Lenovo', 'LENOVO': 'Lenovo',
-  'SAM': 'Samsung', 'SEC': 'Samsung', 'SAMSUNG': 'Samsung',
-  'GSM': 'LG', 'LGD': 'LG', 'LGE': 'LG', 'LG': 'LG',
-  'AOC': 'AOC',
-  'VSC': 'ViewSonic', 'VIEWSONIC': 'ViewSonic',
-  'BNQ': 'BenQ', 'BENQ': 'BenQ',
-  'PHL': 'Philips', 'PHILIPS': 'Philips',
-  'ASU': 'ASUS', 'AUS': 'ASUS', 'ACI': 'ASUS', 'ASUS': 'ASUS',
-  'ACR': 'Acer', 'ACER': 'Acer',
-  'APP': 'Apple', 'APPLE': 'Apple',
-  'MSI': 'MSI', 'GIG': 'Gigabyte', 'SONY': 'Sony',
-  'TER': 'Teraware', 'NEC': 'NEC', 'EIZ': 'Eizo'
-};
-
-function isValidPeripheral(p) {
-  if (!p) return false;
-  const n = (p.nombre || '').trim();
-  const f = (p.fabricante || '').trim();
-  const t = (p.tipo || '').trim();
-  const full = `${f} ${n} ${t}`.trim();
-  if (!n || GENERIC_DRIVER_EXCLUDE_REGEX.test(full)) return false;
-  return PROPRIETARY_BRANDS_PATTERN.test(full) || p.es_marca === true;
-}
-
-function normalizeItem(item) {
-  if (!item) return item;
-  if (item.monitores && Array.isArray(item.monitores)) {
-    item.monitores = item.monitores.map(m => {
-      const rawManuf = (m.fabricante || '').trim().toUpperCase();
-      const brand = EDID_BRAND_MAP[rawManuf] || (m.fabricante || '').trim();
-      let model = (m.modelo || 'Monitor').trim();
-      if (brand && brand !== 'Estándar' && brand !== 'Monitor Integrado' && !model.toLowerCase().includes(brand.toLowerCase())) {
-        model = `${brand} ${model}`;
-      }
-      return {
-        ...m,
-        fabricante: brand,
-        modelo: model
-      };
-    });
-  }
-  if (item.perifericos && Array.isArray(item.perifericos)) {
-    item.perifericos = item.perifericos.filter(isValidPeripheral);
-  }
-  return item;
 }
 
 function loadDB() {
