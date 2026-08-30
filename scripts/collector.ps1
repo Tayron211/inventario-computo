@@ -309,7 +309,8 @@ if ($ServerUrl -match 'ivt\.onrender\.com') {
 }
 
 $sentSuccess = $false
-$payloadBytes = [System.Text.Encoding]::UTF8.GetBytes($jsonPayload)
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+$payloadBytes = $utf8NoBom.GetBytes($jsonPayload)
 
 foreach ($targetUrl in $urlsToTry) {
     if ($sentSuccess) { break }
@@ -319,20 +320,23 @@ foreach ($targetUrl in $urlsToTry) {
     for ($attempt = 1; $attempt -le 3; $attempt++) {
         try {
             $wc = New-Object System.Net.WebClient
-            $wc.Encoding = [System.Text.Encoding]::UTF8
+            $wc.Encoding = $utf8NoBom
             $wc.Headers.Add("Content-Type", "application/json; charset=utf-8")
             $responseBytes = $wc.UploadData($apiUrl, "POST", $payloadBytes)
-            $responseStr = [System.Text.Encoding]::UTF8.GetString($responseBytes)
+            $responseStr = $utf8NoBom.GetString($responseBytes)
             Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
             $sentSuccess = $true
             break
         } catch {
+            $err1 = $_.Exception.Message
             try {
-                $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $payloadBytes -ContentType "application/json; charset=utf-8" -TimeoutSec 60
+                $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
                 Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
                 $sentSuccess = $true
                 break
             } catch {
+                $err2 = $_.Exception.Message
+                Write-Host "    [!] Detalle intento $attempt/3: $err1 | $err2" -ForegroundColor DarkGray
                 if ($attempt -lt 3) {
                     Write-Host "    [*] Despertando servidor en la nube... reintentando en 3s (intento $attempt/3)..." -ForegroundColor Yellow
                     Start-Sleep -Seconds 3
