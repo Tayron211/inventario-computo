@@ -934,11 +934,11 @@ app.get('/api/export-excel', async (req, res) => {
       views: [{ showGridLines: true }]
     });
 
-    // Definición de columnas con HOSTNAME, USUARIO, BLOQUE / ÁREA PRINCIPAL y AULA / AMBIENTE ESPECÍFICO
+    // Definición de columnas con HOSTNAME, USUARIO, BLOQUE y AULA / AMBIENTE ESPECÍFICO
     worksheet.columns = [
       { header: 'HOSTNAME', key: 'hostname', width: 24 },
       { header: 'USUARIO', key: 'usuario_actual', width: 22 },
-      { header: 'BLOQUE / ÁREA PRINCIPAL', key: 'bloque_area', width: 28 },
+      { header: 'BLOQUE', key: 'bloque_area', width: 18 },
       { header: 'AULA / AMBIENTE ESPECÍFICO', key: 'ubicacion', width: 28 },
       { header: 'MODELO', key: 'modelo', width: 28 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
@@ -987,16 +987,19 @@ app.get('/api/export-excel', async (req, res) => {
     // Función auxiliar para convertir a mayúsculas de manera segura
     const toUpper = (val) => (val !== undefined && val !== null ? String(val).toUpperCase() : '');
 
-    // Función auxiliar para obtener el Bloque según la Ubicación
+    // Función auxiliar para obtener exactamente el nombre del Bloque (BLOQUE A, BLOQUE B, BLOQUE C)
     const getBloqueName = (item) => {
-      if (item.bloque) return item.bloque;
+      if (item.bloque) {
+        if (/bloque\s*a/i.test(item.bloque)) return 'BLOQUE A';
+        if (/bloque\s*b/i.test(item.bloque)) return 'BLOQUE B';
+        if (/bloque\s*c/i.test(item.bloque)) return 'BLOQUE C';
+      }
       const u = (item.ubicacion || '').trim().toLowerCase();
-      if (!u || u === 'cae') return 'GENERAL (CAE)';
-      if (/^(aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9])/i.test(u)) return 'BLOQUE A - AULAS Y LABS';
-      if (/^(t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A - ADMINISTRATIVO';
-      if (/^(auditorio|direcci[oó]n|counter|gth|coordinaci|retenci|ssoma|dtc|sala de reuniones|comedor)/i.test(u)) return 'BLOQUE B - ADMINISTRATIVO';
-      if (/^(vida universitaria|promoci|marketing|infraestructura|log[ií]stica|sala gamer)/i.test(u)) return 'BLOQUE C - ADMINISTRATIVO';
-      return 'GENERAL / OTROS';
+      if (!u || u === 'cae') return 'BLOQUE A';
+      if (/^(aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9]|t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A';
+      if (/^(auditorio|direcci[oó]n|counter|gth|coordinaci|retenci|ssoma|dtc|sala de reuniones|comedor)/i.test(u)) return 'BLOQUE B';
+      if (/^(vida universitaria|promoci|marketing|infraestructura|log[ií]stica|sala gamer)/i.test(u)) return 'BLOQUE C';
+      return 'BLOQUE A';
     };
 
     // Agregar filas
