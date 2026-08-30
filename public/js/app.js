@@ -1112,7 +1112,7 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
       'Aula 608', 'Aula 609'
     ],
     'Bloque A (Área Administrativa)': [
-      'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+      'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
       'Admisión', 'Finanzas', 'Defensoría', 'Garita'
     ],
     'Bloque B (Área Administrativa)': [
@@ -1798,7 +1798,7 @@ function getPeripheralBrandInfo(p) {
 
 const ORGANIZATIONAL_BLOCKS = {
   '🏢 Bloque A (Área Administrativa)': [
-    'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+    'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
     'Admisión', 'Finanzas', 'Defensoría', 'Garita'
   ],
   '🎓 Bloque A (Aulas y Laboratorios)': [

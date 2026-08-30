@@ -940,7 +940,7 @@ app.get('/api/export-excel', async (req, res) => {
       }
       const u = (item.ubicacion || '').trim().toLowerCase();
       if (!u || u === 'cae') return 'BLOQUE A';
-      if (/^(aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9]|t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A';
+      if (/^(soporte|aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9]|t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A';
       if (/^(auditorio|direcci[oó]n|counter|gth|coordinaci|retenci|ssoma|dtc|sala de reuniones|comedor)/i.test(u)) return 'BLOQUE B';
       if (/^(vida universitaria|promoci|marketing|infraestructura|log[ií]stica|sala gamer)/i.test(u)) return 'BLOQUE C';
       return 'BLOQUE A';
