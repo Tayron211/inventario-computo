@@ -328,17 +328,14 @@ foreach ($targetUrl in $urlsToTry) {
             $sentSuccess = $true
             break
         } catch {
-            $err1 = $_.Exception.Message
             try {
                 $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
                 Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
                 $sentSuccess = $true
                 break
             } catch {
-                $err2 = $_.Exception.Message
-                Write-Host "    [!] Detalle intento $attempt/3: $err1 | $err2" -ForegroundColor DarkGray
                 if ($attempt -lt 3) {
-                    Write-Host "    [*] Despertando servidor en la nube... reintentando en 3s (intento $attempt/3)..." -ForegroundColor Yellow
+                    Write-Host "    [*] Estableciendo enlace con el servidor cloud... reintentando en 3s ($attempt/3)..." -ForegroundColor Yellow
                     Start-Sleep -Seconds 3
                 }
             }
