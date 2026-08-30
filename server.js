@@ -1180,30 +1180,7 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
-    // -------------------------------------------------------------
-    // HOJA 8: INVENTARIO GENERAL
-    // -------------------------------------------------------------
-    const wsGeneral = workbook.addWorksheet('INVENTARIO GENERAL', { views: [{ showGridLines: true }] });
-    styleWorksheet(wsGeneral, [
-      { header: 'HOSTNAME', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario_actual', width: 22 },
-      { header: 'BLOQUE', key: 'bloque_area', width: 18 },
-      { header: 'AULA / AMBIENTE ESPECÍFICO', key: 'ubicacion', width: 28 },
-      { header: 'MODELO', key: 'modelo', width: 28 },
-      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
-      { header: 'PLACA BASE', key: 'placa_base', width: 20 },
-      { header: 'TIPO DE EQUIPO', key: 'tipo_equipo', width: 18 },
-      { header: 'PROCESADOR', key: 'procesador', width: 36 },
-      { header: 'MEMORIA RAM', key: 'ram_total', width: 20 },
-      { header: 'ALMACENAMIENTO (DISCOS / SSD)', key: 'almacenamiento_str', width: 44 },
-      { header: 'MONITORES (SERIAL)', key: 'monitores_str', width: 32 },
-      { header: 'PERIFÉRICOS CONECTADOS', key: 'perifericos_str', width: 40 },
-      { header: 'ESTADO', key: 'estado', width: 15 },
-      { header: 'DIRECCIÓN IP', key: 'ip_red', width: 22 },
-      { header: 'FECHA REGISTRO', key: 'fecha_escaneo', width: 20 }
-    ]);
-
-    // Poblado de Datos en todas las hojas
+    // Poblado de Datos en todas las hojas categorizadas
     items.forEach((item) => {
       const bloque = getBloqueName(item);
       const amb = toUpper(item.ubicacion || 'CAE');
@@ -1317,33 +1294,10 @@ app.get('/api/export-excel', async (req, res) => {
           });
         }
       });
-
-      // 4. Inventario General
-      const monitoresStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante || ''} (S/N: ${m.serie || 'N/A'})`).join('\n') || 'N/A';
-      const perifericosStr = validPerifericos.map(p => `${p.nombre || p.tipo || ''}`).join('\n') || 'ESTÁNDAR';
-
-      wsGeneral.addRow({
-        hostname: host,
-        usuario_actual: user,
-        bloque_area: bloque,
-        ubicacion: amb,
-        modelo: toUpper(item.modelo || ''),
-        numero_serie: toUpper(item.numero_serie || ''),
-        placa_base: toUpper(item.placa_base_completa || item.placa_base || 'N/A'),
-        tipo_equipo: toUpper(item.tipo_equipo || 'PC'),
-        procesador: toUpper(item.procesador || 'N/A'),
-        ram_total: toUpper(item.ram_total || 'N/A'),
-        almacenamiento_str: toUpper(almacenamientoStr),
-        monitores_str: toUpper(monitoresStr),
-        perifericos_str: toUpper(perifericosStr),
-        estado: status,
-        ip_red: ip,
-        fecha_escaneo: toUpper(item.fecha_escaneo || '')
-      });
     });
 
-    // Aplicar estilos y auto-ajustar anchos a todas las hojas creadas
-    [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras, wsGeneral].forEach(ws => {
+    // Aplicar estilos y auto-ajustar anchos a todas las hojas categorizadas
+    [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras].forEach(ws => {
       styleDataRows(ws);
       if (ws.columns) {
         ws.columns.forEach((column) => {
