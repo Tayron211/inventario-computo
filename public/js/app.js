@@ -1673,6 +1673,34 @@ function getPeripheralBrandInfo(p) {
   return { brand: null, isRecognized: false, fullName: rawName };
 }
 
+const ORGANIZATIONAL_BLOCKS = {
+  '🏢 Bloque A (Área Administrativa)': [
+    'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+    'Admisión', 'Finanzas', 'Defensoría', 'Garita'
+  ],
+  '🏢 Bloque B (Área Administrativa)': [
+    'Auditorio', 'Dirección', 'Counter', 'GTH', 'Coordinación Académica', 
+    'Retención', 'SSOMA', 'DTC', 'Sala de Reuniones', 'Comedor'
+  ],
+  '🏢 Bloque C (Área Administrativa)': [
+    'Vida Universitaria', 'Promoción', 'Marketing', 'Infraestructura', 
+    'Logística', 'Sala Gamer'
+  ]
+};
+
+function getBlockBadgeForAmbiente(ambName) {
+  if (!ambName) return { label: 'General', class: 'block-general', full: 'Área General' };
+  const clean = ambName.trim().toLowerCase();
+  for (const [blockTitle, list] of Object.entries(ORGANIZATIONAL_BLOCKS)) {
+    if (list.some(item => clean === item.toLowerCase() || clean.includes(item.toLowerCase()))) {
+      if (blockTitle.includes('Bloque A')) return { label: 'Bloque A', class: 'block-a', full: 'Bloque A - Administrativo' };
+      if (blockTitle.includes('Bloque B')) return { label: 'Bloque B', class: 'block-b', full: 'Bloque B - Administrativo' };
+      if (blockTitle.includes('Bloque C')) return { label: 'Bloque C', class: 'block-c', full: 'Bloque C - Administrativo' };
+    }
+  }
+  return { label: 'General', class: 'block-general', full: 'Área General' };
+}
+
 function renderDashboard() {
   const dashFilterAmbiente = document.getElementById('dashFilterAmbiente');
   const dashFilterTipo = document.getElementById('dashFilterTipo');
@@ -1680,20 +1708,38 @@ function renderDashboard() {
   const selectedAmbiente = dashFilterAmbiente ? dashFilterAmbiente.value : 'Todos';
   const selectedTipo = dashFilterTipo ? dashFilterTipo.value : 'Todos';
 
-  // 1. Poblar el selector de ambientes únicos
-  if (dashFilterAmbiente && (dashFilterAmbiente.options.length <= 1 || dashFilterAmbiente.options.length !== (new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim())).size + 1))) {
-    const uniqueAmbientes = Array.from(new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim()))).filter(Boolean).sort();
+  // 1. Poblar el selector de ambientes agrupado por Bloques Organizacionales
+  if (dashFilterAmbiente) {
+    const uniqueAmbientes = Array.from(new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim()))).filter(Boolean);
     const prevVal = dashFilterAmbiente.value;
-    dashFilterAmbiente.innerHTML = '<option value="Todos">🏢 Todos los Ambientes</option>';
-    uniqueAmbientes.forEach(amb => {
-      const opt = document.createElement('option');
-      opt.value = amb;
-      opt.textContent = `📍 ${amb}`;
-      dashFilterAmbiente.appendChild(opt);
+    
+    let html = '<option value="Todos">🏢 Todos los Ambientes y Bloques</option>';
+    
+    Object.entries(ORGANIZATIONAL_BLOCKS).forEach(([blockName, list]) => {
+      html += `<optgroup label="${blockName}">`;
+      list.forEach(amb => {
+        const count = inventoryData.filter(i => (i.ubicacion || '').trim().toLowerCase() === amb.toLowerCase()).length;
+        html += `<option value="${amb}">📍 ${amb} (${count} equipos)</option>`;
+      });
+      html += `</optgroup>`;
     });
-    if (prevVal && uniqueAmbientes.includes(prevVal)) {
-      dashFilterAmbiente.value = prevVal;
+
+    const otherAmbs = uniqueAmbientes.filter(amb => {
+      const b = getBlockBadgeForAmbiente(amb);
+      return b.class === 'block-general';
+    });
+
+    if (otherAmbs.length > 0) {
+      html += `<optgroup label="🏢 Otros Ambientes y Áreas">`;
+      otherAmbs.sort().forEach(amb => {
+        const count = inventoryData.filter(i => (i.ubicacion || '').trim().toLowerCase() === amb.toLowerCase()).length;
+        html += `<option value="${amb}">📍 ${amb} (${count} equipos)</option>`;
+      });
+      html += `</optgroup>`;
     }
+
+    dashFilterAmbiente.innerHTML = html;
+    if (prevVal) dashFilterAmbiente.value = prevVal;
   }
 
   // Filtrar datos para el dashboard según selección
@@ -1756,7 +1802,7 @@ function renderDashboard() {
   if (dashTotalMonitores) dashTotalMonitores.textContent = totalMonitoresReconocidos;
   if (dashTotalPerifericos) dashTotalPerifericos.textContent = totalPerifericosReconocidos;
 
-  // 4. Renderizar Tarjetas de Ambientes (Distribución Espacial)
+  // 4. Renderizar Tarjetas de Ambientes (Distribución Espacial por Bloques)
   const ambientesGrid = document.getElementById('ambientesCardsGrid');
   if (ambientesGrid) {
     const ambientesMap = new Map();
@@ -1791,7 +1837,15 @@ function renderDashboard() {
     if (ambientesList.length === 0) {
       ambientesGrid.innerHTML = '<p class="text-gray-400">No hay ambientes registrados aún.</p>';
     } else {
+      // Ordenar: Bloque A primero, luego Bloque B, luego Bloque C, luego Otros
+      ambientesList.sort((a, b) => {
+        const orderA = getBlockBadgeForAmbiente(a.nombre).class;
+        const orderB = getBlockBadgeForAmbiente(b.nombre).class;
+        return orderA.localeCompare(orderB) || a.nombre.localeCompare(b.nombre);
+      });
+
       ambientesGrid.innerHTML = ambientesList.map(amb => {
+        const blockInfo = getBlockBadgeForAmbiente(amb.nombre);
         const userListStr = Array.from(amb.usuarios).slice(0, 3).join(', ') || 'No asignado';
         const isSelected = selectedAmbiente === amb.nombre;
 
@@ -1800,7 +1854,10 @@ function renderDashboard() {
             <div class="ambiente-card-header">
               <div class="ambiente-title-box">
                 <i class="fa-solid fa-location-dot text-crimson"></i>
-                <h4>${escapeHTML(amb.nombre)}</h4>
+                <div>
+                  <h4>${escapeHTML(amb.nombre)}</h4>
+                  <span class="block-badge ${blockInfo.class}">${blockInfo.label}</span>
+                </div>
               </div>
               <span class="ambiente-total-badge">${amb.equipos.length} equipos</span>
             </div>
@@ -1809,7 +1866,7 @@ function renderDashboard() {
               <div class="amb-stat-chip"><i class="fa-solid fa-desktop text-crimson"></i> <b>${amb.desktops}</b> PCs</div>
               <div class="amb-stat-chip"><i class="fa-solid fa-laptop text-blue"></i> <b>${amb.laptops}</b> Laptops</div>
               <div class="amb-stat-chip"><i class="fa-solid fa-display text-emerald"></i> <b>${amb.monitores}</b> Pantallas</div>
-              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericosMarca}</b> Accesorios de Marca</div>
+              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericosMarca}</b> Accesorios Marca</div>
             </div>
 
             <div class="ambiente-user-list">
