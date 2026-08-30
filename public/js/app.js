@@ -545,6 +545,33 @@ async function fetchServerInfo() {
   }
 }
 
+function deduplicateClientData(items) {
+  const unique = [];
+  const seen = new Set();
+
+  for (const item of (items || [])) {
+    if (!item) continue;
+    const cleanSerial = (item.numero_serie || '').trim().toLowerCase();
+    const isGeneric = !cleanSerial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(cleanSerial);
+
+    let key;
+    if (!isGeneric) {
+      key = `serial:${cleanSerial}`;
+    } else {
+      const host = (item.hostname || '').trim().toLowerCase();
+      const mb = (item.placa_base || '').trim().toLowerCase();
+      const cpu = (item.procesador || '').trim().toLowerCase().substring(0, 30);
+      key = `host:${host}|mb:${mb}|cpu:${cpu}`;
+    }
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(item);
+    }
+  }
+  return unique;
+}
+
 // Obtener Inventario
 async function fetchInventory(silent = false) {
   try {
@@ -552,7 +579,7 @@ async function fetchInventory(silent = false) {
     if (!res.ok) throw new Error('Error al cargar inventario');
     const data = await res.json();
     const prevCount = inventoryData.length;
-    inventoryData = data.items || [];
+    inventoryData = deduplicateClientData(data.items || []);
     updateMetrics();
     renderData();
     if (!silent && prevCount > 0 && inventoryData.length > prevCount) {

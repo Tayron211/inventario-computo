@@ -40,6 +40,33 @@ function normalizeItem(item) {
   };
 }
 
+function deduplicateInventory(items) {
+  const uniqueList = [];
+  const seen = new Set();
+
+  for (const item of (items || [])) {
+    if (!item) continue;
+    const cleanSerial = (item.numero_serie || '').trim().toLowerCase();
+    const isGeneric = !cleanSerial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(cleanSerial);
+
+    let key;
+    if (!isGeneric) {
+      key = `serial:${cleanSerial}`;
+    } else {
+      const host = (item.hostname || '').trim().toLowerCase();
+      const mb = (item.placa_base || '').trim().toLowerCase();
+      const cpu = (item.procesador || '').trim().toLowerCase().substring(0, 30);
+      key = `host:${host}|mb:${mb}|cpu:${cpu}`;
+    }
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueList.push(item);
+    }
+  }
+  return uniqueList;
+}
+
 // Conexión e inicialización automática de Base de Datos en la Nube
 let mongoConnecting = false;
 let mongoError = null;
@@ -62,19 +89,19 @@ async function initCloudDatabase() {
       // Cargar todos los equipos existentes en MongoDB
       const cloudItems = await mongoCollection.find({}).toArray();
       if (cloudItems.length > 0) {
-        const cleaned = cloudItems.map(item => {
+        const cleaned = deduplicateInventory(cloudItems.map(item => {
           const { _id, ...clean } = item;
           return normalizeItem(clean);
-        });
+        }));
         memoryCache = cleaned;
         saveLocalFile(cleaned);
-        // Persistir la corrección de CAE en MongoDB
+        // Persistir la base de datos limpia y sin duplicados en MongoDB
         await mongoCollection.deleteMany({});
         await mongoCollection.insertMany(cleaned);
-        console.log(`📦 Sincronizados y normalizados ${cleaned.length} equipos con ubicación CAE en MongoDB Atlas.`);
+        console.log(`📦 Sincronizados y deduplicados ${cleaned.length} equipos en MongoDB Atlas.`);
       } else {
         // Si MongoDB está vacío, subir los datos locales iniciales
-        const local = loadLocalFile().map(normalizeItem);
+        const local = deduplicateInventory(loadLocalFile().map(normalizeItem));
         if (local.length > 0) {
           await mongoCollection.insertMany(local);
           memoryCache = local;
@@ -723,7 +750,7 @@ app.post('/api/agent/report', (req, res) => {
 
   let existingIndex = -1;
 
-  // 1. Coincidencia SOLO por número de serie físico válido (NO genérico)
+  // 1. Coincidencia por número de serie físico válido (NO genérico)
   if (!isGenericSerial) {
     existingIndex = items.findIndex(i => {
       const itemSerial = (i.numero_serie || '').trim().toLowerCase();
@@ -731,11 +758,12 @@ app.post('/api/agent/report', (req, res) => {
     });
   }
 
-  // 2. Si el serial es genérico o no coincidió, buscar por MAC Address física (si existe y no es genérica)
+  // 2. Si el serial es genérico o no coincidió, buscar por intersección de MAC Address física
   if (existingIndex === -1 && macNormalized && macNormalized !== 'n/a' && macNormalized !== '') {
+    const reportMacs = macNormalized.split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
     existingIndex = items.findIndex(i => {
-      const itemMac = (i.mac_address || '').trim().toLowerCase();
-      return itemMac && itemMac === macNormalized;
+      const itemMacs = (i.mac_address || '').trim().toLowerCase().split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
+      return reportMacs.some(rm => itemMacs.includes(rm));
     });
   }
 
@@ -747,8 +775,20 @@ app.post('/api/agent/report', (req, res) => {
     });
   }
 
-  // NUNCA sobreescribir por simple coincidencia de Hostname:
-  // Si tienen el mismo Hostname pero diferente hardware, se registran como equipos independientes.
+  // 4. Si el Hostname coincide Y (la Placa Base coincide O el Procesador coincide), es la MISMA máquina física re-escaneada
+  if (existingIndex === -1 && payload.hostname) {
+    const cleanHost = payload.hostname.trim().toLowerCase();
+    existingIndex = items.findIndex(i => {
+      const itemHost = (i.hostname || '').trim().toLowerCase();
+      if (itemHost && itemHost === cleanHost) {
+        const sameMb = (i.placa_base || '').trim().toLowerCase() === (payload.placa_base || '').trim().toLowerCase();
+        const sameCpu = (i.procesador || '').trim().toLowerCase().substring(0, 25) === (payload.procesador || '').trim().toLowerCase().substring(0, 25);
+        return sameMb || sameCpu;
+      }
+      return false;
+    });
+  }
+
   const recordHostname = payload.hostname || 'DESKTOP-EQUIPO';
 
   const record = {
