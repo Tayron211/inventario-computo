@@ -298,36 +298,6 @@ function initEventListeners() {
     });
   }
 
-  const btnOpenNetworkScanModal = document.getElementById('btnOpenNetworkScanModal');
-  if (btnOpenNetworkScanModal) {
-    btnOpenNetworkScanModal.addEventListener('click', () => {
-      if (serverInfo && serverInfo.subnetBase) {
-        const inputSubnet = document.getElementById('inputSubnet');
-        if (inputSubnet) inputSubnet.value = serverInfo.subnetBase;
-      }
-      if (serverInfo && serverInfo.oneLinerCommand) {
-        const oneLinerDisplay = document.getElementById('oneLinerCmdDisplay');
-        if (oneLinerDisplay) oneLinerDisplay.textContent = serverInfo.oneLinerCommand;
-      }
-      openModal('networkScanModal');
-    });
-  }
-
-  const btnStartSubnetScan = document.getElementById('btnStartSubnetScan');
-  if (btnStartSubnetScan) {
-    btnStartSubnetScan.addEventListener('click', runNetworkScan);
-  }
-
-  const btnCopyOneLiner = document.getElementById('btnCopyOneLiner');
-  if (btnCopyOneLiner) {
-    btnCopyOneLiner.addEventListener('click', () => {
-      const cmd = document.getElementById('oneLinerCmdDisplay').textContent;
-      navigator.clipboard.writeText(cmd).then(() => {
-        showToast('¡Comando copiado! Pégalo en PowerShell de cualquier PC en tu red.', 'success');
-      });
-    });
-  }
-
   // Botón Nuevo Registro Manual
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
   if (btnOpenManualModal) {

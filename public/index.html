@@ -100,14 +100,8 @@
             <i class="fa-solid fa-qrcode qr-mini-icon"></i>
           </div>
 
-          <!-- Botón Escanear Toda la Red -->
-          <button class="btn btn-crimson-pulse" id="btnOpenNetworkScanModal" title="Escanear y auditar todas las PCs de la subred local">
-            <i class="fa-solid fa-network-wired"></i>
-            <span>Escanear Red</span>
-          </button>
-
           <!-- Botón Escanear Este Equipo -->
-          <button class="btn btn-outline-crimson" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
+          <button class="btn btn-crimson-pulse" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
             <i class="fa-solid fa-bolt"></i>
             <span>Escanear PC</span>
           </button>
@@ -622,72 +616,6 @@
           <i class="fa-solid fa-download"></i> Descargar .BAT
         </a>
         <button class="btn btn-secondary" data-close-modal="agentModal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =================================================================== -->
-  <!-- MODAL: ESCÁNER DE TODA LA RED LOCAL (SUBNET DISCOVERY) -->
-  <!-- =================================================================== -->
-  <div class="modal-overlay" id="networkScanModal">
-    <div class="modal-card modal-lg">
-      <button class="modal-close-btn" data-close-modal="networkScanModal">&times;</button>
-      <div class="modal-header-styled">
-        <i class="fa-solid fa-network-wired header-icon"></i>
-        <h3>Escanear y Auditar Toda la Red Local</h3>
-        <p>Descubre automáticamente todas las computadoras conectadas a tu misma red Wi-Fi o cableada</p>
-      </div>
-
-      <div class="modal-body modal-scrollable">
-        
-        <!-- OPCIÓN 1: BARRIDO DE SUBRED AUTOMÁTICO -->
-        <div class="form-section-title">
-          <i class="fa-solid fa-satellite-dish"></i> MÉTODO 1: BARRIDO AUTOMÁTICO DE SUBRED (PING & WMI)
-        </div>
-        
-        <div class="net-scan-box">
-          <p class="mb-3 text-gray-300">El sistema enviará una ráfaga multi-hilo a todas las IPs de tu subred local para detectar equipos activos, resolver nombres de host, direcciones MAC y extraer números de serie de hardware.</p>
-          
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="inputSubnet">SUBRED A ESCANEAR</label>
-              <input type="text" id="inputSubnet" placeholder="Ej: 192.168.89" class="form-control mono-font">
-            </div>
-            <div class="form-group" style="justify-content: flex-end;">
-              <button class="btn btn-crimson-pulse w-100" id="btnStartSubnetScan">
-                <i class="fa-solid fa-play"></i> Iniciar Escaneo de Red
-              </button>
-            </div>
-          </div>
-
-          <!-- Progress / Terminal Output Log -->
-          <div class="scan-console-box" id="scanConsoleBox" style="display: none;">
-            <div class="console-header">
-              <span><i class="fa-solid fa-terminal"></i> REGISTRO DE DESCUBRIMIENTO EN VIVO</span>
-              <span class="console-spinner" id="consoleSpinner"><i class="fa-solid fa-spinner fa-spin"></i> Escaneando subred...</span>
-            </div>
-            <pre class="console-body" id="scanConsoleLog">Iniciando escaneo...</pre>
-          </div>
-        </div>
-
-        <!-- OPCIÓN 2: COMANDO REMOTO DE 1 SOLA LÍNEA -->
-        <div class="form-section-title mt-4">
-          <i class="fa-solid fa-terminal"></i> MÉTODO 2: COMANDO RÁPIDO DE 1 LÍNEA (SIN INSTALAR NADA)
-        </div>
-
-        <div class="net-scan-box">
-          <p class="mb-3 text-gray-300">En cualquier otra PC o Laptop conectada a tu red, abre <b>PowerShell</b> y pega este comando. Escaneará el 100% de su hardware y lo registrará en este panel al instante:</p>
-          
-          <div class="ip-copy-box" style="padding: 10px 14px;">
-            <code id="oneLinerCmdDisplay" style="font-size: 0.95rem;">irm http://192.168.x.x:3000/scan | iex</code>
-            <button class="btn-copy-ip" id="btnCopyOneLiner" title="Copiar Comando"><i class="fa-regular fa-copy"></i> Copiar Comando</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-close-modal="networkScanModal">Cerrar</button>
       </div>
     </div>
   </div>
