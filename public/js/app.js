@@ -243,9 +243,9 @@ function initEventListeners() {
   });
 
   // Filtros por pestañas (Categorías)
-  filterPills.forEach(pill => {
+  document.querySelectorAll('.filter-pills-group .pill').forEach(pill => {
     pill.addEventListener('click', () => {
-      filterPills.forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.filter-pills-group .pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       currentCategory = pill.getAttribute('data-category') || 'Todos';
       currentFilterType = pill.getAttribute('data-type') || 'Todos';

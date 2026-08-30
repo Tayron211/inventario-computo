@@ -21,7 +21,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=4.0">
+  <link rel="stylesheet" href="css/styles.css?v=4.1">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -206,39 +206,37 @@
           </div>
         </section>
 
-        <!-- Search, Filters and View Controls -->
-        <section class="controls-card">
+        <!-- Control Toolbar: Search & Tabs Filters -->
+        <section class="toolbar-section">
           <div class="search-bar-wrapper">
-            <div class="search-input-group">
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" id="searchInput" placeholder="Buscar por Hostname, serie, modelo, procesador, ambiente, usuario..." autocomplete="off">
-              <button class="btn-clear-search" id="btnClearSearch" title="Limpiar búsqueda">&times;</button>
-            </div>
-            <button class="btn btn-secondary btn-icon-only" id="btnScanBarcodeInput" title="Escanear Código de Barras con la Cámara">
-              <i class="fa-solid fa-barcode"></i>
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por Modelo, Serie, Marca, Tipo, CPU, Hostname, Ambiente o Usuario..." autocomplete="off">
+            <button class="clear-search-btn" id="btnClearSearch" title="Limpiar búsqueda" style="display: none;">
+              <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
-          <div class="filters-and-views">
-            <!-- Categorías rápidas -->
-            <div class="category-pills">
-              <button class="pill-btn active" data-category="Todos">
-                <span>Todos</span> <span class="pill-count" id="countAll">0</span>
-              </button>
-              <button class="pill-btn" data-category="Computadoras">
-                <i class="fa-solid fa-computer"></i> <span>Computadoras</span> <span class="pill-count" id="countComputadoras">0</span>
-              </button>
-              <button class="pill-btn" data-category="Periféricos">
-                <i class="fa-solid fa-keyboard"></i> <span>Periféricos</span> <span class="pill-count" id="countPerifericos">0</span>
-              </button>
-              <button class="pill-btn" data-category="Impresoras">
-                <i class="fa-solid fa-print"></i> <span>Impresoras</span> <span class="pill-count" id="countImpresoras">0</span>
-              </button>
-              <button class="pill-btn" data-category="Redes">
-                <i class="fa-solid fa-network-wired"></i> <span>Redes</span> <span class="pill-count" id="countRedes">0</span>
-              </button>
-            </div>
+          <!-- Filter Pills / Categories -->
+          <div class="filter-pills-group">
+            <button class="pill active" data-category="Todos" data-type="Todos">
+              <i class="fa-solid fa-layer-group"></i> Todos (<span id="countAll">0</span>)
+            </button>
+            <button class="pill" data-category="Computadoras">
+              <i class="fa-solid fa-desktop"></i> Computadoras (<span id="countComputadoras">0</span>)
+            </button>
+            <button class="pill" data-category="Impresoras">
+              <i class="fa-solid fa-print"></i> Impresoras (<span id="countImpresoras">0</span>)
+            </button>
+            <button class="pill" data-category="Redes">
+              <i class="fa-solid fa-network-wired"></i> Red & Wi-Fi (<span id="countRedes">0</span>)
+            </button>
+            <button class="pill" data-category="Periféricos">
+              <i class="fa-solid fa-keyboard"></i> Periféricos & Audio (<span id="countPerifericos">0</span>)
+            </button>
+          </div>
 
+          <!-- Secondary Filters & View Switcher -->
+          <div class="view-and-extra-controls">
             <!-- Filtro por Tipo Específico -->
             <div class="custom-select-wrapper">
               <select id="typeSelectFilter" class="custom-select" title="Filtrar por Tipo de Dispositivo">
@@ -764,6 +762,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=3.0"></script>
+  <script src="js/app.js?v=3.1"></script>
 </body>
 </html>
