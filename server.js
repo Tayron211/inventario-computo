@@ -695,20 +695,46 @@ app.post('/api/agent/report', (req, res) => {
   
   const items = loadDB();
   
-  // Buscar si ya existe por número de serie o hostname
   const serialNormalized = (payload.numero_serie || '').trim();
+  const macNormalized = (payload.mac_address || '').trim().toLowerCase();
+  const mbSerialNormalized = (payload.placa_base_serial || '').trim().toLowerCase();
+
+  // Lista de seriales genéricos o no disponibles que NO deben usarse para reemplazar equipos distintos
+  const isGenericSerial = !serialNormalized || 
+    /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serialNormalized);
+
   let existingIndex = -1;
-  
-  if (serialNormalized && serialNormalized !== 'S/N NO DISPONIBLE' && serialNormalized !== 'Default string') {
-    existingIndex = items.findIndex(i => i.numero_serie && i.numero_serie.trim().toLowerCase() === serialNormalized.toLowerCase());
+
+  // 1. Coincidencia SOLO por número de serie físico válido (NO genérico)
+  if (!isGenericSerial) {
+    existingIndex = items.findIndex(i => {
+      const itemSerial = (i.numero_serie || '').trim().toLowerCase();
+      return itemSerial && itemSerial === serialNormalized.toLowerCase();
+    });
   }
-  
-  if (existingIndex === -1 && payload.hostname) {
-    existingIndex = items.findIndex(i => i.hostname && i.hostname.trim().toLowerCase() === payload.hostname.trim().toLowerCase());
+
+  // 2. Si el serial es genérico o no coincidió, buscar por MAC Address física (si existe y no es genérica)
+  if (existingIndex === -1 && macNormalized && macNormalized !== 'n/a' && macNormalized !== '') {
+    existingIndex = items.findIndex(i => {
+      const itemMac = (i.mac_address || '').trim().toLowerCase();
+      return itemMac && itemMac === macNormalized;
+    });
   }
-  
+
+  // 3. Si el serial de la placa base es único y válido (no genérico), verificar coincidencia
+  if (existingIndex === -1 && mbSerialNormalized && !/^(default string|none|n\/a|0|to be filled by o\.e\.m\.)$/i.test(mbSerialNormalized)) {
+    existingIndex = items.findIndex(i => {
+      const itemMb = (i.placa_base_serial || '').trim().toLowerCase();
+      return itemMb && itemMb === mbSerialNormalized;
+    });
+  }
+
+  // NUNCA sobreescribir por simple coincidencia de Hostname:
+  // Si tienen el mismo Hostname pero diferente hardware, se registran como equipos independientes.
+  const recordHostname = payload.hostname || 'DESKTOP-EQUIPO';
+
   const record = {
-    id: existingIndex >= 0 ? items[existingIndex].id : `item-${Date.now()}`,
+    id: existingIndex >= 0 ? items[existingIndex].id : `item-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
     modelo: payload.modelo,
     numero_serie: payload.numero_serie || 'S/N NO DISPONIBLE',
     placa_base: payload.placa_base || 'N/A',
@@ -723,7 +749,7 @@ app.post('/api/agent/report', (req, res) => {
     almacenamiento: payload.almacenamiento || [],
     monitores: payload.monitores || [],
     perifericos: payload.perifericos || [],
-    hostname: payload.hostname || '',
+    hostname: recordHostname,
     usuario_actual: payload.usuario_actual || '',
     sistema_operativo: payload.sistema_operativo || '',
     ip_red: payload.ip_red || '',
@@ -742,6 +768,7 @@ app.post('/api/agent/report', (req, res) => {
   }
   
   saveDB(items);
+  console.log(`[✓] Equipo procesado: "${record.hostname}" (S/N: ${record.numero_serie}) - Acción: ${existingIndex >= 0 ? 'Actualizado' : 'Nuevo Registro Creado'}`);
   res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
 });
 
