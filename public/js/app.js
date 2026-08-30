@@ -1891,6 +1891,65 @@ function filterByStatus(statusName) {
   if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
 }
 
+function filterByPeripheralType(tipo, brand) {
+  switchPage('inventory');
+  
+  if (searchInput) {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    if (btnClearSearch) btnClearSearch.style.display = 'none';
+  }
+  
+  if (statusFilter) {
+    statusFilter.value = 'Todos';
+    currentFilterStatus = 'Todos';
+  }
+  
+  document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+    p.classList.remove('active');
+  });
+
+  const tipoClean = (tipo || '').toLowerCase();
+  
+  if (tipoClean.includes('monitor') || tipoClean.includes('pantalla') || tipoClean.includes('display')) {
+    currentCategory = 'Todos';
+    currentFilterType = 'Todos';
+    currentSpecificType = 'Monitor / Pantalla';
+    if (typeSelectFilter) typeSelectFilter.value = 'Monitor / Pantalla';
+    showToast('Filtrando por tipo: Monitores / Pantallas', 'info');
+  } else if (tipoClean.includes('teclado') || tipoClean.includes('keyboard')) {
+    currentCategory = 'Periféricos';
+    currentFilterType = 'Todos';
+    currentSpecificType = 'Teclado';
+    if (typeSelectFilter) typeSelectFilter.value = 'Teclado';
+    showToast('Filtrando por tipo: Teclados', 'info');
+  } else if (tipoClean.includes('mouse') || tipoClean.includes('ratón') || tipoClean.includes('raton')) {
+    currentCategory = 'Periféricos';
+    currentFilterType = 'Todos';
+    currentSpecificType = 'Mouse / Puntero';
+    if (typeSelectFilter) typeSelectFilter.value = 'Mouse / Puntero';
+    showToast('Filtrando por tipo: Mouse / Punteros', 'info');
+  } else if (tipoClean.includes('audífono') || tipoClean.includes('audifono') || tipoClean.includes('diadema') || tipoClean.includes('headset')) {
+    currentCategory = 'Periféricos';
+    currentFilterType = 'Todos';
+    currentSpecificType = 'Audífonos / Diadema';
+    if (typeSelectFilter) typeSelectFilter.value = 'Audífonos / Diadema';
+    showToast('Filtrando por tipo: Audífonos / Diademas', 'info');
+  } else {
+    currentCategory = 'Periféricos';
+    currentFilterType = 'Todos';
+    currentSpecificType = 'Todos';
+    if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+    const pillPerif = document.querySelector('.filter-pills-group .pill[data-category="Periféricos"]');
+    if (pillPerif) pillPerif.classList.add('active');
+    showToast(`Filtrando por tipo: Periféricos (${tipo || 'Accesorios'})`, 'info');
+  }
+
+  renderData();
+  const tableCard = document.getElementById('tableViewContainer');
+  if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
+}
+
 const GENERIC_DRIVER_EXCLUDE_REGEX = /compatible con hid|hid-compliant|dispositivo de |dispositivo del |dispositivo definido|dispositivo port[aá]til|controles de radio|dispositivo de interfaz|usb input device|hid keyboard|hid mouse|touchpad|trackpoint|button driver|wireless button|ideacamera|virtual|composite|dispositivo del sistema|realtek|high definition audio|altavoces|micr[oó]fono|audioendpoint|dispositivo de audio|audio digital|mezcla est|controlador de audio|wave|stereo mix|s\/pdif/i;
 
 const RECOGNIZED_PERIPHERAL_BRANDS = [
@@ -2239,7 +2298,7 @@ function renderDashboard() {
         const hostList = Array.from(data.hosts).slice(0, 2).join(', ');
 
         return `
-          <div class="breakdown-row" onclick="filterByAmbiente('${escapeHTML(brand)}')" title="Clic para ver computadoras con periféricos ${escapeHTML(brand)}">
+          <div class="breakdown-row" onclick="filterByPeripheralType('${escapeHTML(data.tipo)}', '${escapeHTML(brand)}')" title="Clic para filtrar por tipo: ${escapeHTML(data.tipo)}">
             <div class="breakdown-label">
               <span class="breakdown-name">
                 <span class="brand-badge-icon"><i class="fa-solid fa-tag"></i></span>
