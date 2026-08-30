@@ -934,11 +934,12 @@ app.get('/api/export-excel', async (req, res) => {
       views: [{ showGridLines: true }]
     });
 
-    // Definición de columnas con HOSTNAME, USUARIO y AMBIENTE / UBICACIÓN en primeras posiciones
+    // Definición de columnas con HOSTNAME, USUARIO, BLOQUE / ÁREA PRINCIPAL y AULA / AMBIENTE ESPECÍFICO
     worksheet.columns = [
       { header: 'HOSTNAME', key: 'hostname', width: 24 },
       { header: 'USUARIO', key: 'usuario_actual', width: 22 },
-      { header: 'AMBIENTE / UBICACIÓN', key: 'ubicacion', width: 26 },
+      { header: 'BLOQUE / ÁREA PRINCIPAL', key: 'bloque_area', width: 28 },
+      { header: 'AULA / AMBIENTE ESPECÍFICO', key: 'ubicacion', width: 28 },
       { header: 'MODELO', key: 'modelo', width: 28 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
       { header: 'PLACA BASE', key: 'placa_base', width: 20 },
@@ -986,6 +987,18 @@ app.get('/api/export-excel', async (req, res) => {
     // Función auxiliar para convertir a mayúsculas de manera segura
     const toUpper = (val) => (val !== undefined && val !== null ? String(val).toUpperCase() : '');
 
+    // Función auxiliar para obtener el Bloque según la Ubicación
+    const getBloqueName = (item) => {
+      if (item.bloque) return item.bloque;
+      const u = (item.ubicacion || '').trim().toLowerCase();
+      if (!u || u === 'cae') return 'GENERAL (CAE)';
+      if (/^(aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9])/i.test(u)) return 'BLOQUE A - AULAS Y LABS';
+      if (/^(t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A - ADMINISTRATIVO';
+      if (/^(auditorio|direcci[oó]n|counter|gth|coordinaci|retenci|ssoma|dtc|sala de reuniones|comedor)/i.test(u)) return 'BLOQUE B - ADMINISTRATIVO';
+      if (/^(vida universitaria|promoci|marketing|infraestructura|log[ií]stica|sala gamer)/i.test(u)) return 'BLOQUE C - ADMINISTRATIVO';
+      return 'GENERAL / OTROS';
+    };
+
     // Agregar filas
     items.forEach((item, index) => {
       const monitoresStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante || ''} (S/N: ${m.serie || 'N/A'})`).join('\n') || 'N/A';
@@ -1005,7 +1018,8 @@ app.get('/api/export-excel', async (req, res) => {
       const row = worksheet.addRow({
         hostname: toUpper(item.hostname || 'PC-EQUIPO'),
         usuario_actual: toUpper(item.usuario_actual || 'ADMIN'),
-        ubicacion: toUpper(item.ubicacion || 'SIN ASIGNAR'),
+        bloque_area: toUpper(getBloqueName(item)),
+        ubicacion: toUpper(item.ubicacion || 'CAE'),
         modelo: toUpper(item.modelo || ''),
         numero_serie: toUpper(item.numero_serie || ''),
         placa_base: toUpper(item.placa_base_completa || item.placa_base || 'N/A'),
