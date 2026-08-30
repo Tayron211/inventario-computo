@@ -758,12 +758,89 @@ body {
   color: var(--gray-400);
 }
 
+.header-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.top-right-user-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Header Actions */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .header-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .brand-text p {
+    display: none;
+  }
+
+  .brand-text h1 {
+    font-size: 1.15rem;
+  }
+
+  .top-right-user-tools {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+
+  .app-nav-tabs {
+    margin: 4px auto !important;
+    width: 100% !important;
+    max-width: 360px !important;
+    display: flex !important;
+    justify-content: center !important;
+    padding: 3px !important;
+  }
+
+  .nav-tab-btn {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 7px 10px !important;
+    font-size: 0.78rem !important;
+    justify-content: center !important;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .header-actions .btn {
+    flex: 1;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    justify-content: center;
+  }
 }
 
 /* Network Badge / QR Trigger - COMPACTO */
@@ -3511,4 +3588,44 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* Sombreado y Resaltado Dinámico para Registros Filtrados */
+@keyframes row-glow-anim {
+  0% { background: rgba(225, 29, 72, 0.18); }
+  50% { background: rgba(225, 29, 72, 0.06); }
+  100% { background: rgba(225, 29, 72, 0.14); }
+}
+
+tr.row-highlight-pulse {
+  animation: row-glow-anim 2.5s ease-in-out infinite alternate !important;
+  border-left: 4px solid var(--crimson-glow) !important;
+}
+
+[data-theme="light"] tr.row-highlight-pulse {
+  background: #fff1f2 !important;
+  border-left: 4px solid #e11d48 !important;
+}
+
+.spec-match-highlight {
+  background: rgba(225, 29, 72, 0.28) !important;
+  border: 1px solid rgba(225, 29, 72, 0.65) !important;
+  color: #ffffff !important;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+  display: inline-block;
+}
+
+[data-theme="light"] .spec-match-highlight {
+  background: #ffe4e6 !important;
+  border: 1px solid #f43f5e !important;
+  color: #be123c !important;
+  box-shadow: 0 0 6px rgba(244, 63, 94, 0.3);
+}
+
+.equipment-card.card-highlight-pulse {
+  border-color: var(--crimson-glow) !important;
+  box-shadow: 0 0 20px rgba(225, 29, 72, 0.35) !important;
 }

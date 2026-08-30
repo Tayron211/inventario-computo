@@ -774,8 +774,25 @@ function renderData() {
   renderGrid(filtered);
 }
 
+function highlightMatch(text, query) {
+  if (!text) return '';
+  if (!query || query.trim() === '') return escapeHTML(String(text));
+  const qClean = query.trim().toLowerCase();
+  const textStr = String(text);
+  const lower = textStr.toLowerCase();
+  const idx = lower.indexOf(qClean);
+  if (idx === -1) return escapeHTML(textStr);
+
+  const before = textStr.substring(0, idx);
+  const match = textStr.substring(idx, idx + qClean.length);
+  const after = textStr.substring(idx + qClean.length);
+  return `${escapeHTML(before)}<span class="spec-match-highlight">${escapeHTML(match)}</span>${highlightMatch(after, query)}`;
+}
+
 function renderTable(items) {
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
+
   tableBody.innerHTML = items.map(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
     const tipoClass = typeInfo.class;
@@ -791,11 +808,11 @@ function renderTable(items) {
     let storageHtml = '';
     if (item.almacenamiento && item.almacenamiento.length > 0) {
       storageHtml = item.almacenamiento.map(d => {
-        const serieText = d.serie && d.serie !== 'N/A' ? ` <span class="serial-mini-tag">S/N: ${escapeHTML(d.serie)}</span>` : '';
-        return `<div class="hw-item-line"><i class="fa-solid fa-hard-drive text-crimson"></i> <b>${escapeHTML(d.modelo || d.tipo)}</b> (${escapeHTML(d.capacidad || '')})${serieText}</div>`;
+        const serieText = d.serie && d.serie !== 'N/A' ? ` <span class="serial-mini-tag">S/N: ${highlightMatch(d.serie, currentSearchQuery)}</span>` : '';
+        return `<div class="hw-item-line"><i class="fa-solid fa-hard-drive text-crimson"></i> <b>${highlightMatch(d.modelo || d.tipo, currentSearchQuery)}</b> (${escapeHTML(d.capacidad || '')})${serieText}</div>`;
       }).join('');
     } else if (item.almacenamiento_resumen) {
-      storageHtml = `<div class="hw-item-line"><i class="fa-solid fa-hard-drive text-crimson"></i> ${escapeHTML(item.almacenamiento_resumen)}</div>`;
+      storageHtml = `<div class="hw-item-line"><i class="fa-solid fa-hard-drive text-crimson"></i> ${highlightMatch(item.almacenamiento_resumen, currentSearchQuery)}</div>`;
     }
 
     // Periféricos y Monitores completos
@@ -804,8 +821,8 @@ function renderTable(items) {
     // Monitores primero
     if (item.monitores && item.monitores.length > 0) {
       item.monitores.forEach(m => {
-        const monSerial = m.serie ? ` <span class="serial-mini-tag">S/N: ${escapeHTML(m.serie)}</span>` : '';
-        perifericosListHtml += `<div class="hw-item-line mon-line"><i class="fa-solid fa-display text-crimson"></i> <b>${escapeHTML(m.modelo || m.fabricante || 'Monitor')}</b>${monSerial}</div>`;
+        const monSerial = m.serie ? ` <span class="serial-mini-tag">S/N: ${highlightMatch(m.serie, currentSearchQuery)}</span>` : '';
+        perifericosListHtml += `<div class="hw-item-line mon-line"><i class="fa-solid fa-display text-crimson"></i> <b>${highlightMatch(m.modelo || m.fabricante || 'Monitor', currentSearchQuery)}</b>${monSerial}</div>`;
       });
     }
 
@@ -813,7 +830,7 @@ function renderTable(items) {
     if (item.perifericos && item.perifericos.length > 0) {
       item.perifericos.forEach(p => {
         const pTipoIcon = (p.tipo && p.tipo.toLowerCase().includes('mouse')) ? 'fa-mouse' : ((p.tipo && p.tipo.toLowerCase().includes('teclado')) ? 'fa-keyboard' : 'fa-plug');
-        perifericosListHtml += `<div class="hw-item-line"><i class="fa-solid ${pTipoIcon}"></i> ${escapeHTML(p.nombre || p.tipo)}</div>`;
+        perifericosListHtml += `<div class="hw-item-line"><i class="fa-solid ${pTipoIcon}"></i> ${highlightMatch(p.nombre || p.tipo, currentSearchQuery)}</div>`;
       });
     }
 
@@ -826,16 +843,16 @@ function renderTable(items) {
     if (cpuText || ramText || storageHtml) {
       specsHtml = `
         <div class="specs-full-block">
-          ${cpuText ? `<div class="spec-cpu-title"><i class="fa-solid fa-microchip text-crimson"></i> <b>${escapeHTML(cpuText)}</b></div>` : ''}
-          ${ramText ? `<div class="spec-ram-line"><i class="fa-solid fa-memory text-crimson"></i> <b>RAM:</b> ${escapeHTML(ramText)}</div>` : ''}
+          ${cpuText ? `<div class="spec-cpu-title"><i class="fa-solid fa-microchip text-crimson"></i> <b>${highlightMatch(cpuText, currentSearchQuery)}</b></div>` : ''}
+          ${ramText ? `<div class="spec-ram-line"><i class="fa-solid fa-memory text-crimson"></i> <b>RAM:</b> ${highlightMatch(ramText, currentSearchQuery)}</div>` : ''}
           ${storageHtml ? `<div class="spec-storage-block">${storageHtml}</div>` : ''}
         </div>
       `;
     } else {
       specsHtml = `
         <div class="specs-full-block">
-          <div class="hw-item-line"><i class="fa-solid ${tipoIcon} text-crimson"></i> <b>${escapeHTML(item.fabricante || 'Dispositivo')}</b> ${escapeHTML(item.tipo_equipo || '')}</div>
-          ${item.notas ? `<div class="hw-item-line text-gray-400"><i class="fa-solid fa-circle-info"></i> ${escapeHTML(item.notas)}</div>` : ''}
+          <div class="hw-item-line"><i class="fa-solid ${tipoIcon} text-crimson"></i> <b>${highlightMatch(item.fabricante || 'Dispositivo', currentSearchQuery)}</b> ${highlightMatch(item.tipo_equipo || '', currentSearchQuery)}</div>
+          ${item.notas ? `<div class="hw-item-line text-gray-400"><i class="fa-solid fa-circle-info"></i> ${highlightMatch(item.notas, currentSearchQuery)}</div>` : ''}
         </div>
       `;
     }
@@ -843,34 +860,35 @@ function renderTable(items) {
     const statusClass = (item.estado || 'Operativo').toLowerCase().replace(/\s+/g, '-');
     const primaryName = item.hostname || item.modelo || 'Equipo';
     const subName = item.hostname ? (item.modelo || '') : '';
+    const isRowHighlighted = queryActive ? 'row-highlight-pulse' : '';
 
     return `
-      <tr>
+      <tr class="${isRowHighlighted}">
         <td class="cell-modelo">
           <div class="col-modelo-val">
             <div class="modelo-header">
               <i class="fa-solid ${tipoIcon} text-crimson modelo-type-icon"></i>
-              <strong class="modelo-text">${escapeHTML(primaryName)}</strong>
+              <strong class="modelo-text">${highlightMatch(primaryName, currentSearchQuery)}</strong>
             </div>
-            ${subName ? `<span style="font-size: 0.74rem; color: var(--gray-400); margin-left: 20px; line-height: 1.2;">${escapeHTML(subName)}</span>` : ''}
-            ${item.fabricante ? `<span class="fabricante-tag">${escapeHTML(item.fabricante)}</span>` : ''}
+            ${subName ? `<span style="font-size: 0.74rem; color: var(--gray-400); margin-left: 20px; line-height: 1.2;">${highlightMatch(subName, currentSearchQuery)}</span>` : ''}
+            ${item.fabricante ? `<span class="fabricante-tag">${highlightMatch(item.fabricante, currentSearchQuery)}</span>` : ''}
           </div>
         </td>
         <td class="cell-serie">
           <span class="serial-badge" onclick="copyText('${escapeHTML(item.numero_serie)}')" title="Clic para copiar S/N">
             <i class="fa-solid fa-barcode"></i>
-            ${escapeHTML(item.numero_serie || 'N/A')}
+            ${highlightMatch(item.numero_serie || 'N/A', currentSearchQuery)}
           </span>
         </td>
         <td class="cell-ambiente">
-          <div class="user-loc" title="Ambiente / Ubicación"><i class="fa-solid fa-location-dot text-crimson"></i> <b>${escapeHTML(item.ubicacion || 'Sin Asignar')}</b></div>
+          <div class="user-loc" title="Ambiente / Ubicación"><i class="fa-solid fa-location-dot text-crimson"></i> <b>${highlightMatch(item.ubicacion || 'Sin Asignar', currentSearchQuery)}</b></div>
         </td>
         <td class="cell-placa">
-          <span class="placa-badge" title="Placa Base">${escapeHTML(item.placa_base || 'N/A')}</span>
+          <span class="placa-badge" title="Placa Base">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
         </td>
         <td class="cell-tipo">
           <span class="tipo-badge ${tipoClass}">
-            <i class="fa-solid ${tipoIcon}"></i> ${escapeHTML(item.tipo_equipo || 'Equipo')}
+            <i class="fa-solid ${tipoIcon}"></i> ${highlightMatch(item.tipo_equipo || 'Equipo', currentSearchQuery)}
           </span>
         </td>
         <td class="cell-specs">
@@ -883,9 +901,9 @@ function renderTable(items) {
         </td>
         <td class="cell-usuario">
           <div class="user-block">
-            <div class="user-name"><i class="fa-solid fa-user text-crimson"></i> <b>${escapeHTML(item.usuario_actual || 'Sin Asignar')}</b></div>
-            ${item.ubicacion ? `<div class="user-loc"><i class="fa-solid fa-location-dot"></i> ${escapeHTML(item.ubicacion)}</div>` : ''}
-            ${item.ip_red ? `<div class="user-host"><i class="fa-solid fa-network-wired"></i> ${escapeHTML(item.ip_red.split(',')[0].trim())}</div>` : ''}
+            <div class="user-name"><i class="fa-solid fa-user text-crimson"></i> <b>${highlightMatch(item.usuario_actual || 'Sin Asignar', currentSearchQuery)}</b></div>
+            ${item.ubicacion ? `<div class="user-loc"><i class="fa-solid fa-location-dot"></i> ${highlightMatch(item.ubicacion, currentSearchQuery)}</div>` : ''}
+            ${item.ip_red ? `<div class="user-host"><i class="fa-solid fa-network-wired"></i> ${highlightMatch(item.ip_red.split(',')[0].trim(), currentSearchQuery)}</div>` : ''}
           </div>
         </td>
         <td class="cell-estado">
@@ -916,43 +934,45 @@ function renderTable(items) {
 
 function renderGrid(items) {
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   gridContainer.innerHTML = items.map(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
     const primaryName = item.hostname || item.modelo || 'Equipo';
     const subName = item.hostname ? (item.modelo || '') : '';
+    const highlightCardClass = queryActive ? 'card-highlight-pulse' : '';
 
     return `
-      <div class="grid-card">
+      <div class="grid-card ${highlightCardClass}">
         <div class="grid-card-header">
           <div>
-            <div class="grid-card-title">${escapeHTML(primaryName)}</div>
-            ${subName ? `<div style="font-size: 0.78rem; color: var(--gray-400); margin-top: 2px;">${escapeHTML(subName)}</div>` : ''}
-            <span class="tipo-badge ${typeInfo.class} mt-4"><i class="fa-solid ${typeInfo.icon}"></i> ${escapeHTML(item.tipo_equipo || 'Equipo')}</span>
+            <div class="grid-card-title">${highlightMatch(primaryName, currentSearchQuery)}</div>
+            ${subName ? `<div style="font-size: 0.78rem; color: var(--gray-400); margin-top: 2px;">${highlightMatch(subName, currentSearchQuery)}</div>` : ''}
+            <span class="tipo-badge ${typeInfo.class} mt-4"><i class="fa-solid ${typeInfo.icon}"></i> ${highlightMatch(item.tipo_equipo || 'Equipo', currentSearchQuery)}</span>
           </div>
           <span class="serial-badge" onclick="copyText('${escapeHTML(item.numero_serie)}')">
-            <i class="fa-solid fa-barcode"></i> ${escapeHTML(item.numero_serie || 'N/A')}
+            <i class="fa-solid fa-barcode"></i> ${highlightMatch(item.numero_serie || 'N/A', currentSearchQuery)}
           </span>
         </div>
 
         <div class="grid-card-specs">
           <div class="grid-spec-row">
             <span class="grid-spec-label">Marca / Placa:</span>
-            <span class="grid-spec-val">${escapeHTML(item.fabricante || item.placa_base || 'N/A')}</span>
+            <span class="grid-spec-val">${highlightMatch(item.fabricante || item.placa_base || 'N/A', currentSearchQuery)}</span>
           </div>
           ${item.procesador ? `
           <div class="grid-spec-row">
             <span class="grid-spec-label">Procesador:</span>
-            <span class="grid-spec-val">${escapeHTML(item.procesador.substring(0, 24))}...</span>
+            <span class="grid-spec-val">${highlightMatch(item.procesador.substring(0, 24), currentSearchQuery)}...</span>
           </div>` : ''}
           ${item.ram_total ? `
           <div class="grid-spec-row">
             <span class="grid-spec-label">RAM:</span>
-            <span class="grid-spec-val">${escapeHTML(item.ram_total)}</span>
+            <span class="grid-spec-val">${highlightMatch(item.ram_total, currentSearchQuery)}</span>
           </div>` : ''}
           <div class="grid-spec-row">
             <span class="grid-spec-label">Ubicación / Resp:</span>
-            <span class="grid-spec-val">${escapeHTML(item.ubicacion || item.usuario_actual || 'N/A')}</span>
+            <span class="grid-spec-val">${highlightMatch(item.ubicacion || item.usuario_actual || 'N/A', currentSearchQuery)}</span>
           </div>
         </div>
 

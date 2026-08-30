@@ -21,7 +21,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=5.0">
+  <link rel="stylesheet" href="css/styles.css?v=5.1">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -79,17 +79,40 @@
     <!-- Header Principal -->
     <header class="app-header">
       <div class="header-container">
-        <div class="brand-section">
-          <div class="logo-icon">
-            <i class="fa-solid fa-microchip"></i>
+        <!-- Barra Superior: Marca + Herramientas de Usuario en la esquina derecha -->
+        <div class="header-top-bar">
+          <div class="brand-section">
+            <div class="logo-icon">
+              <i class="fa-solid fa-microchip"></i>
+            </div>
+            <div class="brand-text">
+              <h1>SYS-INVENTORY <span class="badge-crimson">PRO</span></h1>
+              <p>Control de Hardware, Números de Serie & Periféricos</p>
+            </div>
           </div>
-          <div class="brand-text">
-            <h1>SYS-INVENTORY <span class="badge-crimson">PRO</span></h1>
-            <p>Control de Hardware, Números de Serie & Periféricos</p>
+
+          <div class="top-right-user-tools">
+            <!-- Perfil de Usuario y Cerrar Sesión en la esquina superior derecha -->
+            <div class="user-session-badge badge-role-admin" id="userSessionBox">
+              <span class="user-pill" id="userPill">
+                <span id="sessionUserIcon"><i class="fa-solid fa-crown gold-crown-icon"></i></span>
+                <span id="sessionUserName"><b>admin</b></span>
+              </span>
+              <button class="btn-logout" id="btnLogout" title="Cerrar Sesión">
+                <i class="fa-solid fa-power-off"></i>
+              </button>
+            </div>
+
+            <!-- Botón Modo Claro / Oscuro a su lado -->
+            <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Alternar entre Modo Claro y Modo Oscuro">
+              <i class="fa-solid fa-sun icon-sun"></i>
+              <i class="fa-solid fa-moon icon-moon"></i>
+              <span id="themeToggleText">Modo Claro</span>
+            </button>
           </div>
         </div>
 
-        <!-- Navegación Multi-Página -->
+        <!-- Navegación Multi-Página Centrada -->
         <nav class="app-nav-tabs" id="appNavTabs">
           <button class="nav-tab-btn active" id="tabNavInventory" title="Ver Listado y Tabla de Inventario">
             <i class="fa-solid fa-boxes-stacked"></i>
@@ -101,6 +124,7 @@
           </button>
         </nav>
 
+        <!-- Botones de Acción de Equipos -->
         <div class="header-actions">
           <!-- Botón Escanear Este Equipo -->
           <button class="btn btn-crimson-pulse" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
@@ -119,24 +143,6 @@
             <i class="fa-solid fa-file-excel"></i>
             <span>Excel</span>
           </a>
-
-          <!-- Perfil de Usuario y Cerrar Sesión -->
-          <div class="user-session-badge badge-role-admin" id="userSessionBox">
-            <span class="user-pill" id="userPill">
-              <span id="sessionUserIcon"><i class="fa-solid fa-crown gold-crown-icon"></i></span>
-              <span id="sessionUserName"><b>admin</b></span>
-            </span>
-            <button class="btn-logout" id="btnLogout" title="Cerrar Sesión">
-              <i class="fa-solid fa-power-off"></i>
-            </button>
-          </div>
-
-          <!-- Botón Modo Claro / Oscuro ubicado en el extremo superior derecho -->
-          <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Alternar entre Modo Claro y Modo Oscuro">
-            <i class="fa-solid fa-sun icon-sun"></i>
-            <i class="fa-solid fa-moon icon-moon"></i>
-            <span id="themeToggleText">Modo Claro</span>
-          </button>
         </div>
       </div>
     </header>
