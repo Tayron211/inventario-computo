@@ -209,6 +209,12 @@ function setTheme(theme) {
   if (themeToggleText) {
     themeToggleText.textContent = theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
   }
+
+  const metaThemeColor = document.getElementById('metaThemeColor');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute('content', theme === 'light' ? '#f8fafc' : '#0b0e14');
+  }
+
   updateQrForTheme(theme);
 }
 
