@@ -1172,11 +1172,42 @@ app.get('/api/export-excel', async (req, res) => {
     const wsImpresoras = workbook.addWorksheet('IMPRESORAS', { views: [{ showGridLines: true }] });
     styleWorksheet(wsImpresoras, [
       { header: 'EQUIPO / MODELO', key: 'modelo', width: 30 },
+      { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 24 },
       { header: 'USUARIO', key: 'usuario', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
       { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 8: PROYECTORES
+    // -------------------------------------------------------------
+    const wsProyectores = workbook.addWorksheet('PROYECTORES', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsProyectores, [
+      { header: 'MODELO PROYECTOR', key: 'modelo', width: 30 },
+      { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
+      { header: 'NÚMERO DE SERIE (S/N)', key: 'numero_serie', width: 24 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE (UBICACIÓN)', key: 'ubicacion', width: 28 },
+      { header: 'DIRECCIÓN IP / RED', key: 'ip', width: 20 },
+      { header: 'ESTADO', key: 'estado', width: 16 },
+      { header: 'NOTAS / OBSERVACIONES', key: 'notas', width: 30 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 9: WIFI / RED
+    // -------------------------------------------------------------
+    const wsWifi = workbook.addWorksheet('WIFI', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsWifi, [
+      { header: 'DISPOSITIVO / ACCESS POINT', key: 'dispositivo', width: 32 },
+      { header: 'MARCA / FABRICANTE', key: 'marca', width: 22 },
+      { header: 'DIRECCIÓN MAC', key: 'mac', width: 24 },
+      { header: 'NÚMERO DE SERIE (S/N)', key: 'numero_serie', width: 24 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE (UBICACIÓN)', key: 'ubicacion', width: 28 },
+      { header: 'DIRECCIÓN IP / RED', key: 'ip', width: 20 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -1200,10 +1231,34 @@ app.get('/api/export-excel', async (req, res) => {
       }
 
       const isLaptop = /laptop|port[aá]til|notebook/i.test(item.tipo_equipo || '');
-      const isImpresora = /impresora|multifuncional|proyector/i.test(item.tipo_equipo || '');
+      const isProyector = /proyector|multimedia|datashow/i.test(item.tipo_equipo || '') || /proyector|datashow/i.test(item.modelo || '');
+      const isImpresora = !isProyector && (/impresora|multifuncional|fotocopiadora/i.test(item.tipo_equipo || '') || /impresora/i.test(item.modelo || ''));
+      const isWifiDevice = /wi-fi|wifi|access point|ap|router|switch/i.test(item.tipo_equipo || '') || /wi-fi|wifi|access point|router/i.test(item.modelo || '');
 
-      // 1. CASE o LAPTOP
-      if (isLaptop) {
+      // 1. CLASIFICACIÓN PRINCIPAL DE EQUIPO
+      if (isProyector) {
+        wsProyectores.addRow({
+          modelo: toUpper(item.modelo || 'Proyector Multimedia'),
+          fabricante: toUpper(item.fabricante || 'Epson'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          bloque: bloque,
+          ubicacion: amb,
+          ip: ip,
+          estado: status,
+          notas: toUpper(item.notas || 'Equipo audiovisual')
+        });
+      } else if (isImpresora) {
+        wsImpresoras.addRow({
+          modelo: toUpper(item.modelo || ''),
+          fabricante: toUpper(item.fabricante || 'Epson/HP'),
+          numero_serie: toUpper(item.numero_serie || ''),
+          usuario: user,
+          bloque: bloque,
+          ubicacion: amb,
+          ip: ip,
+          estado: status
+        });
+      } else if (isLaptop) {
         wsLaptops.addRow({
           hostname: host,
           usuario: user,
@@ -1217,17 +1272,7 @@ app.get('/api/export-excel', async (req, res) => {
           ip: ip,
           estado: status
         });
-      } else if (isImpresora) {
-        wsImpresoras.addRow({
-          modelo: toUpper(item.modelo || ''),
-          numero_serie: toUpper(item.numero_serie || ''),
-          usuario: user,
-          bloque: bloque,
-          ubicacion: amb,
-          ip: ip,
-          estado: status
-        });
-      } else {
+      } else if (!isWifiDevice) {
         wsCase.addRow({
           hostname: host,
           usuario: user,
@@ -1244,7 +1289,34 @@ app.get('/api/export-excel', async (req, res) => {
         });
       }
 
-      // 2. Monitores a su propia hoja
+      // 2. REGISTRO EN HOJA WIFI (Equipos de red dedicados o interfaces Wi-Fi/MAC detectadas)
+      if (isWifiDevice) {
+        wsWifi.addRow({
+          dispositivo: toUpper(item.modelo || 'Access Point Wi-Fi'),
+          marca: toUpper(item.fabricante || 'Cisco / Ubiquiti / Mikrotik'),
+          mac: toUpper(item.mac_address || item.mac || 'N/A'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          bloque: bloque,
+          ubicacion: amb,
+          ip: ip,
+          estado: status
+        });
+      } else if (item.mac_address && item.mac_address !== 'N/A' && item.mac_address !== '') {
+        const devDesc = isLaptop ? `LAPTOP WI-FI (${item.hostname || item.modelo})` : `INTERFAZ RED / WI-FI (${item.hostname})`;
+        const brandDesc = item.fabricante || (isLaptop ? 'HP / INTEL' : 'GIGABIT ADAPTER');
+        wsWifi.addRow({
+          dispositivo: toUpper(devDesc),
+          marca: toUpper(brandDesc),
+          mac: toUpper(item.mac_address),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          bloque: bloque,
+          ubicacion: amb,
+          ip: ip,
+          estado: status
+        });
+      }
+
+      // 3. Monitores a su propia hoja
       (item.monitores || []).forEach(m => {
         wsMonitor.addRow({
           monitor: toUpper(`${m.modelo || m.fabricante || 'Monitor'}`),
@@ -1257,7 +1329,7 @@ app.get('/api/export-excel', async (req, res) => {
         });
       });
 
-      // 3. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS (Solo hardware propietario/marca)
+      // 4. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS (Solo hardware propietario/marca)
       const validPerifericos = (item.perifericos || []).filter(isValidPeripheral);
 
       validPerifericos.forEach(p => {
@@ -1297,7 +1369,7 @@ app.get('/api/export-excel', async (req, res) => {
     });
 
     // Aplicar estilos y auto-ajustar anchos a todas las hojas categorizadas
-    [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras].forEach(ws => {
+    [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras, wsProyectores, wsWifi].forEach(ws => {
       styleDataRows(ws);
       if (ws.columns) {
         ws.columns.forEach((column) => {
