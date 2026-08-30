@@ -425,16 +425,52 @@ function initEventListeners() {
   });
 
   // Copiar URL local
-  const btnCopyUrl = document.getElementById('btnCopyUrl');
-  if (btnCopyUrl) {
-    btnCopyUrl.addEventListener('click', () => {
-      if (serverInfo && serverInfo.serverUrl) {
-        navigator.clipboard.writeText(serverInfo.serverUrl).then(() => {
-          showToast('¡URL copiada al portapapeles!', 'success');
-        });
-      }
-    });
-  }
+  // Inicializar Arrastre con Mouse para Scroll Horizontal Cómodo
+  initTableDragScroll();
+}
+
+function initTableDragScroll() {
+  const slider = document.querySelector('.table-responsive');
+  if (!slider) return;
+
+  let isDown = false;
+  let startX = 0;
+  let scrollLeft = 0;
+
+  slider.addEventListener('mousedown', (e) => {
+    // Si el usuario hace clic sobre un botón interactivo, enlace o copiar serial, permitir acción normal
+    if (e.target.closest('button, a, .serial-badge, input, select, textarea')) return;
+    
+    isDown = true;
+    slider.classList.add('grabbing');
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDown) {
+      isDown = false;
+      slider.classList.remove('grabbing');
+    }
+  });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  });
+
+  // Soporte directo: Shift + Rueda del mouse para desplazamiento horizontal inmediato
+  slider.addEventListener('wheel', (e) => {
+    if (e.shiftKey) return;
+    if (Math.abs(e.deltaX) > 0) return;
+    if (e.altKey) {
+      e.preventDefault();
+      slider.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
 }
 
 // Funciones globales de apertura y cierre de modales

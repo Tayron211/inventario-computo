@@ -1509,6 +1509,21 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--crimson-primary) rgba(15, 15, 25, 0.9);
   padding-bottom: 4px;
+  cursor: grab;
+}
+
+.table-responsive.grabbing {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.table-responsive button,
+.table-responsive a,
+.table-responsive input,
+.table-responsive select,
+.table-responsive .serial-badge {
+  cursor: pointer;
+  user-select: auto;
 }
 
 .table-responsive::-webkit-scrollbar {
