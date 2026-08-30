@@ -922,20 +922,200 @@ app.post('/api/restore-json', (req, res) => {
   }
 });
 
-// Exportación a Excel con el formato exacto del modelo proporcionado
+// Exportación a Excel con hojas separadas por categoría y tipo de hardware
 app.get('/api/export-excel', async (req, res) => {
   try {
     const items = loadDB();
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'SYS-INVENTORY';
+    workbook.creator = 'SYS-INVENTORY PRO';
     workbook.created = new Date();
-    
-    const worksheet = workbook.addWorksheet('Inventario Hardware', {
-      views: [{ showGridLines: true }]
-    });
 
-    // Definición de columnas con HOSTNAME, USUARIO, BLOQUE y AULA / AMBIENTE ESPECÍFICO
-    worksheet.columns = [
+    const toUpper = (val) => (val !== undefined && val !== null ? String(val).toUpperCase() : '');
+
+    const getBloqueName = (item) => {
+      if (item.bloque) {
+        if (/bloque\s*a/i.test(item.bloque)) return 'BLOQUE A';
+        if (/bloque\s*b/i.test(item.bloque)) return 'BLOQUE B';
+        if (/bloque\s*c/i.test(item.bloque)) return 'BLOQUE C';
+      }
+      const u = (item.ubicacion || '').trim().toLowerCase();
+      if (!u || u === 'cae') return 'BLOQUE A';
+      if (/^(aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9]|t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A';
+      if (/^(auditorio|direcci[oó]n|counter|gth|coordinaci|retenci|ssoma|dtc|sala de reuniones|comedor)/i.test(u)) return 'BLOQUE B';
+      if (/^(vida universitaria|promoci|marketing|infraestructura|log[ií]stica|sala gamer)/i.test(u)) return 'BLOQUE C';
+      return 'BLOQUE A';
+    };
+
+    const styleWorksheet = (ws, columns) => {
+      ws.columns = columns;
+      const headerRow = ws.getRow(1);
+      headerRow.height = 28;
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF1F4E38' } // Verde esmeralda corporativo
+        };
+        cell.font = {
+          name: 'Segoe UI',
+          size: 11,
+          bold: true,
+          color: { argb: 'FFFFFFFF' }
+        };
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: 'center',
+          wrapText: true
+        };
+        cell.border = {
+          top: { style: 'medium', color: { argb: 'FF0D2E1F' } },
+          left: { style: 'thin', color: { argb: 'FF336B50' } },
+          bottom: { style: 'medium', color: { argb: 'FF0D2E1F' } },
+          right: { style: 'thin', color: { argb: 'FF336B50' } }
+        };
+      });
+    };
+
+    const styleDataRows = (ws) => {
+      ws.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return;
+        row.height = 24;
+        const isEven = rowNumber % 2 === 0;
+        row.eachCell((cell) => {
+          cell.font = {
+            name: 'Calibri',
+            size: 11,
+            color: { argb: 'FF1A1A1A' }
+          };
+          cell.alignment = { 
+            vertical: 'middle', 
+            horizontal: 'center',
+            wrapText: true 
+          };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: isEven ? 'FFFFFFFF' : 'FFF7FAF8' }
+          };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD4D4D4' } },
+            left: { style: 'thin', color: { argb: 'FFD4D4D4' } },
+            bottom: { style: 'thin', color: { argb: 'FFD4D4D4' } },
+            right: { style: 'thin', color: { argb: 'FFD4D4D4' } }
+          };
+        });
+      });
+    };
+
+    // -------------------------------------------------------------
+    // HOJA 1: CASE (PCs de Escritorio, All-in-One, Mini PCs)
+    // -------------------------------------------------------------
+    const wsCase = workbook.addWorksheet('CASE', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsCase, [
+      { header: 'HOSTNAME', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'MODELO PC', key: 'modelo', width: 28 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'PLACA BASE', key: 'placa_base', width: 22 },
+      { header: 'PROCESADOR', key: 'procesador', width: 34 },
+      { header: 'MEMORIA RAM', key: 'ram', width: 20 },
+      { header: 'DISCOS / SSD', key: 'almacenamiento', width: 38 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 2: LAPTOPS
+    // -------------------------------------------------------------
+    const wsLaptops = workbook.addWorksheet('LAPTOPS', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsLaptops, [
+      { header: 'HOSTNAME', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'MODELO LAPTOP', key: 'modelo', width: 28 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'PROCESADOR', key: 'procesador', width: 34 },
+      { header: 'MEMORIA RAM', key: 'ram', width: 20 },
+      { header: 'DISCOS / SSD', key: 'almacenamiento', width: 38 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 3: MONITOR
+    // -------------------------------------------------------------
+    const wsMonitor = workbook.addWorksheet('MONITOR', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsMonitor, [
+      { header: 'MONITOR MODELO / MARCA', key: 'monitor', width: 30 },
+      { header: 'NÚMERO DE SERIE (S/N)', key: 'serie', width: 24 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 4: TECLADO
+    // -------------------------------------------------------------
+    const wsTeclado = workbook.addWorksheet('TECLADO', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsTeclado, [
+      { header: 'TECLADO / MARCA', key: 'dispositivo', width: 32 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 5: AUDÍFONOS
+    // -------------------------------------------------------------
+    const wsAudifonos = workbook.addWorksheet('AUDÍFONOS', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsAudifonos, [
+      { header: 'DISPOSITIVO DE AUDIO / DIADEMA', key: 'dispositivo', width: 34 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 6: MOUSE
+    // -------------------------------------------------------------
+    const wsMouse = workbook.addWorksheet('MOUSE', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsMouse, [
+      { header: 'MOUSE / MARCA', key: 'dispositivo', width: 32 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 7: IMPRESORAS
+    // -------------------------------------------------------------
+    const wsImpresoras = workbook.addWorksheet('IMPRESORAS', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsImpresoras, [
+      { header: 'EQUIPO / MODELO', key: 'modelo', width: 30 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 8: INVENTARIO GENERAL
+    // -------------------------------------------------------------
+    const wsGeneral = workbook.addWorksheet('INVENTARIO GENERAL', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsGeneral, [
       { header: 'HOSTNAME', key: 'hostname', width: 24 },
       { header: 'USUARIO', key: 'usuario_actual', width: 22 },
       { header: 'BLOQUE', key: 'bloque_area', width: 18 },
@@ -952,62 +1132,17 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'ESTADO', key: 'estado', width: 15 },
       { header: 'DIRECCIÓN IP', key: 'ip_red', width: 22 },
       { header: 'FECHA REGISTRO', key: 'fecha_escaneo', width: 20 }
-    ];
+    ]);
 
-    // Estilo del encabezado idéntico al tema de la imagen (Verde oscuro esmeralda / Bosque corporativo con texto blanco bold)
-    // O estilo corporativo con bordes definidos
-    const headerRow = worksheet.getRow(1);
-    headerRow.height = 28;
-    
-    headerRow.eachCell((cell) => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF1F4E38' } // Verde oscuro elegante como en la captura
-      };
-      cell.font = {
-        name: 'Segoe UI',
-        size: 11,
-        bold: true,
-        color: { argb: 'FFFFFFFF' }
-      };
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center',
-        wrapText: true
-      };
-      cell.border = {
-        top: { style: 'medium', color: { argb: 'FF0D2E1F' } },
-        left: { style: 'thin', color: { argb: 'FF336B50' } },
-        bottom: { style: 'medium', color: { argb: 'FF0D2E1F' } },
-        right: { style: 'thin', color: { argb: 'FF336B50' } }
-      };
-    });
+    // Poblado de Datos en todas las hojas
+    items.forEach((item) => {
+      const bloque = getBloqueName(item);
+      const amb = toUpper(item.ubicacion || 'CAE');
+      const host = toUpper(item.hostname || 'PC-EQUIPO');
+      const user = toUpper(item.usuario_actual || 'ADMIN');
+      const status = toUpper(item.estado || 'OPERATIVO');
+      const ip = toUpper(item.ip_red || 'N/A');
 
-    // Función auxiliar para convertir a mayúsculas de manera segura
-    const toUpper = (val) => (val !== undefined && val !== null ? String(val).toUpperCase() : '');
-
-    // Función auxiliar para obtener exactamente el nombre del Bloque (BLOQUE A, BLOQUE B, BLOQUE C)
-    const getBloqueName = (item) => {
-      if (item.bloque) {
-        if (/bloque\s*a/i.test(item.bloque)) return 'BLOQUE A';
-        if (/bloque\s*b/i.test(item.bloque)) return 'BLOQUE B';
-        if (/bloque\s*c/i.test(item.bloque)) return 'BLOQUE C';
-      }
-      const u = (item.ubicacion || '').trim().toLowerCase();
-      if (!u || u === 'cae') return 'BLOQUE A';
-      if (/^(aula|207|304|305|centro de informaci|20[1-6]|30[1-6]|40[1-9]|50[1-9]|60[1-9]|t[oó]pico|lactario|guarder[ií]a|psicopedag[oó]gico|atp|admis|finanzas|defensor|garita)/i.test(u)) return 'BLOQUE A';
-      if (/^(auditorio|direcci[oó]n|counter|gth|coordinaci|retenci|ssoma|dtc|sala de reuniones|comedor)/i.test(u)) return 'BLOQUE B';
-      if (/^(vida universitaria|promoci|marketing|infraestructura|log[ií]stica|sala gamer)/i.test(u)) return 'BLOQUE C';
-      return 'BLOQUE A';
-    };
-
-    // Agregar filas
-    items.forEach((item, index) => {
-      const monitoresStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante || ''} (S/N: ${m.serie || 'N/A'})`).join('\n') || 'N/A';
-      const perifericosStr = (item.perifericos || []).map(p => `${p.nombre || p.tipo || ''}`).join('\n') || 'ESTÁNDAR';
-      
-      // Construir almacenamiento detallado legible
       let almacenamientoStr = '';
       if (item.almacenamiento && Array.isArray(item.almacenamiento) && item.almacenamiento.length > 0) {
         almacenamientoStr = item.almacenamiento.map(d => {
@@ -1018,11 +1153,109 @@ app.get('/api/export-excel', async (req, res) => {
         almacenamientoStr = item.almacenamiento_resumen || 'Disco Principal';
       }
 
-      const row = worksheet.addRow({
-        hostname: toUpper(item.hostname || 'PC-EQUIPO'),
-        usuario_actual: toUpper(item.usuario_actual || 'ADMIN'),
-        bloque_area: toUpper(getBloqueName(item)),
-        ubicacion: toUpper(item.ubicacion || 'CAE'),
+      const isLaptop = /laptop|port[aá]til|notebook/i.test(item.tipo_equipo || '');
+      const isImpresora = /impresora|multifuncional|proyector/i.test(item.tipo_equipo || '');
+
+      // 1. CASE o LAPTOP
+      if (isLaptop) {
+        wsLaptops.addRow({
+          hostname: host,
+          usuario: user,
+          bloque: bloque,
+          ubicacion: amb,
+          modelo: toUpper(item.modelo || ''),
+          numero_serie: toUpper(item.numero_serie || ''),
+          procesador: toUpper(item.procesador || 'N/A'),
+          ram: toUpper(item.ram_total || 'N/A'),
+          almacenamiento: toUpper(almacenamientoStr),
+          ip: ip,
+          estado: status
+        });
+      } else if (isImpresora) {
+        wsImpresoras.addRow({
+          modelo: toUpper(item.modelo || ''),
+          numero_serie: toUpper(item.numero_serie || ''),
+          usuario: user,
+          bloque: bloque,
+          ubicacion: amb,
+          ip: ip,
+          estado: status
+        });
+      } else {
+        wsCase.addRow({
+          hostname: host,
+          usuario: user,
+          bloque: bloque,
+          ubicacion: amb,
+          modelo: toUpper(item.modelo || ''),
+          numero_serie: toUpper(item.numero_serie || ''),
+          placa_base: toUpper(item.placa_base_completa || item.placa_base || 'N/A'),
+          procesador: toUpper(item.procesador || 'N/A'),
+          ram: toUpper(item.ram_total || 'N/A'),
+          almacenamiento: toUpper(almacenamientoStr),
+          ip: ip,
+          estado: status
+        });
+      }
+
+      // 2. Monitores a su propia hoja
+      (item.monitores || []).forEach(m => {
+        wsMonitor.addRow({
+          monitor: toUpper(`${m.modelo || m.fabricante || 'Monitor'}`),
+          serie: toUpper(m.serie || 'N/A'),
+          hostname: host,
+          usuario: user,
+          bloque: bloque,
+          ubicacion: amb,
+          estado: status
+        });
+      });
+
+      // 3. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS
+      (item.perifericos || []).forEach(p => {
+        const pName = toUpper(p.nombre || p.tipo || '');
+        const pType = (p.tipo || '').toLowerCase();
+        const pNameLower = pName.toLowerCase();
+
+        if (/teclado|keyboard/i.test(pType) || /teclado|keyboard/i.test(pNameLower)) {
+          wsTeclado.addRow({
+            dispositivo: pName,
+            hostname: host,
+            usuario: user,
+            bloque: bloque,
+            ubicacion: amb,
+            estado: status
+          });
+        } else if (/mouse|rat[oó]n|puntero/i.test(pType) || /mouse|rat[oó]n|puntero/i.test(pNameLower)) {
+          wsMouse.addRow({
+            dispositivo: pName,
+            hostname: host,
+            usuario: user,
+            bloque: bloque,
+            ubicacion: amb,
+            estado: status
+          });
+        } else if (/aud[ií]fono|diadema|headset|auricular|audio/i.test(pType) || /aud[ií]fono|diadema|headset|auricular|audio/i.test(pNameLower)) {
+          wsAudifonos.addRow({
+            dispositivo: pName,
+            hostname: host,
+            usuario: user,
+            bloque: bloque,
+            ubicacion: amb,
+            estado: status
+          });
+        }
+      });
+
+      // 4. Inventario General
+      const monitoresStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante || ''} (S/N: ${m.serie || 'N/A'})`).join('\n') || 'N/A';
+      const perifericosStr = (item.perifericos || []).map(p => `${p.nombre || p.tipo || ''}`).join('\n') || 'ESTÁNDAR';
+
+      wsGeneral.addRow({
+        hostname: host,
+        usuario_actual: user,
+        bloque_area: bloque,
+        ubicacion: amb,
         modelo: toUpper(item.modelo || ''),
         numero_serie: toUpper(item.numero_serie || ''),
         placa_base: toUpper(item.placa_base_completa || item.placa_base || 'N/A'),
@@ -1032,41 +1265,15 @@ app.get('/api/export-excel', async (req, res) => {
         almacenamiento_str: toUpper(almacenamientoStr),
         monitores_str: toUpper(monitoresStr),
         perifericos_str: toUpper(perifericosStr),
-        estado: toUpper(item.estado || 'OPERATIVO'),
-        ip_red: toUpper(item.ip_red || 'N/A'),
+        estado: status,
+        ip_red: ip,
         fecha_escaneo: toUpper(item.fecha_escaneo || '')
       });
+    });
 
-      row.height = 26;
-      const isEven = index % 2 === 0;
-
-      row.eachCell((cell) => {
-        cell.font = {
-          name: 'Calibri',
-          size: 11,
-          color: { argb: 'FF1A1A1A' }
-        };
-        
-        // Todo el contenido en el excel centrado horizontal y verticalmente
-        cell.alignment = { 
-          vertical: 'middle', 
-          horizontal: 'center',
-          wrapText: true 
-        };
-
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: isEven ? 'FFFFFFFF' : 'FFF7FAF8' }
-        };
-
-        cell.border = {
-          top: { style: 'thin', color: { argb: 'FFD4D4D4' } },
-          left: { style: 'thin', color: { argb: 'FFD4D4D4' } },
-          bottom: { style: 'thin', color: { argb: 'FFD4D4D4' } },
-          right: { style: 'thin', color: { argb: 'FFD4D4D4' } }
-        };
-      });
+    // Aplicar estilos a todas las hojas creadas
+    [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras, wsGeneral].forEach(ws => {
+      styleDataRows(ws);
     });
 
     // Auto-ajustar el ancho de cada columna al contenido real completo (mínimo 18 dígitos, adaptado para que todo entre en 1 sola línea)
