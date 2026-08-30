@@ -1101,6 +1101,10 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
   if (!formUbicacion) return;
 
   const bloquesMap = {
+    'Bloque A (Área Administrativa)': [
+      'CAE', 'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+      'Admisión', 'Finanzas', 'Defensoría', 'Garita'
+    ],
     'Bloque A (Aulas y Laboratorios)': [
       'Aula 201', 'Aula 202', 'Aula 203', 'Aula 204', 'Aula 205', 'Aula 206', 
       '207 (Sala SUM)', 'Aula 301', 'Aula 302', 'Aula 303', 'Laboratorio 304', 
@@ -1111,10 +1115,6 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
       'Aula 602', 'Aula 603', 'Aula 604', 'Aula 605', 'Aula 606', 'Aula 607', 
       'Aula 608', 'Aula 609'
     ],
-    'Bloque A (Área Administrativa)': [
-      'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
-      'Admisión', 'Finanzas', 'Defensoría', 'Garita'
-    ],
     'Bloque B (Área Administrativa)': [
       'Auditorio', 'Dirección', 'Counter', 'GTH', 'Coordinación Académica', 
       'Retención', 'SSOMA', 'DTC', 'Sala de Reuniones', 'Comedor'
@@ -1122,9 +1122,6 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
     'Bloque C (Área Administrativa)': [
       'Vida Universitaria', 'Promoción', 'Marketing', 'Infraestructura', 
       'Logística', 'Sala Gamer'
-    ],
-    'General / Atención': [
-      'CAE'
     ]
   };
 
@@ -1175,8 +1172,8 @@ function openManualCreateModal() {
 
   const formBloque = document.getElementById('formBloque');
   if (formBloque) {
-    formBloque.value = 'Bloque A (Aulas y Laboratorios)';
-    populateFormAmbientes('Bloque A (Aulas y Laboratorios)', 'Aula 201');
+    formBloque.value = 'Bloque A (Área Administrativa)';
+    populateFormAmbientes('Bloque A (Área Administrativa)', 'CAE');
   }
 
   openModal('manualModal');
@@ -1217,13 +1214,13 @@ function editEquipment(id) {
 
   const currentUbicacion = item.ubicacion || 'CAE';
   const blockBadge = getBlockBadgeForAmbiente(currentUbicacion);
-  let matchingBloque = 'General / Atención';
+  let matchingBloque = 'Bloque A (Área Administrativa)';
 
   if (blockBadge.class === 'block-a-aulas') matchingBloque = 'Bloque A (Aulas y Laboratorios)';
   else if (blockBadge.class === 'block-a') matchingBloque = 'Bloque A (Área Administrativa)';
   else if (blockBadge.class === 'block-b') matchingBloque = 'Bloque B (Área Administrativa)';
   else if (blockBadge.class === 'block-c') matchingBloque = 'Bloque C (Área Administrativa)';
-  else matchingBloque = 'General / Atención';
+  else matchingBloque = 'Bloque A (Área Administrativa)';
 
   const formBloque = document.getElementById('formBloque');
   if (formBloque) {
@@ -1798,7 +1795,7 @@ function getPeripheralBrandInfo(p) {
 
 const ORGANIZATIONAL_BLOCKS = {
   '🏢 Bloque A (Área Administrativa)': [
-    'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+    'CAE', 'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
     'Admisión', 'Finanzas', 'Defensoría', 'Garita'
   ],
   '🎓 Bloque A (Aulas y Laboratorios)': [
