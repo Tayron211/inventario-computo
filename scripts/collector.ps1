@@ -3,7 +3,7 @@
 # ==============================================================================
 
 param(
-    [string]$ServerUrl = "http://localhost:3000"
+    [string]$ServerUrl = "https://ivt.onrender.com"
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
