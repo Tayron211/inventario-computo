@@ -297,16 +297,72 @@ function initEventListeners() {
     renderData();
   });
 
-  // Clic en tarjetas de métricas para filtrar
-  const cardFilterDesktop = document.getElementById('cardFilterDesktop');
-  if (cardFilterDesktop) {
-    cardFilterDesktop.addEventListener('click', () => {
-      setFilterCategory('Computadoras');
+  // Clic interactivo en tarjetas de métricas para filtrar
+  function applyMetricFilter(target) {
+    document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+      if (target === 'Todos' && p.getAttribute('data-category') === 'Todos') p.classList.add('active');
+      else if (p.getAttribute('data-category') === target) p.classList.add('active');
+      else p.classList.remove('active');
     });
+
+    if (target === 'Todos') {
+      currentCategory = 'Todos';
+      currentFilterType = 'Todos';
+      currentSpecificType = 'Todos';
+      currentFilterStatus = 'Todos';
+      if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+      if (statusFilter) statusFilter.value = 'Todos';
+      if (searchInput) {
+        searchInput.value = '';
+        currentSearchQuery = '';
+        if (btnClearSearch) btnClearSearch.style.display = 'none';
+      }
+      showToast('Mostrando todos los equipos del inventario', 'info');
+    } else if (target === 'PC de Escritorio') {
+      currentCategory = 'Computadoras';
+      currentFilterType = 'Todos';
+      currentSpecificType = 'PC de Escritorio';
+      if (typeSelectFilter) typeSelectFilter.value = 'PC de Escritorio';
+      showToast('Filtrando por PCs de Escritorio', 'info');
+    } else if (target === 'Laptop') {
+      currentCategory = 'Computadoras';
+      currentFilterType = 'Todos';
+      currentSpecificType = 'Laptop';
+      if (typeSelectFilter) typeSelectFilter.value = 'Laptop';
+      showToast('Filtrando por Laptops', 'info');
+    } else if (target === 'Monitor') {
+      currentCategory = 'Todos';
+      currentFilterType = 'Todos';
+      currentSpecificType = 'Monitor / Pantalla';
+      if (typeSelectFilter) typeSelectFilter.value = 'Monitor / Pantalla';
+      showToast('Filtrando por Monitores y Pantallas', 'info');
+    } else if (target === 'Periféricos') {
+      currentCategory = 'Periféricos';
+      currentFilterType = 'Todos';
+      currentSpecificType = 'Todos';
+      if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+      showToast('Filtrando por Periféricos y Accesorios', 'info');
+    }
+
+    renderData();
+    const tableContainer = document.getElementById('tableViewContainer');
+    if (tableContainer) tableContainer.scrollIntoView({ behavior: 'smooth' });
   }
-  document.getElementById('cardFilterLaptop').addEventListener('click', () => {
-    setFilterPill('Laptop');
-  });
+
+  const cardFilterTotal = document.getElementById('cardFilterTotal');
+  if (cardFilterTotal) cardFilterTotal.addEventListener('click', () => applyMetricFilter('Todos'));
+
+  const cardFilterDesktop = document.getElementById('cardFilterDesktop');
+  if (cardFilterDesktop) cardFilterDesktop.addEventListener('click', () => applyMetricFilter('PC de Escritorio'));
+
+  const cardFilterLaptop = document.getElementById('cardFilterLaptop');
+  if (cardFilterLaptop) cardFilterLaptop.addEventListener('click', () => applyMetricFilter('Laptop'));
+
+  const cardFilterMonitor = document.getElementById('cardFilterMonitor');
+  if (cardFilterMonitor) cardFilterMonitor.addEventListener('click', () => applyMetricFilter('Monitor'));
+
+  const cardFilterPerifericos = document.getElementById('cardFilterPerifericos');
+  if (cardFilterPerifericos) cardFilterPerifericos.addEventListener('click', () => applyMetricFilter('Periféricos'));
 
   // Cambio de Vista (Tabla vs Tarjetas)
   document.getElementById('viewTableBtn').addEventListener('click', () => {
