@@ -582,6 +582,7 @@ async function fetchInventory(silent = false) {
     inventoryData = deduplicateClientData(data.items || []);
     updateMetrics();
     renderData();
+    renderDashboard();
     if (!silent && prevCount > 0 && inventoryData.length > prevCount) {
       showToast(`¡Nuevo equipo detectado en la red! Total: ${inventoryData.length}`, 'success');
     }
