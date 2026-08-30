@@ -14,6 +14,9 @@ param(
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls
+} catch {}
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "  ESCANER DE HARDWARE Y PERIFERICOS - AUDITORIA DE COMPUTO" -ForegroundColor Red

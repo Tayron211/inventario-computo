@@ -499,7 +499,7 @@ echo [*] Conectando con servidor (${serverUrl})...
 echo [*] Extrayendo BIOS, Motherboard, CPU, RAM, Discos y Perifericos...
 echo.
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm ${serverUrl}/scan | iex"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls; irm ${serverUrl}/scan | iex"
 
 echo.
 echo ====================================================================
