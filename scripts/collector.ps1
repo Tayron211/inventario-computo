@@ -377,10 +377,15 @@ if (-not $sentSuccess) {
 }
 
 Write-Host ""
-Write-Host "[✓] Registro completado con éxito. Cerrando ventana en 2 segundos..." -ForegroundColor Cyan
-Start-Sleep -Seconds 2
+Write-Host "[✓] Registro completado con éxito. Cerrando ventana..." -ForegroundColor Cyan
+Start-Sleep -Milliseconds 1500
+
 try {
-    Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
-} catch {
     [System.Environment]::Exit(0)
-}
+} catch {}
+
+try {
+    [System.Diagnostics.Process]::GetCurrentProcess().Kill()
+} catch {}
+
+Stop-Process -Id $PID -Force

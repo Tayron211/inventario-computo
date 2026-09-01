@@ -506,6 +506,9 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
     scriptContent = scriptContent.replace(/\[string\]\$ServerUrl\s*=\s*"[^"]*"/i, `[string]$ServerUrl = "${serverUrl}"`);
     scriptContent = scriptContent.replace(/\[string\]\$Ubicacion\s*=\s*"[^"]*"/i, `[string]$Ubicacion = "${ubicacion}"`);
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.send(scriptContent);
   } catch (err) {
     res.status(500).send('# Error leyendo script de escaneo');
