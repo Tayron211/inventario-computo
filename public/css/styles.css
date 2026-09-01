@@ -970,18 +970,21 @@ body {
 
 .nav-tab-btn:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)) !important;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3), 0 6px 14px rgba(0, 0, 0, 0.25) !important;
+  transform: translateY(-2px);
 }
 
 .nav-tab-btn:active {
-  transform: scale(0.96) !important;
+  transform: translateY(2px) scale(0.98) !important;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3) !important;
 }
 
 .nav-tab-btn.active {
   background: linear-gradient(135deg, var(--crimson-primary), #991b1b) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 100, 120, 0.5) !important;
-  box-shadow: 0 4px 16px rgba(220, 20, 60, 0.5) !important;
+  box-shadow: 0 3px 0 #881337, 0 4px 16px rgba(220, 20, 60, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
   font-weight: 700;
 }
 
@@ -998,12 +1001,15 @@ body {
 }
 
 [data-theme="light"] .nav-tab-btn {
-  color: #334155;
+  color: #475569;
 }
 
 [data-theme="light"] .nav-tab-btn:hover {
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.7);
+  color: #0f172a !important;
+  background: linear-gradient(135deg, #ffffff, #f1f5f9) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 3px 0 #cbd5e1, 0 5px 12px rgba(15, 23, 42, 0.1) !important;
+  transform: translateY(-2px);
 }
 
 [data-theme="light"] .nav-tab-btn.active {
@@ -1167,7 +1173,7 @@ body {
   color: var(--crimson-glow);
 }
 
-/* BOTONES PREMIUM LIQUID GLASS CON BAJA REDONDEZ (6px) */
+/* BOTONES PREMIUM LIQUID GLASS CON 3D EFECTO Y BAJA REDONDEZ (6px) */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1180,7 +1186,7 @@ body {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.18);
   white-space: nowrap;
   position: relative;
@@ -1188,6 +1194,7 @@ body {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   user-select: none;
+  transform: translateY(0);
 }
 
 .btn::before {
@@ -1208,7 +1215,7 @@ body {
 }
 
 .btn:active {
-  transform: scale(0.96) translateY(1px) !important;
+  transform: translateY(2px) scale(0.98) !important;
 }
 
 .btn-crimson, .btn-crimson-pulse {
@@ -1216,43 +1223,43 @@ body {
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 6px !important;
-  box-shadow: 0 4px 16px rgba(225, 29, 72, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 3px 0 #881337, 0 5px 15px rgba(225, 29, 72, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-crimson:hover, .btn-crimson-pulse:hover {
   background: linear-gradient(135deg, #fb7185 0%, #f43f5e 45%, #be123c 100%) !important;
-  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
-  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #881337, 0 10px 24px rgba(225, 29, 72, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+  transform: translateY(-3px);
 }
 
 .btn-crimson:active, .btn-crimson-pulse:active {
   background: linear-gradient(135deg, #be123c 0%, #881337 100%) !important;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 18px rgba(244, 63, 94, 0.7) !important;
-  transform: scale(0.96) translateY(1px) !important;
+  box-shadow: 0 1px 0 #881337, inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 0 16px rgba(244, 63, 94, 0.7) !important;
+  transform: translateY(2px) scale(0.98) !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, rgba(51, 65, 85, 0.8), rgba(30, 41, 59, 0.95)) !important;
-  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+  background: linear-gradient(135deg, rgba(51, 65, 85, 0.9), rgba(30, 41, 59, 0.98)) !important;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
   border-radius: 6px !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 3px 0 #0f172a, 0 5px 15px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(135deg, rgba(71, 85, 105, 0.95), rgba(51, 65, 85, 0.95)) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #475569 0%, #334155 100%) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 5px 0 #0f172a, 0 10px 22px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-3px);
   color: #ffffff !important;
 }
 
 .btn-secondary:active {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(148, 163, 184, 0.4) !important;
-  transform: scale(0.96) translateY(1px) !important;
+  box-shadow: 0 1px 0 #0f172a, inset 0 3px 6px rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(2px) scale(0.98) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
@@ -1261,21 +1268,21 @@ body {
   color: #ffffff !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 6px !important;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 3px 0 #064e3b, 0 5px 15px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-excel:hover {
   background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%) !important;
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
-  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #064e3b, 0 10px 24px rgba(16, 185, 129, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-3px);
   color: #ffffff !important;
 }
 
 .btn-excel:active {
   background: linear-gradient(135deg, #047857 0%, #064e3b 100%) !important;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 18px rgba(16, 185, 129, 0.7) !important;
-  transform: scale(0.96) translateY(1px) !important;
+  box-shadow: 0 1px 0 #064e3b, inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 0 18px rgba(16, 185, 129, 0.7) !important;
+  transform: translateY(2px) scale(0.98) !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
@@ -1284,20 +1291,20 @@ body {
   border: 1px solid rgba(255, 45, 85, 0.45);
   border-radius: 6px !important;
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .btn-outline-crimson:hover {
   background: rgba(220, 20, 60, 0.22);
   border-color: var(--crimson-glow);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 18px rgba(220, 20, 60, 0.35);
-  transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 8px 20px rgba(220, 20, 60, 0.35);
+  transform: translateY(-3px);
 }
 
 .btn-outline-crimson:active {
   background: rgba(220, 20, 60, 0.35) !important;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6) !important;
-  transform: scale(0.96) !important;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(2px) scale(0.98) !important;
 }
 
 .btn-theme-toggle {

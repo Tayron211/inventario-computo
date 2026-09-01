@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=18.0">
+  <link rel="stylesheet" href="css/styles.css?v=20.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -406,42 +406,61 @@
           </div>
         </section>
 
-        <!-- KPI Summary Cards -->
-        <section class="dash-kpi-grid">
-          <div class="dash-kpi-card">
-            <div class="kpi-icon icon-emerald"><i class="fa-solid fa-building-user"></i></div>
-            <div class="kpi-info">
-              <span class="kpi-num" id="dashTotalAmbientes">0</span>
-              <span class="kpi-label">Ambientes</span>
+        <!-- KPI Summary Cards (IDÉNTICO A INVENTARIO) -->
+        <section class="metrics-grid">
+          <div class="metric-card" title="Ambientes y Aulas Registradas">
+            <div class="metric-icon total">
+              <i class="fa-solid fa-building-user"></i>
             </div>
+            <div class="metric-data">
+              <span class="metric-value" id="dashTotalAmbientes">0</span>
+              <span class="metric-title">Ambientes</span>
+            </div>
+            <div class="metric-tag">Sedes</div>
           </div>
-          <div class="dash-kpi-card">
-            <div class="kpi-icon icon-crimson"><i class="fa-solid fa-desktop"></i></div>
-            <div class="kpi-info">
-              <span class="kpi-num" id="dashTotalPCs">0</span>
-              <span class="kpi-label">PCs Escritorio</span>
+
+          <div class="metric-card" title="Total PCs de Escritorio">
+            <div class="metric-icon desktop">
+              <i class="fa-solid fa-desktop"></i>
             </div>
+            <div class="metric-data">
+              <span class="metric-value" id="dashTotalPCs">0</span>
+              <span class="metric-title">PCs Escritorio</span>
+            </div>
+            <div class="metric-tag">Equipos</div>
           </div>
-          <div class="dash-kpi-card">
-            <div class="kpi-icon icon-cyan"><i class="fa-solid fa-laptop"></i></div>
-            <div class="kpi-info">
-              <span class="kpi-num" id="dashTotalLaptops">0</span>
-              <span class="kpi-label">Laptops</span>
+
+          <div class="metric-card" title="Total Laptops">
+            <div class="metric-icon laptop">
+              <i class="fa-solid fa-laptop"></i>
             </div>
+            <div class="metric-data">
+              <span class="metric-value" id="dashTotalLaptops">0</span>
+              <span class="metric-title">Laptops</span>
+            </div>
+            <div class="metric-tag">Equipos</div>
           </div>
-          <div class="dash-kpi-card">
-            <div class="kpi-icon icon-blue"><i class="fa-solid fa-display"></i></div>
-            <div class="kpi-info">
-              <span class="kpi-num" id="dashTotalMonitores">0</span>
-              <span class="kpi-label">Monitores</span>
+
+          <div class="metric-card" title="Total Monitores">
+            <div class="metric-icon monitors">
+              <i class="fa-solid fa-display"></i>
             </div>
+            <div class="metric-data">
+              <span class="metric-value" id="dashTotalMonitores">0</span>
+              <span class="metric-title">Monitores</span>
+            </div>
+            <div class="metric-tag">Pantallas</div>
           </div>
-          <div class="dash-kpi-card">
-            <div class="kpi-icon icon-purple"><i class="fa-solid fa-keyboard"></i></div>
-            <div class="kpi-info">
-              <span class="kpi-num" id="dashTotalPerifericos">0</span>
-              <span class="kpi-label">Periféricos</span>
+
+          <div class="metric-card" title="Total Periféricos">
+            <div class="metric-icon peripherals">
+              <i class="fa-solid fa-keyboard"></i>
             </div>
+            <div class="metric-data">
+              <span class="metric-value" id="dashTotalPerifericos">0</span>
+              <span class="metric-title">Periféricos</span>
+            </div>
+            <div class="metric-tag">Accesorios</div>
           </div>
         </section>
 
@@ -993,6 +1012,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=18.0"></script>
+  <script src="js/app.js?v=20.0"></script>
 </body>
 </html>
