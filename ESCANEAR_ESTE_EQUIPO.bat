@@ -31,4 +31,5 @@ echo ====================================================================
 echo  [OK] Escaneo completado. Los datos se guardaron en el inventario.
 echo ====================================================================
 echo.
-timeout /t 5 >nul
+timeout /t 2 >nul
+exit

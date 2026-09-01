@@ -377,4 +377,10 @@ if (-not $sentSuccess) {
 }
 
 Write-Host ""
-Write-Host "Presione cualquier tecla para salir..." -ForegroundColor Gray
+Write-Host "[✓] Registro completado con éxito. Cerrando ventana en 2 segundos..." -ForegroundColor Cyan
+Start-Sleep -Seconds 2
+try {
+    Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
+} catch {
+    [System.Environment]::Exit(0)
+}
