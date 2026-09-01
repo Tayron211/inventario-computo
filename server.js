@@ -741,6 +741,7 @@ app.post('/api/inventory', (req, res) => {
     usuario_actual: body.usuario_actual || '',
     ubicacion: body.ubicacion || 'Sin asignar',
     estado: body.estado || 'Operativo',
+    consumible: body.consumible || body.tinta_toner || '',
     notas: body.notas || '',
     fecha_escaneo: new Date().toISOString().replace('T', ' ').substring(0, 19),
     origen: 'Manual'

@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=7.0">
+  <link rel="stylesheet" href="css/styles.css?v=8.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -653,6 +653,16 @@
                 <option value="En Bodega">En Bodega</option>
               </select>
             </div>
+
+            <!-- Campo Inteligente para Tinta / Tóner de Impresoras -->
+            <div class="form-group full-width" id="formGroupConsumible" style="display: none;">
+              <label for="formConsumible" style="display: flex; align-items: center; justify-content: space-between;">
+                <span><i class="fa-solid fa-droplet text-cyan"></i> CONSUMIBLE (TINTA / TÓNER CORRESPONDIENTE)</span>
+                <span class="auto-badge" id="badgeConsumibleAuto" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detectado</span>
+              </label>
+              <input type="text" id="formConsumible" placeholder="Ej: Tinta Epson T544 o Tóner HP 85A (Se completa automáticamente al ingresar el modelo)" class="form-control" style="border-color: rgba(6, 182, 212, 0.4);">
+              <div id="consumibleSuggestions" class="consumible-suggestions-row"></div>
+            </div>
           </div>
 
           <!-- SECCIÓN 2: HARDWARE INTERNO -->
@@ -834,6 +844,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=7.0"></script>
+  <script src="js/app.js?v=8.0"></script>
 </body>
 </html>
