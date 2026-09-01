@@ -2601,6 +2601,14 @@ function viewDetails(id) {
 function copyText(text, label = '') {
   if (!text || text === 'N/A' || text === 'Sin Asignar' || text === 'Sin asignar' || text === 'null') return;
   const clean = String(text).trim();
+
+  // Eliminar cualquier sombreado o selección azul de texto
+  try {
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
+  } catch (e) {}
+
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(clean).then(() => {
       showToast(`Copiado: ${clean}`, 'success');
@@ -2618,6 +2626,8 @@ function fallbackCopyText(text) {
   textArea.style.position = 'fixed';
   textArea.style.left = '-999999px';
   textArea.style.top = '-999999px';
+  textArea.setAttribute('readonly', '');
+  textArea.style.opacity = '0';
   document.body.appendChild(textArea);
   textArea.focus();
   textArea.select();
@@ -2628,6 +2638,11 @@ function fallbackCopyText(text) {
     showToast('Error al copiar al portapapeles', 'error');
   }
   textArea.remove();
+  try {
+    if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
+  } catch (e) {}
 }
 
 function showToast(message, type = 'info') {

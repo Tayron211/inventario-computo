@@ -456,6 +456,8 @@
   border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
   cursor: pointer;
+  user-select: none !important;
+  -webkit-user-select: none !important;
   transition: all 0.2s ease;
 }
 
@@ -2186,6 +2188,9 @@ body {
   align-items: center;
   gap: 3px;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2225,8 +2230,16 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
-  user-select: all;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.placa-badge::selection,
+.serial-badge::selection {
+  background: transparent;
 }
 
 .placa-badge:hover {
