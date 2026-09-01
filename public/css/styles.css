@@ -1021,6 +1021,12 @@ body {
 }
 
 [data-theme="light"] .nav-tab-btn.active {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(225, 29, 72, 0.6) !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+}
+
 [data-theme="light"] .nav-tab-btn.active i,
 [data-theme="light"] .nav-tab-btn.active span {
   color: #ffffff !important;
