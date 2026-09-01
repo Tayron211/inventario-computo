@@ -884,126 +884,166 @@ function setFilterCategory(category) {
 // RENDERIZADO Y FILTROS
 // -------------------------------------------------------------
 function renderData() {
-  // Aplicar filtros
-  const filtered = inventoryData.filter(item => {
-    const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
-    const itemType = (item.tipo_equipo || '').toLowerCase();
+  let displayItems = [];
 
-    // Filtro por tipo específico dropdown
-    if (currentSpecificType && currentSpecificType !== 'Todos') {
-      const targetType = currentSpecificType.toLowerCase();
+  if (currentCategory === 'Monitor' || currentCategory === 'Monitores') {
+    inventoryData.forEach(item => {
+      const t = (item.tipo_equipo || '').toLowerCase();
+      // Si el registro es un monitor independiente
+      if (t.includes('monitor') || t.includes('pantalla') || t.includes('display')) {
+        displayItems.push({
+          ...item,
+          isDiscreteDevice: true,
+          discreteCategory: 'Monitor',
+          deviceTypeLabel: 'Monitor',
+          equipoAsignado: item.hostname || 'Independiente'
+        });
+      }
+      // Monitores conectados a las computadoras
+      if (item.monitores && Array.isArray(item.monitores) && item.monitores.length > 0) {
+        item.monitores.forEach((m, idx) => {
+          const monName = formatMonitorDisplayName(m);
+          const monSerial = (m.serie && m.serie !== 'PNP-ID' && m.serie !== 'N/A' && m.serie !== 'No reportado por EDID') ? m.serie : 'PNP-STD';
+          displayItems.push({
+            id: `${item.id}-mon-${idx}`,
+            parentId: item.id,
+            hostname: monName,
+            modelo: monName,
+            fabricante: m.fabricante && m.fabricante !== 'PNP' ? m.fabricante : (EDID_BRAND_MAP[m.fabricante] || 'Monitor'),
+            numero_serie: monSerial,
+            tipo_equipo: 'Monitor / Pantalla',
+            ubicacion: item.ubicacion || 'Sin Asignar',
+            usuario_actual: item.usuario_actual || 'Sin Asignar',
+            ip_red: item.ip_red || '',
+            placa_base: item.hostname ? `Conectado a: ${item.hostname}` : 'Integrado',
+            estado: item.estado || 'Operativo',
+            hardware_specs: m.resolucion ? `Resolución: ${m.resolucion}` : 'Pantalla Externa',
+            isDiscreteDevice: true,
+            discreteCategory: 'Monitor',
+            deviceTypeLabel: 'Monitor',
+            equipoAsignado: item.hostname || item.modelo || 'Equipo'
+          });
+        });
+      }
+    });
+  } else if (currentCategory === 'Periféricos' || currentCategory === 'Perifericos') {
+    inventoryData.forEach(item => {
+      const info = getDeviceTypeInfo(item.tipo_equipo);
+      // Si el registro es un periférico independiente
+      if (info.category === 'Periféricos') {
+        displayItems.push({
+          ...item,
+          isDiscreteDevice: true,
+          discreteCategory: 'Periférico',
+          deviceTypeLabel: item.tipo_equipo || 'Periférico',
+          equipoAsignado: item.hostname || 'Independiente'
+        });
+      }
+      // Periféricos conectados a las computadoras
+      if (item.perifericos && Array.isArray(item.perifericos) && item.perifericos.length > 0) {
+        item.perifericos.forEach((p, idx) => {
+          const pName = p.nombre || p.modelo || p.tipo || 'Periférico USB';
+          const pSerial = (p.serie && p.serie !== 'N/A' && !/^(0+$|none)/i.test(p.serie)) ? p.serie : (p.id_hardware || 'Plug & Play');
+          displayItems.push({
+            id: `${item.id}-perif-${idx}`,
+            parentId: item.id,
+            hostname: pName,
+            modelo: pName,
+            fabricante: p.fabricante || 'Dispositivo USB',
+            numero_serie: pSerial,
+            tipo_equipo: p.tipo || 'Periférico USB',
+            ubicacion: item.ubicacion || 'Sin Asignar',
+            usuario_actual: item.usuario_actual || 'Sin Asignar',
+            ip_red: item.ip_red || '',
+            placa_base: item.hostname ? `Conectado a: ${item.hostname}` : 'N/A',
+            estado: item.estado || 'Operativo',
+            hardware_specs: p.interfaz || p.conexion || 'Conexión USB',
+            isDiscreteDevice: true,
+            discreteCategory: 'Periférico',
+            deviceTypeLabel: p.tipo || 'Periférico',
+            equipoAsignado: item.hostname || item.modelo || 'Equipo'
+          });
+        });
+      }
+    });
+  } else {
+    // Aplicar filtros estándar para equipos completos
+    displayItems = inventoryData.filter(item => {
+      const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
+      const itemType = (item.tipo_equipo || '').toLowerCase();
 
-      if (targetType === 'laptop') {
-        if (!itemType.includes('laptop') && !itemType.includes('notebook') && !itemType.includes('portat') && !itemType.includes('thinkpad') && !itemType.includes('latitude') && !itemType.includes('macbook')) {
-          return false;
-        }
-      } else if (targetType === 'pc de escritorio') {
-        if (itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat')) return false;
-        if (!itemType.includes('pc') && !itemType.includes('escritorio') && !itemType.includes('desktop') && !itemType.includes('torre') && !itemType.includes('mini pc') && !itemType.includes('all-in-one') && !itemType.includes('servidor') && typeInfo.category !== 'Computadoras') {
-          return false;
-        }
-      } else if (targetType.includes('monitor') || targetType.includes('pantalla')) {
-        const isMon = itemType.includes('monitor') || itemType.includes('pantalla') || itemType.includes('display') || (item.monitores && item.monitores.length > 0);
-        if (!isMon) return false;
-      } else if (targetType.includes('all-in-one') || targetType.includes('aio')) {
-        if (!itemType.includes('all-in-one') && !itemType.includes('aio')) return false;
-      } else if (targetType.includes('mini pc')) {
-        if (!itemType.includes('mini')) return false;
-      } else if (targetType.includes('servidor')) {
-        if (!itemType.includes('servidor') && !itemType.includes('server')) return false;
-      } else if (targetType.includes('teclado')) {
-        if (!itemType.includes('teclado') && !itemType.includes('keyboard')) return false;
-      } else if (targetType.includes('mouse')) {
-        if (!itemType.includes('mouse') && !itemType.includes('rat')) return false;
-      } else {
-        if (item.tipo_equipo !== currentSpecificType && !itemType.includes(targetType)) {
+      // Filtro por categoría pills
+      if (currentCategory && currentCategory !== 'Todos') {
+        if (currentCategory === 'Laptop' || currentCategory === 'Laptops') {
+          const isLap = itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat') || itemType.includes('thinkpad') || itemType.includes('latitude') || itemType.includes('macbook');
+          if (!isLap) return false;
+        } else if (currentCategory === 'PC de Escritorio' || currentCategory === 'PCs Escritorio') {
+          const isLap = itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat') || itemType.includes('thinkpad') || itemType.includes('latitude') || itemType.includes('macbook');
+          const isAio = itemType.includes('all-in-one') || itemType.includes('aio');
+          if (isLap || isAio) return false;
+          const isPc = itemType.includes('pc') || itemType.includes('escritorio') || itemType.includes('desktop') || itemType.includes('torre') || itemType.includes('mini pc') || typeInfo.category === 'Computadoras';
+          if (!isPc) return false;
+        } else if (currentCategory === 'All-in-One') {
+          const isAio = itemType.includes('all-in-one') || itemType.includes('aio');
+          if (!isAio) return false;
+        } else if (typeInfo.category !== currentCategory) {
           return false;
         }
       }
-    }
 
-    // Filtro por categoría pills
-    if (currentCategory && currentCategory !== 'Todos') {
-      if (currentCategory === 'Periféricos') {
-        const hasPerif = (item.perifericos && item.perifericos.length > 0) || typeInfo.category === 'Periféricos' || itemType.includes('teclado') || itemType.includes('mouse') || itemType.includes('periferico');
-        if (!hasPerif) return false;
-      } else if (currentCategory === 'Monitor' || currentCategory === 'Monitores') {
-        const hasMon = (item.monitores && item.monitores.length > 0) || itemType.includes('monitor') || itemType.includes('pantalla') || itemType.includes('display') || typeInfo.category === 'Monitores';
-        if (!hasMon) return false;
-      } else if (currentCategory === 'Laptop' || currentCategory === 'Laptops') {
-        const isLap = itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat') || itemType.includes('thinkpad') || itemType.includes('latitude') || itemType.includes('macbook');
-        if (!isLap) return false;
-      } else if (currentCategory === 'PC de Escritorio' || currentCategory === 'PCs Escritorio') {
-        const isLap = itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat') || itemType.includes('thinkpad') || itemType.includes('latitude') || itemType.includes('macbook');
-        const isAio = itemType.includes('all-in-one') || itemType.includes('aio');
-        if (isLap || isAio) return false;
-        const isPc = itemType.includes('pc') || itemType.includes('escritorio') || itemType.includes('desktop') || itemType.includes('torre') || itemType.includes('mini pc') || typeInfo.category === 'Computadoras';
-        if (!isPc) return false;
-      } else if (currentCategory === 'All-in-One') {
-        const isAio = itemType.includes('all-in-one') || itemType.includes('aio');
-        if (!isAio) return false;
-      } else if (typeInfo.category !== currentCategory) {
+      // Filtro por tipo específico dropdown
+      if (currentSpecificType && currentSpecificType !== 'Todos') {
+        const targetType = currentSpecificType.toLowerCase();
+        if (targetType === 'laptop') {
+          if (!itemType.includes('laptop') && !itemType.includes('notebook') && !itemType.includes('portat')) return false;
+        } else if (targetType === 'pc de escritorio') {
+          if (itemType.includes('laptop') || itemType.includes('all-in-one')) return false;
+        } else if (item.tipo_equipo !== currentSpecificType && !itemType.includes(targetType)) {
+          return false;
+        }
+      }
+
+      // Filtro por estado
+      if (currentFilterStatus !== 'Todos' && item.estado !== currentFilterStatus) {
         return false;
       }
-    }
 
-    // Filtro por estado
-    if (currentFilterStatus !== 'Todos' && item.estado !== currentFilterStatus) {
-      return false;
-    }
+      // Filtro por búsqueda de texto
+      if (currentSearchQuery) {
+        const q = currentSearchQuery;
+        const match = (
+          (item.modelo && item.modelo.toLowerCase().includes(q)) ||
+          (item.numero_serie && item.numero_serie.toLowerCase().includes(q)) ||
+          (item.hostname && item.hostname.toLowerCase().includes(q)) ||
+          (item.usuario_actual && item.usuario_actual.toLowerCase().includes(q)) ||
+          (item.ubicacion && item.ubicacion.toLowerCase().includes(q)) ||
+          (item.ip_red && item.ip_red.toLowerCase().includes(q))
+        );
+        if (!match) return false;
+      }
 
-    // Filtro por búsqueda de texto profunda
-    if (currentSearchQuery) {
-      const q = currentSearchQuery;
+      return true;
+    });
+  }
 
-      const inMonitores = (item.monitores || []).some(m => 
-        (m.modelo && m.modelo.toLowerCase().includes(q)) ||
-        (m.fabricante && m.fabricante.toLowerCase().includes(q)) ||
-        (m.serie && m.serie.toLowerCase().includes(q))
-      );
-
-      const inPerifericos = (item.perifericos || []).some(p => 
-        (p.nombre && p.nombre.toLowerCase().includes(q)) ||
-        (p.tipo && p.tipo.toLowerCase().includes(q)) ||
-        (p.fabricante && p.fabricante.toLowerCase().includes(q))
-      );
-
-      const inDiscos = (item.almacenamiento || []).some(d => 
-        (d.modelo && d.modelo.toLowerCase().includes(q)) ||
-        (d.serie && d.serie.toLowerCase().includes(q)) ||
-        (d.tipo && d.tipo.toLowerCase().includes(q))
-      );
-
-      const match = (
-        (item.modelo && item.modelo.toLowerCase().includes(q)) ||
-        (item.numero_serie && item.numero_serie.toLowerCase().includes(q)) ||
-        (item.placa_base && item.placa_base.toLowerCase().includes(q)) ||
-        (item.placa_base_completa && item.placa_base_completa.toLowerCase().includes(q)) ||
-        (item.tipo_equipo && item.tipo_equipo.toLowerCase().includes(q)) ||
-        (item.fabricante && item.fabricante.toLowerCase().includes(q)) ||
-        (item.procesador && item.procesador.toLowerCase().includes(q)) ||
-        (item.hostname && item.hostname.toLowerCase().includes(q)) ||
-        (item.usuario_actual && item.usuario_actual.toLowerCase().includes(q)) ||
-        (item.ubicacion && item.ubicacion.toLowerCase().includes(q)) ||
-        (item.ip_red && item.ip_red.toLowerCase().includes(q)) ||
-        (item.mac_address && item.mac_address.toLowerCase().includes(q)) ||
-        (item.almacenamiento_resumen && item.almacenamiento_resumen.toLowerCase().includes(q)) ||
-        (item.notas && item.notas.toLowerCase().includes(q)) ||
-        inMonitores ||
-        inPerifericos ||
-        inDiscos
-      );
-      if (!match) return false;
-    }
-
-    return true;
-  });
+  // Filtrar por búsqueda si es categoría discreta
+  if (currentSearchQuery && (currentCategory === 'Monitor' || currentCategory === 'Monitores' || currentCategory === 'Periféricos' || currentCategory === 'Perifericos')) {
+    const q = currentSearchQuery;
+    displayItems = displayItems.filter(d => 
+      (d.modelo && d.modelo.toLowerCase().includes(q)) ||
+      (d.numero_serie && d.numero_serie.toLowerCase().includes(q)) ||
+      (d.fabricante && d.fabricante.toLowerCase().includes(q)) ||
+      (d.ubicacion && d.ubicacion.toLowerCase().includes(q)) ||
+      (d.usuario_actual && d.usuario_actual.toLowerCase().includes(q)) ||
+      (d.placa_base && d.placa_base.toLowerCase().includes(q))
+    );
+  }
 
   // Actualizar contadores visibles
-  visibleCount.textContent = filtered.length;
-  totalCount.textContent = inventoryData.length;
+  visibleCount.textContent = displayItems.length;
+  totalCount.textContent = (currentCategory === 'Todos') ? inventoryData.length : displayItems.length;
 
-  if (filtered.length === 0) {
+  if (displayItems.length === 0) {
     tableBody.innerHTML = '';
     gridContainer.innerHTML = '';
     emptyState.style.display = 'block';
@@ -1013,10 +1053,10 @@ function renderData() {
   emptyState.style.display = 'none';
 
   // Renderizar Tabla
-  renderTable(filtered);
+  renderTable(displayItems);
 
   // Renderizar Grid
-  renderGrid(filtered);
+  renderGrid(displayItems);
 }
 
 function highlightMatch(text, query) {
@@ -1089,7 +1129,16 @@ function renderTable(items) {
     let specsHtml = '';
     const isPrinter = typeInfo.category === 'Impresoras' || (item.tipo_equipo || '').toLowerCase().includes('impresora') || Boolean(item.consumible);
 
-    if (isPrinter) {
+    if (item.isDiscreteDevice) {
+      specsHtml = `
+        <div class="specs-full-block">
+          <div class="hw-item-line"><i class="fa-solid fa-microchip text-crimson"></i> <b>${highlightMatch(item.hardware_specs || 'Dispositivo Externo', currentSearchQuery)}</b></div>
+        </div>
+      `;
+      perifericosListHtml = `
+        <div class="hw-item-line mon-line"><i class="fa-solid fa-desktop text-crimson"></i> <b>${highlightMatch(item.placa_base || 'Conectado a PC', currentSearchQuery)}</b></div>
+      `;
+    } else if (isPrinter) {
       const consVal = item.consumible || item.tinta_toner || autoDetectPrinterConsumables(item.modelo)?.consumable || 'Tinta / Tóner Estándar';
       specsHtml = `
         <div class="specs-full-block">
@@ -1143,7 +1192,7 @@ function renderTable(items) {
           <div class="user-loc" title="Ambiente / Ubicación"><i class="fa-solid fa-location-dot text-crimson"></i> <b>${highlightMatch(item.ubicacion || 'Sin Asignar', currentSearchQuery)}</b></div>
         </td>
         <td class="cell-placa">
-          <span class="placa-badge" title="Placa Base">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
+          <span class="placa-badge" title="Placa Base / Conexión">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
         </td>
         <td class="cell-tipo">
           <span class="tipo-badge ${tipoClass}">
@@ -1172,10 +1221,10 @@ function renderTable(items) {
         </td>
         <td class="cell-acciones">
           <div class="table-actions-cell">
-            <button class="action-btn-mini" onclick="viewDetails('${item.id}')" title="Ver Ficha Técnica Completa">
+            <button class="action-btn-mini" onclick="viewDetails('${item.parentId || item.id}')" title="Ver Ficha Técnica Completa">
               <i class="fa-solid fa-eye"></i>
             </button>
-            ${!isOperador ? `
+            ${!isOperador && !item.isDiscreteDevice ? `
             <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
