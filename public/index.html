@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=12.0">
+  <link rel="stylesheet" href="css/styles.css?v=13.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -594,8 +594,16 @@
           
           <div class="form-grid">
             <div class="form-group">
-              <label for="formModelo">MODELO *</label>
-              <input type="text" id="formModelo" required placeholder="Ej: HP ProBook 450, Dell OptiPlex 7080" class="form-control">
+              <label for="formModelo" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>MODELO DE EQUIPO *</span>
+                <span class="auto-badge" id="badgeSpecAuto" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Completado</span>
+              </label>
+              <div class="input-with-action">
+                <input type="text" id="formModelo" required placeholder="Ej: HP ProBook 450 G8, Dell OptiPlex 7080, ThinkPad T14" class="form-control">
+                <button type="button" class="btn-input-action" id="btnLookupSpecs" title="Buscar ficha técnica en Internet">
+                  <i class="fa-solid fa-bolt"></i> <span>Auto-Llenar</span>
+                </button>
+              </div>
             </div>
 
             <div class="form-group">
@@ -846,6 +854,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=12.0"></script>
+  <script src="js/app.js?v=13.0"></script>
 </body>
 </html>

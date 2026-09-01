@@ -416,40 +416,115 @@ function initEventListeners() {
     equipmentForm.addEventListener('submit', handleFormSubmit);
   }
 
-  // Auto-detección en tiempo real de Tinta / Tóner para Impresoras
-  const formModelo = document.getElementById('formModelo');
-  if (formModelo) {
-    const handleModelInput = (e) => {
-      const val = e.target.value;
-      const detected = autoDetectPrinterConsumables(val);
-      const formTipo = document.getElementById('formTipoEquipo');
-      const formFab = document.getElementById('formFabricante');
-      const formCons = document.getElementById('formConsumible');
-      const badgeAuto = document.getElementById('badgeConsumibleAuto');
+  // Auto-detección en tiempo real de Especificaciones de Fábrica (CPU, RAM, Almacenamiento, Placa, Marca, Consumible)
+  let specLookupTimeout = null;
 
-      if (detected) {
-        if (formTipo && formTipo.value !== 'Impresora / Multifuncional') {
-          formTipo.value = 'Impresora / Multifuncional';
-          adaptFormFieldsByType('Impresora / Multifuncional');
+  async function triggerModelSpecsAutofill(modelQuery, isManual = false) {
+    if (!modelQuery || modelQuery.trim().length < 2) return;
+    const cleanModel = modelQuery.trim();
+
+    const formTipo = document.getElementById('formTipoEquipo');
+    const formFab = document.getElementById('formFabricante');
+    const formCpu = document.getElementById('formProcesador');
+    const formRam = document.getElementById('formRamTotal');
+    const formDisk = document.getElementById('formAlmacenamiento');
+    const formPlaca = document.getElementById('formPlacaBase');
+    const formCons = document.getElementById('formConsumible');
+    const badgeAuto = document.getElementById('badgeSpecAuto');
+    const badgeConsAuto = document.getElementById('badgeConsumibleAuto');
+    const btnLookup = document.getElementById('btnLookupSpecs');
+
+    if (btnLookup) {
+      btnLookup.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Buscando...</span>';
+      btnLookup.disabled = true;
+    }
+
+    try {
+      const res = await fetch(`/api/lookup-specs?model=${encodeURIComponent(cleanModel)}`);
+      const data = await res.json();
+
+      if (data && data.found) {
+        if (formTipo && data.tipo_equipo) {
+          formTipo.value = data.tipo_equipo;
+          adaptFormFieldsByType(data.tipo_equipo);
         }
 
-        if (formFab && (!formFab.value || formFab.value === 'Genérico')) {
-          formFab.value = detected.brand;
+        if (formFab && data.fabricante && data.fabricante !== 'Genérico') {
+          formFab.value = data.fabricante;
         }
 
-        if (formCons) {
-          formCons.value = detected.consumable;
+        if (formCpu && data.procesador) {
+          formCpu.value = data.procesador;
+        }
+
+        if (formRam && data.ram_total) {
+          formRam.value = data.ram_total;
+        }
+
+        if (formDisk && data.almacenamiento) {
+          formDisk.value = data.almacenamiento;
+        }
+
+        if (formPlaca && data.placa_base && data.placa_base !== 'N/A') {
+          formPlaca.value = data.placa_base;
+        }
+
+        if (formCons && data.consumible) {
+          formCons.value = data.consumible;
+          if (badgeConsAuto) {
+            badgeConsAuto.style.display = 'inline-flex';
+            badgeConsAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Consumible Auto-Detectado`;
+          }
         }
 
         if (badgeAuto) {
           badgeAuto.style.display = 'inline-flex';
-          badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detectado`;
+          badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Ficha Cargada (${data.fabricante})`;
+        }
+
+        if (isManual) {
+          showToast(`Ficha técnica cargada: ${data.fabricante} (${data.procesador})`, 'success');
         }
       }
-    };
+    } catch (err) {
+      console.warn('Error en auto-lookup de hardware:', err);
+    } finally {
+      if (btnLookup) {
+        btnLookup.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Auto-Llenar</span>';
+        btnLookup.disabled = false;
+      }
+    }
+  }
 
-    formModelo.addEventListener('input', handleModelInput);
-    formModelo.addEventListener('change', handleModelInput);
+  const formModelo = document.getElementById('formModelo');
+  const btnLookupSpecs = document.getElementById('btnLookupSpecs');
+
+  if (formModelo) {
+    formModelo.addEventListener('input', (e) => {
+      clearTimeout(specLookupTimeout);
+      const val = e.target.value;
+      if (val && val.trim().length >= 3) {
+        specLookupTimeout = setTimeout(() => {
+          triggerModelSpecsAutofill(val, false);
+        }, 600);
+      }
+    });
+
+    formModelo.addEventListener('change', (e) => {
+      triggerModelSpecsAutofill(e.target.value, false);
+    });
+  }
+
+  if (btnLookupSpecs) {
+    btnLookupSpecs.addEventListener('click', () => {
+      const val = formModelo ? formModelo.value : '';
+      if (!val || val.trim().length < 2) {
+        showToast('Escribe primero el modelo para buscar sus especificaciones', 'error');
+        if (formModelo) formModelo.focus();
+        return;
+      }
+      triggerModelSpecsAutofill(val, true);
+    });
   }
 
   // Selectores dependientes de Bloque y Aula/Ambiente
