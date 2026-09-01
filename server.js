@@ -450,14 +450,14 @@ const USERS = [
   { username: 'user', password: 'solover', role: 'operador', displayName: 'Observador' }
 ];
 
-// Obtener rol del usuario actual basado en el token Bearer
+// Obtener rol del usuario actual basado en el token Bearer o query param
 function getUserRole(req) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return 'admin'; // Fallback por defecto
+  let token = req.headers['authorization'] || (req.query && req.query.token);
+  if (!token) return 'admin'; // Fallback por defecto si no se especifica
   
   try {
-    const token = authHeader.replace('Bearer ', '').trim();
-    const decoded = Buffer.from(token, 'base64').toString('utf8');
+    const cleanToken = String(token).replace(/^Bearer\s+/i, '').trim();
+    const decoded = Buffer.from(cleanToken, 'base64').toString('utf8');
     const [username, role] = decoded.split(':');
     return role || 'admin';
   } catch (e) {
@@ -1490,9 +1490,16 @@ app.post('/api/restore-json', (req, res) => {
   }
 });
 
-// Exportación a Excel con hojas separadas por categoría y tipo de hardware
+// Exportación a Excel con hojas separadas por categoría y tipo de hardware (Solo Administrador)
 app.get('/api/export-excel', async (req, res) => {
   try {
+    const role = getUserRole(req);
+    if (role === 'operador') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado: El usuario Observador solo tiene permisos de visualización y no puede exportar el inventario en Excel.' 
+      });
+    }
+
     const items = loadDB();
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'SYS-INVENTORY PRO';

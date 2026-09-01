@@ -179,9 +179,24 @@ function updateAuthUI() {
       : `<b>${escapeHTML(username)}</b>`;
   }
   
+  const isOperador = role === 'operador';
+
+  // 1. Botón "Nuevo" (Registrar Equipo / Componente)
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
   if (btnOpenManualModal) {
-    btnOpenManualModal.style.display = role === 'operador' ? 'none' : 'inline-flex';
+    btnOpenManualModal.style.display = isOperador ? 'none' : 'inline-flex';
+  }
+
+  // 2. Botón "Escanear PC" (Auditoría / Registro automático)
+  const btnScanLocal = document.getElementById('btnScanLocal');
+  if (btnScanLocal) {
+    btnScanLocal.style.display = isOperador ? 'none' : 'inline-flex';
+  }
+
+  // 3. Botón "Excel" (Exportación del inventario)
+  const btnExportExcel = document.getElementById('btnExportExcel');
+  if (btnExportExcel) {
+    btnExportExcel.style.display = isOperador ? 'none' : 'inline-flex';
   }
 }
 
@@ -2034,7 +2049,7 @@ function openManualCreateModal(e) {
   if (e && e.preventDefault) e.preventDefault();
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
   if (isOperador) {
-    showToast('Acceso denegado: El usuario operador no tiene permisos para registrar equipos.', 'error');
+    showToast('Acceso denegado: El usuario Observador solo tiene permisos de visualización y no puede registrar equipos ni componentes.', 'error');
     return;
   }
   const modalTitle = document.getElementById('modalFormTitle');
@@ -2258,6 +2273,12 @@ async function handleFormSubmit(e) {
 
 // Escanear PC (Ejecución 100% automática y silenciosa sin descargas ni intervención manual)
 async function handleScanLocal() {
+  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  if (isOperador) {
+    showToast('Acceso denegado: El usuario Observador solo tiene permisos de visualización y no puede ejecutar auditorías ni registros.', 'error');
+    return;
+  }
+
   showToast('Iniciando auditoría de hardware en segundo plano...', 'info');
 
   const cloudReportUrl = window.location.origin;
