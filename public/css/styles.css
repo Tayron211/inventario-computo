@@ -1984,15 +1984,13 @@ body {
   box-shadow: 0 0 8px rgba(220, 20, 60, 0.3);
 }
 
-/* Tabla Estilizada - Adaptativa 100% Sin Scroll Horizontal */
+/* Tabla Estilizada - Ancho Mínimo para Asegurar Legibilidad y Scroll en Laptops */
 .custom-excel-table {
   width: 100%;
-  table-layout: fixed;
-  border-collapse: separate;
-  border-spacing: 0;
+  min-width: 1380px;
+  border-collapse: collapse;
   text-align: left;
-  font-size: 0.78rem;
-  box-sizing: border-box;
+  font-size: 0.82rem;
 }
 
 /* ==============================================================================
@@ -2005,51 +2003,36 @@ body {
 }
 
 .custom-excel-table thead th {
-  background: rgba(18, 18, 30, 0.85) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(18, 18, 30, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
   color: #ffffff !important;
   font-family: var(--font-main);
-  font-size: 0.7rem;
+  font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  padding: 8px 4px;
+  letter-spacing: 0.6px;
+  padding: 12px 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-bottom: 2px solid rgba(220, 20, 60, 0.85) !important;
   border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.35);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
-
-/* Anchos porcentuales fijos que suman 100% exacto para encajar en cualquier pantalla */
-.custom-excel-table th.col-modelo { width: 14%; text-align: left; padding-left: 8px; }
-.custom-excel-table th.col-serie { width: 10%; }
-.custom-excel-table th.col-ambiente { width: 9%; }
-.custom-excel-table th.col-placa { width: 9%; }
-.custom-excel-table th.col-tipo { width: 9%; }
-.custom-excel-table th.col-hardware { width: 20%; text-align: left; padding-left: 6px; }
-.custom-excel-table th.col-perifericos { width: 14%; text-align: left; padding-left: 6px; }
-.custom-excel-table th.col-usuario { width: 8%; }
-.custom-excel-table th.col-estado { width: 4%; }
-.custom-excel-table th.col-acciones { width: 3%; }
 
 /* Modo Claro: Liquid Glass Esmerilado Blanco Translúcido */
 [data-theme="light"] .custom-excel-table thead th {
-  background: rgba(248, 250, 252, 0.95) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: rgba(248, 250, 252, 0.88) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
   color: #0f172a !important;
   border-top: 1px solid rgba(255, 255, 255, 0.95) !important;
   border-bottom: 2px solid #e11d48 !important;
   border-left: 1px solid rgba(203, 213, 225, 0.5) !important;
   border-right: 1px solid rgba(203, 213, 225, 0.5) !important;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 1), 0 2px 8px rgba(15, 23, 42, 0.06);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 1), 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 
 [data-theme="light"] .table-header-bar {
@@ -2070,13 +2053,13 @@ body {
 }
 
 .custom-excel-table thead th .header-filter-icon {
-  font-size: 0.62rem;
-  margin-left: 2px;
+  font-size: 0.68rem;
+  margin-left: 3px;
   opacity: 0.75;
 }
 
 .custom-excel-table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--gray-700);
   transition: var(--transition-fast);
 }
 
@@ -2089,177 +2072,108 @@ body {
 }
 
 .custom-excel-table tbody td {
-  padding: 5px 5px;
+  padding: 8px 8px;
   vertical-align: middle;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--gray-200);
-  font-size: 0.76rem;
-  line-height: 1.2;
-  overflow: hidden;
-  box-sizing: border-box;
+  font-size: 0.8rem;
 }
 
-[data-theme="light"] .custom-excel-table tbody td {
-  border-color: rgba(226, 232, 240, 0.8) !important;
-  color: #1e293b !important;
-}
-
-[data-theme="light"] .custom-excel-table tbody tr:nth-child(even) {
-  background: rgba(248, 250, 252, 0.6) !important;
-}
-
-[data-theme="light"] .custom-excel-table tbody tr:hover {
-  background: rgba(225, 29, 72, 0.06) !important;
-}
-
-/* Celdas específicas adaptativas y compactas */
+/* Celdas específicas optimizadas para pantalla completa */
 .cell-modelo {
-  overflow: hidden;
+  max-width: 190px;
 }
 
 .col-modelo-val {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  overflow: hidden;
 }
 
 .modelo-header {
   display: flex;
   align-items: flex-start;
-  gap: 4px;
-  overflow: hidden;
+  gap: 6px;
 }
 
 .modelo-type-icon {
-  margin-top: 1px;
-  font-size: 0.78rem;
-  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 0.85rem;
 }
 
 .modelo-text {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 700;
   color: #ffffff;
-  line-height: 1.15;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-theme="light"] .modelo-text {
-  color: #0f172a !important;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .fabricante-tag {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--gray-400);
-  background: rgba(255, 255, 255, 0.08);
-  padding: 1px 3px;
+  background: var(--bg-surface-elevated);
+  padding: 1px 5px;
   border-radius: 3px;
   align-self: flex-start;
-  margin-left: 12px;
-  max-width: 90%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-theme="light"] .fabricante-tag {
-  background: #e2e8f0 !important;
-  color: #475569 !important;
+  margin-left: 18px;
 }
 
 .cell-serie {
-  text-align: center;
-  overflow: hidden;
+  white-space: nowrap;
 }
 
 .serial-badge {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: var(--crimson-glow);
-  background: rgba(220, 20, 60, 0.12);
+  background: rgba(220, 20, 60, 0.14);
   border: 1px solid var(--crimson-border);
-  padding: 2px 4px;
+  padding: 3px 6px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   cursor: pointer;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  box-sizing: border-box;
   transition: var(--transition-fast);
 }
 
-[data-theme="light"] .serial-badge {
-  background: #fff1f2 !important;
-  color: #dc143c !important;
-  border-color: #fecdd3 !important;
-}
-
 .serial-badge:hover {
-  background: rgba(220, 20, 60, 0.25);
+  background: rgba(220, 20, 60, 0.3);
   color: #fff;
-}
-
-.cell-ambiente {
-  text-align: center;
-  font-size: 0.74rem;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  transform: scale(1.02);
 }
 
 .cell-placa {
-  text-align: center;
-  overflow: hidden;
+  white-space: nowrap;
 }
 
 .placa-badge {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #f1f5f9;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 2px 4px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--gray-600);
+  padding: 2px 6px;
   border-radius: 4px;
   display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-theme="light"] .placa-badge {
-  background: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
 }
 
 .cell-tipo {
-  text-align: center;
-  overflow: hidden;
+  white-space: nowrap;
 }
 
 .tipo-badge {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  gap: 4px;
   white-space: nowrap;
 }
 
@@ -2330,78 +2244,64 @@ body {
   border: 1px solid rgba(220, 20, 60, 0.35);
 }
 
-/* Especificaciones Compactas */
+/* Especificaciones Completas */
 .cell-specs {
-  overflow: hidden;
+  max-width: 220px;
 }
 
 .specs-full-block {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  overflow: hidden;
+  gap: 3px;
 }
 
 .spec-cpu-title {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #fff;
   display: flex;
   align-items: center;
-  gap: 3px;
-  line-height: 1.15;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-theme="light"] .spec-cpu-title {
-  color: #0f172a !important;
+  gap: 4px;
+  line-height: 1.2;
 }
 
 .spec-ram-line {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--gray-300);
   display: flex;
   align-items: center;
-  gap: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-theme="light"] .spec-ram-line {
-  color: #475569 !important;
+  gap: 4px;
 }
 
 .spec-storage-block {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  max-height: 48px;
+  gap: 2px;
+  margin-top: 2px;
+  max-height: 65px;
   overflow-y: auto;
+  padding-right: 3px;
   scrollbar-width: thin;
+  scrollbar-color: var(--crimson-primary) rgba(0, 0, 0, 0.25);
+}
+
+.spec-storage-block::-webkit-scrollbar {
+  width: 3px;
 }
 
 .hw-item-line {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   color: var(--gray-300);
   display: flex;
   align-items: center;
-  gap: 2px;
+  flex-wrap: wrap;
+  gap: 4px;
   background: rgba(0, 0, 0, 0.25);
-  padding: 1px 3px;
-  border-radius: 2px;
+  padding: 2px 6px;
+  border-radius: 3px;
   border-left: 2px solid var(--crimson-primary);
-  line-height: 1.15;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-[data-theme="light"] .hw-item-line {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
+  margin-bottom: 2px;
+  line-height: 1.25;
 }
 
 .hw-item-line.mon-line {
@@ -2410,41 +2310,44 @@ body {
 
 .serial-mini-tag {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   color: var(--crimson-glow);
   background: rgba(220, 20, 60, 0.12);
-  padding: 0 2px;
-  border-radius: 2px;
-  flex-shrink: 0;
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
 /* Periféricos */
 .cell-perifericos {
-  overflow: hidden;
+  max-width: 200px;
 }
 
 .perifericos-full-block {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  max-height: 52px;
+  gap: 3px;
+  max-height: 85px;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
   scrollbar-width: thin;
+  scrollbar-color: var(--crimson-primary) rgba(0, 0, 0, 0.3);
+}
+
+.perifericos-full-block::-webkit-scrollbar {
+  width: 3px;
 }
 
 /* Usuario / Red */
 .cell-usuario {
-  text-align: center;
-  overflow: hidden;
+  max-width: 170px;
 }
 
 .user-block {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  font-size: 0.72rem;
-  overflow: hidden;
-  align-items: center;
+  gap: 2px;
+  font-size: 0.78rem;
 }
 
 .user-name {
@@ -2452,53 +2355,42 @@ body {
   color: #fff;
   display: flex;
   align-items: center;
-  gap: 2px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-[data-theme="light"] .user-name {
-  color: #0f172a !important;
+  gap: 4px;
 }
 
 .user-host {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   color: var(--gray-300);
   display: flex;
   align-items: center;
-  gap: 2px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  gap: 4px;
 }
 
-[data-theme="light"] .user-host {
-  color: #475569 !important;
+.user-loc {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .cell-estado {
   white-space: nowrap;
-  text-align: center;
-  overflow: hidden;
 }
 
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font-size: 0.7rem;
+  gap: 4px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .status-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .status-operativo .status-dot { background: var(--accent-emerald); }
@@ -2508,43 +2400,38 @@ body {
 
 .cell-acciones {
   white-space: nowrap;
-  text-align: center;
-  padding: 4px 2px !important;
 }
 
 .table-actions-cell {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 .action-btn-mini {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--gray-700);
   color: var(--gray-300);
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
   cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-[data-theme="light"] .action-btn-mini {
-  background: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
+  font-size: 0.78rem;
+  transition: var(--transition-fast);
 }
 
 .action-btn-mini:hover {
-  background: var(--crimson-primary) !important;
-  color: #fff !important;
-  border-color: var(--crimson-primary) !important;
-  transform: scale(1.08);
+  background: var(--crimson-primary);
+  border-color: var(--crimson-glow);
+  color: #fff;
+}
+
+.action-btn-mini.delete-btn:hover {
+  background: #990000;
+  border-color: #ff3333;
 }
 
 /* ==============================================================================
