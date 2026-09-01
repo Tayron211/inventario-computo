@@ -4274,10 +4274,10 @@ body {
   padding: 5px 8px;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   user-select: none;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="light"] .pie-legend-item {
@@ -4287,12 +4287,15 @@ body {
 }
 
 .pie-legend-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 [data-theme="light"] .pie-legend-item:hover {
   background: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
 .pie-legend-left {
