@@ -1154,6 +1154,40 @@ function setFilterCategory(category) {
   renderData();
 }
 
+// Función para limpiar nombres genéricos de BIOS (ej: "System manufacturer System Product Name")
+function getCleanModelName(item) {
+  if (!item) return 'Equipo';
+  let m = (item.modelo || '').trim();
+  let f = (item.fabricante || '').trim();
+  let p = (item.placa_base || '').trim();
+
+  const isGenericModel = !m || /^(system product name|to be filled by o\.e\.m\.|default string|generic|desconocido|standard pc|all series)/i.test(m);
+  const isGenericFab = !f || /^(system manufacturer|to be filled by o\.e\.m\.|default string|generic|desconocido|o\.e\.m\.)/i.test(f);
+
+  if (isGenericModel && isGenericFab) {
+    if (p && p !== 'N/A' && !/^(default|generic)/i.test(p)) {
+      return `PC Ensamblada (${p})`;
+    }
+    return item.tipo_equipo ? `PC Ensamblada (${item.tipo_equipo})` : 'PC Ensamblada Estándar';
+  }
+
+  if (isGenericModel) {
+    if (p && p !== 'N/A' && !/^(default|generic)/i.test(p)) {
+      return `${f} (${p})`;
+    }
+    return `${f} PC de Escritorio`;
+  }
+
+  if (isGenericFab) {
+    return m;
+  }
+
+  if (!m.toLowerCase().includes(f.toLowerCase())) {
+    return `${f} ${m}`;
+  }
+  return m;
+}
+
 // -------------------------------------------------------------
 // RENDERIZADO Y FILTROS
 // -------------------------------------------------------------
@@ -1282,17 +1316,32 @@ function renderData() {
         return false;
       }
 
-      // Filtro por búsqueda de texto
+      // Filtro por búsqueda de texto multi-campo
       if (currentSearchQuery) {
-        const q = currentSearchQuery;
-        const match = (
-          (item.modelo && item.modelo.toLowerCase().includes(q)) ||
-          (item.numero_serie && item.numero_serie.toLowerCase().includes(q)) ||
-          (item.hostname && item.hostname.toLowerCase().includes(q)) ||
-          (item.usuario_actual && item.usuario_actual.toLowerCase().includes(q)) ||
-          (item.ubicacion && item.ubicacion.toLowerCase().includes(q)) ||
-          (item.ip_red && item.ip_red.toLowerCase().includes(q))
-        );
+        const q = currentSearchQuery.toLowerCase().trim();
+        const searchTerms = q.split(/\s+/).filter(Boolean);
+        const cleanModel = getCleanModelName(item).toLowerCase();
+        
+        const fullSearchString = [
+          cleanModel,
+          item.modelo || '',
+          item.fabricante || '',
+          item.placa_base || '',
+          item.numero_serie || '',
+          item.hostname || '',
+          item.usuario_actual || '',
+          item.ubicacion || '',
+          item.ip_red || '',
+          item.procesador || '',
+          item.ram_total || '',
+          item.tipo_equipo || '',
+          item.estado || '',
+          ...(item.almacenamiento || []).map(d => `${d.modelo || ''} ${d.serie || ''}`),
+          ...(item.monitores || []).map(mon => `${mon.modelo || ''} ${mon.serie || ''} ${mon.fabricante || ''}`),
+          ...(item.perifericos || []).map(per => `${per.nombre || ''} ${per.fabricante || ''} ${per.serie || ''}`)
+        ].join(' ').toLowerCase();
+
+        const match = searchTerms.every(term => fullSearchString.includes(term));
         if (!match) return false;
       }
 
@@ -1302,15 +1351,21 @@ function renderData() {
 
   // Filtrar por búsqueda si es categoría discreta
   if (currentSearchQuery && (currentCategory === 'Monitor' || currentCategory === 'Monitores' || currentCategory === 'Periféricos' || currentCategory === 'Perifericos')) {
-    const q = currentSearchQuery;
-    displayItems = displayItems.filter(d => 
-      (d.modelo && d.modelo.toLowerCase().includes(q)) ||
-      (d.numero_serie && d.numero_serie.toLowerCase().includes(q)) ||
-      (d.fabricante && d.fabricante.toLowerCase().includes(q)) ||
-      (d.ubicacion && d.ubicacion.toLowerCase().includes(q)) ||
-      (d.usuario_actual && d.usuario_actual.toLowerCase().includes(q)) ||
-      (d.placa_base && d.placa_base.toLowerCase().includes(q))
-    );
+    const q = currentSearchQuery.toLowerCase().trim();
+    const searchTerms = q.split(/\s+/).filter(Boolean);
+    displayItems = displayItems.filter(d => {
+      const fullStr = [
+        d.modelo || '',
+        d.numero_serie || '',
+        d.fabricante || '',
+        d.ubicacion || '',
+        d.usuario_actual || '',
+        d.placa_base || '',
+        d.tipo_equipo || '',
+        d.hardware_specs || ''
+      ].join(' ').toLowerCase();
+      return searchTerms.every(term => fullStr.includes(term));
+    });
   }
 
   // Actualizar contadores visibles
@@ -2513,6 +2568,10 @@ function stopCameraScanner() {
 // ==============================================================================
 // NAVEGACIÓN MULTI-PÁGINA (INVENTARIO MAESTRO vs DASHBOARD & AMBIENTES)
 // ==============================================================================
+// NAVEGACIÓN MULTI-PÁGINA E INTEGRACIÓN CON BOTÓN ATRÁS/ADELANTE DEL NAVEGADOR
+// ==============================================================================
+let currentPageState = 'inventory';
+
 function initMultiPageNav() {
   const tabNavInventory = document.getElementById('tabNavInventory');
   const tabNavDashboard = document.getElementById('tabNavDashboard');
@@ -2531,15 +2590,46 @@ function initMultiPageNav() {
   if (dashFilterTipo) {
     dashFilterTipo.addEventListener('change', () => renderDashboard());
   }
+
+  // Escuchar botón Atrás y Adelante del navegador (popstate)
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.page) {
+      switchPage(e.state.page, false);
+    } else if (window.location.hash === '#dashboard') {
+      switchPage('dashboard', false);
+    } else {
+      switchPage('inventory', false);
+    }
+  });
+
+  // Establecer estado inicial según la URL actual
+  if (window.location.hash === '#dashboard') {
+    switchPage('dashboard', false);
+  } else {
+    try {
+      history.replaceState({ page: 'inventory' }, '', '#inventory');
+    } catch(err) {}
+  }
 }
 
-function switchPage(pageName) {
+function switchPage(pageName, pushToHistory = true) {
   const tabNavInventory = document.getElementById('tabNavInventory');
   const tabNavDashboard = document.getElementById('tabNavDashboard');
   const pageInventoryView = document.getElementById('pageInventoryView');
   const pageDashboardView = document.getElementById('pageDashboardView');
 
-  if (pageName === 'dashboard') {
+  const targetPage = pageName === 'dashboard' ? 'dashboard' : 'inventory';
+  currentPageState = targetPage;
+
+  if (pushToHistory) {
+    try {
+      if (window.location.hash !== `#${targetPage}`) {
+        history.pushState({ page: targetPage }, '', `#${targetPage}`);
+      }
+    } catch(err) {}
+  }
+
+  if (targetPage === 'dashboard') {
     if (tabNavDashboard) tabNavDashboard.classList.add('active');
     if (tabNavInventory) tabNavInventory.classList.remove('active');
     if (pageDashboardView) pageDashboardView.style.display = 'block';
@@ -2599,9 +2689,16 @@ function filterByModel(modelName) {
     else p.classList.remove('active');
   });
 
+  // Si el modelo tiene formato "PC Ensamblada (PLACA)", buscar por la placa o palabras clave
+  let searchQuery = modelName;
+  const boardMatch = modelName.match(/\(([^)]+)\)/);
+  if (boardMatch && boardMatch[1]) {
+    searchQuery = boardMatch[1];
+  }
+
   if (searchInput) {
-    searchInput.value = modelName;
-    currentSearchQuery = modelName.toLowerCase().trim();
+    searchInput.value = searchQuery;
+    currentSearchQuery = searchQuery.toLowerCase().trim();
     if (btnClearSearch) btnClearSearch.style.display = 'block';
   }
 
@@ -3215,18 +3312,13 @@ function renderDashboard() {
     }
   }
 
-  // 5. Renderizar Desglose por Modelos y Tipos de PC
+  // 5. Renderizar Desglose por Modelos y Tipos de PC (NOMBRES LIMPIOS)
   const modelosListContainer = document.getElementById('modelosBreakdownList');
   if (modelosListContainer) {
     const modelosCount = {};
     filteredData.forEach(item => {
-      const m = (item.modelo || 'Equipo Estándar').trim();
-      const f = (item.fabricante || '').trim();
-      let modeloKey = m;
-      if (f && !m.toLowerCase().startsWith(f.toLowerCase())) {
-        modeloKey = `${f} ${m}`;
-      }
-      modelosCount[modeloKey] = (modelosCount[modeloKey] || 0) + 1;
+      const cleanName = getCleanModelName(item);
+      modelosCount[cleanName] = (modelosCount[cleanName] || 0) + 1;
     });
 
     const sortedModelos = Object.entries(modelosCount).sort((a, b) => b[1] - a[1]);
