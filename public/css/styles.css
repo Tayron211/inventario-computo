@@ -2189,8 +2189,10 @@ body {
 
 .cell-tipo {
   white-space: nowrap;
-  max-width: 95px;
+  max-width: 100px;
   text-align: center;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .tipo-badge {
@@ -2202,6 +2204,10 @@ body {
   align-items: center;
   gap: 3px;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 
 .tipo-badge.desktop {
@@ -2541,6 +2547,39 @@ body {
     width: 24px;
     height: 24px;
     font-size: 0.68rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    display: block;
+  }
+
+  .custom-excel-table {
+    min-width: 820px !important;
+    font-size: 0.72rem;
+  }
+
+  .custom-excel-table thead th {
+    padding: 7px 4px;
+    font-size: 0.67rem;
+  }
+
+  .custom-excel-table tbody td {
+    padding: 4px 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding: 8px 6px;
+  }
+
+  .custom-excel-table {
+    min-width: 780px !important;
   }
 }
 
