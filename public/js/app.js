@@ -1785,6 +1785,7 @@ function adaptFormFieldsByType(selectedType) {
   const groupPlacaBase = document.getElementById('formGroupPlacaBase');
   const sectionHardware = document.getElementById('formSectionHardware');
   const sectionPerifericos = document.getElementById('formSectionPerifericos');
+  const groupConsumible = document.getElementById('formGroupConsumible');
   const groupMacAddress = document.getElementById('formGroupMacAddress');
   const labelHostname = document.getElementById('labelFormHostname');
   const inputHostname = document.getElementById('formHostname');
@@ -1792,7 +1793,8 @@ function adaptFormFieldsByType(selectedType) {
   const inputUsuario = document.getElementById('formUsuario');
 
   const isComputer = t.includes('pc de escritorio') || t.includes('laptop') || t.includes('all-in-one') || t.includes('mini pc') || t.includes('servidor') || t.includes('computadora');
-  const isPrinterOrProjector = t.includes('impresora') || t.includes('proyector');
+  const isPrinter = t.includes('impresora') || t.includes('multifuncional') || t.includes('fotocopiadora') || t.includes('plotter');
+  const isProjector = t.includes('proyector');
   const isNetwork = t.includes('switch') || t.includes('access point') || t.includes('router') || t.includes('red');
   const isPeripheral = t.includes('teclado') || t.includes('mouse') || t.includes('audífono') || t.includes('audifono') || t.includes('monitor') || t.includes('otro periférico') || t.includes('periférico');
 
@@ -1811,28 +1813,30 @@ function adaptFormFieldsByType(selectedType) {
     sectionPerifericos.style.display = isComputer ? 'block' : 'none';
   }
 
-  // 4. Consumible / Tinta / Tóner (Solo en Impresoras)
-  const groupConsumible = document.getElementById('formGroupConsumible');
+  // 4. Consumible / Tinta / Tóner (ÚNICA Y EXCLUSIVAMENTE en Impresoras)
   if (groupConsumible) {
-    groupConsumible.style.display = isPrinterOrProjector ? 'block' : 'none';
+    groupConsumible.style.display = isPrinter ? 'block' : 'none';
   }
 
-  // 5. Campo MAC Address (Visible para Dispositivos de Red, Impresoras y PCs)
+  // 5. Campo MAC Address (Solo para Dispositivos de Red e Impresoras en Red)
   if (groupMacAddress) {
-    groupMacAddress.style.display = (isNetwork || isPrinterOrProjector || isComputer) ? 'block' : 'none';
+    groupMacAddress.style.display = (isNetwork || isPrinter) ? 'block' : 'none';
   }
 
-  // 5. Adaptar textos y placeholders contextuales
+  // 6. Adaptar textos y placeholders contextuales
   if (labelHostname && inputHostname) {
     if (isNetwork) {
       labelHostname.textContent = 'NOMBRE / IP DEL EQUIPO DE RED';
       inputHostname.placeholder = 'Ej: SWITCH-CORE-01, AP-AULA201 o 192.168.89.254';
-    } else if (isPrinterOrProjector) {
-      labelHostname.textContent = 'NOMBRE / IP EN RED DEL DISPOSITIVO';
-      inputHostname.placeholder = 'Ej: IMP-CAE-01, PROY-AULA301 o 192.168.89.40';
+    } else if (isPrinter) {
+      labelHostname.textContent = 'NOMBRE / IP EN RED DE LA IMPRESORA';
+      inputHostname.placeholder = 'Ej: IMP-CAE-01 o 192.168.89.40';
+    } else if (isProjector) {
+      labelHostname.textContent = 'NOMBRE / CÓDIGO DEL PROYECTOR';
+      inputHostname.placeholder = 'Ej: PROY-AULA-101 o 192.168.89.55';
     } else if (isPeripheral) {
       labelHostname.textContent = 'CONECTADO A (HOSTNAME DE PC)';
-      inputHostname.placeholder = 'Ej: PC-SOPORTE04 o Sin Asignar';
+      inputHostname.placeholder = 'Ej: PC-SOPORTE04 o Libre';
     } else {
       labelHostname.textContent = 'NOMBRE DEL EQUIPO (HOSTNAME / IP)';
       inputHostname.placeholder = 'Ej: DESKTOP-HP-01 o 192.168.89.50';
@@ -1843,6 +1847,9 @@ function adaptFormFieldsByType(selectedType) {
     if (isNetwork) {
       labelUsuario.textContent = 'ADMINISTRADOR / RESPONSABLE TI';
       inputUsuario.placeholder = 'Ej: Administrador de Red / Soporte TI';
+    } else if (isProjector) {
+      labelUsuario.textContent = 'DOCENTE / RESPONSABLE DEL AULA';
+      inputUsuario.placeholder = 'Ej: Encargado de Aulas / Laboratorio';
     } else if (isPeripheral) {
       labelUsuario.textContent = 'USUARIO ASIGNADO';
       inputUsuario.placeholder = 'Ej: Docente Aula / Libre';
@@ -2551,7 +2558,6 @@ function switchPage(pageName) {
 function filterByAmbiente(searchTerm) {
   switchPage('inventory');
 
-  // Resetear filtros para que la búsqueda sea global y no quede bloqueada por una categoría previa
   currentCategory = 'Todos';
   currentFilterType = 'Todos';
   currentSpecificType = 'Todos';
@@ -2572,7 +2578,107 @@ function filterByAmbiente(searchTerm) {
   }
 
   renderData();
-  showToast(`Filtrando inventario por: "${searchTerm}"`, 'info');
+  showToast(`Filtrando inventario por ambiente: "${searchTerm}"`, 'info');
+  const tableCard = document.getElementById('tableViewContainer');
+  if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterByModel(modelName) {
+  switchPage('inventory');
+
+  currentCategory = 'Todos';
+  currentFilterType = 'Todos';
+  currentSpecificType = 'Todos';
+  currentFilterStatus = 'Todos';
+  
+  if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+  if (statusFilter) statusFilter.value = 'Todos';
+
+  document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+    if (p.getAttribute('data-category') === 'Todos') p.classList.add('active');
+    else p.classList.remove('active');
+  });
+
+  if (searchInput) {
+    searchInput.value = modelName;
+    currentSearchQuery = modelName.toLowerCase().trim();
+    if (btnClearSearch) btnClearSearch.style.display = 'block';
+  }
+
+  renderData();
+  showToast(`Filtrando por modelo: "${modelName}"`, 'info');
+  const tableCard = document.getElementById('tableViewContainer');
+  if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterByBrand(brandName) {
+  switchPage('inventory');
+
+  currentCategory = 'Todos';
+  currentFilterType = 'Todos';
+  currentSpecificType = 'Todos';
+  currentFilterStatus = 'Todos';
+  
+  if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+  if (statusFilter) statusFilter.value = 'Todos';
+
+  document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+    if (p.getAttribute('data-category') === 'Todos') p.classList.add('active');
+    else p.classList.remove('active');
+  });
+
+  if (searchInput) {
+    searchInput.value = brandName;
+    currentSearchQuery = brandName.toLowerCase().trim();
+    if (btnClearSearch) btnClearSearch.style.display = 'block';
+  }
+
+  renderData();
+  showToast(`Filtrando por marca/fabricante: "${brandName}"`, 'info');
+  const tableCard = document.getElementById('tableViewContainer');
+  if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterByTipo(tipoName) {
+  switchPage('inventory');
+
+  currentCategory = 'Todos';
+  currentFilterType = 'Todos';
+  currentFilterStatus = 'Todos';
+  if (statusFilter) statusFilter.value = 'Todos';
+  if (searchInput) {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    if (btnClearSearch) btnClearSearch.style.display = 'none';
+  }
+
+  document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
+    p.classList.remove('active');
+  });
+
+  if (typeSelectFilter) {
+    let found = false;
+    for (let opt of typeSelectFilter.options) {
+      if (opt.value.toLowerCase() === tipoName.toLowerCase() || opt.text.toLowerCase().includes(tipoName.toLowerCase())) {
+        typeSelectFilter.value = opt.value;
+        currentSpecificType = opt.value;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      currentSpecificType = 'Todos';
+      typeSelectFilter.value = 'Todos';
+      if (searchInput) {
+        searchInput.value = tipoName;
+        currentSearchQuery = tipoName.toLowerCase().trim();
+        if (btnClearSearch) btnClearSearch.style.display = 'block';
+      }
+    }
+  }
+
+  renderData();
+  showToast(`Filtrando por tipo: "${tipoName}"`, 'info');
   const tableCard = document.getElementById('tableViewContainer');
   if (tableCard) tableCard.scrollIntoView({ behavior: 'smooth' });
 }
@@ -2960,7 +3066,7 @@ function renderDashboard() {
 
     if (badgeTipos) badgeTipos.textContent = `${filteredData.length} Equipos`;
     renderPieDonutChart(circleTipos, legendTipos, tiposEntries, pieColors, (tipo) => {
-      filterByAmbiente(tipo);
+      filterByTipo(tipo);
     });
   }
 
@@ -2995,7 +3101,7 @@ function renderDashboard() {
 
     if (badgeMarcas) badgeMarcas.textContent = `${marcasEntries.length} Fabricantes`;
     renderPieDonutChart(circleMarcas, legendMarcas, marcasEntries, ['#3b82f6', '#e11d48', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'], (marca) => {
-      filterByAmbiente(marca);
+      filterByBrand(marca);
     });
   }
 
@@ -3018,7 +3124,7 @@ function renderDashboard() {
 
     if (badgeSalud) badgeSalud.textContent = `${filteredData.length} Auditados`;
     renderPieDonutChart(circleSalud, legendSalud, saludEntries, ['#10b981', '#f59e0b', '#ef4444'], (estado) => {
-      filterByAmbiente(estado);
+      filterByStatus(estado);
     });
   }
 
@@ -3128,7 +3234,7 @@ function renderDashboard() {
     modelosListContainer.innerHTML = sortedModelos.map(([modelo, count]) => {
       const percent = Math.round((count / (filteredData.length || 1)) * 100);
       return `
-        <div class="breakdown-row" onclick="filterByAmbiente('${escapeHTML(modelo)}')" title="Clic para filtrar por este modelo">
+        <div class="breakdown-row" onclick="filterByModel('${escapeHTML(modelo)}')" title="Clic para filtrar por este modelo">
           <div class="breakdown-label">
             <span class="breakdown-name"><i class="fa-solid fa-microchip text-crimson"></i> ${escapeHTML(modelo)}</span>
             <span class="breakdown-count"><b>${count}</b> (${percent}%)</span>
