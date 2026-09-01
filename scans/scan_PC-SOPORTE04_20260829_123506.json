@@ -1,0 +1,106 @@
+﻿{
+    "modelo":  "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
+    "numero_serie":  "8CN60500YC",
+    "placa_base":  "8D19",
+    "placa_base_completa":  "HP 8D19",
+    "placa_base_serial":  "PUNNL0DWBLZ0OQ",
+    "fabricante":  "HP",
+    "tipo_equipo":  "All-in-One",
+    "procesador":  "Intel(R) Core(TM) Ultra 5 225 (10 Nucleos / 10 Hilos)",
+    "ram_total":  "16 GB ( modulo(s))",
+    "ram_detalles":  [
+                         "DIMM1: 16GB @ 5600MHz (S/N: 34A9674D - Modelo: M425R2GA3EB0-CWMOL)"
+                     ],
+    "almacenamiento_resumen":  "PC SN5000S SDEPNSJ-512G-1006 (477 GB, S/N: E823_8FA6_BF53_0001_001B_448B_4F0B_52A1.) | BIWIN M1 00 512GB SCSI Disk Device (477 GB, S/N: 0B4038EE1A62)",
+    "almacenamiento":  [
+                           {
+                               "serie":  "E823_8FA6_BF53_0001_001B_448B_4F0B_52A1.",
+                               "tipo":  "Disco",
+                               "capacidad":  "477 GB",
+                               "interfaz":  "SCSI",
+                               "modelo":  "PC SN5000S SDEPNSJ-512G-1006"
+                           },
+                           {
+                               "serie":  "0B4038EE1A62",
+                               "tipo":  "Disco",
+                               "capacidad":  "477 GB",
+                               "interfaz":  "SCSI",
+                               "modelo":  "BIWIN M1 00 512GB SCSI Disk Device"
+                           }
+                       ],
+    "monitores":  [
+                      {
+                          "serie":  "8CN60500YC",
+                          "fabricante":  "HPN",
+                          "modelo":  "ProStudio 4"
+                      }
+                  ],
+    "perifericos":  [
+                        {
+                            "nombre":  "Dispositivo de teclado HID",
+                            "tipo":  "Teclado",
+                            "id_hardware":  "HID\\CONVERTEDDEVICE\u0026COL01\\5\u002632FED25\u00260\u00260000"
+                        },
+                        {
+                            "nombre":  "Dispositivo de entrada USB",
+                            "tipo":  "Teclado",
+                            "id_hardware":  "USB\\VID_0461\u0026PID_554A\u0026MI_00\\6\u002618780B94\u00260\u00260000"
+                        },
+                        {
+                            "nombre":  "Dispositivo de teclado HID",
+                            "tipo":  "Teclado",
+                            "id_hardware":  "HID\\INTC816\u0026COL01\\3\u0026125F27AF\u00260\u00260000"
+                        },
+                        {
+                            "nombre":  "Dispositivo de entrada USB",
+                            "tipo":  "Mouse / Puntero",
+                            "id_hardware":  "USB\\VID_03F0\u0026PID_584A\\5\u00262713CBC8\u00260\u00263"
+                        },
+                        {
+                            "nombre":  "Varios micrófonos (Realtek(R) Audio)",
+                            "tipo":  "AudioEndpoint",
+                            "id_hardware":  "SWD\\MMDEVAPI\\{0.0.1.00000000}.{F28B5A22-9E5C-429E-A167-7D5A224FF3A6}"
+                        },
+                        {
+                            "nombre":  "Controles de radio inalámbrica compatibles con HID",
+                            "tipo":  "HIDClass",
+                            "id_hardware":  "HID\\INTC816\u0026COL02\\3\u0026125F27AF\u00260\u00260001"
+                        },
+                        {
+                            "nombre":  "Dispositivo de control del consumidor compatible con HID",
+                            "tipo":  "HIDClass",
+                            "id_hardware":  "HID\\INTC816\u0026COL07\\3\u0026125F27AF\u00260\u00260006"
+                        },
+                        {
+                            "nombre":  "Dispositivo de control del consumidor compatible con HID",
+                            "tipo":  "HIDClass",
+                            "id_hardware":  "HID\\INTC816\u0026COL0A\\3\u0026125F27AF\u00260\u00260009"
+                        },
+                        {
+                            "nombre":  "Dispositivo de control de dispositivo portátil convertido",
+                            "tipo":  "HIDClass",
+                            "id_hardware":  "BUTTONCONVERTER\\CONVERTEDDEVICE\\4\u00262FC29DA9\u00260\u00260"
+                        },
+                        {
+                            "nombre":  "Dispositivo de entrada USB",
+                            "tipo":  "HIDClass",
+                            "id_hardware":  "USB\\VID_0461\u0026PID_554A\u0026MI_01\\6\u002618780B94\u00260\u00260001"
+                        },
+                        {
+                            "nombre":  "Altavoces (Realtek(R) Audio)",
+                            "tipo":  "AudioEndpoint",
+                            "id_hardware":  "SWD\\MMDEVAPI\\{0.0.0.00000000}.{92C0138A-6E69-4DAB-9911-5A8CE1E61923}"
+                        },
+                        {
+                            "nombre":  "IdeaCamera(App)",
+                            "tipo":  "Camera",
+                            "id_hardware":  "ROOT\\CAMERA\\0000"
+                        }
+                    ],
+    "hostname":  "PC-SOPORTE04",
+    "usuario_actual":  "AUTONOMA",
+    "sistema_operativo":  "Microsoft Windows 11 Pro (64 bits)",
+    "ip_red":  "192.168.89.76, fe80::ed60:be2a:82f5:69cc | 192.168.137.1, fe80::bbef:b88e:841e:b781",
+    "mac_address":  "40:D1:33:8F:11:64 | 42:D1:33:8F:11:64",
+    "fecha_escaneo":  "2026-08-29 12:35:06"
+}

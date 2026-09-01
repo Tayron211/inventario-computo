@@ -56,50 +56,32 @@
     "numero_serie": "8CN60500YC",
     "placa_base": "8D19",
     "placa_base_completa": "HP 8D19",
-    "placa_base_serial": "PUNNL0DWBLZ0OQ",
+    "placa_base_serial": "",
     "tipo_equipo": "All-in-One",
     "fabricante": "HP",
-    "procesador": "Intel(R) Core(TM) Ultra 5 225 (10 Nucleos / 10 Hilos)",
-    "ram_total": "16 GB (1 modulo(s))",
-    "ram_detalles": [
-      "DIMM1 - 16GB @ 5600MHz (S/N: 34A9674D - Modelo: M425R2GA3EB0-CWMOL)"
-    ],
-    "almacenamiento_resumen": "PC SN5000S SDEPNSJ-512G-1006 (477 GB, S/N: E823_8FA6_BF53_0001_001B_448B_4F0B_52A1.)",
+    "procesador": "Intel(R) Core(TM) Ultra 5 225 (10 Nucleos)",
+    "ram_total": "16 GB (1 Modulos)",
+    "ram_detalles": [],
+    "almacenamiento_resumen": "PC SN5000S SDEPNSJ-512G-1006 (477 GB)",
     "almacenamiento": [
       {
         "serie": "E823_8FA6_BF53_0001_001B_448B_4F0B_52A1.",
         "tipo": "Disco",
         "capacidad": "477 GB",
-        "interfaz": "SCSI",
         "modelo": "PC SN5000S SDEPNSJ-512G-1006"
       }
     ],
-    "monitores": [
-      {
-        "serie": "8CN60500YC",
-        "fabricante": "HP",
-        "modelo": "HP ProStudio 4"
-      }
-    ],
-    "perifericos": [
-      {
-        "fabricante": "SunplusIT",
-        "nombre": "HP 5MP Camera",
-        "tipo": "CÃ¡mara Web",
-        "es_marca": true,
-        "id_hardware": "USB\\VID_04F2&PID_B795&MI_00\\6&2A0629BB&0&0000"
-      }
-    ],
+    "monitores": [],
+    "perifericos": [],
     "hostname": "PC-SOPORTE04",
     "usuario_actual": "AUTONOMA",
-    "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.89.76, fe80::ed60:be2a:82f5:69cc",
-    "ubicacion": "Soporte TÃ©cnico",
+    "sistema_operativo": "",
+    "ip_red": "192.168.89.252",
+    "ubicacion": "Red Local (192.168.89.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner automático",
-    "fecha_escaneo": "2026-08-30 01:32:35",
-    "origen": "Escáner Batch/PowerShell",
-    "_id": "6a93cec1d93bacbe3b39576e"
+    "fecha_escaneo": "2026-09-01 00:11:36",
+    "origen": "Escáner Batch/PowerShell"
   },
   {
     "id": "item-1788050236641-4842",

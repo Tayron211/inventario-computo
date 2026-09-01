@@ -265,16 +265,13 @@ function initEventListeners() {
     renderData();
   });
 
-  // Filtros por pestañas (Categorías)
+  // Filtros por pestañas (Pills)
   document.querySelectorAll('.filter-pills-group .pill').forEach(pill => {
     pill.addEventListener('click', () => {
       document.querySelectorAll('.filter-pills-group .pill').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
-      currentCategory = pill.getAttribute('data-category') || 'Todos';
-      currentFilterType = pill.getAttribute('data-type') || 'Todos';
-      if (typeSelectFilter) typeSelectFilter.value = 'Todos';
-      currentSpecificType = 'Todos';
-      renderData();
+      const target = pill.getAttribute('data-type') || pill.getAttribute('data-category') || 'Todos';
+      applyMetricFilter(target);
     });
   });
 
@@ -305,6 +302,14 @@ function initEventListeners() {
       else p.classList.remove('active');
     });
 
+    document.querySelectorAll('.metrics-grid .metric-card').forEach(card => {
+      if (card.getAttribute('data-filter') === target) {
+        card.classList.add('active-filter');
+      } else {
+        card.classList.remove('active-filter');
+      }
+    });
+
     if (target === 'Todos') {
       currentCategory = 'Todos';
       currentFilterType = 'Todos';
@@ -317,15 +322,15 @@ function initEventListeners() {
         currentSearchQuery = '';
         if (btnClearSearch) btnClearSearch.style.display = 'none';
       }
-      showToast('Mostrando todos los equipos del inventario', 'info');
+      showToast('Mostrando todos los equipos', 'info');
     } else if (target === 'PC de Escritorio') {
-      currentCategory = 'Computadoras';
+      currentCategory = 'Todos';
       currentFilterType = 'Todos';
       currentSpecificType = 'PC de Escritorio';
       if (typeSelectFilter) typeSelectFilter.value = 'PC de Escritorio';
       showToast('Filtrando por PCs de Escritorio', 'info');
     } else if (target === 'Laptop') {
-      currentCategory = 'Computadoras';
+      currentCategory = 'Todos';
       currentFilterType = 'Todos';
       currentSpecificType = 'Laptop';
       if (typeSelectFilter) typeSelectFilter.value = 'Laptop';
@@ -335,13 +340,13 @@ function initEventListeners() {
       currentFilterType = 'Todos';
       currentSpecificType = 'Monitor / Pantalla';
       if (typeSelectFilter) typeSelectFilter.value = 'Monitor / Pantalla';
-      showToast('Filtrando por Monitores y Pantallas', 'info');
+      showToast('Filtrando por Monitores', 'info');
     } else if (target === 'Periféricos') {
       currentCategory = 'Periféricos';
       currentFilterType = 'Todos';
       currentSpecificType = 'Todos';
       if (typeSelectFilter) typeSelectFilter.value = 'Todos';
-      showToast('Filtrando por Periféricos y Accesorios', 'info');
+      showToast('Filtrando por Periféricos', 'info');
     }
 
     renderData();
@@ -802,7 +807,7 @@ async function runNetworkScan() {
 function getDeviceTypeInfo(tipo) {
   const t = (tipo || '').toLowerCase();
   
-  if (t.includes('laptop') || t.includes('notebook') || t.includes('portátil')) {
+  if (t.includes('laptop') || t.includes('notebook') || t.includes('portátil') || t.includes('portatil') || t.includes('thinkpad') || t.includes('latitude') || t.includes('macbook')) {
     return { icon: 'fa-laptop', class: 'laptop', label: 'Laptop', category: 'Computadoras' };
   }
   if (t.includes('all-in-one') || t.includes('aio')) {
@@ -826,10 +831,10 @@ function getDeviceTypeInfo(tipo) {
   if (t.includes('teclado') || t.includes('keyboard')) {
     return { icon: 'fa-keyboard', class: 'teclado', label: 'Teclado', category: 'Periféricos' };
   }
-  if (t.includes('mouse') || t.includes('puntero') || t.includes('ratón')) {
+  if (t.includes('mouse') || t.includes('puntero') || t.includes('ratón') || t.includes('raton')) {
     return { icon: 'fa-mouse', class: 'mouse', label: 'Mouse', category: 'Periféricos' };
   }
-  if (t.includes('audífono') || t.includes('audifono') || t.includes('diadema') || t.includes('auricular') || t.includes('headphone')) {
+  if (t.includes('audífono') || t.includes('audifono') || t.includes('diadema') || t.includes('auricular') || t.includes('headphone') || t.includes('headset')) {
     return { icon: 'fa-headphones', class: 'audifonos', label: 'Audífonos', category: 'Periféricos' };
   }
   if (t.includes('monitor') || t.includes('pantalla') || t.includes('display')) {
@@ -862,11 +867,38 @@ function renderData() {
   // Aplicar filtros
   const filtered = inventoryData.filter(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
+    const itemType = (item.tipo_equipo || '').toLowerCase();
 
     // Filtro por tipo específico dropdown
     if (currentSpecificType && currentSpecificType !== 'Todos') {
-      if (item.tipo_equipo !== currentSpecificType) {
-        return false;
+      const targetType = currentSpecificType.toLowerCase();
+
+      if (targetType === 'laptop') {
+        if (!itemType.includes('laptop') && !itemType.includes('notebook') && !itemType.includes('portat') && !itemType.includes('thinkpad') && !itemType.includes('latitude') && !itemType.includes('macbook')) {
+          return false;
+        }
+      } else if (targetType === 'pc de escritorio') {
+        if (itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat')) return false;
+        if (!itemType.includes('pc') && !itemType.includes('escritorio') && !itemType.includes('desktop') && !itemType.includes('torre') && !itemType.includes('mini pc') && !itemType.includes('all-in-one') && !itemType.includes('servidor') && typeInfo.category !== 'Computadoras') {
+          return false;
+        }
+      } else if (targetType.includes('monitor') || targetType.includes('pantalla')) {
+        const isMon = itemType.includes('monitor') || itemType.includes('pantalla') || itemType.includes('display') || (item.monitores && item.monitores.length > 0);
+        if (!isMon) return false;
+      } else if (targetType.includes('all-in-one') || targetType.includes('aio')) {
+        if (!itemType.includes('all-in-one') && !itemType.includes('aio')) return false;
+      } else if (targetType.includes('mini pc')) {
+        if (!itemType.includes('mini')) return false;
+      } else if (targetType.includes('servidor')) {
+        if (!itemType.includes('servidor') && !itemType.includes('server')) return false;
+      } else if (targetType.includes('teclado')) {
+        if (!itemType.includes('teclado') && !itemType.includes('keyboard')) return false;
+      } else if (targetType.includes('mouse')) {
+        if (!itemType.includes('mouse') && !itemType.includes('rat')) return false;
+      } else {
+        if (item.tipo_equipo !== currentSpecificType && !itemType.includes(targetType)) {
+          return false;
+        }
       }
     }
 
@@ -1079,7 +1111,6 @@ function renderTable(items) {
         <td class="cell-usuario">
           <div class="user-block">
             <div class="user-name"><i class="fa-solid fa-user text-crimson"></i> <b>${highlightMatch(item.usuario_actual || 'Sin Asignar', currentSearchQuery)}</b></div>
-            ${item.ubicacion ? `<div class="user-loc"><i class="fa-solid fa-location-dot"></i> ${highlightMatch(item.ubicacion, currentSearchQuery)}</div>` : ''}
             ${item.ip_red ? `<div class="user-host"><i class="fa-solid fa-network-wired"></i> ${highlightMatch(item.ip_red.split(',')[0].trim(), currentSearchQuery)}</div>` : ''}
           </div>
         </td>
@@ -1176,34 +1207,70 @@ function renderGrid(items) {
 // -------------------------------------------------------------
 function updateMetrics() {
   const total = inventoryData.length;
-  let computadoras = 0;
+  let pcs = 0;
+  let laptops = 0;
+  let aio = 0;
   let impresoras = 0;
   let redes = 0;
   let perifericos = 0;
+  let monitores = 0;
 
   inventoryData.forEach(item => {
+    const t = (item.tipo_equipo || '').toLowerCase();
     const info = getDeviceTypeInfo(item.tipo_equipo);
-    if (info.category === 'Computadoras') computadoras++;
-    else if (info.category === 'Impresoras') impresoras++;
-    else if (info.category === 'Redes') redes++;
-    else if (info.category === 'Periféricos') perifericos++;
+
+    if (t.includes('laptop') || t.includes('notebook') || t.includes('portat') || t.includes('thinkpad') || t.includes('latitude') || t.includes('macbook')) {
+      laptops++;
+    } else if (t.includes('all-in-one') || t.includes('aio')) {
+      aio++;
+    } else if (info.category === 'Computadoras') {
+      pcs++;
+    } else if (info.category === 'Impresoras') {
+      impresoras++;
+    } else if (info.category === 'Redes') {
+      redes++;
+    } else if (info.category === 'Periféricos') {
+      if (t.includes('monitor') || t.includes('pantalla') || t.includes('display')) {
+        monitores++;
+      } else {
+        perifericos++;
+      }
+    }
+
+    // Monitores asociados a equipos
+    if (item.monitores && Array.isArray(item.monitores) && item.monitores.length > 0) {
+      monitores += item.monitores.length;
+    }
+    // Periféricos asociados
+    if (item.perifericos && Array.isArray(item.perifericos) && item.perifericos.length > 0) {
+      perifericos += item.perifericos.length;
+    }
   });
 
   const statTotal = document.getElementById('statTotal');
   const statDesktop = document.getElementById('statDesktop');
+  const statLaptop = document.getElementById('statLaptop');
+  const statMonitors = document.getElementById('statMonitors');
+  const statPeripherals = document.getElementById('statPeripherals');
+
   if (statTotal) statTotal.textContent = total;
-  if (statDesktop) statDesktop.textContent = computadoras;
+  if (statDesktop) statDesktop.textContent = pcs;
+  if (statLaptop) statLaptop.textContent = laptops;
+  if (statMonitors) statMonitors.textContent = monitores;
+  if (statPeripherals) statPeripherals.textContent = perifericos;
 
   const countAll = document.getElementById('countAll');
-  const countComputadoras = document.getElementById('countComputadoras');
-  const countImpresoras = document.getElementById('countImpresoras');
-  const countRedes = document.getElementById('countRedes');
+  const countLaptops = document.getElementById('countLaptops');
+  const countDesktop = document.getElementById('countDesktop');
+  const countAIO = document.getElementById('countAIO');
+  const countMonitores = document.getElementById('countMonitores');
   const countPerifericos = document.getElementById('countPerifericos');
 
   if (countAll) countAll.textContent = total;
-  if (countComputadoras) countComputadoras.textContent = computadoras;
-  if (countImpresoras) countImpresoras.textContent = impresoras;
-  if (countRedes) countRedes.textContent = redes;
+  if (countLaptops) countLaptops.textContent = laptops;
+  if (countDesktop) countDesktop.textContent = pcs;
+  if (countAIO) countAIO.textContent = aio;
+  if (countMonitores) countMonitores.textContent = monitores;
   if (countPerifericos) countPerifericos.textContent = perifericos;
 }
 
@@ -1648,32 +1715,61 @@ function viewDetails(id) {
   }
 
   // Monitores List
-  let monitoresHtml = '<p class="text-gray-400">Sin monitores adicionales registrados</p>';
+  let monitoresHtml = '<p class="text-gray-400" style="font-size: 0.85rem;">Sin pantallas adicionales</p>';
   if (item.monitores && item.monitores.length > 0) {
     monitoresHtml = `
-      <ul class="components-list">
-        ${item.monitores.map(m => `
-          <li class="component-item">
-            <strong><i class="fa-solid fa-display"></i> ${escapeHTML(m.modelo || m.fabricante || 'Monitor')}</strong>
-            <br><small class="text-gray-400">Fabricante: ${escapeHTML(m.fabricante || 'N/A')} | S/N: <span class="text-crimson mono-font">${escapeHTML(m.serie || 'N/A')}</span></small>
-          </li>
-        `).join('')}
-      </ul>
+      <div class="component-card-grid">
+        ${item.monitores.map(m => {
+          const hasSerial = m.serie && m.serie !== 'N/A' && !/^(0+$|none|pnp|no reportado)/i.test(m.serie);
+          return `
+            <div class="component-card">
+              <div class="comp-header">
+                <span class="comp-icon"><i class="fa-solid fa-display text-emerald"></i></span>
+                <span class="comp-title">${escapeHTML(m.modelo || m.fabricante || 'Monitor')}</span>
+                ${m.fabricante && m.fabricante !== 'Estándar' ? `<span class="comp-badge">${escapeHTML(m.fabricante)}</span>` : ''}
+              </div>
+              ${hasSerial ? `
+                <div class="comp-details">
+                  <div class="comp-serial">
+                    <span class="serial-label">S/N:</span>
+                    <code class="serial-code">${escapeHTML(m.serie)}</code>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
     `;
   }
 
   // Periféricos List
-  let perifericosHtml = '<p class="text-gray-400">Sin periféricos USB registrados</p>';
+  let perifericosHtml = '<p class="text-gray-400" style="font-size: 0.85rem;">Sin periféricos registrados</p>';
   if (item.perifericos && item.perifericos.length > 0) {
     perifericosHtml = `
-      <ul class="components-list">
-        ${item.perifericos.map(p => `
-          <li class="component-item">
-            <strong><i class="fa-solid fa-plug"></i> [${escapeHTML(p.tipo || 'USB')}] ${escapeHTML(p.nombre || 'Dispositivo')}</strong>
-            ${p.id_hardware ? `<br><small class="text-gray-400" style="font-family: var(--font-mono); font-size: 0.72rem;">ID: ${escapeHTML(p.id_hardware)}</small>` : ''}
-          </li>
-        `).join('')}
-      </ul>
+      <div class="component-card-grid">
+        ${item.perifericos.map(p => {
+          const pTipo = (p.tipo || '').toLowerCase();
+          const icon = pTipo.includes('mouse') ? 'fa-mouse text-purple' : (pTipo.includes('teclado') ? 'fa-keyboard text-blue' : 'fa-plug text-cyan');
+          return `
+            <div class="component-card">
+              <div class="comp-header">
+                <span class="comp-icon"><i class="fa-solid ${icon}"></i></span>
+                <span class="comp-title">${escapeHTML(p.nombre || p.tipo || 'Dispositivo')}</span>
+                <span class="comp-pill">${escapeHTML(p.tipo || 'USB')}</span>
+              </div>
+              ${p.id_hardware ? `
+                <div class="comp-details">
+                  <div class="comp-serial">
+                    <span class="serial-label">ID:</span>
+                    <code class="serial-code">${escapeHTML(p.id_hardware)}</code>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
     `;
   }
 
@@ -1681,28 +1777,49 @@ function viewDetails(id) {
   let ramSlotsHtml = `<div class="spec-box-val">${escapeHTML(item.ram_total || 'N/A')}</div>`;
   if (item.ram_detalles && item.ram_detalles.length > 0) {
     ramSlotsHtml += `
-      <ul class="components-list mt-4">
+      <div class="component-card-grid mt-2">
         ${item.ram_detalles.map(slot => `
-          <li class="component-item" style="font-size: 0.78rem;">
-            <i class="fa-solid fa-memory"></i> ${escapeHTML(slot)}
-          </li>
+          <div class="component-card">
+            <div class="comp-header">
+              <span class="comp-icon"><i class="fa-solid fa-memory text-amber"></i></span>
+              <span class="comp-title" style="font-size: 0.82rem;">${escapeHTML(slot)}</span>
+            </div>
+          </div>
         `).join('')}
-      </ul>
+      </div>
     `;
   }
 
   // Discos List
   let discosHtml = `<div class="spec-box-val">${escapeHTML(item.almacenamiento_resumen || 'N/A')}</div>`;
   if (item.almacenamiento && item.almacenamiento.length > 0) {
-    discosHtml += `
-      <ul class="components-list mt-4">
-        ${item.almacenamiento.map(d => `
-          <li class="component-item">
-            <strong><i class="fa-solid fa-hard-drive"></i> ${escapeHTML(d.modelo || d.tipo)} (${escapeHTML(d.capacidad || '')})</strong>
-            <br><small class="text-gray-400">Número de Serie: <span class="text-crimson mono-font">${escapeHTML(d.serie || 'N/A')}</span> | Interfaz: ${escapeHTML(d.interfaz || 'N/A')}</small>
-          </li>
-        `).join('')}
-      </ul>
+    discosHtml = `
+      <div class="component-card-grid">
+        ${item.almacenamiento.map(d => {
+          const capText = d.capacidad ? `<span class="comp-pill">${escapeHTML(d.capacidad)}</span>` : '';
+          const hasSerial = d.serie && d.serie !== 'N/A' && !/^(0+$|none)/i.test(d.serie);
+          const hasInterfaz = d.interfaz && d.interfaz !== 'N/A';
+
+          return `
+            <div class="component-card">
+              <div class="comp-header">
+                <span class="comp-icon"><i class="fa-solid fa-hard-drive text-cyan"></i></span>
+                <span class="comp-title">${escapeHTML(d.modelo || d.tipo || 'Disco')}</span>
+                ${capText}
+              </div>
+              <div class="comp-details">
+                ${hasInterfaz ? `<span class="comp-badge">${escapeHTML(d.interfaz)}</span>` : ''}
+                ${hasSerial ? `
+                  <div class="comp-serial">
+                    <span class="serial-label">S/N:</span>
+                    <code class="serial-code">${escapeHTML(d.serie)}</code>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
     `;
   }
 
@@ -2292,15 +2409,30 @@ function renderDashboard() {
 
   // 3. Calcular KPIs
   const allAmbientes = new Set(inventoryData.map(i => (i.ubicacion || 'Sin Asignar').trim()).filter(Boolean));
-  const totalPCs = filteredData.filter(i => i.tipo_equipo === 'PC de Escritorio' || i.tipo_equipo === 'Laptop' || i.tipo_equipo === 'Mini PC' || i.tipo_equipo === 'All-in-One').length;
+  let totalDesktops = 0;
+  let totalLaptops = 0;
+
+  filteredData.forEach(i => {
+    const t = (i.tipo_equipo || '').toLowerCase();
+    if (t.includes('laptop') || t.includes('notebook') || t.includes('portat') || t.includes('thinkpad') || t.includes('latitude') || t.includes('macbook')) {
+      totalLaptops++;
+    } else {
+      const info = getDeviceTypeInfo(i.tipo_equipo);
+      if (info.category === 'Computadoras') {
+        totalDesktops++;
+      }
+    }
+  });
 
   const dashTotalAmbientes = document.getElementById('dashTotalAmbientes');
   const dashTotalPCs = document.getElementById('dashTotalPCs');
+  const dashTotalLaptops = document.getElementById('dashTotalLaptops');
   const dashTotalMonitores = document.getElementById('dashTotalMonitores');
   const dashTotalPerifericos = document.getElementById('dashTotalPerifericos');
 
   if (dashTotalAmbientes) dashTotalAmbientes.textContent = allAmbientes.size;
-  if (dashTotalPCs) dashTotalPCs.textContent = totalPCs;
+  if (dashTotalPCs) dashTotalPCs.textContent = totalDesktops;
+  if (dashTotalLaptops) dashTotalLaptops.textContent = totalLaptops;
   if (dashTotalMonitores) dashTotalMonitores.textContent = totalMonitoresReconocidos;
   if (dashTotalPerifericos) dashTotalPerifericos.textContent = totalPerifericosReconocidos;
 
@@ -2323,8 +2455,12 @@ function renderDashboard() {
       }
       const data = ambientesMap.get(ambName);
       data.equipos.push(item);
-      if (item.tipo_equipo === 'Laptop') data.laptops++;
-      else data.desktops++;
+      const t = (item.tipo_equipo || '').toLowerCase();
+      if (t.includes('laptop') || t.includes('notebook') || t.includes('portat') || t.includes('thinkpad') || t.includes('latitude') || t.includes('macbook')) {
+        data.laptops++;
+      } else {
+        data.desktops++;
+      }
       data.monitores += (item.monitores || []).length;
       
       // Contar solo periféricos de marca
@@ -2368,7 +2504,7 @@ function renderDashboard() {
               <div class="amb-stat-chip"><i class="fa-solid fa-desktop text-crimson"></i> <b>${amb.desktops}</b> PCs</div>
               <div class="amb-stat-chip"><i class="fa-solid fa-laptop text-blue"></i> <b>${amb.laptops}</b> Laptops</div>
               <div class="amb-stat-chip"><i class="fa-solid fa-display text-emerald"></i> <b>${amb.monitores}</b> Pantallas</div>
-              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericosMarca}</b> Accesorios Marca</div>
+              <div class="amb-stat-chip"><i class="fa-solid fa-keyboard text-purple"></i> <b>${amb.perifericosMarca}</b> Accesorios</div>
             </div>
 
             <div class="ambiente-user-list">

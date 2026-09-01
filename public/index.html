@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>SYS-INVENTORY | Control & Auditoría de Hardware</title>
   
-  <!-- PWA & Mobile Status Bar Color Integration (Blanco puro en Modo Claro, Negro en Modo Oscuro) -->
+  <!-- PWA & Mobile Status Bar Color Integration -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#ffffff" id="metaThemeColor">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default" id="metaAppleStatus">
-  <meta name="apple-mobile-web-app-title" content="SYS-INVENTORY PRO">
+  <meta name="apple-mobile-web-app-title" content="SYS-INVENTORY">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="msapplication-navbutton-color" content="#ffffff" id="metaMsNav">
   <meta name="msapplication-TileColor" content="#ffffff">
 
-  <!-- Sincronización instantánea de tema antes de renderizar para evitar destellos -->
+  <!-- Sincronización instantánea de tema antes de renderizar -->
   <script>
     (function() {
       try {
@@ -40,7 +40,7 @@
   <!-- Google Fonts: Outfit & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=5.1">
+  <link rel="stylesheet" href="css/styles.css?v=7.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -67,7 +67,7 @@
           <i class="fa-solid fa-shield-halved"></i>
         </div>
         <h2>SYS-INVENTORY <span class="badge-crimson">PRO</span></h2>
-        <p>Control de Hardware & Auditoría de Red</p>
+        <p>Control de Hardware & Auditoría</p>
       </div>
 
       <form id="loginForm" class="login-form">
@@ -96,7 +96,7 @@
       </form>
 
       <div class="login-footer-hint">
-        <i class="fa-solid fa-lock"></i> Acceso protegido para administradores
+        <i class="fa-solid fa-lock"></i> Acceso seguro al inventario
       </div>
     </div>
   </div>
@@ -114,27 +114,26 @@
           </div>
           <div class="brand-text">
             <h1>SYS-INVENTORY <span class="badge-crimson">PRO</span></h1>
-            <p>Control de Hardware, Números de Serie & Periféricos</p>
+            <p>Control de Hardware & Periféricos</p>
           </div>
         </div>
 
-        <!-- Centro: Navegación Multi-Página -->
+        <!-- Centro: Navegación -->
         <nav class="app-nav-tabs" id="appNavTabs">
-          <button class="nav-tab-btn active" id="tabNavInventory" title="Ver Listado y Tabla de Inventario">
+          <button class="nav-tab-btn active" id="tabNavInventory" title="Ver Inventario">
             <i class="fa-solid fa-boxes-stacked"></i>
-            <span>Inventario Maestro</span>
+            <span>Inventario</span>
           </button>
-          <button class="nav-tab-btn" id="tabNavDashboard" title="Ver Estadísticas, Ambientes y Periféricos">
+          <button class="nav-tab-btn" id="tabNavDashboard" title="Ver Estadísticas">
             <i class="fa-solid fa-chart-pie"></i>
-            <span>Dashboard & Ambientes</span>
+            <span>Dashboard</span>
           </button>
         </nav>
 
-        <!-- Derecha: Todos los botones agrupados en la misma columna derecha -->
+        <!-- Derecha: Acciones y Usuario -->
         <div class="header-right-column">
-          <!-- Fila Superior Derecha: Admin y Modo Claro/Oscuro -->
+          <!-- Fila Superior Derecha: Usuario y Modo Claro/Oscuro -->
           <div class="top-right-user-tools">
-            <!-- Perfil de Usuario y Cerrar Sesión -->
             <div class="user-session-badge badge-role-admin" id="userSessionBox">
               <span class="user-pill" id="userPill">
                 <span id="sessionUserIcon"><i class="fa-solid fa-crown gold-crown-icon"></i></span>
@@ -145,30 +144,26 @@
               </button>
             </div>
 
-            <!-- Botón Modo Claro / Oscuro -->
-            <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Alternar entre Modo Claro y Modo Oscuro">
+            <button class="btn btn-theme-toggle" id="btnThemeToggle" title="Cambiar tema">
               <i class="fa-solid fa-sun icon-sun"></i>
               <i class="fa-solid fa-moon icon-moon"></i>
               <span id="themeToggleText">Modo Claro</span>
             </button>
           </div>
 
-          <!-- Fila Inferior Derecha: Escanear PC, Nuevo y Excel (Directamente abajo) -->
+          <!-- Fila Inferior Derecha: Botones de Acción -->
           <div class="header-actions">
-            <!-- Botón Escanear Este Equipo -->
-            <button class="btn btn-crimson-pulse" id="btnScanLocal" title="Ejecutar recolector de hardware en esta máquina">
+            <button class="btn btn-crimson-pulse" id="btnScanLocal" title="Escanear esta computadora">
               <i class="fa-solid fa-bolt"></i>
               <span>Escanear PC</span>
             </button>
 
-            <!-- Botón Nuevo Registro Manual -->
-            <button class="btn btn-secondary" id="btnOpenManualModal">
+            <button class="btn btn-secondary" id="btnOpenManualModal" title="Agregar equipo manualmente">
               <i class="fa-solid fa-plus"></i>
               <span>Nuevo</span>
             </button>
 
-            <!-- Botón Exportar Excel -->
-            <a href="/api/export-excel" class="btn btn-excel" id="btnExportExcel" download>
+            <a href="/api/export-excel" class="btn btn-excel" id="btnExportExcel" download title="Descargar reporte Excel">
               <i class="fa-solid fa-file-excel"></i>
               <span>Excel</span>
             </a>
@@ -181,14 +176,14 @@
     <main class="main-content">
       
       <!-- ======================================================= -->
-      <!-- PÁGINA 1: INVENTARIO MAESTRO (TABLA Y TARJETAS) -->
+      <!-- PÁGINA 1: INVENTARIO (TABLA Y TARJETAS) -->
       <!-- ======================================================= -->
       <div id="pageInventoryView" class="page-view-container active">
         <!-- Metric Cards Grid -->
         <section class="metrics-grid">
-          <div class="metric-card clickable" id="cardFilterTotal" data-filter="Todos" title="Clic para mostrar todos los equipos">
+          <div class="metric-card clickable active-filter" id="cardFilterTotal" data-filter="Todos" title="Ver todos los equipos">
             <div class="metric-icon total">
-              <i class="fa-solid fa-server"></i>
+              <i class="fa-solid fa-layer-group"></i>
             </div>
             <div class="metric-data">
               <span class="metric-value" id="statTotal">0</span>
@@ -197,18 +192,18 @@
             <div class="metric-tag">Todos</div>
           </div>
 
-          <div class="metric-card clickable" id="cardFilterDesktop" data-filter="PC de Escritorio">
+          <div class="metric-card clickable" id="cardFilterDesktop" data-filter="PC de Escritorio" title="Filtrar por PCs de Escritorio">
             <div class="metric-icon desktop">
               <i class="fa-solid fa-desktop"></i>
             </div>
             <div class="metric-data">
               <span class="metric-value" id="statDesktop">0</span>
-              <span class="metric-title">PCs de Escritorio</span>
+              <span class="metric-title">PCs Escritorio</span>
             </div>
             <div class="metric-tag">Filtrar</div>
           </div>
 
-          <div class="metric-card clickable" id="cardFilterLaptop" data-filter="Laptop">
+          <div class="metric-card clickable" id="cardFilterLaptop" data-filter="Laptop" title="Filtrar por Laptops">
             <div class="metric-icon laptop">
               <i class="fa-solid fa-laptop"></i>
             </div>
@@ -219,24 +214,24 @@
             <div class="metric-tag">Filtrar</div>
           </div>
 
-          <div class="metric-card clickable" id="cardFilterMonitor" data-filter="Monitor">
+          <div class="metric-card clickable" id="cardFilterMonitor" data-filter="Monitor" title="Filtrar por Pantallas">
             <div class="metric-icon monitors">
               <i class="fa-solid fa-display"></i>
             </div>
             <div class="metric-data">
               <span class="metric-value" id="statMonitors">0</span>
-              <span class="metric-title">Monitores / Displays</span>
+              <span class="metric-title">Monitores</span>
             </div>
             <div class="metric-tag">Filtrar</div>
           </div>
 
-          <div class="metric-card clickable" id="cardFilterPerifericos" data-filter="Periféricos">
+          <div class="metric-card clickable" id="cardFilterPerifericos" data-filter="Periféricos" title="Filtrar por Periféricos">
             <div class="metric-icon peripherals">
               <i class="fa-solid fa-keyboard"></i>
             </div>
             <div class="metric-data">
               <span class="metric-value" id="statPeripherals">0</span>
-              <span class="metric-title">Periféricos & USB</span>
+              <span class="metric-title">Periféricos</span>
             </div>
             <div class="metric-tag">Filtrar</div>
           </div>
@@ -246,7 +241,7 @@
         <section class="toolbar-section">
           <div class="search-bar-wrapper">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" placeholder="Buscar por Modelo, Serie, Marca, Tipo, CPU, Hostname, Ambiente o Usuario..." autocomplete="off">
+            <input type="text" id="searchInput" placeholder="Buscar por modelo, serie, ambiente, usuario, hardware..." autocomplete="off">
             <button class="clear-search-btn" id="btnClearSearch" title="Limpiar búsqueda" style="display: none;">
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -257,17 +252,20 @@
             <button class="pill active" data-category="Todos" data-type="Todos">
               <i class="fa-solid fa-layer-group"></i> Todos (<span id="countAll">0</span>)
             </button>
-            <button class="pill" data-category="Computadoras">
-              <i class="fa-solid fa-desktop"></i> Computadoras (<span id="countComputadoras">0</span>)
+            <button class="pill pill-laptop" data-type="Laptop" data-category="Laptop">
+              <i class="fa-solid fa-laptop"></i> Laptops (<span id="countLaptops">0</span>)
             </button>
-            <button class="pill" data-category="Impresoras">
-              <i class="fa-solid fa-print"></i> Impresoras (<span id="countImpresoras">0</span>)
+            <button class="pill pill-desktop" data-type="PC de Escritorio" data-category="PC de Escritorio">
+              <i class="fa-solid fa-desktop"></i> PCs Escritorio (<span id="countDesktop">0</span>)
             </button>
-            <button class="pill" data-category="Redes">
-              <i class="fa-solid fa-network-wired"></i> Red & Wi-Fi (<span id="countRedes">0</span>)
+            <button class="pill pill-aio" data-type="All-in-One" data-category="All-in-One">
+              <i class="fa-solid fa-tv"></i> All-in-One (<span id="countAIO">0</span>)
             </button>
-            <button class="pill" data-category="Periféricos">
-              <i class="fa-solid fa-keyboard"></i> Periféricos & Audio (<span id="countPerifericos">0</span>)
+            <button class="pill pill-monitors" data-type="Monitor" data-category="Monitor">
+              <i class="fa-solid fa-display"></i> Monitores (<span id="countMonitores">0</span>)
+            </button>
+            <button class="pill pill-peripherals" data-type="Periféricos" data-category="Periféricos">
+              <i class="fa-solid fa-keyboard"></i> Periféricos (<span id="countPerifericos">0</span>)
             </button>
           </div>
 
@@ -275,21 +273,21 @@
           <div class="view-and-extra-controls">
             <!-- Filtro por Tipo Específico -->
             <div class="custom-select-wrapper">
-              <select id="typeSelectFilter" class="custom-select" title="Filtrar por Tipo de Dispositivo">
-                <option value="Todos">Todos los Dispositivos</option>
+              <select id="typeSelectFilter" class="custom-select" title="Filtrar por Tipo">
+                <option value="Todos">Todos los Tipos</option>
                 <optgroup label="💻 Computadoras">
                   <option value="PC de Escritorio">🖥️ PC de Escritorio</option>
-                  <option value="Laptop">💻 Laptop / Notebook</option>
-                  <option value="Mini PC">📦 Mini PC</option>
+                  <option value="Laptop">💻 Laptop</option>
                   <option value="All-in-One">🖥️ All-in-One</option>
+                  <option value="Mini PC">📦 Mini PC</option>
                   <option value="Servidor">🗄️ Servidor</option>
                 </optgroup>
-                <optgroup label="⌨️ Periféricos & Accesorios">
+                <optgroup label="⌨️ Periféricos">
                   <option value="Teclado">⌨️ Teclado</option>
-                  <option value="Mouse / Puntero">🖱️ Mouse / Puntero</option>
-                  <option value="Audífonos / Diadema">🎧 Audífonos / Diadema</option>
-                  <option value="Monitor / Pantalla">🖥️ Monitor / Pantalla</option>
-                  <option value="Otro Periférico">🔌 Otro Dispositivo</option>
+                  <option value="Mouse / Puntero">🖱️ Mouse</option>
+                  <option value="Audífonos / Diadema">🎧 Audífonos</option>
+                  <option value="Monitor / Pantalla">🖥️ Monitor</option>
+                  <option value="Otro Periférico">🔌 Otros</option>
                 </optgroup>
               </select>
             </div>
@@ -307,7 +305,7 @@
             </div>
 
             <div class="view-switch-group">
-              <button class="view-btn active" id="viewTableBtn" title="Vista Tabla (Excel)">
+              <button class="view-btn active" id="viewTableBtn" title="Vista Tabla">
                 <i class="fa-solid fa-table-list"></i>
               </button>
               <button class="view-btn" id="viewGridBtn" title="Vista Tarjetas">
@@ -321,11 +319,11 @@
         <section class="inventory-table-card" id="tableViewContainer">
           <div class="table-header-bar">
             <div class="table-title">
-              <i class="fa-solid fa-list-check"></i>
-              <span>LISTADO MAESTRO DE EQUIPOS Y COMPONENTES</span>
+              <i class="fa-solid fa-boxes-stacked"></i>
+              <span>Equipos Registrados</span>
             </div>
             <div class="table-stats">
-              Mostrando <b id="visibleCount">0</b> de <b id="totalCount">0</b> registros
+              <b id="visibleCount">0</b> de <b id="totalCount">0</b> equipos
             </div>
           </div>
 
@@ -333,14 +331,14 @@
             <table class="custom-excel-table" id="inventoryTable">
               <thead>
                 <tr>
-                  <th class="col-modelo">HOSTNAME / MODELO</th>
-                  <th class="col-serie">NÚMERO DE SERIE</th>
-                  <th class="col-ambiente">AMBIENTE / UBICACIÓN</th>
+                  <th class="col-modelo">EQUIPO</th>
+                  <th class="col-serie">N° SERIE</th>
+                  <th class="col-ambiente">AMBIENTE</th>
                   <th class="col-placa">PLACA BASE</th>
                   <th class="col-tipo">TIPO</th>
-                  <th class="col-hardware">ESPECIFICACIONES (CPU / RAM / DISCO)</th>
-                  <th class="col-perifericos">PERIFÉRICOS & SERIALES</th>
-                  <th class="col-usuario">USUARIO / RED</th>
+                  <th class="col-hardware">ESPECIFICACIONES</th>
+                  <th class="col-perifericos">PERIFÉRICOS & PANTALLAS</th>
+                  <th class="col-usuario">USUARIO</th>
                   <th class="col-estado">ESTADO</th>
                   <th class="col-acciones">ACCIONES</th>
                 </tr>
@@ -355,18 +353,18 @@
           <div class="empty-state" id="emptyState" style="display: none;">
             <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
             <h3>No se encontraron equipos</h3>
-            <p>Intenta ajustar tus criterios de búsqueda o registra un nuevo equipo con el botón "Nuevo" o "Escanear PC".</p>
+            <p>Ajusta los filtros de búsqueda o agrega un nuevo equipo.</p>
           </div>
         </section>
 
-        <!-- Grid Cards View Section (Opcional) -->
+        <!-- Grid Cards View Section -->
         <section class="inventory-grid-container" id="gridViewContainer" style="display: none;">
           <!-- Renderizado dinámico de tarjetas -->
         </section>
       </div>
 
       <!-- ======================================================= -->
-      <!-- PÁGINA 2: DASHBOARD ANALÍTICO & AMBIENTES HUB -->
+      <!-- PÁGINA 2: DASHBOARD ANALÍTICO & AMBIENTES -->
       <!-- ======================================================= -->
       <div id="pageDashboardView" class="page-view-container" style="display: none;">
         
@@ -375,14 +373,14 @@
           <div class="dash-title-block">
             <div class="dash-icon"><i class="fa-solid fa-chart-pie"></i></div>
             <div>
-              <h2>Dashboard de Control y Distribución</h2>
-              <p>Monitoreo en tiempo real de Ambientes, Modelos, Tipos de PC y Periféricos</p>
+              <h2>Dashboard de Hardware</h2>
+              <p>Distribución en tiempo real por ambiente, tipo y periféricos</p>
             </div>
           </div>
 
           <div class="dash-quick-filters">
             <div class="custom-select-wrapper">
-              <select id="dashFilterAmbiente" class="custom-select" title="Filtrar estadísticas por Ambiente">
+              <select id="dashFilterAmbiente" class="custom-select" title="Filtrar por Ambiente">
                 <option value="Todos">🏢 Todos los Ambientes</option>
               </select>
             </div>
@@ -405,28 +403,35 @@
             <div class="kpi-icon icon-emerald"><i class="fa-solid fa-building-user"></i></div>
             <div class="kpi-info">
               <span class="kpi-num" id="dashTotalAmbientes">0</span>
-              <span class="kpi-label">Ambientes / Áreas</span>
+              <span class="kpi-label">Ambientes</span>
             </div>
           </div>
           <div class="dash-kpi-card">
             <div class="kpi-icon icon-crimson"><i class="fa-solid fa-desktop"></i></div>
             <div class="kpi-info">
               <span class="kpi-num" id="dashTotalPCs">0</span>
-              <span class="kpi-label">Computadoras (PC/Laptop)</span>
+              <span class="kpi-label">PCs Escritorio</span>
+            </div>
+          </div>
+          <div class="dash-kpi-card">
+            <div class="kpi-icon icon-cyan"><i class="fa-solid fa-laptop"></i></div>
+            <div class="kpi-info">
+              <span class="kpi-num" id="dashTotalLaptops">0</span>
+              <span class="kpi-label">Laptops</span>
             </div>
           </div>
           <div class="dash-kpi-card">
             <div class="kpi-icon icon-blue"><i class="fa-solid fa-display"></i></div>
             <div class="kpi-info">
               <span class="kpi-num" id="dashTotalMonitores">0</span>
-              <span class="kpi-label">Monitores Registrados</span>
+              <span class="kpi-label">Monitores</span>
             </div>
           </div>
           <div class="dash-kpi-card">
             <div class="kpi-icon icon-purple"><i class="fa-solid fa-keyboard"></i></div>
             <div class="kpi-info">
               <span class="kpi-num" id="dashTotalPerifericos">0</span>
-              <span class="kpi-label">Periféricos Conectados</span>
+              <span class="kpi-label">Periféricos</span>
             </div>
           </div>
         </section>
@@ -439,9 +444,9 @@
             <div class="dash-panel-header">
               <div class="panel-title">
                 <i class="fa-solid fa-layer-group text-crimson"></i>
-                <span>MATRIZ DE AMBIENTES Y EQUIPOS ASIGNADOS</span>
+                <span>MATRIZ DE AMBIENTES</span>
               </div>
-              <span class="panel-subtitle">Haz clic en cualquier ambiente para ver sus computadoras</span>
+              <span class="panel-subtitle">Haz clic en un ambiente para ver sus equipos</span>
             </div>
             <div class="ambientes-cards-grid" id="ambientesCardsGrid">
               <!-- Renderizado dinámico vía JS -->
@@ -453,7 +458,7 @@
             <div class="dash-panel-header">
               <div class="panel-title">
                 <i class="fa-solid fa-laptop-code text-crimson"></i>
-                <span>DISTRIBUCIÓN POR MODELO Y TIPO</span>
+                <span>MODELOS & FABRICANTES</span>
               </div>
             </div>
             <div class="modelos-breakdown-list" id="modelosBreakdownList">
@@ -466,7 +471,7 @@
             <div class="dash-panel-header">
               <div class="panel-title">
                 <i class="fa-solid fa-plug-circle-bolt text-crimson"></i>
-                <span>INVENTARIO GENERAL DE PERIFÉRICOS</span>
+                <span>PERIFÉRICOS DE MARCA</span>
               </div>
             </div>
             <div class="perifericos-breakdown-list" id="perifericosBreakdownList">
@@ -479,7 +484,7 @@
             <div class="dash-panel-header">
               <div class="panel-title">
                 <i class="fa-solid fa-heart-pulse text-crimson"></i>
-                <span>ESTADO OPERATIVO & SALUD DEL HARDWARE</span>
+                <span>ESTADO OPERATIVO</span>
               </div>
             </div>
             <div class="health-status-grid" id="healthStatusGrid">
@@ -496,10 +501,10 @@
     <!-- Footer -->
     <footer class="app-footer">
       <div class="footer-content">
-        <p><strong>SYS-INVENTORY PRO</strong> &copy; 2026 | Sistema de Auditoría & Control de Hardware</p>
+        <p><strong>SYS-INVENTORY PRO</strong> &copy; 2026</p>
         <div class="footer-links">
-          <span><i class="fa-solid fa-circle-check text-green"></i> Conexión en Red Activa</span>
-          <span><i class="fa-solid fa-shield-halved text-crimson"></i> Auditoría CIM/WMI</span>
+          <span><i class="fa-solid fa-circle-check text-green"></i> Conectado</span>
+          <span><i class="fa-solid fa-shield-halved text-crimson"></i> Auditoría de Hardware</span>
         </div>
       </div>
     </footer>
@@ -513,19 +518,17 @@
       <button class="modal-close-btn" data-close-modal="cameraModal" id="btnCloseCameraX">&times;</button>
       <div class="modal-header-styled">
         <i class="fa-solid fa-camera header-icon"></i>
-        <h3>Escáner de Código de Barras & S/N</h3>
-        <p>Apunta la cámara a la etiqueta del equipo o caja</p>
+        <h3>Escáner de Código de Barras</h3>
+        <p>Apunta la cámara al código de barras o QR de la etiqueta</p>
       </div>
       <div class="modal-body text-center">
-        <div id="cameraPreview" class="camera-preview-container">
-          <!-- Visor de la cámara con escáner interactivo -->
-        </div>
+        <div id="cameraPreview" class="camera-preview-container"></div>
         <div class="camera-scanner-controls">
           <button class="btn btn-outline-crimson btn-sm" id="btnSwitchCamera" title="Cambiar cámara">
             <i class="fa-solid fa-arrows-rotate"></i> Cambiar Cámara
           </button>
         </div>
-        <p class="camera-scan-tip"><i class="fa-solid fa-barcode"></i> Centra el código de barras o QR de la etiqueta</p>
+        <p class="camera-scan-tip"><i class="fa-solid fa-barcode"></i> Centra el código de barras en el visor</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary w-100" data-close-modal="cameraModal" id="btnCloseCamera">Cerrar Cámara</button>
@@ -541,17 +544,17 @@
       <button class="modal-close-btn" data-close-modal="qrModal">&times;</button>
       <div class="modal-header-styled">
         <i class="fa-solid fa-mobile-screen-button header-icon"></i>
-        <h3>Acceso desde tu Teléfono Celular</h3>
-        <p>Conéctate al inventario en tiempo real desde la misma red Wi-Fi</p>
+        <h3>Conectar Celular</h3>
+        <p>Accede desde tu teléfono en la misma red Wi-Fi</p>
       </div>
       <div class="modal-body text-center">
         <div class="qr-code-wrapper">
           <img id="qrCodeImage" src="" alt="Código QR de Conexión Local">
         </div>
         <div class="qr-instructions">
-          <p class="step-desc">1. Conecta tu celular a la misma red Wi-Fi / LAN.</p>
-          <p class="step-desc">2. Abre la cámara de tu teléfono y escanea el código QR.</p>
-          <p class="step-desc">3. O escribe directamente esta dirección en el navegador de tu móvil:</p>
+          <p class="step-desc">1. Conecta tu celular a la misma red Wi-Fi.</p>
+          <p class="step-desc">2. Abre la cámara del móvil y escanea el código.</p>
+          <p class="step-desc">3. O ingresa esta dirección en el navegador:</p>
           <div class="ip-copy-box">
             <code id="modalServerUrl">http://192.168.1.X:3000</code>
             <button class="btn-copy-ip" id="btnCopyUrl" title="Copiar URL"><i class="fa-regular fa-copy"></i> Copiar</button>
@@ -565,15 +568,15 @@
   </div>
 
   <!-- =================================================================== -->
-  <!-- MODAL: NUEVO REGISTRO MANUAL / EDICIÓN -->
+  <!-- MODAL: NUEVO REGISTRO / EDICIÓN -->
   <!-- =================================================================== -->
   <div class="modal-overlay" id="manualModal">
     <div class="modal-card modal-lg">
       <button class="modal-close-btn" data-close-modal="manualModal">&times;</button>
       <div class="modal-header-styled">
         <i class="fa-solid fa-laptop-medical header-icon"></i>
-        <h3 id="modalFormTitle">Registrar Nuevo Equipo de Cómputo</h3>
-        <p>Ingresa manualmente los datos del equipo, números de serie y periféricos</p>
+        <h3 id="modalFormTitle">Registrar Equipo</h3>
+        <p>Datos del equipo, componentes y números de serie</p>
       </div>
       
       <form id="equipmentForm">
@@ -581,87 +584,87 @@
         
         <div class="modal-body modal-scrollable">
           
-          <!-- SECCIÓN 1: IDENTIFICACIÓN PRINCIPAL (COMO EN LA IMAGEN) -->
+          <!-- SECCIÓN 1: IDENTIFICACIÓN PRINCIPAL -->
           <div class="form-section-title">
-            <i class="fa-solid fa-barcode"></i> DATOS PRINCIPALES DE INVENTARIO
+            <i class="fa-solid fa-barcode"></i> DATOS DE IDENTIFICACIÓN
           </div>
           
           <div class="form-grid">
             <div class="form-group">
-              <label for="formModelo">MODELO * <small>(Ej: HP ProStudio 4, Dell OptiPlex 7080)</small></label>
-              <input type="text" id="formModelo" required placeholder="Ej: HP ProStudio 4" class="form-control">
+              <label for="formModelo">MODELO *</label>
+              <input type="text" id="formModelo" required placeholder="Ej: HP ProBook 450, Dell OptiPlex 7080" class="form-control">
             </div>
 
             <div class="form-group">
-              <label for="formNumeroSerie">NÚMERO DE SERIE * <small>(S/N del equipo o periférico)</small></label>
+              <label for="formNumeroSerie">NÚMERO DE SERIE *</label>
               <div class="input-with-action">
                 <input type="text" id="formNumeroSerie" required placeholder="Ej: 8CN60500Y3" class="form-control mono-font">
-                <button type="button" class="btn-input-action" id="btnScanSerialCam" title="Escanear código de barras con la cámara del celular">
+                <button type="button" class="btn-input-action" id="btnScanSerialCam" title="Escanear con cámara">
                   <i class="fa-solid fa-camera"></i> <span>Escanear</span>
                 </button>
               </div>
             </div>
 
             <div class="form-group" id="formGroupPlacaBase">
-              <label for="formPlacaBase">PLACA BASE <small>(Solo PCs/Laptops o N/A)</small></label>
-              <input type="text" id="formPlacaBase" placeholder="Ej: 8D19 o N/A" class="form-control mono-font">
+              <label for="formPlacaBase">PLACA BASE</label>
+              <input type="text" id="formPlacaBase" placeholder="Ej: HP 832A o N/A" class="form-control mono-font">
             </div>
 
             <div class="form-group">
-              <label for="formTipoEquipo">TIPO DE DISPOSITIVO / EQUIPO *</label>
+              <label for="formTipoEquipo">TIPO DE EQUIPO *</label>
               <select id="formTipoEquipo" class="form-control">
                 <optgroup label="💻 Computadoras">
                   <option value="PC de Escritorio">🖥️ PC de Escritorio</option>
-                  <option value="Laptop">💻 Laptop / Portátil</option>
+                  <option value="Laptop" selected>💻 Laptop / Portátil</option>
                   <option value="All-in-One">🖥️ All-in-One</option>
                   <option value="Mini PC">📦 Mini PC</option>
                   <option value="Servidor">🗄️ Servidor</option>
                 </optgroup>
-                <optgroup label="🖨️ Impresión & Proyección">
+                <optgroup label="🖨️ Impresión">
                   <option value="Impresora / Multifuncional">🖨️ Impresora / Multifuncional</option>
                   <option value="Proyector">📽️ Proyector</option>
                 </optgroup>
-                <optgroup label="📡 Redes & Conectividad">
+                <optgroup label="📡 Redes">
                   <option value="Switch de Red">🔀 Switch de Red</option>
-                  <option value="Access Point Wi-Fi">📡 Access Point / Router Wi-Fi</option>
+                  <option value="Access Point Wi-Fi">📡 Access Point / Router</option>
                 </optgroup>
-                <optgroup label="⌨️ Periféricos & Accesorios">
+                <optgroup label="⌨️ Periféricos">
                   <option value="Teclado">⌨️ Teclado</option>
-                  <option value="Mouse / Puntero">🖱️ Mouse / Puntero</option>
-                  <option value="Audífonos / Diadema">🎧 Audífonos / Diadema</option>
-                  <option value="Monitor / Pantalla">🖥️ Monitor / Pantalla</option>
-                  <option value="Otro Periférico">🔌 Otro Dispositivo</option>
+                  <option value="Mouse / Puntero">🖱️ Mouse</option>
+                  <option value="Audífonos / Diadema">🎧 Audífonos</option>
+                  <option value="Monitor / Pantalla">🖥️ Monitor</option>
+                  <option value="Otro Periférico">🔌 Otro</option>
                 </optgroup>
               </select>
             </div>
 
             <div class="form-group">
               <label for="formFabricante">FABRICANTE / MARCA</label>
-              <input type="text" id="formFabricante" placeholder="Ej: HP, Lenovo, Dell, ASUS, Cisco, Epson" class="form-control">
+              <input type="text" id="formFabricante" placeholder="Ej: HP, Lenovo, Dell, ASUS" class="form-control">
             </div>
 
             <div class="form-group">
-              <label for="formEstado">ESTADO DEL EQUIPO</label>
+              <label for="formEstado">ESTADO</label>
               <select id="formEstado" class="form-control">
                 <option value="Operativo">Operativo</option>
                 <option value="En Uso">En Uso</option>
                 <option value="En Mantenimiento">En Mantenimiento</option>
-                <option value="De Baja">De Baja / Obsoleto</option>
-                <option value="En Bodega">En Bodega / Disponible</option>
+                <option value="De Baja">De Baja</option>
+                <option value="En Bodega">En Bodega</option>
               </select>
             </div>
           </div>
 
-          <!-- SECCIÓN 2: HARDWARE INTERNO (CPU, RAM, DISCO) -->
+          <!-- SECCIÓN 2: HARDWARE INTERNO -->
           <div id="formSectionHardware">
             <div class="form-section-title mt-4">
-              <i class="fa-solid fa-microchip"></i> COMPONENTES DE HARDWARE INTERNO
+              <i class="fa-solid fa-microchip"></i> COMPONENTES DE HARDWARE
             </div>
 
             <div class="form-grid">
               <div class="form-group full-width">
                 <label for="formProcesador">PROCESADOR (CPU)</label>
-                <input type="text" id="formProcesador" placeholder="Ej: Intel Core i7-10700 @ 2.90GHz (8 Núcleos)" class="form-control">
+                <input type="text" id="formProcesador" placeholder="Ej: Intel Core i5-8250U @ 1.60GHz (4 Núcleos)" class="form-control">
               </div>
 
               <div class="form-group">
@@ -670,65 +673,65 @@
               </div>
 
               <div class="form-group">
-                <label for="formAlmacenamiento">ALMACENAMIENTO (DISCO / SSD + SERIAL)</label>
-                <input type="text" id="formAlmacenamiento" placeholder="Ej: NVMe SSD 512GB (S/N: KX9087123)" class="form-control">
+                <label for="formAlmacenamiento">ALMACENAMIENTO (DISCO / SSD)</label>
+                <input type="text" id="formAlmacenamiento" placeholder="Ej: SSD 512GB (S/N: KX9087123)" class="form-control">
               </div>
             </div>
           </div>
 
-          <!-- SECCIÓN 3: PERIFÉRICOS Y MONITORES CON SERIALES -->
+          <!-- SECCIÓN 3: PERIFÉRICOS Y MONITORES -->
           <div id="formSectionPerifericos">
             <div class="form-section-title mt-4">
-              <i class="fa-solid fa-keyboard"></i> PERIFÉRICOS Y MONITORES ASOCIADOS
+              <i class="fa-solid fa-keyboard"></i> PANTALLA & PERIFÉRICOS
             </div>
 
             <div class="form-grid">
               <div class="form-group">
-                <label for="formMonitor">MONITOR (MODELO Y SERIAL)</label>
+                <label for="formMonitor">MONITOR / PANTALLA (MODELO Y S/N)</label>
                 <input type="text" id="formMonitor" placeholder="Ej: HP E24 G4 (S/N: CNC1234XYZ)" class="form-control">
               </div>
 
               <div class="form-group">
-                <label for="formPerifericos">TECLADO, MOUSE Y OTROS PERIFÉRICOS</label>
-                <input type="text" id="formPerifericos" placeholder="Ej: Teclado HP Slim, Mouse Óptico Logitech" class="form-control">
+                <label for="formPerifericos">TECLADO, MOUSE Y ACCESORIOS</label>
+                <input type="text" id="formPerifericos" placeholder="Ej: Mouse Logitech M185, Teclado HP" class="form-control">
               </div>
             </div>
           </div>
 
           <!-- SECCIÓN 4: ASIGNACIÓN Y UBICACIÓN -->
           <div class="form-section-title mt-4">
-            <i class="fa-solid fa-user-tag"></i> ASIGNACIÓN, RED Y UBICACIÓN
+            <i class="fa-solid fa-location-dot"></i> UBICACIÓN & RESPONSABLE
           </div>
 
           <div class="form-grid">
             <div class="form-group">
-              <label for="formHostname" id="labelFormHostname">NOMBRE DEL EQUIPO (HOSTNAME / IP)</label>
-              <input type="text" id="formHostname" placeholder="Ej: DESKTOP-HP-01 o 192.168.89.50" class="form-control mono-font">
+              <label for="formHostname" id="labelFormHostname">NOMBRE DE EQUIPO / HOSTNAME</label>
+              <input type="text" id="formHostname" placeholder="Ej: DESKTOP-PC01 o 192.168.1.50" class="form-control mono-font">
             </div>
 
             <div class="form-group" id="formGroupMacAddress" style="display: none;">
-              <label for="formMacAddress">DIRECCIÓN MAC (RED / WI-FI)</label>
+              <label for="formMacAddress">DIRECCIÓN MAC</label>
               <input type="text" id="formMacAddress" placeholder="Ej: 00:1A:2B:3C:4D:5E" class="form-control mono-font">
             </div>
 
             <div class="form-group" id="formGroupUsuario">
               <label for="formUsuario" id="labelFormUsuario">USUARIO / RESPONSABLE</label>
-              <input type="text" id="formUsuario" placeholder="Ej: Juan Pérez / Contabilidad" class="form-control">
+              <input type="text" id="formUsuario" placeholder="Ej: Juan Pérez / Soporte" class="form-control">
             </div>
 
             <div class="form-group">
-              <label for="formBloque">1. BLOQUE / ÁREA PRINCIPAL *</label>
+              <label for="formBloque">BLOQUE / ÁREA</label>
               <select id="formBloque" class="form-control">
                 <option value="Bloque A (Área Administrativa)" selected>🏢 Bloque A - Área Administrativa</option>
                 <option value="Bloque A (Aulas y Laboratorios)">🎓 Bloque A - Aulas y Laboratorios</option>
                 <option value="Bloque B (Área Administrativa)">🏢 Bloque B - Área Administrativa</option>
                 <option value="Bloque C (Área Administrativa)">🏢 Bloque C - Área Administrativa</option>
-                <option value="Personalizado">✏️ Otro Bloque / Personalizado</option>
+                <option value="Personalizado">✏️ Personalizado</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="formUbicacion">2. AULA / AMBIENTE ESPECÍFICO *</label>
+              <label for="formUbicacion">AMBIENTE ESPECÍFICO *</label>
               <select id="formUbicacion" class="form-control" required>
                 <option value="CAE" selected>📍 CAE</option>
                 <option value="Soporte Técnico">📍 Soporte Técnico</option>
@@ -742,12 +745,12 @@
                 <option value="Defensoría">📍 Defensoría</option>
                 <option value="Garita">📍 Garita</option>
               </select>
-              <input type="text" id="formUbicacionCustom" placeholder="Escribe el nombre del aula o ambiente..." class="form-control mt-2" style="display: none;">
+              <input type="text" id="formUbicacionCustom" placeholder="Nombre del ambiente..." class="form-control mt-2" style="display: none;">
             </div>
 
             <div class="form-group full-width">
-              <label for="formNotas">NOTAS / OBSERVACIONES</label>
-              <textarea id="formNotas" rows="2" placeholder="Detalles adicionales sobre el estado, periféricos, etc." class="form-control"></textarea>
+              <label for="formNotas">NOTAS ADICIONALES</label>
+              <textarea id="formNotas" rows="2" placeholder="Observaciones sobre el equipo..." class="form-control"></textarea>
             </div>
           </div>
 
@@ -756,7 +759,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-close-modal="manualModal">Cancelar</button>
           <button type="submit" class="btn btn-crimson" id="btnSaveEquipment">
-            <i class="fa-solid fa-floppy-disk"></i> Guardar Equipo
+            <i class="fa-solid fa-floppy-disk"></i> Guardar
           </button>
         </div>
       </form>
@@ -764,15 +767,15 @@
   </div>
 
   <!-- =================================================================== -->
-  <!-- MODAL: DETALLES COMPLETOS DEL EQUIPO (FICHA TÉCNICA) -->
+  <!-- MODAL: FICHA TÉCNICA -->
   <!-- =================================================================== -->
   <div class="modal-overlay" id="detailsModal">
     <div class="modal-card modal-lg">
       <button class="modal-close-btn" data-close-modal="detailsModal">&times;</button>
       <div class="modal-header-styled">
         <i class="fa-solid fa-circle-info header-icon"></i>
-        <h3 id="detailsTitle">Ficha Técnica de Hardware</h3>
-        <p id="detailsSubtitle">Detalles exhaustivos de componentes y números de serie</p>
+        <h3 id="detailsTitle">Ficha Técnica</h3>
+        <p id="detailsSubtitle">Detalles de hardware y periféricos</p>
       </div>
 
       <div class="modal-body modal-scrollable" id="detailsContent">
@@ -781,31 +784,31 @@
 
       <div class="modal-footer">
         <button class="btn btn-outline-crimson" id="btnDeleteFromDetails">
-          <i class="fa-solid fa-trash-can"></i> Eliminar Equipo
+          <i class="fa-solid fa-trash-can"></i> Eliminar
         </button>
         <button class="btn btn-secondary" data-close-modal="detailsModal">Cerrar</button>
         <button class="btn btn-crimson" id="btnEditFromDetails">
-          <i class="fa-solid fa-pen-to-square"></i> Editar Información
+          <i class="fa-solid fa-pen-to-square"></i> Editar
         </button>
       </div>
     </div>
   </div>
 
   <!-- =================================================================== -->
-  <!-- MODAL: ESCANEAR ESTA PC (DESCARGAR .BAT O COPIAR COMANDO) -->
+  <!-- MODAL: ESCANEAR PC -->
   <!-- =================================================================== -->
   <div class="modal-overlay" id="agentModal">
     <div class="modal-card" style="max-width: 500px;">
       <button class="modal-close-btn" data-close-modal="agentModal">&times;</button>
       <div class="modal-header-styled">
         <i class="fa-solid fa-bolt header-icon"></i>
-        <h3>Auditoría de Hardware de PC</h3>
-        <p>Selecciona tu opción para auditar y registrar esta computadora</p>
+        <h3>Auditar Hardware de PC</h3>
+        <p>Ejecuta el escáner para registrar el hardware automáticamente</p>
       </div>
 
       <div class="modal-body">
-        <p style="font-size: 0.84rem; color: var(--gray-300); margin-bottom: 14px;">
-          Pega este comando en <b>PowerShell</b> o descarga el archivo <b>.BAT</b> para extraer todo el hardware real al instante:
+        <p style="font-size: 0.85rem; color: var(--gray-300); margin-bottom: 12px;">
+          Pega este comando en <b>PowerShell</b> o descarga el archivo <b>.BAT</b>:
         </p>
 
         <div class="ip-copy-box mb-3" style="flex-direction: column; align-items: stretch; gap: 8px;">
@@ -831,6 +834,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=5.0"></script>
+  <script src="js/app.js?v=7.0"></script>
 </body>
 </html>

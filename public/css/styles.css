@@ -1206,6 +1206,18 @@ body {
   flex-shrink: 0;
 }
 
+.metric-card.active-filter {
+  border-color: var(--crimson-primary) !important;
+  background: rgba(220, 20, 60, 0.12) !important;
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.25), inset 0 0 0 1px var(--crimson-primary) !important;
+}
+
+[data-theme="light"] .metric-card.active-filter {
+  border-color: var(--crimson-primary) !important;
+  background: rgba(220, 20, 60, 0.06) !important;
+  box-shadow: 0 4px 16px rgba(220, 20, 60, 0.2), inset 0 0 0 1px var(--crimson-primary) !important;
+}
+
 .metric-icon.total {
   background: rgba(220, 20, 60, 0.15);
   color: var(--crimson-glow);
@@ -1219,6 +1231,12 @@ body {
 }
 
 .metric-icon.laptop {
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+}
+
+.metric-icon.monitors {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.3);
@@ -1228,6 +1246,12 @@ body {
   background: rgba(245, 158, 11, 0.15);
   color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.kpi-icon.icon-cyan {
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.35);
 }
 
 .metric-data {
@@ -1405,6 +1429,34 @@ body {
   border-color: var(--crimson-glow);
   color: #fff;
   box-shadow: var(--shadow-crimson-sm);
+}
+
+.pill.pill-laptop.active {
+  background: #06b6d4;
+  border-color: #22d3ee;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.35);
+}
+
+.pill.pill-aio.active {
+  background: #a855f7;
+  border-color: #c084fc;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.35);
+}
+
+.pill.pill-monitors.active {
+  background: #10b981;
+  border-color: #34d399;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+.pill.pill-peripherals.active {
+  background: #f59e0b;
+  border-color: #fbbf24;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
 }
 
 /* Secondary Controls */
@@ -1762,9 +1814,9 @@ body {
 }
 
 .tipo-badge.laptop {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.35);
 }
 
 .tipo-badge.aio {
@@ -2498,19 +2550,115 @@ body {
   color: var(--crimson-glow);
 }
 
-.components-list {
-  list-style: none;
+.component-card-grid {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 6px;
 }
 
-.component-item {
-  background: var(--bg-surface-elevated);
-  border-left: 3px solid var(--crimson-primary);
+.component-card {
+  background: var(--bg-card);
+  border: 1px solid var(--gray-700);
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 0.84rem;
+  transition: var(--transition-fast);
+}
+
+.component-card:hover {
+  border-color: var(--gray-500);
+  background: var(--bg-card-hover);
+}
+
+.comp-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.comp-icon {
+  font-size: 0.95rem;
+}
+
+.comp-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.86rem;
+}
+
+.comp-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.comp-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.comp-serial {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--gray-700);
+  padding: 2px 8px;
+  border-radius: 4px;
+  max-width: 100%;
+}
+
+.serial-label {
+  font-size: 0.68rem;
+  color: var(--gray-400);
+  font-weight: 600;
+}
+
+.serial-code {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: #f1f5f9;
+  word-break: break-all;
+}
+
+.comp-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--gray-300);
+  background: var(--gray-700);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+[data-theme="light"] .component-card {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .comp-title {
+  color: #0f172a;
+}
+
+[data-theme="light"] .comp-serial {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .serial-code {
+  color: #0f172a;
+}
+
+[data-theme="light"] .comp-badge {
+  background: #e2e8f0;
+  color: #334155;
 }
 
 /* MODAL DE AUTORIZACIÓN TRANSPARENTE */
