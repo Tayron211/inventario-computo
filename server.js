@@ -84,8 +84,9 @@ function isValidPeripheral(p) {
 
 function normalizeItem(item) {
   if (!item) return item;
-  if (item.monitores && Array.isArray(item.monitores)) {
-    item.monitores = item.monitores.map(m => {
+  const { _id, ...clean } = item;
+  if (clean.monitores && Array.isArray(clean.monitores)) {
+    clean.monitores = clean.monitores.map(m => {
       const rawManuf = (m.fabricante || '').trim().toUpperCase();
       const brand = EDID_BRAND_MAP[rawManuf] || (m.fabricante || '').trim();
       let model = (m.modelo || 'Monitor').trim();
@@ -99,10 +100,10 @@ function normalizeItem(item) {
       };
     });
   }
-  if (item.perifericos && Array.isArray(item.perifericos)) {
-    item.perifericos = item.perifericos.filter(isValidPeripheral);
+  if (clean.perifericos && Array.isArray(clean.perifericos)) {
+    clean.perifericos = clean.perifericos.filter(isValidPeripheral);
   }
-  return item;
+  return clean;
 }
 
 function deduplicateInventory(items) {
@@ -382,22 +383,24 @@ function loadDB() {
   return data;
 }
 
-function saveDB(data) {
+async function saveDB(data) {
   const normalized = (data || []).map(normalizeItem);
   memoryCache = normalized;
   saveLocalFile(normalized);
   
   if (mongoCollection) {
-    (async () => {
-      try {
-        await mongoCollection.deleteMany({});
-        if (normalized.length > 0) {
-          await mongoCollection.insertMany(normalized);
-        }
-      } catch (err) {
-        console.error('⚠️ Error sincronizando en MongoDB Atlas:', err.message);
+    try {
+      await mongoCollection.deleteMany({});
+      if (normalized.length > 0) {
+        const toInsert = normalized.map(i => {
+          const { _id, ...clean } = i;
+          return clean;
+        });
+        await mongoCollection.insertMany(toInsert);
       }
-    })();
+    } catch (err) {
+      console.error('⚠️ Error sincronizando en MongoDB Atlas:', err.message);
+    }
   }
 }
 
@@ -1194,7 +1197,7 @@ app.get('/api/lookup-specs', async (req, res) => {
 });
 
 // Crear registro manual (Bloqueado para operador)
-app.post('/api/inventory', (req, res) => {
+app.post('/api/inventory', async (req, res) => {
   const role = getUserRole(req);
   if (role === 'operador') {
     return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede crear registros.' });
@@ -1236,13 +1239,13 @@ app.post('/api/inventory', (req, res) => {
   };
   
   items.unshift(newItem);
-  saveDB(items);
+  await saveDB(items);
   
   res.status(201).json({ message: 'Equipo registrado exitosamente', item: newItem });
 });
 
 // Actualizar equipo (Bloqueado para operador)
-app.put('/api/inventory/:id', (req, res) => {
+app.put('/api/inventory/:id', async (req, res) => {
   const role = getUserRole(req);
   if (role === 'operador') {
     return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede editar registros.' });
@@ -1270,32 +1273,35 @@ app.put('/api/inventory/:id', (req, res) => {
   };
   
   items[index] = updated;
-  saveDB(items);
+  await saveDB(items);
   
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
 
 // Eliminar equipo (Bloqueado para operador)
-app.delete('/api/inventory/:id', (req, res) => {
+app.delete('/api/inventory/:id', async (req, res) => {
   const role = getUserRole(req);
   if (role === 'operador') {
     return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede eliminar registros.' });
   }
 
   let items = loadDB();
+  const rawId = req.params.id;
+  const decodedId = decodeURIComponent(rawId);
   const initialLen = items.length;
-  items = items.filter(i => i.id !== req.params.id);
+  
+  items = items.filter(i => i.id !== rawId && i.id !== decodedId);
   
   if (items.length === initialLen) {
     return res.status(404).json({ error: 'Equipo no encontrado' });
   }
   
-  saveDB(items);
+  await saveDB(items);
   res.json({ message: 'Equipo eliminado exitosamente' });
 });
 
 // Endpoint receptor para el Agente Escaneador de Hardware (.bat / PowerShell)
-app.post('/api/agent/report', (req, res) => {
+app.post('/api/agent/report', async (req, res) => {
   try {
     const payload = req.body;
     if (!payload || !payload.modelo) {
@@ -1390,7 +1396,7 @@ app.post('/api/agent/report', (req, res) => {
       items.unshift(record);
     }
     
-    saveDB(items);
+    await saveDB(items);
     console.log(`[✓] Equipo procesado: "${record.hostname}" (S/N: ${record.numero_serie}) - Acción: ${existingIndex >= 0 ? 'Actualizado' : 'Nuevo Registro Creado'}`);
     res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
   } catch (err) {
@@ -1454,7 +1460,7 @@ app.get('/api/backup-json', (req, res) => {
 });
 
 // Restaurar Copia de Seguridad JSON
-app.post('/api/restore-json', (req, res) => {
+app.post('/api/restore-json', async (req, res) => {
   try {
     const newItems = req.body;
     if (!Array.isArray(newItems)) {
@@ -1477,7 +1483,7 @@ app.post('/api/restore-json', (req, res) => {
     });
 
     const merged = Array.from(map.values());
-    saveDB(merged);
+    await saveDB(merged);
 
     res.json({
       success: true,

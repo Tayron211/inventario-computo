@@ -99,8 +99,7 @@
     "estado": "Operativo",
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-30 01:06:32",
-    "origen": "Escáner Batch/PowerShell",
-    "_id": "6a93cec1d93bacbe3b39576d"
+    "origen": "Escáner Batch/PowerShell"
   },
   {
     "id": "item-1788030640878",
@@ -186,8 +185,7 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 19:37:15",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:44:13",
-    "_id": "6a93cec1d93bacbe3b39576f"
+    "fecha_modificacion": "2026-08-30 03:44:13"
   },
   {
     "id": "item-1788050010372-5116",
@@ -245,8 +243,7 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 19:33:30",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:44:27",
-    "_id": "6a93cec1d93bacbe3b395770"
+    "fecha_modificacion": "2026-08-30 03:44:27"
   },
   {
     "id": "item-1788049839894-6493",
@@ -290,8 +287,7 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 19:30:39",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:44:43",
-    "_id": "6a93cec1d93bacbe3b395771"
+    "fecha_modificacion": "2026-08-30 03:44:43"
   },
   {
     "id": "item-1788049727863-770",
@@ -336,8 +332,7 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 19:28:49",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:44:52",
-    "_id": "6a93cec1d93bacbe3b395772"
+    "fecha_modificacion": "2026-08-30 03:44:52"
   },
   {
     "id": "item-1788047956358",
@@ -389,8 +384,7 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 19:15:40",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:45:02",
-    "_id": "6a93cec1d93bacbe3b395773"
+    "fecha_modificacion": "2026-08-30 03:45:02"
   },
   {
     "id": "item-1788047921973",
@@ -433,8 +427,7 @@
     "estado": "Operativo",
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 19:19:17",
-    "origen": "Escáner Batch/PowerShell",
-    "_id": "6a93cec1d93bacbe3b395774"
+    "origen": "Escáner Batch/PowerShell"
   },
   {
     "id": "item-1788046978633",
@@ -478,8 +471,7 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 18:42:59",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:45:16",
-    "_id": "6a93cec1d93bacbe3b395775"
+    "fecha_modificacion": "2026-08-30 03:45:16"
   },
   {
     "id": "item-1788045639053",
@@ -523,7 +515,6 @@
     "notas": "Registrado por escáner automático",
     "fecha_escaneo": "2026-08-29 18:20:38",
     "origen": "Escáner Batch/PowerShell",
-    "fecha_modificacion": "2026-08-30 03:45:24",
-    "_id": "6a93cec1d93bacbe3b395776"
+    "fecha_modificacion": "2026-08-30 03:45:24"
   }
 ]

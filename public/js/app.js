@@ -2325,24 +2325,39 @@ async function handleScanLocal() {
   }
 }
 
-// Eliminar equipo
 async function deleteEquipment(id, modelo) {
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
   if (isOperador) {
-    showToast('Acceso denegado: El usuario operador no tiene permisos para eliminar registros.', 'error');
+    showToast('Acceso denegado: El usuario Observador no tiene permisos para eliminar registros.', 'error');
     return;
   }
 
-  if (!confirm(`¿Estás seguro de eliminar el equipo "${modelo}" del inventario?`)) {
+  if (!confirm(`¿Estás seguro de eliminar "${modelo || 'este elemento'}" del inventario?`)) {
     return;
   }
 
   try {
-    const res = await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Error al eliminar');
+    const res = await fetch(`/api/inventory/${encodeURIComponent(id)}`, { 
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${sessionStorage.getItem('sysinventario_session_token') || ''}`
+      }
+    });
 
-    showToast('Equipo eliminado del inventario', 'info');
-    fetchInventory();
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || 'Error al eliminar registro');
+    }
+
+    // Actualización inmediata en UI
+    inventoryData = inventoryData.filter(i => i.id !== id && i.parentId !== id);
+    renderData();
+    updateMetrics();
+    renderDashboard();
+
+    closeModal('modalDetails');
+    showToast('Registro eliminado con éxito', 'info');
+    await fetchInventory();
   } catch (err) {
     showToast(err.message, 'error');
   }
