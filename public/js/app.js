@@ -2837,6 +2837,136 @@ function renderDashboard() {
   if (dashTotalMonitores) dashTotalMonitores.textContent = totalMonitoresReconocidos;
   if (dashTotalPerifericos) dashTotalPerifericos.textContent = totalPerifericosReconocidos;
 
+  // =========================================================
+  // 3.5. RENDERIZADO DE MÉTRICAS TIPO PASTEL (PIE / DONUT CHARTS)
+  // =========================================================
+  const pieColors = [
+    '#e11d48', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', 
+    '#06b6d4', '#ec4899', '#6366f1', '#14b8a6', '#f97316'
+  ];
+
+  function renderPieDonutChart(circleEl, legendEl, dataEntries, colors, onSelect) {
+    if (!circleEl || !legendEl) return;
+    const total = dataEntries.reduce((sum, item) => sum + item.count, 0);
+
+    if (total === 0) {
+      circleEl.style.background = '#334155';
+      legendEl.innerHTML = '<span class="text-gray-400" style="font-size:0.75rem; text-align:center; padding:10px;">Sin datos registrados</span>';
+      return;
+    }
+
+    let currentDegree = 0;
+    const gradientStops = [];
+
+    dataEntries.forEach((entry, idx) => {
+      const color = colors[idx % colors.length];
+      const percentage = (entry.count / total) * 100;
+      const startDeg = currentDegree;
+      const endDeg = currentDegree + (percentage * 3.6);
+      currentDegree = endDeg;
+      gradientStops.push(`${color} ${startDeg.toFixed(1)}deg ${endDeg.toFixed(1)}deg`);
+      entry.color = color;
+      entry.percentage = Math.round(percentage);
+    });
+
+    circleEl.style.background = `conic-gradient(${gradientStops.join(', ')})`;
+
+    legendEl.innerHTML = dataEntries.map(entry => `
+      <div class="pie-legend-item" title="Clic para filtrar por ${escapeHTML(entry.label)}">
+        <div class="pie-legend-left">
+          <span class="pie-legend-dot" style="background: ${entry.color};"></span>
+          <span>${escapeHTML(entry.label)}</span>
+        </div>
+        <span class="pie-legend-count">${entry.count} (${entry.percentage}%)</span>
+      </div>
+    `).join('');
+
+    const items = legendEl.querySelectorAll('.pie-legend-item');
+    items.forEach((itemEl, idx) => {
+      itemEl.addEventListener('click', () => {
+        if (onSelect) onSelect(dataEntries[idx].label);
+      });
+    });
+  }
+
+  // 1. Gráfico Pastel: Distribución por Tipo de Equipo
+  const circleTipos = document.getElementById('pieChartCircleTipos');
+  const legendTipos = document.getElementById('pieChartLegendTipos');
+  const badgeTipos = document.getElementById('pieBadgeTotalTipos');
+  if (circleTipos && legendTipos) {
+    const tiposMap = {};
+    filteredData.forEach(item => {
+      const t = (item.tipo_equipo || 'PC de Escritorio').trim();
+      tiposMap[t] = (tiposMap[t] || 0) + 1;
+    });
+    const tiposEntries = Object.entries(tiposMap)
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count);
+
+    if (badgeTipos) badgeTipos.textContent = `${filteredData.length} Equipos`;
+    renderPieDonutChart(circleTipos, legendTipos, tiposEntries, pieColors, (tipo) => {
+      filterByAmbiente(tipo);
+    });
+  }
+
+  // 2. Gráfico Pastel: Distribución por Marca / Fabricante
+  const circleMarcas = document.getElementById('pieChartCircleMarcas');
+  const legendMarcas = document.getElementById('pieChartLegendMarcas');
+  const badgeMarcas = document.getElementById('pieBadgeTotalMarcas');
+  if (circleMarcas && legendMarcas) {
+    const marcasMap = {};
+    filteredData.forEach(item => {
+      let fab = (item.fabricante || '').trim();
+      if (!fab || fab === 'Genérico' || fab === 'N/A') {
+        const m = (item.modelo || '').toLowerCase();
+        if (m.includes('victus') || m.includes('hp') || m.includes('probook') || m.includes('omen')) fab = 'HP';
+        else if (m.includes('dell') || m.includes('optiplex') || m.includes('latitude')) fab = 'Dell';
+        else if (m.includes('lenovo') || m.includes('thinkpad')) fab = 'Lenovo';
+        else if (m.includes('epson') || m.includes('ecotank') || m.includes('powerlite')) fab = 'Epson';
+        else if (m.includes('cisco') || m.includes('catalyst')) fab = 'Cisco';
+        else if (m.includes('asus') || m.includes('tuf')) fab = 'ASUS';
+        else if (m.includes('acer') || m.includes('nitro')) fab = 'Acer';
+        else if (m.includes('apple') || m.includes('macbook')) fab = 'Apple';
+        else if (m.includes('benq')) fab = 'BenQ';
+        else if (m.includes('brother')) fab = 'Brother';
+        else fab = 'Otras Marcas';
+      }
+      marcasMap[fab] = (marcasMap[fab] || 0) + 1;
+    });
+
+    const marcasEntries = Object.entries(marcasMap)
+      .map(([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count);
+
+    if (badgeMarcas) badgeMarcas.textContent = `${marcasEntries.length} Fabricantes`;
+    renderPieDonutChart(circleMarcas, legendMarcas, marcasEntries, ['#3b82f6', '#e11d48', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'], (marca) => {
+      filterByAmbiente(marca);
+    });
+  }
+
+  // 3. Gráfico Pastel: Estado Operativo
+  const circleSalud = document.getElementById('pieChartCircleSalud');
+  const legendSalud = document.getElementById('pieChartLegendSalud');
+  const badgeSalud = document.getElementById('pieBadgeTotalSalud');
+  if (circleSalud && legendSalud) {
+    const saludMap = { 'Operativo': 0, 'En Mantenimiento': 0, 'De Baja': 0 };
+    filteredData.forEach(item => {
+      const st = (item.estado || 'Operativo').trim();
+      if (st.toLowerCase().includes('manten')) saludMap['En Mantenimiento']++;
+      else if (st.toLowerCase().includes('baja') || st.toLowerCase().includes('inoper')) saludMap['De Baja']++;
+      else saludMap['Operativo']++;
+    });
+
+    const saludEntries = Object.entries(saludMap)
+      .filter(([_, count]) => count > 0 || _ === 'Operativo')
+      .map(([label, count]) => ({ label, count }));
+
+    if (badgeSalud) badgeSalud.textContent = `${filteredData.length} Auditados`;
+    renderPieDonutChart(circleSalud, legendSalud, saludEntries, ['#10b981', '#f59e0b', '#ef4444'], (estado) => {
+      filterByAmbiente(estado);
+    });
+  }
+
   // 4. Renderizar Tarjetas de Ambientes (Distribución Espacial por Bloques)
   const ambientesGrid = document.getElementById('ambientesCardsGrid');
   if (ambientesGrid) {
@@ -3026,5 +3156,28 @@ function renderDashboard() {
       `;
     }).join('');
   }
+}
+
+// Listeners para filtros y controles del Dashboard
+const btnDashRefresh = document.getElementById('btnDashRefresh');
+if (btnDashRefresh) {
+  btnDashRefresh.addEventListener('click', () => {
+    renderDashboard();
+    showToast('Estadísticas del Dashboard actualizadas', 'success');
+  });
+}
+
+const dashFilterAmbienteEl = document.getElementById('dashFilterAmbiente');
+if (dashFilterAmbienteEl) {
+  dashFilterAmbienteEl.addEventListener('change', () => {
+    renderDashboard();
+  });
+}
+
+const dashFilterTipoEl = document.getElementById('dashFilterTipo');
+if (dashFilterTipoEl) {
+  dashFilterTipoEl.addEventListener('change', () => {
+    renderDashboard();
+  });
 }
 

@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=17.0">
+  <link rel="stylesheet" href="css/styles.css?v=18.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -394,9 +394,15 @@
                 <option value="Laptop">💻 Laptops</option>
                 <option value="Mini PC">📦 Mini PCs</option>
                 <option value="All-in-One">🖥️ All-in-One</option>
-                <option value="Periféricos">⌨️ Periféricos</option>
+                <option value="Proyector">📽️ Proyectores</option>
+                <option value="Impresora / Multifuncional">🖨️ Impresoras</option>
+                <option value="Switch de Red">🌐 Switches & Redes</option>
+                <option value="Servidor">🗄️ Servidores</option>
               </select>
             </div>
+            <button class="btn btn-secondary btn-sm" id="btnDashRefresh" title="Actualizar estadísticas">
+              <i class="fa-solid fa-rotate"></i> <span>Actualizar</span>
+            </button>
           </div>
         </section>
 
@@ -439,6 +445,72 @@
           </div>
         </section>
 
+        <!-- MÉTRICAS TIPO PASTEL (PIE / DONUT CHARTS) -->
+        <section class="dash-pie-charts-grid">
+          <!-- Gráfico Pastel 1: Tipos de Hardware -->
+          <div class="dash-card-panel pie-panel">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-chart-pie text-crimson"></i>
+                <span>DISTRIBUCIÓN POR TIPO</span>
+              </div>
+              <span class="panel-badge-kpi" id="pieBadgeTotalTipos">0 Equipos</span>
+            </div>
+            <div class="pie-chart-wrapper">
+              <div class="pie-chart-visual-box">
+                <div class="pie-chart-circle" id="pieChartCircleTipos"></div>
+                <div class="pie-chart-center-hole">
+                  <i class="fa-solid fa-laptop-code"></i>
+                  <span id="pieCenterTiposText">Tipos</span>
+                </div>
+              </div>
+              <div class="pie-chart-legend" id="pieChartLegendTipos"></div>
+            </div>
+          </div>
+
+          <!-- Gráfico Pastel 2: Marcas y Fabricantes -->
+          <div class="dash-card-panel pie-panel">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-industry text-crimson"></i>
+                <span>DISTRIBUCIÓN POR MARCA</span>
+              </div>
+              <span class="panel-badge-kpi" id="pieBadgeTotalMarcas">0 Marcas</span>
+            </div>
+            <div class="pie-chart-wrapper">
+              <div class="pie-chart-visual-box">
+                <div class="pie-chart-circle" id="pieChartCircleMarcas"></div>
+                <div class="pie-chart-center-hole">
+                  <i class="fa-solid fa-tag"></i>
+                  <span id="pieCenterMarcasText">Marcas</span>
+                </div>
+              </div>
+              <div class="pie-chart-legend" id="pieChartLegendMarcas"></div>
+            </div>
+          </div>
+
+          <!-- Gráfico Pastel 3: Estado Operativo -->
+          <div class="dash-card-panel pie-panel">
+            <div class="dash-panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-heart-pulse text-crimson"></i>
+                <span>ESTADO OPERATIVO</span>
+              </div>
+              <span class="panel-badge-kpi" id="pieBadgeTotalSalud">100% Auditado</span>
+            </div>
+            <div class="pie-chart-wrapper">
+              <div class="pie-chart-visual-box">
+                <div class="pie-chart-circle" id="pieChartCircleSalud"></div>
+                <div class="pie-chart-center-hole">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span id="pieCenterSaludText">Estado</span>
+                </div>
+              </div>
+              <div class="pie-chart-legend" id="pieChartLegendSalud"></div>
+            </div>
+          </div>
+        </section>
+
         <!-- Grid de Secciones Analíticas -->
         <div class="dash-sections-grid">
           
@@ -456,20 +528,20 @@
             </div>
           </div>
 
-          <!-- SECCIÓN: TIPOS DE PC & MODELOS DE FABRICANTE -->
+          <!-- SECCIÓN: MODELOS DE EQUIPO -->
           <div class="dash-card-panel">
             <div class="dash-panel-header">
               <div class="panel-title">
                 <i class="fa-solid fa-laptop-code text-crimson"></i>
-                <span>MODELOS & FABRICANTES</span>
+                <span>MODELOS DESTACADOS</span>
               </div>
             </div>
             <div class="modelos-breakdown-list" id="modelosBreakdownList">
-              <!-- Renderizado dinámico de barras de porcentaje vía JS -->
+              <!-- Renderizado dinámico vía JS -->
             </div>
           </div>
 
-          <!-- SECCIÓN: INVENTARIO DE PERIFÉRICOS Y ACCESORIOS -->
+          <!-- SECCIÓN: INVENTARIO DE PERIFÉRICOS -->
           <div class="dash-card-panel">
             <div class="dash-panel-header">
               <div class="panel-title">
@@ -481,20 +553,6 @@
               <!-- Renderizado dinámico vía JS -->
             </div>
           </div>
-
-          <!-- SECCIÓN: ESTADO OPERATIVO DEL PARQUE INFORMÁTICO -->
-          <div class="dash-card-panel full-width">
-            <div class="dash-panel-header">
-              <div class="panel-title">
-                <i class="fa-solid fa-heart-pulse text-crimson"></i>
-                <span>ESTADO OPERATIVO</span>
-              </div>
-            </div>
-            <div class="health-status-grid" id="healthStatusGrid">
-              <!-- Renderizado dinámico vía JS -->
-            </div>
-          </div>
-
         </div>
 
       </div>
@@ -935,6 +993,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=17.0"></script>
+  <script src="js/app.js?v=18.0"></script>
 </body>
 </html>
