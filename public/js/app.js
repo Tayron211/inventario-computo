@@ -1573,7 +1573,7 @@ function renderTable(items) {
           <div class="user-loc" title="Ambiente / Ubicación"><i class="fa-solid fa-location-dot text-crimson"></i> <b>${highlightMatch(item.ubicacion || 'Sin Asignar', currentSearchQuery)}</b></div>
         </td>
         <td class="cell-placa">
-          <span class="placa-badge" title="Placa Base / Conexión">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
+          <span class="placa-badge" onclick="copyText('${escapeHTML(item.placa_base || '')}', 'Placa Base')" title="Clic para copiar">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
         </td>
         <td class="cell-tipo">
           <span class="tipo-badge ${tipoClass}">
@@ -2598,11 +2598,36 @@ function viewDetails(id) {
 // -------------------------------------------------------------
 // UTILIDADES
 // -------------------------------------------------------------
-function copyText(text) {
-  if (!text || text === 'N/A') return;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast(`Serial copiado: ${text}`, 'success');
-  });
+function copyText(text, label = '') {
+  if (!text || text === 'N/A' || text === 'Sin Asignar' || text === 'Sin asignar' || text === 'null') return;
+  const clean = String(text).trim();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(clean).then(() => {
+      showToast(`Copiado: ${clean}`, 'success');
+    }).catch(() => {
+      fallbackCopyText(clean);
+    });
+  } else {
+    fallbackCopyText(clean);
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    showToast(`Copiado: ${text}`, 'success');
+  } catch (err) {
+    showToast('Error al copiar al portapapeles', 'error');
+  }
+  textArea.remove();
 }
 
 function showToast(message, type = 'info') {
