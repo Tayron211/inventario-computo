@@ -289,33 +289,39 @@ function initEventListeners() {
   }
 
   // Filtro por Estado
-  statusFilter.addEventListener('change', (e) => {
-    currentFilterStatus = e.target.value;
-    renderData();
-  });
+  if (statusFilter) {
+    statusFilter.addEventListener('change', (e) => {
+      currentFilterStatus = e.target.value;
+      renderData();
+    });
+  }
 
-  // Clic interactivo en tarjetas de métricas para filtrar
-  function applyMetricFilter(target) {
+  // Clic interactivo en tarjetas de métricas y pastillas para filtrar
+  window.applyMetricFilter = function(target) {
     document.querySelectorAll('.filter-pills-group .pill').forEach(p => {
-      if (target === 'Todos' && p.getAttribute('data-category') === 'Todos') p.classList.add('active');
-      else if (p.getAttribute('data-category') === target) p.classList.add('active');
+      const pCat = p.getAttribute('data-category');
+      const pType = p.getAttribute('data-type');
+      if (target === 'Todos' && (pCat === 'Todos' || pType === 'Todos')) p.classList.add('active');
+      else if (pCat === target || pType === target) p.classList.add('active');
       else p.classList.remove('active');
     });
 
     document.querySelectorAll('.metrics-grid .metric-card').forEach(card => {
-      if (card.getAttribute('data-filter') === target) {
+      const cFilter = card.getAttribute('data-filter');
+      if (cFilter === target) {
         card.classList.add('active-filter');
       } else {
         card.classList.remove('active-filter');
       }
     });
 
+    currentCategory = target;
+    currentFilterType = 'Todos';
+    currentSpecificType = 'Todos';
+    if (typeSelectFilter) typeSelectFilter.value = 'Todos';
+
     if (target === 'Todos') {
-      currentCategory = 'Todos';
-      currentFilterType = 'Todos';
-      currentSpecificType = 'Todos';
       currentFilterStatus = 'Todos';
-      if (typeSelectFilter) typeSelectFilter.value = 'Todos';
       if (statusFilter) statusFilter.value = 'Todos';
       if (searchInput) {
         searchInput.value = '';
@@ -323,36 +329,14 @@ function initEventListeners() {
         if (btnClearSearch) btnClearSearch.style.display = 'none';
       }
       showToast('Mostrando todos los equipos', 'info');
-    } else if (target === 'PC de Escritorio') {
-      currentCategory = 'Todos';
-      currentFilterType = 'Todos';
-      currentSpecificType = 'PC de Escritorio';
-      if (typeSelectFilter) typeSelectFilter.value = 'PC de Escritorio';
-      showToast('Filtrando por PCs de Escritorio', 'info');
-    } else if (target === 'Laptop') {
-      currentCategory = 'Todos';
-      currentFilterType = 'Todos';
-      currentSpecificType = 'Laptop';
-      if (typeSelectFilter) typeSelectFilter.value = 'Laptop';
-      showToast('Filtrando por Laptops', 'info');
-    } else if (target === 'Monitor') {
-      currentCategory = 'Todos';
-      currentFilterType = 'Todos';
-      currentSpecificType = 'Monitor / Pantalla';
-      if (typeSelectFilter) typeSelectFilter.value = 'Monitor / Pantalla';
-      showToast('Filtrando por Monitores', 'info');
-    } else if (target === 'Periféricos') {
-      currentCategory = 'Periféricos';
-      currentFilterType = 'Todos';
-      currentSpecificType = 'Todos';
-      if (typeSelectFilter) typeSelectFilter.value = 'Todos';
-      showToast('Filtrando por Periféricos', 'info');
+    } else {
+      showToast(`Filtrando por: ${target}`, 'info');
     }
 
     renderData();
     const tableContainer = document.getElementById('tableViewContainer');
     if (tableContainer) tableContainer.scrollIntoView({ behavior: 'smooth' });
-  }
+  };
 
   const cardFilterTotal = document.getElementById('cardFilterTotal');
   if (cardFilterTotal) cardFilterTotal.addEventListener('click', () => applyMetricFilter('Todos'));
@@ -940,7 +924,25 @@ function renderData() {
 
     // Filtro por categoría pills
     if (currentCategory && currentCategory !== 'Todos') {
-      if (typeInfo.category !== currentCategory) {
+      if (currentCategory === 'Periféricos') {
+        const hasPerif = (item.perifericos && item.perifericos.length > 0) || typeInfo.category === 'Periféricos' || itemType.includes('teclado') || itemType.includes('mouse') || itemType.includes('periferico');
+        if (!hasPerif) return false;
+      } else if (currentCategory === 'Monitor' || currentCategory === 'Monitores') {
+        const hasMon = (item.monitores && item.monitores.length > 0) || itemType.includes('monitor') || itemType.includes('pantalla') || itemType.includes('display') || typeInfo.category === 'Monitores';
+        if (!hasMon) return false;
+      } else if (currentCategory === 'Laptop' || currentCategory === 'Laptops') {
+        const isLap = itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat') || itemType.includes('thinkpad') || itemType.includes('latitude') || itemType.includes('macbook');
+        if (!isLap) return false;
+      } else if (currentCategory === 'PC de Escritorio' || currentCategory === 'PCs Escritorio') {
+        const isLap = itemType.includes('laptop') || itemType.includes('notebook') || itemType.includes('portat') || itemType.includes('thinkpad') || itemType.includes('latitude') || itemType.includes('macbook');
+        const isAio = itemType.includes('all-in-one') || itemType.includes('aio');
+        if (isLap || isAio) return false;
+        const isPc = itemType.includes('pc') || itemType.includes('escritorio') || itemType.includes('desktop') || itemType.includes('torre') || itemType.includes('mini pc') || typeInfo.category === 'Computadoras';
+        if (!isPc) return false;
+      } else if (currentCategory === 'All-in-One') {
+        const isAio = itemType.includes('all-in-one') || itemType.includes('aio');
+        if (!isAio) return false;
+      } else if (typeInfo.category !== currentCategory) {
         return false;
       }
     }
@@ -1254,44 +1256,31 @@ function renderGrid(items) {
 // ACTUALIZACIÓN DE MÉTRICAS Y CONTADORES DE CATEGORÍA
 // -------------------------------------------------------------
 function updateMetrics() {
-  const total = inventoryData.length;
+  let total = inventoryData.length;
   let pcs = 0;
   let laptops = 0;
   let aio = 0;
-  let impresoras = 0;
-  let redes = 0;
-  let perifericos = 0;
   let monitores = 0;
+  let perifericos = 0;
 
   inventoryData.forEach(item => {
     const t = (item.tipo_equipo || '').toLowerCase();
     const info = getDeviceTypeInfo(item.tipo_equipo);
 
-    if (t.includes('laptop') || t.includes('notebook') || t.includes('portat') || t.includes('thinkpad') || t.includes('latitude') || t.includes('macbook')) {
-      laptops++;
-    } else if (t.includes('all-in-one') || t.includes('aio')) {
-      aio++;
-    } else if (info.category === 'Computadoras') {
-      pcs++;
-    } else if (info.category === 'Impresoras') {
-      impresoras++;
-    } else if (info.category === 'Redes') {
-      redes++;
-    } else if (info.category === 'Periféricos') {
-      if (t.includes('monitor') || t.includes('pantalla') || t.includes('display')) {
-        monitores++;
-      } else {
-        perifericos++;
-      }
+    const isLap = t.includes('laptop') || t.includes('notebook') || t.includes('portat') || t.includes('thinkpad') || t.includes('latitude') || t.includes('macbook');
+    const isAio = t.includes('all-in-one') || t.includes('aio');
+    const isPc = (t.includes('pc') || t.includes('escritorio') || t.includes('desktop') || t.includes('torre') || t.includes('mini pc') || info.category === 'Computadoras') && !isLap && !isAio;
+
+    if (isLap) laptops++;
+    if (isAio) aio++;
+    if (isPc) pcs++;
+
+    if ((item.monitores && item.monitores.length > 0) || t.includes('monitor') || t.includes('pantalla') || t.includes('display') || info.category === 'Monitores') {
+      monitores++;
     }
 
-    // Monitores asociados a equipos
-    if (item.monitores && Array.isArray(item.monitores) && item.monitores.length > 0) {
-      monitores += item.monitores.length;
-    }
-    // Periféricos asociados
-    if (item.perifericos && Array.isArray(item.perifericos) && item.perifericos.length > 0) {
-      perifericos += item.perifericos.length;
+    if ((item.perifericos && item.perifericos.length > 0) || info.category === 'Periféricos' || t.includes('teclado') || t.includes('mouse') || t.includes('periferico')) {
+      perifericos++;
     }
   });
 

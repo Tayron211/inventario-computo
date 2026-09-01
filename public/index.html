@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=10.0">
+  <link rel="stylesheet" href="css/styles.css?v=11.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -352,8 +352,11 @@
           <!-- Empty State -->
           <div class="empty-state" id="emptyState" style="display: none;">
             <div class="empty-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-            <h3>No se encontraron equipos</h3>
-            <p>Ajusta los filtros de búsqueda o agrega un nuevo equipo.</p>
+            <h3>No se encontraron equipos con este filtro</h3>
+            <p>Prueba seleccionando otra categoría o restablece los filtros para ver todo el inventario.</p>
+            <button class="btn btn-secondary mt-3" onclick="applyMetricFilter('Todos')" style="margin: 12px auto; display: inline-flex;">
+              <i class="fa-solid fa-rotate-left"></i> Restablecer Filtros
+            </button>
           </div>
         </section>
 
@@ -843,6 +846,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=10.0"></script>
+  <script src="js/app.js?v=11.0"></script>
 </body>
 </html>
