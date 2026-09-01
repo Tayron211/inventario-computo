@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const https = require('https');
 const { exec } = require('child_process');
 const QRCode = require('qrcode');
 const ExcelJS = require('exceljs');
@@ -802,8 +803,10 @@ const HARDWARE_MODELS_CATALOG = [
   { pattern: /inspiron\s*15|inspiron\s*3501|inspiron\s*3511/i, brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Inspiron Mainboard' },
 
   // ==========================================
-  // HP PROBOOK & ELITEBOOK & DESKTOPS
+  // HP PROBOOK & ELITEBOOK & GAMING (VICTUS / OMEN)
   // ==========================================
+  { pattern: /victus.*15[- ]?fb|victus.*15|victus.*16|hp\s*victus/i, brand: 'HP', type: 'Laptop', cpu: 'AMD Ryzen 5 8645HS @ 4.30GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050 (6GB)', ram: '16 GB DDR5 (5600MHz)', storage: '512 GB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP 8B9D (AMD Promontory/Bixby Chipset)' },
+  { pattern: /omen\s*15|omen\s*16|omen\s*17|hp\s*omen/i, brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-13700HX / AMD Ryzen 7 7840HS (NVIDIA GeForce RTX 4060/4070)', ram: '16 GB DDR5 (5600MHz)', storage: '1 TB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP OMEN Gaming Motherboard' },
   { pattern: /probook\s*450\s*g9/i, brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1235U @ 1.30GHz (10 Núcleos, 12 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2 PCIe', motherboard: 'HP 8A19' },
   { pattern: /probook\s*450\s*g8/i, brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2 PCIe', motherboard: 'HP 880D' },
   { pattern: /probook\s*450\s*g7/i, brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-10210U @ 1.60GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (2666MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'HP 86A2' },

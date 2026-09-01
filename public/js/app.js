@@ -482,12 +482,22 @@ function initEventListeners() {
           badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Ficha Cargada (${data.fabricante})`;
         }
 
+        const fieldsToAnimate = [formTipo, formFab, formCpu, formRam, formDisk, formPlaca, formCons].filter(Boolean);
+        fieldsToAnimate.forEach(f => {
+          f.classList.remove('input-autofill-glow');
+          void f.offsetWidth;
+          f.classList.add('input-autofill-glow');
+        });
+
         if (isManual) {
-          showToast(`Ficha técnica cargada: ${data.fabricante} (${data.procesador})`, 'success');
+          showToast(`Ficha técnica cargada: ${data.fabricante} (${data.tipo_equipo})`, 'success');
         }
+      } else if (isManual) {
+        showToast('No se encontraron especificaciones automáticas para este modelo', 'error');
       }
     } catch (err) {
       console.warn('Error en auto-lookup de hardware:', err);
+      if (isManual) showToast('Error al consultar especificaciones en el servidor', 'error');
     } finally {
       if (btnLookup) {
         btnLookup.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Auto-Llenar</span>';
