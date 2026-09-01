@@ -442,7 +442,6 @@ function initEventListeners() {
       const formFab = document.getElementById('formFabricante');
       const formCons = document.getElementById('formConsumible');
       const badgeAuto = document.getElementById('badgeConsumibleAuto');
-      const suggContainer = document.getElementById('consumibleSuggestions');
 
       if (detected) {
         if (formTipo && formTipo.value !== 'Impresora / Multifuncional') {
@@ -460,13 +459,7 @@ function initEventListeners() {
 
         if (badgeAuto) {
           badgeAuto.style.display = 'inline-flex';
-          badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> ${escapeHTML(detected.type || 'Auto-Detectado')}`;
-        }
-
-        if (suggContainer && detected.suggestions) {
-          suggContainer.innerHTML = detected.suggestions.map(s => `
-            <span class="consumible-chip" onclick="document.getElementById('formConsumible').value='${escapeHTML(s)}'">${escapeHTML(s)}</span>
-          `).join('');
+          badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detectado`;
         }
       }
     };
@@ -1347,62 +1340,62 @@ function closeModal(modalId) {
 // -------------------------------------------------------------
 const PRINTER_CONSUMABLES_DB = [
   // EPSON ECOTANK / INK TANK (TINTAS)
-  { pattern: /l3110|l3150|l3160|l3210|l3250|l3251|l3260|l5190|l5290|l1110|l1210|l1250/i, brand: 'Epson', consumable: 'Tinta Epson T544 (Negro, Cyan, Magenta, Amarillo)', type: 'Tinta Continua EcoTank', suggestions: ['T544 Negro (65ml)', 'T544 Cyan / Mag / Yell (65ml)'] },
-  { pattern: /l4150|l4160|l4260|l6161|l6171|l6191|l6270|l14150/i, brand: 'Epson', consumable: 'Tinta Epson T504 (Negro Pigmentada 127ml, Cyan, Magenta, Amarillo)', type: 'Tinta Continua EcoTank', suggestions: ['T504 Negro (127ml)', 'T504 Color (70ml)'] },
-  { pattern: /l800|l805|l810|l850|l1800/i, brand: 'Epson', consumable: 'Tinta Epson T673 (6 Colores: Negro, Cyan, Magenta, Amarillo, LC, LM)', type: 'Tinta Fotográfica 6 Colores' },
-  { pattern: /l8050|l18050/i, brand: 'Epson', consumable: 'Tinta Epson 108 (6 Colores Fotográficos)', type: 'Tinta Fotográfica 6 Colores' },
-  { pattern: /m1100|m1120|m2140|m2170|m3170|m3180/i, brand: 'Epson', consumable: 'Tinta Epson T534 (Negro Pigmentada 120ml / 2.000 pág)', type: 'Tinta Monocromática EcoTank' },
-  { pattern: /l210|l220|l355|l365|l375|l380|l395|l455|l475|l495|l555|l575|l110|l120|l1300/i, brand: 'Epson', consumable: 'Tinta Epson T664 (Negro, Cyan, Magenta, Amarillo 70ml)', type: 'Tinta Continua' },
-  { pattern: /wf-c5790|wf-c5290|wf-c5710/i, brand: 'Epson', consumable: 'Bolsas de Tinta Epson T941 / T942 (Negro XL, C, M, Y)', type: 'Bolsas de Tinta WorkForce' },
+  { pattern: /l3110|l3150|l3160|l3210|l3250|l3251|l3260|l5190|l5290|l1110|l1210|l1250/i, brand: 'Epson', consumable: 'Tinta Epson T544' },
+  { pattern: /l4150|l4160|l4260|l6161|l6171|l6191|l6270|l14150/i, brand: 'Epson', consumable: 'Tinta Epson T504' },
+  { pattern: /l800|l805|l810|l850|l1800/i, brand: 'Epson', consumable: 'Tinta Epson T673' },
+  { pattern: /l8050|l18050/i, brand: 'Epson', consumable: 'Tinta Epson 108' },
+  { pattern: /m1100|m1120|m2140|m2170|m3170|m3180/i, brand: 'Epson', consumable: 'Tinta Epson T534' },
+  { pattern: /l210|l220|l355|l365|l375|l380|l395|l455|l475|l495|l555|l575|l110|l120|l1300/i, brand: 'Epson', consumable: 'Tinta Epson T664' },
+  { pattern: /wf-c5790|wf-c5290|wf-c5710/i, brand: 'Epson', consumable: 'Tinta Epson T941' },
 
   // HP LASERJET (TÓNER)
-  { pattern: /p1102|m1132|m1212|m1214|m1217/i, brand: 'HP', consumable: 'Tóner HP 85A (CE285A) ~1,600 páginas', type: 'Tóner Monocromático', suggestions: ['HP 85A (CE285A)'] },
-  { pattern: /p1005|p1006/i, brand: 'HP', consumable: 'Tóner HP 35A (CB435A) ~1,500 páginas', type: 'Tóner Monocromático' },
-  { pattern: /p1505|m1522|m1120/i, brand: 'HP', consumable: 'Tóner HP 36A (CB436A) ~2,000 páginas', type: 'Tóner Monocromático' },
-  { pattern: /p1606|p1566|m1536/i, brand: 'HP', consumable: 'Tóner HP 78A (CE278A) ~2,100 páginas', type: 'Tóner Monocromático' },
-  { pattern: /m12w|m12a|m26a|m26nw/i, brand: 'HP', consumable: 'Tóner HP 79A (CF279A) ~1,000 páginas', type: 'Tóner Monocromático' },
-  { pattern: /m15a|m15w|m28a|m28w/i, brand: 'HP', consumable: 'Tóner HP 48A (CF248A) ~1,000 páginas', type: 'Tóner Monocromático' },
-  { pattern: /107a|107w|107r|135a|135w|135r|137fnw/i, brand: 'HP', consumable: 'Tóner HP 105A (W1105A) ~1,000 páginas', type: 'Tóner Monocromático', suggestions: ['HP 105A (W1105A)'] },
-  { pattern: /m402|m426/i, brand: 'HP', consumable: 'Tóner HP 26A (CF226A) ~3,100 pág / 26X (CF226X) ~9,000 pág', type: 'Tóner Monocromático', suggestions: ['HP 26A (3.1K pág)', 'HP 26X (9K pág)'] },
-  { pattern: /m404|m428|m406|m430/i, brand: 'HP', consumable: 'Tóner HP 58A (CF258A) ~3,000 pág / 58X (CF258X) ~10,000 pág', type: 'Tóner Monocromático', suggestions: ['HP 58A (3K pág)', 'HP 58X (10K pág)'] },
-  { pattern: /p2035|p2055/i, brand: 'HP', consumable: 'Tóner HP 05A (CE505A) ~2,300 pág / 05X (CE505X) ~6,500 pág', type: 'Tóner Monocromático' },
-  { pattern: /p3015|m521|m525/i, brand: 'HP', consumable: 'Tóner HP 55A (CE255A) ~6,000 pág / 55X (CE255X) ~12,500 pág', type: 'Tóner Monocromático' },
-  { pattern: /m506|m507|m527|m528/i, brand: 'HP', consumable: 'Tóner HP 89A (CF289A) ~5,000 pág / 89X (CF289X) ~10,000 pág', type: 'Tóner Monocromático' },
-  { pattern: /m209|m211|m234|m236/i, brand: 'HP', consumable: 'Tóner HP 134A (W1340A) ~1,100 pág / 134X (W1340X) ~2,400 pág', type: 'Tóner Monocromático' },
-  { pattern: /cp1025|m175|m275/i, brand: 'HP', consumable: 'Tóner HP 126A (CE310A Negro, CE311A Cyan, CE312A Amarillo, CE313A Magenta)', type: 'Tóner Láser Color' },
-  { pattern: /m252|m277|m254|m281/i, brand: 'HP', consumable: 'Tóner HP 201A / 202A (CF400A / CF500A Negro, Cyan, Magenta, Amarillo)', type: 'Tóner Láser Color' },
-  { pattern: /m452|m477|m454|m479/i, brand: 'HP', consumable: 'Tóner HP 410A / 414A (W2020A Negro, Cyan, Magenta, Amarillo)', type: 'Tóner Láser Color' },
+  { pattern: /p1102|m1132|m1212|m1214|m1217/i, brand: 'HP', consumable: 'Tóner HP 85A' },
+  { pattern: /p1005|p1006/i, brand: 'HP', consumable: 'Tóner HP 35A' },
+  { pattern: /p1505|m1522|m1120/i, brand: 'HP', consumable: 'Tóner HP 36A' },
+  { pattern: /p1606|p1566|m1536/i, brand: 'HP', consumable: 'Tóner HP 78A' },
+  { pattern: /m12w|m12a|m26a|m26nw/i, brand: 'HP', consumable: 'Tóner HP 79A' },
+  { pattern: /m15a|m15w|m28a|m28w/i, brand: 'HP', consumable: 'Tóner HP 48A' },
+  { pattern: /107a|107w|107r|135a|135w|135r|137fnw/i, brand: 'HP', consumable: 'Tóner HP 105A' },
+  { pattern: /m402|m426/i, brand: 'HP', consumable: 'Tóner HP 26A' },
+  { pattern: /m404|m428|m406|m430/i, brand: 'HP', consumable: 'Tóner HP 58A' },
+  { pattern: /p2035|p2055/i, brand: 'HP', consumable: 'Tóner HP 05A' },
+  { pattern: /p3015|m521|m525/i, brand: 'HP', consumable: 'Tóner HP 55A' },
+  { pattern: /m506|m507|m527|m528/i, brand: 'HP', consumable: 'Tóner HP 89A' },
+  { pattern: /m209|m211|m234|m236/i, brand: 'HP', consumable: 'Tóner HP 134A' },
+  { pattern: /cp1025|m175|m275/i, brand: 'HP', consumable: 'Tóner HP 126A' },
+  { pattern: /m252|m277|m254|m281/i, brand: 'HP', consumable: 'Tóner HP 201A' },
+  { pattern: /m452|m477|m454|m479/i, brand: 'HP', consumable: 'Tóner HP 410A' },
 
   // HP SMART TANK & INK TANK (TINTAS)
-  { pattern: /smart tank|515|519|530|580|615|720|750/i, brand: 'HP', consumable: 'Botellas HP GT53XL Negro (135ml) / GT52 Cyan, Magenta, Amarillo (70ml)', type: 'Tinta Continua Smart Tank' },
-  { pattern: /ink tank|115|315|415|419/i, brand: 'HP', consumable: 'Botellas HP GT51 Negro / GT52 Cyan, Magenta, Amarillo', type: 'Tinta Continua Ink Tank' },
+  { pattern: /smart tank|515|519|530|580|615|720|750/i, brand: 'HP', consumable: 'Tinta HP GT53 / GT52' },
+  { pattern: /ink tank|115|315|415|419/i, brand: 'HP', consumable: 'Tinta HP GT51 / GT52' },
 
   // CANON (PIXMA TINTA & IMAGECLASS TÓNER)
-  { pattern: /g1100|g1110|g2100|g2110|g3100|g3110|g4100|g4110/i, brand: 'Canon', consumable: 'Tinta Canon GI-190 (Negro 135ml, Cyan, Magenta, Amarillo 70ml)', type: 'Tinta MegaTank Continua' },
-  { pattern: /g2160|g3160/i, brand: 'Canon', consumable: 'Tinta Canon GI-11 (Negro Pigmento 135ml, C, M, Y)', type: 'Tinta MegaTank Continua' },
-  { pattern: /g5010|g6010|g7010/i, brand: 'Canon', consumable: 'Tinta Canon GI-10 (Negro 170ml, C, M, Y)', type: 'Tinta MegaTank Continua' },
-  { pattern: /mf3010|lbp6000|lbp6030/i, brand: 'Canon', consumable: 'Tóner Canon 125 / CRG-125 / CRG-725 ~1,600 páginas', type: 'Tóner Monocromático' },
-  { pattern: /mf4770|mf4890|d530|d550/i, brand: 'Canon', consumable: 'Tóner Canon 128 / CRG-128 ~2,100 páginas', type: 'Tóner Monocromático' },
-  { pattern: /mf212|mf216|mf227|mf232|mf244|mf247/i, brand: 'Canon', consumable: 'Tóner Canon 137 / CRG-137 ~2,400 páginas', type: 'Tóner Monocromático' },
-  { pattern: /mf445|mf448|mf449|lbp226|lbp228/i, brand: 'Canon', consumable: 'Tóner Canon 057 / 057H ~3,100 pág / 10,000 pág', type: 'Tóner Monocromático' },
+  { pattern: /g1100|g1110|g2100|g2110|g3100|g3110|g4100|g4110/i, brand: 'Canon', consumable: 'Tinta Canon GI-190' },
+  { pattern: /g2160|g3160/i, brand: 'Canon', consumable: 'Tinta Canon GI-11' },
+  { pattern: /g5010|g6010|g7010/i, brand: 'Canon', consumable: 'Tinta Canon GI-10' },
+  { pattern: /g510|g610/i, brand: 'Canon', consumable: 'Tinta Canon GI-13' },
+  { pattern: /mf3010|lbp6000|lbp6030/i, brand: 'Canon', consumable: 'Tóner Canon 125' },
+  { pattern: /mf4770|mf4890|d530|d550/i, brand: 'Canon', consumable: 'Tóner Canon 128' },
+  { pattern: /mf212|mf216|mf227|mf232|mf244|mf247/i, brand: 'Canon', consumable: 'Tóner Canon 137' },
+  { pattern: /mf445|mf448|mf449|lbp226|lbp228/i, brand: 'Canon', consumable: 'Tóner Canon 057' },
 
   // BROTHER (INKBENEFIT TINTA & HL/DCP TÓNER)
-  { pattern: /t300|t310|t500w|t510w|t700w|t710w/i, brand: 'Brother', consumable: 'Tinta Brother BTD60BK Negro (108ml) / BT5001 Cyan, Magenta, Amarillo (48.8ml)', type: 'Tinta Continua InkBenefit' },
-  { pattern: /t220|t420w|t520w|t720dw|t820dw|t920dw/i, brand: 'Brother', consumable: 'Tinta Brother BTD60BK Negro / BT5001C, BT5001M, BT5001Y', type: 'Tinta Continua InkBenefit' },
-  { pattern: /hl-1212w|dcp-1617nw|hl-1110|hl-1112|hl-1200|hl-1202/i, brand: 'Brother', consumable: 'Tóner Brother TN-1060 ~1,000 pág + Tambor DR-1060', type: 'Tóner + Tambor Brother' },
-  { pattern: /hl-l2320d|hl-l2360dw|dcp-l2520dw|dcp-l2540dw|mfc-l2700dw|mfc-l2720dw|mfc-l2740dw/i, brand: 'Brother', consumable: 'Tóner Brother TN-660 / TN-2370 ~2,600 pág + Tambor DR-630', type: 'Tóner + Tambor Brother' },
-  { pattern: /hl-l2350dw|hl-l2370dw|dcp-l2550dw|mfc-l2710dw|mfc-l2750dw/i, brand: 'Brother', consumable: 'Tóner Brother TN-760 / TN-2470 ~3,000 pág + Tambor DR-730', type: 'Tóner + Tambor Brother' },
-  { pattern: /hl-l5100dn|hl-l5200dw|hl-l6200dw|dcp-l5500dn|dcp-l5600dn|dcp-l5650dn|mfc-l5800dw|mfc-l5900dw/i, brand: 'Brother', consumable: 'Tóner Brother TN-3472 / TN-850 (~8K pág) o TN-3479 / TN-890 (~12K pág)', type: 'Tóner Alto Rendimiento Brother' },
+  { pattern: /t300|t310|t500w|t510w|t700w|t710w|t220|t420w|t520w|t720dw|t820dw|t920dw/i, brand: 'Brother', consumable: 'Tinta Brother BTD60BK / BT5001' },
+  { pattern: /hl-1212w|dcp-1617nw|hl-1110|hl-1112|hl-1200|hl-1202/i, brand: 'Brother', consumable: 'Tóner Brother TN-1060' },
+  { pattern: /hl-l2320d|hl-l2360dw|dcp-l2520dw|dcp-l2540dw|mfc-l2700dw|mfc-l2720dw|mfc-l2740dw/i, brand: 'Brother', consumable: 'Tóner Brother TN-660 / TN-2370' },
+  { pattern: /hl-l2350dw|hl-l2370dw|dcp-l2550dw|mfc-l2710dw|mfc-l2750dw/i, brand: 'Brother', consumable: 'Tóner Brother TN-760 / TN-2470' },
+  { pattern: /hl-l5100dn|hl-l5200dw|hl-l6200dw|dcp-l5500dn|dcp-l5600dn|dcp-l5650dn|mfc-l5800dw|mfc-l5900dw/i, brand: 'Brother', consumable: 'Tóner Brother TN-3472 / TN-3479' },
 
   // KYOCERA (ECOSYS TÓNER)
-  { pattern: /m2040dn|m2540dn|m2640idw|m2135dn|m2635dn/i, brand: 'Kyocera', consumable: 'Tóner Kyocera TK-1175 (~7,200 pág) / TK-1152 (~3,000 pág)', type: 'Tóner Monocromático ECOSYS' },
-  { pattern: /m3145dn|m3645dn|m3540dn|m3040dn/i, brand: 'Kyocera', consumable: 'Tóner Kyocera TK-3172 (~12,500 pág) / TK-3182 (~21,000 pág)', type: 'Tóner Monocromático ECOSYS' },
-  { pattern: /m3655idn|m3860idn/i, brand: 'Kyocera', consumable: 'Tóner Kyocera TK-3192 (~25,000 pág)', type: 'Tóner Monocromático ECOSYS' },
+  { pattern: /m2040dn|m2540dn|m2640idw|m2135dn|m2635dn/i, brand: 'Kyocera', consumable: 'Tóner Kyocera TK-1175 / TK-1152' },
+  { pattern: /m3145dn|m3645dn|m3540dn|m3040dn/i, brand: 'Kyocera', consumable: 'Tóner Kyocera TK-3172 / TK-3182' },
+  { pattern: /m3655idn|m3860idn/i, brand: 'Kyocera', consumable: 'Tóner Kyocera TK-3192' },
 
   // RICOH
-  { pattern: /mp 201|mp 301|mp 305/i, brand: 'Ricoh', consumable: 'Tóner Ricoh MP 301 (841711) ~8,000 páginas', type: 'Tóner Monocromático Ricoh' },
-  { pattern: /mp 401|mp 402|mp 501|mp 601/i, brand: 'Ricoh', consumable: 'Tóner Ricoh MP 501 (841993) ~25,000 páginas', type: 'Tóner Monocromático Ricoh' },
-  { pattern: /im c2000|im c2500|im c3000|im c3500/i, brand: 'Ricoh', consumable: 'Tóner Ricoh IM C3000 (Negro 31K, Cyan 19K, Magenta 19K, Amarillo 19K)', type: 'Tóner Multifuncional Color' }
+  { pattern: /mp 201|mp 301|mp 305/i, brand: 'Ricoh', consumable: 'Tóner Ricoh MP 301' },
+  { pattern: /mp 401|mp 402|mp 501|mp 601/i, brand: 'Ricoh', consumable: 'Tóner Ricoh MP 501' },
+  { pattern: /im c2000|im c2500|im c3000|im c3500/i, brand: 'Ricoh', consumable: 'Tóner Ricoh IM C3000' }
 ];
 
 function autoDetectPrinterConsumables(modelText) {
