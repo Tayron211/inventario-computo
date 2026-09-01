@@ -195,7 +195,7 @@
   transform: translateY(1px) scale(0.97) !important;
 }
 
-[data-theme="light"] .user-session-badge {
+[data-theme="light"] .user-session-badge.badge-role-admin {
   background: rgba(245, 158, 11, 0.12) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
@@ -204,18 +204,47 @@
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
 }
 
-[data-theme="light"] .user-session-badge span,
-[data-theme="light"] .user-session-badge b {
+[data-theme="light"] .user-session-badge.badge-role-admin span,
+[data-theme="light"] .user-session-badge.badge-role-admin b {
   color: #92400e !important;
 }
 
-[data-theme="light"] .btn-logout {
+[data-theme="light"] .user-session-badge.badge-role-admin .btn-logout {
   color: #92400e !important;
 }
 
-[data-theme="light"] .btn-logout:hover {
+[data-theme="light"] .user-session-badge.badge-role-admin .btn-logout:hover {
   background: rgba(220, 20, 60, 0.15) !important;
   color: #dc143c !important;
+}
+
+/* OBSERVADOR EN MODO CLARO: GRIS PLATA MATE ELEGANTE */
+[data-theme="light"] .user-session-badge.badge-role-operador {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1) !important;
+  border: 1.5px solid #94a3b8 !important;
+  color: #334155 !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 2px 6px rgba(100, 116, 139, 0.2) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador span,
+[data-theme="light"] .user-session-badge.badge-role-operador b {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador i,
+[data-theme="light"] .user-session-badge.badge-role-operador #sessionUserIcon i {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador .btn-logout {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador .btn-logout:hover {
+  background: rgba(220, 20, 60, 0.15) !important;
+  color: #dc2626 !important;
 }
 
 [data-theme="light"] .btn-outline-crimson {
@@ -3822,36 +3851,51 @@ body {
 }
 
 /* =======================================================
-   OPERADOR: AZUL PLATA MATE ELEGANTE
+   OPERADOR: GRIS PLATA MATE ELEGANTE (MATTE SILVER)
    ======================================================= */
 .user-session-badge.badge-role-operador {
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, rgba(71, 85, 105, 0.55), rgba(30, 41, 59, 0.85)) !important;
+  border: 1.5px solid rgba(203, 213, 225, 0.45) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.35) !important;
 }
 
 .user-session-badge.badge-role-operador .user-pill {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #cbd5e1;
+  color: #e2e8f0 !important;
   display: flex;
   align-items: center;
   gap: 7px;
 }
 
-.user-session-badge.badge-role-operador i {
-  color: #94a3b8;
+.user-session-badge.badge-role-operador span,
+.user-session-badge.badge-role-operador b {
+  color: #e2e8f0 !important;
+}
+
+.user-session-badge.badge-role-operador i,
+.user-session-badge.badge-role-operador #sessionUserIcon i {
+  color: #cbd5e1 !important;
   font-size: 0.88rem;
+}
+
+.user-session-badge.badge-role-operador .btn-logout {
+  color: #cbd5e1 !important;
+}
+
+.user-session-badge.badge-role-operador .btn-logout:hover {
+  background: rgba(220, 20, 60, 0.25) !important;
+  color: #fb7185 !important;
 }
 
 .user-session-badge.badge-role-operador .role-sublabel {
   font-size: 0.65rem;
   padding: 1px 7px;
   border-radius: var(--radius-full);
-  background: rgba(148, 163, 184, 0.22);
-  color: #94a3b8;
+  background: rgba(203, 213, 225, 0.2);
+  color: #e2e8f0 !important;
   font-weight: 700;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -3869,18 +3913,32 @@ body {
 }
 
 [data-theme="light"] .user-session-badge.badge-role-operador {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  box-shadow: inset 0 1px 1px #fff, 0 1px 4px rgba(0, 0, 0, 0.06);
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1) !important;
+  border: 1.5px solid #94a3b8 !important;
+  box-shadow: inset 0 1px 1px #fff, 0 2px 6px rgba(100, 116, 139, 0.2) !important;
 }
 
 [data-theme="light"] .user-session-badge.badge-role-operador .user-pill {
-  color: #334155;
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador span,
+[data-theme="light"] .user-session-badge.badge-role-operador b {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador i,
+[data-theme="light"] .user-session-badge.badge-role-operador #sessionUserIcon i {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .user-session-badge.badge-role-operador .btn-logout {
+  color: #475569 !important;
 }
 
 [data-theme="light"] .user-session-badge.badge-role-operador .role-sublabel {
-  background: #e2e8f0;
-  color: #475569;
+  background: #cbd5e1;
+  color: #334155 !important;
 }
 
 .btn-logout {

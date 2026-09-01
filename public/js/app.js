@@ -169,7 +169,7 @@ function updateAuthUI() {
   
   if (sessionUserIcon) {
     sessionUserIcon.innerHTML = role === 'operador' 
-      ? `<i class="fa-solid fa-eye text-cyan"></i>` 
+      ? `<i class="fa-solid fa-eye"></i>` 
       : `<i class="fa-solid fa-crown gold-crown-icon"></i>`;
   }
   
