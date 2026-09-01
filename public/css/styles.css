@@ -1987,12 +1987,12 @@ body {
 /* Tabla Estilizada - Adaptativa 100% Sin Scroll Horizontal */
 .custom-excel-table {
   width: 100%;
-  min-width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
-  font-size: 0.79rem;
+  font-size: 0.78rem;
+  box-sizing: border-box;
 }
 
 /* ==============================================================================
@@ -2010,19 +2010,34 @@ body {
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   color: #ffffff !important;
   font-family: var(--font-main);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 10px 7px;
+  letter-spacing: 0.3px;
+  padding: 8px 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-bottom: 2px solid rgba(220, 20, 60, 0.85) !important;
   border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.25);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
   transition: all 0.2s ease;
 }
+
+/* Anchos porcentuales fijos que suman 100% exacto para encajar en cualquier pantalla */
+.custom-excel-table th.col-modelo { width: 14%; text-align: left; padding-left: 8px; }
+.custom-excel-table th.col-serie { width: 10%; }
+.custom-excel-table th.col-ambiente { width: 9%; }
+.custom-excel-table th.col-placa { width: 9%; }
+.custom-excel-table th.col-tipo { width: 9%; }
+.custom-excel-table th.col-hardware { width: 20%; text-align: left; padding-left: 6px; }
+.custom-excel-table th.col-perifericos { width: 14%; text-align: left; padding-left: 6px; }
+.custom-excel-table th.col-usuario { width: 8%; }
+.custom-excel-table th.col-estado { width: 4%; }
+.custom-excel-table th.col-acciones { width: 3%; }
 
 /* Modo Claro: Liquid Glass Esmerilado Blanco Translúcido */
 [data-theme="light"] .custom-excel-table thead th {
@@ -2055,7 +2070,7 @@ body {
 }
 
 .custom-excel-table thead th .header-filter-icon {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   margin-left: 2px;
   opacity: 0.75;
 }
@@ -2074,12 +2089,14 @@ body {
 }
 
 .custom-excel-table tbody td {
-  padding: 6px 7px;
+  padding: 5px 5px;
   vertical-align: middle;
   border: 1px solid rgba(255, 255, 255, 0.05);
   color: var(--gray-200);
-  font-size: 0.78rem;
-  line-height: 1.25;
+  font-size: 0.76rem;
+  line-height: 1.2;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 [data-theme="light"] .custom-excel-table tbody td {
@@ -2097,34 +2114,37 @@ body {
 
 /* Celdas específicas adaptativas y compactas */
 .cell-modelo {
-  max-width: 160px;
-  min-width: 110px;
+  overflow: hidden;
 }
 
 .col-modelo-val {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow: hidden;
 }
 
 .modelo-header {
   display: flex;
   align-items: flex-start;
-  gap: 5px;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .modelo-type-icon {
   margin-top: 1px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   flex-shrink: 0;
 }
 
 .modelo-text {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: #ffffff;
-  line-height: 1.2;
-  word-break: break-word;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .modelo-text {
@@ -2132,14 +2152,18 @@ body {
 }
 
 .fabricante-tag {
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 600;
   color: var(--gray-400);
   background: rgba(255, 255, 255, 0.08);
-  padding: 1px 4px;
+  padding: 1px 3px;
   border-radius: 3px;
   align-self: flex-start;
-  margin-left: 15px;
+  margin-left: 12px;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .fabricante-tag {
@@ -2148,26 +2172,28 @@ body {
 }
 
 .cell-serie {
-  white-space: nowrap;
-  max-width: 130px;
+  text-align: center;
+  overflow: hidden;
 }
 
 .serial-badge {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--crimson-glow);
   background: rgba(220, 20, 60, 0.12);
   border: 1px solid var(--crimson-border);
-  padding: 2px 5px;
+  padding: 2px 4px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   cursor: pointer;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
   transition: var(--transition-fast);
 }
 
@@ -2183,23 +2209,27 @@ body {
 }
 
 .cell-ambiente {
-  max-width: 110px;
-  font-size: 0.76rem;
+  text-align: center;
+  font-size: 0.74rem;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cell-placa {
-  max-width: 115px;
+  text-align: center;
+  overflow: hidden;
 }
 
 .placa-badge {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: #f1f5f9;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 2px 5px;
+  padding: 2px 4px;
   border-radius: 4px;
   display: inline-block;
   max-width: 100%;
@@ -2215,18 +2245,21 @@ body {
 }
 
 .cell-tipo {
-  white-space: nowrap;
-  max-width: 105px;
+  text-align: center;
+  overflow: hidden;
 }
 
 .tipo-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -2299,25 +2332,27 @@ body {
 
 /* Especificaciones Compactas */
 .cell-specs {
-  max-width: 175px;
-  min-width: 130px;
+  overflow: hidden;
 }
 
 .specs-full-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  overflow: hidden;
 }
 
 .spec-cpu-title {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #fff;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   line-height: 1.15;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .spec-cpu-title {
@@ -2325,11 +2360,14 @@ body {
 }
 
 .spec-ram-line {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--gray-300);
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .spec-ram-line {
@@ -2339,26 +2377,26 @@ body {
 .spec-storage-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-top: 1px;
-  max-height: 55px;
+  gap: 1px;
+  max-height: 48px;
   overflow-y: auto;
-  padding-right: 2px;
   scrollbar-width: thin;
 }
 
 .hw-item-line {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--gray-300);
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 3px;
+  gap: 2px;
   background: rgba(0, 0, 0, 0.25);
-  padding: 1px 4px;
-  border-radius: 3px;
+  padding: 1px 3px;
+  border-radius: 2px;
   border-left: 2px solid var(--crimson-primary);
-  line-height: 1.2;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .hw-item-line {
@@ -2372,41 +2410,41 @@ body {
 
 .serial-mini-tag {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--crimson-glow);
   background: rgba(220, 20, 60, 0.12);
-  padding: 0 3px;
+  padding: 0 2px;
   border-radius: 2px;
+  flex-shrink: 0;
 }
 
 /* Periféricos */
 .cell-perifericos {
-  max-width: 155px;
-  min-width: 110px;
+  overflow: hidden;
 }
 
 .perifericos-full-block {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  max-height: 65px;
+  gap: 1px;
+  max-height: 52px;
   overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 2px;
   scrollbar-width: thin;
 }
 
 /* Usuario / Red */
 .cell-usuario {
-  max-width: 125px;
-  min-width: 95px;
+  text-align: center;
+  overflow: hidden;
 }
 
 .user-block {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
+  overflow: hidden;
+  align-items: center;
 }
 
 .user-name {
@@ -2414,7 +2452,8 @@ body {
   color: #fff;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2426,12 +2465,15 @@ body {
 
 .user-host {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--gray-300);
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
+  max-width: 100%;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 [data-theme="light"] .user-host {
@@ -2440,21 +2482,23 @@ body {
 
 .cell-estado {
   white-space: nowrap;
-  max-width: 95px;
+  text-align: center;
+  overflow: hidden;
 }
 
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 0.72rem;
+  gap: 2px;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .status-operativo .status-dot { background: var(--accent-emerald); }
@@ -2464,29 +2508,28 @@ body {
 
 .cell-acciones {
   white-space: nowrap;
-  width: 65px;
-  min-width: 65px;
   text-align: center;
+  padding: 4px 2px !important;
 }
 
 .table-actions-cell {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .action-btn-mini {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: var(--gray-300);
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -2498,8 +2541,10 @@ body {
 }
 
 .action-btn-mini:hover {
-  background: #990000;
-  border-color: #ff3333;
+  background: var(--crimson-primary) !important;
+  color: #fff !important;
+  border-color: var(--crimson-primary) !important;
+  transform: scale(1.08);
 }
 
 /* ==============================================================================
