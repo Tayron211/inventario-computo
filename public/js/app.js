@@ -369,28 +369,11 @@ function initEventListeners() {
     });
   }
 
-  // Botón Nuevo Registro Manual (+ Nuevo)
+  // Botón Nuevo Registro Manual
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
   if (btnOpenManualModal) {
     btnOpenManualModal.addEventListener('click', openManualCreateModal);
   }
-
-  // Delegación global de respaldo para modales y cierres
-  document.addEventListener('click', (e) => {
-    const btnOpenManual = e.target.closest('#btnOpenManualModal, [data-open-modal="manualModal"]');
-    if (btnOpenManual) {
-      e.preventDefault();
-      openManualCreateModal(e);
-      return;
-    }
-
-    const closeBtn = e.target.closest('[data-close-modal]');
-    if (closeBtn) {
-      e.preventDefault();
-      const targetModalId = closeBtn.getAttribute('data-close-modal');
-      if (targetModalId) closeModal(targetModalId);
-    }
-  });
 
   // Botón Escanear Este Equipo / PC (Abre modal con BAT y Comando)
   const btnScanLocal = document.getElementById('btnScanLocal');
@@ -875,7 +858,6 @@ function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.add('active');
-    modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
 }
@@ -884,7 +866,6 @@ function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.classList.remove('active');
-    modal.style.display = '';
     document.body.style.overflow = '';
   }
 }
@@ -1654,8 +1635,17 @@ function updateMetrics() {
 }
 
 // -------------------------------------------------------------
-// GESTIÓN DE FORMULARIOS Y DETECCIÓN AUTOMÁTICA
+// GESTIÓN DE MODALES Y FORMULARIOS
 // -------------------------------------------------------------
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.add('active');
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('active');
+}
 
 // -------------------------------------------------------------
 // BASE DE DATOS Y DETECCIÓN AUTOMÁTICA DE TINTA / TÓNER
@@ -1872,37 +1862,29 @@ function adaptFormFieldsByType(selectedType) {
   }
 }
 
-function openManualCreateModal(e) {
-  if (e && e.preventDefault) e.preventDefault();
+function openManualCreateModal() {
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
   if (isOperador) {
     showToast('Acceso denegado: El usuario operador no tiene permisos para registrar equipos.', 'error');
     return;
   }
-  const titleEl = document.getElementById('modalFormTitle');
-  if (titleEl) titleEl.textContent = 'Registrar Nuevo Dispositivo / Equipo';
-
-  const eqIdEl = document.getElementById('formEquipmentId');
-  if (eqIdEl) eqIdEl.value = '';
-
-  const eqForm = document.getElementById('equipmentForm');
-  if (eqForm) {
-    try { eqForm.reset(); } catch(err) {}
-  }
+  document.getElementById('modalFormTitle').textContent = 'Registrar Nuevo Dispositivo / Equipo';
+  document.getElementById('formEquipmentId').value = '';
+  equipmentForm.reset();
 
   const formTipoEquipo = document.getElementById('formTipoEquipo');
   if (formTipoEquipo) {
     formTipoEquipo.value = 'PC de Escritorio';
-    try { adaptFormFieldsByType('PC de Escritorio'); } catch(err) {}
+    adaptFormFieldsByType('PC de Escritorio');
   }
 
   const formBloque = document.getElementById('formBloque');
   if (formBloque) {
     formBloque.value = 'Bloque A (Área Administrativa)';
-    try { populateFormAmbientes('Bloque A (Área Administrativa)', 'CAE'); } catch(err) {}
+    populateFormAmbientes('Bloque A (Área Administrativa)', 'CAE');
   }
 
-  try { updateDynamicQuickModelChips(); } catch(err) {}
+  updateDynamicQuickModelChips();
   openModal('manualModal');
 }
 
