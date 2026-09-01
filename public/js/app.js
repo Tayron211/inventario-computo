@@ -643,16 +643,69 @@ function initEventListeners() {
   const formModelo = document.getElementById('formModelo');
   const btnLookupSpecs = document.getElementById('btnLookupSpecs');
 
-  // Chips de modelos rápidos en el modal (1 clic)
-  document.querySelectorAll('.chip-model-quick').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const modelName = chip.getAttribute('data-model');
-      if (formModelo && modelName) {
-        formModelo.value = modelName;
-        triggerModelSpecsAutofill(modelName, true);
+  // Actualizador dinámico de modelos frecuentes según los registros del usuario
+  function updateDynamicQuickModelChips() {
+    const container = document.getElementById('quickModelsContainer');
+    const chipsWrapper = document.getElementById('quickModelsChips');
+    if (!container || !chipsWrapper) return;
+
+    if (!inventoryData || inventoryData.length === 0) {
+      container.style.display = 'none';
+      chipsWrapper.innerHTML = '';
+      return;
+    }
+
+    // Contar frecuencia de modelos registrados por el usuario en su base de datos
+    const modelCounts = {};
+    const modelSampleMap = {};
+
+    inventoryData.forEach(item => {
+      const m = (item.modelo || '').trim();
+      if (m && m.length > 2 && m.toLowerCase() !== 'equipo estándar' && m.toLowerCase() !== 'genérico') {
+        modelCounts[m] = (modelCounts[m] || 0) + 1;
+        if (!modelSampleMap[m]) modelSampleMap[m] = item;
       }
     });
-  });
+
+    const sortedModels = Object.entries(modelCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8); // Top modelos más registrados en el inventario real
+
+    if (sortedModels.length === 0) {
+      container.style.display = 'none';
+      chipsWrapper.innerHTML = '';
+      return;
+    }
+
+    container.style.display = 'block';
+    chipsWrapper.innerHTML = sortedModels.map(([model, count]) => {
+      const sample = modelSampleMap[model];
+      const tipo = (sample?.tipo_equipo || '').toLowerCase();
+      let icon = '💻';
+      if (tipo.includes('escritorio') || tipo.includes('desktop') || tipo.includes('optiplex')) icon = '🖥️';
+      else if (tipo.includes('proyector')) icon = '📽️';
+      else if (tipo.includes('impresora')) icon = '🖨️';
+      else if (tipo.includes('switch') || tipo.includes('red')) icon = '🌐';
+      else if (tipo.includes('servidor')) icon = '🗄️';
+      else if (tipo.includes('apple') || (sample?.fabricante || '').toLowerCase() === 'apple') icon = '🍎';
+
+      return `
+        <button type="button" class="chip-model-quick" data-model="${escapeHTML(model)}" title="Registrado ${count} veces en tu inventario">
+          ${icon} ${escapeHTML(model)} <span style="opacity:0.75; font-size:0.7rem;">(${count})</span>
+        </button>
+      `;
+    }).join('');
+
+    chipsWrapper.querySelectorAll('.chip-model-quick').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const modelName = chip.getAttribute('data-model');
+        if (formModelo && modelName) {
+          formModelo.value = modelName;
+          triggerModelSpecsAutofill(modelName, true);
+        }
+      });
+    });
+  }
 
   if (formModelo) {
     formModelo.addEventListener('input', (e) => {
@@ -1831,6 +1884,7 @@ function openManualCreateModal() {
     populateFormAmbientes('Bloque A (Área Administrativa)', 'CAE');
   }
 
+  updateDynamicQuickModelChips();
   openModal('manualModal');
 }
 
@@ -1856,6 +1910,8 @@ function editEquipment(id) {
     formTipoEquipo.value = item.tipo_equipo || 'PC de Escritorio';
     adaptFormFieldsByType(item.tipo_equipo || 'PC de Escritorio');
   }
+
+  updateDynamicQuickModelChips();
   
   document.getElementById('formFabricante').value = item.fabricante || '';
   document.getElementById('formEstado').value = item.estado || 'Operativo';

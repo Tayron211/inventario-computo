@@ -148,54 +148,60 @@
 }
 
 [data-theme="light"] .btn-secondary {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   color: #0f172a !important;
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 2px 0 #cbd5e1, 0 3px 6px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
 }
 
 [data-theme="light"] .btn-secondary:hover {
-  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   color: #0f172a !important;
-  border-color: #94a3b8 !important;
-  box-shadow: 0 4px 0 #94a3b8, 0 6px 14px rgba(15, 23, 42, 0.12), inset 0 1px 0 #ffffff !important;
-  transform: translateY(-2px);
+  border-color: rgba(100, 116, 139, 0.6) !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.09), inset 0 1px 2px rgba(255, 255, 255, 1) !important;
+  transform: translateY(-1.5px);
 }
 
 [data-theme="light"] .btn-secondary:active {
-  background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%) !important;
+  background: rgba(241, 245, 249, 0.9) !important;
   color: #0f172a !important;
-  box-shadow: 0 0 0 #cbd5e1, inset 0 2px 4px rgba(0, 0, 0, 0.12) !important;
-  transform: translateY(2px) scale(0.98) !important;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.1) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 [data-theme="light"] .btn-theme-toggle {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   color: #0f172a !important;
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 2px 0 #cbd5e1, 0 3px 6px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff !important;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
 }
 
 [data-theme="light"] .btn-theme-toggle:hover {
-  background: linear-gradient(135deg, #ffffff 0%, #fff1f2 50%, #ffe4e6 100%) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   color: #0f172a !important;
   border-color: var(--crimson-primary) !important;
-  box-shadow: 0 4px 0 var(--crimson-primary), 0 6px 14px rgba(220, 20, 60, 0.16), inset 0 1px 0 #ffffff !important;
-  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(220, 20, 60, 0.15), inset 0 1px 2px rgba(255, 255, 255, 1) !important;
+  transform: translateY(-1.5px);
 }
 
 [data-theme="light"] .btn-theme-toggle:active {
-  background: linear-gradient(180deg, #ffe4e6 0%, #fecdd3 100%) !important;
+  background: rgba(255, 241, 242, 0.9) !important;
   color: #0f172a !important;
-  box-shadow: 0 0 0 transparent, inset 0 2px 4px rgba(220, 20, 60, 0.2) !important;
-  transform: translateY(2px) scale(0.98) !important;
+  box-shadow: inset 0 1px 3px rgba(220, 20, 60, 0.15) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 [data-theme="light"] .user-session-badge {
   background: rgba(245, 158, 11, 0.12) !important;
-  border: 1px solid rgba(217, 119, 6, 0.45) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(217, 119, 6, 0.35) !important;
   color: #92400e !important;
-  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
 }
 
 [data-theme="light"] .user-session-badge span,
@@ -970,21 +976,21 @@ body {
 
 .nav-tab-btn:hover {
   color: #ffffff;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)) !important;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3), 0 6px 14px rgba(0, 0, 0, 0.25) !important;
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
 }
 
 .nav-tab-btn:active {
-  transform: translateY(2px) scale(0.98) !important;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(1px) scale(0.98) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
 .nav-tab-btn.active {
-  background: linear-gradient(135deg, var(--crimson-primary), #991b1b) !important;
+  background: linear-gradient(135deg, var(--crimson-primary), #be123c) !important;
   color: #ffffff !important;
   border: 1px solid rgba(255, 100, 120, 0.5) !important;
-  box-shadow: 0 3px 0 #881337, 0 4px 16px rgba(220, 20, 60, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(220, 20, 60, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
   font-weight: 700;
 }
 
@@ -995,9 +1001,11 @@ body {
 
 /* Modo Claro Adaptación */
 [data-theme="light"] .app-nav-tabs {
-  background: #e2e8f0;
-  border: 1px solid #cbd5e1;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 [data-theme="light"] .nav-tab-btn {
@@ -1006,19 +1014,13 @@ body {
 
 [data-theme="light"] .nav-tab-btn:hover {
   color: #0f172a !important;
-  background: linear-gradient(135deg, #ffffff, #f1f5f9) !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 3px 0 #cbd5e1, 0 5px 12px rgba(15, 23, 42, 0.1) !important;
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(148, 163, 184, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), inset 0 1px 1px #ffffff !important;
+  transform: translateY(-1px);
 }
 
 [data-theme="light"] .nav-tab-btn.active {
-  background: linear-gradient(135deg, #dc143c, #991b1b) !important;
-  color: #ffffff !important;
-  border: 1px solid #7f1d1d !important;
-  box-shadow: 0 3px 12px rgba(220, 20, 60, 0.35) !important;
-}
-
 [data-theme="light"] .nav-tab-btn.active i,
 [data-theme="light"] .nav-tab-btn.active span {
   color: #ffffff !important;
@@ -1173,7 +1175,7 @@ body {
   color: var(--crimson-glow);
 }
 
-/* BOTONES PREMIUM LIQUID GLASS CON 3D EFECTO Y BAJA REDONDEZ (6px) */
+/* BOTONES PREMIUM LIQUID GLASS (6px RADIUS) */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1186,15 +1188,14 @@ body {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   user-select: none;
-  transform: translateY(0);
 }
 
 .btn::before {
@@ -1215,75 +1216,74 @@ body {
 }
 
 .btn:active {
-  transform: translateY(2px) scale(0.98) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 .btn-crimson, .btn-crimson-pulse {
-  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 45%, #9f1239 100%) !important;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.9) 0%, rgba(225, 29, 72, 0.95) 50%, rgba(190, 18, 60, 0.95) 100%) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
   border-radius: 6px !important;
-  box-shadow: 0 3px 0 #881337, 0 5px 15px rgba(225, 29, 72, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(225, 29, 72, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .btn-crimson:hover, .btn-crimson-pulse:hover {
-  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 45%, #be123c 100%) !important;
-  box-shadow: 0 5px 0 #881337, 0 10px 24px rgba(225, 29, 72, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
-  transform: translateY(-3px);
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.95) 0%, rgba(244, 63, 94, 0.98) 50%, rgba(225, 29, 72, 1) 100%) !important;
+  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-1.5px);
 }
 
 .btn-crimson:active, .btn-crimson-pulse:active {
-  background: linear-gradient(135deg, #be123c 0%, #881337 100%) !important;
-  box-shadow: 0 1px 0 #881337, inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 0 16px rgba(244, 63, 94, 0.7) !important;
-  transform: translateY(2px) scale(0.98) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: linear-gradient(135deg, #be123c 0%, #9f1239 100%) !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(225, 29, 72, 0.4) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, rgba(51, 65, 85, 0.9), rgba(30, 41, 59, 0.98)) !important;
-  border: 1px solid rgba(148, 163, 184, 0.4) !important;
+  background: rgba(30, 41, 59, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
   border-radius: 6px !important;
   color: #ffffff !important;
-  box-shadow: 0 3px 0 #0f172a, 0 5px 15px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(135deg, #475569 0%, #334155 100%) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 5px 0 #0f172a, 0 10px 22px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
-  transform: translateY(-3px);
+  background: rgba(51, 65, 85, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+  transform: translateY(-1.5px);
   color: #ffffff !important;
 }
 
 .btn-secondary:active {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
-  box-shadow: 0 1px 0 #0f172a, inset 0 3px 6px rgba(0, 0, 0, 0.6) !important;
-  transform: translateY(2px) scale(0.98) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 .btn-excel {
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%) !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.95) 100%) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
   border-radius: 6px !important;
-  box-shadow: 0 3px 0 #064e3b, 0 5px 15px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .btn-excel:hover {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%) !important;
-  box-shadow: 0 5px 0 #064e3b, 0 10px 24px rgba(16, 185, 129, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
-  transform: translateY(-3px);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.95) 0%, rgba(16, 185, 129, 1) 100%) !important;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-1.5px);
   color: #ffffff !important;
 }
 
 .btn-excel:active {
   background: linear-gradient(135deg, #047857 0%, #064e3b 100%) !important;
-  box-shadow: 0 1px 0 #064e3b, inset 0 3px 6px rgba(0, 0, 0, 0.6), 0 0 18px rgba(16, 185, 129, 0.7) !important;
-  transform: translateY(2px) scale(0.98) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 .btn-outline-crimson {
@@ -1291,43 +1291,42 @@ body {
   border: 1px solid rgba(255, 45, 85, 0.45);
   border-radius: 6px !important;
   color: #fff;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .btn-outline-crimson:hover {
-  background: rgba(220, 20, 60, 0.22);
+  background: rgba(220, 20, 60, 0.25);
   border-color: var(--crimson-glow);
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 8px 20px rgba(220, 20, 60, 0.35);
-  transform: translateY(-3px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 6px 20px rgba(220, 20, 60, 0.35);
+  transform: translateY(-1.5px);
 }
 
 .btn-outline-crimson:active {
-  background: rgba(220, 20, 60, 0.35) !important;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.6) !important;
-  transform: translateY(2px) scale(0.98) !important;
+  background: rgba(220, 20, 60, 0.4) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 .btn-theme-toggle {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)) !important;
-  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  background: rgba(30, 41, 59, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   color: #f1f5f9 !important;
   padding: 8px 14px;
   border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
 }
 
 .btn-theme-toggle:hover {
-  background: linear-gradient(135deg, rgba(51, 65, 85, 0.95), rgba(30, 41, 59, 0.95)) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  color: #ffffff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3) !important;
+  background: rgba(51, 65, 85, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1.5px);
 }
 
 .btn-theme-toggle:active {
-  background: #0f172a !important;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6) !important;
-  transform: scale(0.96) translateY(1px) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(1px) scale(0.97) !important;
 }
 
 .user-session-badge {

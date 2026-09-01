@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=20.0">
+  <link rel="stylesheet" href="css/styles.css?v=21.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -669,24 +669,11 @@
             <i class="fa-solid fa-barcode"></i> DATOS DE IDENTIFICACIÓN
           </div>
           
-          <!-- CHIPS DE MODELOS FRECUENTES PARA LLENADO EN 1 CLIC -->
-          <div class="quick-models-container">
-            <div class="quick-models-title"><i class="fa-solid fa-bolt"></i> Modelos frecuentes (1 clic para auto-llenar):</div>
-            <div class="quick-models-chips">
-              <button type="button" class="chip-model-quick" data-model="HP Victus 15">💻 HP Victus 15</button>
-              <button type="button" class="chip-model-quick" data-model="HP ProBook 450">💻 HP ProBook 450</button>
-              <button type="button" class="chip-model-quick" data-model="Dell OptiPlex 7080">🖥️ Dell OptiPlex</button>
-              <button type="button" class="chip-model-quick" data-model="Dell Latitude 5420">💻 Dell Latitude</button>
-              <button type="button" class="chip-model-quick" data-model="Lenovo ThinkPad T14">💻 ThinkPad T14</button>
-              <button type="button" class="chip-model-quick" data-model="ASUS TUF Gaming F15">💻 ASUS TUF</button>
-              <button type="button" class="chip-model-quick" data-model="Apple MacBook Air M1">🍎 MacBook Air</button>
-              <button type="button" class="chip-model-quick" data-model="Epson EcoTank L3250">🖨️ Epson L3250</button>
-              <button type="button" class="chip-model-quick" data-model="Epson PowerLite E20">📽️ Epson E20</button>
-              <button type="button" class="chip-model-quick" data-model="BenQ MW560">📽️ BenQ MW560</button>
-              <button type="button" class="chip-model-quick" data-model="ViewSonic PA503W">📽️ ViewSonic PA503</button>
-              <button type="button" class="chip-model-quick" data-model="Cisco Catalyst 2960">🌐 Cisco Switch</button>
-              <button type="button" class="chip-model-quick" data-model="MikroTik CRS326">🌐 MikroTik</button>
-              <button type="button" class="chip-model-quick" data-model="Dell PowerEdge R740">🗄️ Servidor Dell</button>
+          <!-- CHIPS DE MODELOS FRECUENTES DINÁMICOS SEGÚN REGISTRO -->
+          <div class="quick-models-container" id="quickModelsContainer" style="display: none;">
+            <div class="quick-models-title"><i class="fa-solid fa-bolt"></i> Modelos frecuentes registrados:</div>
+            <div class="quick-models-chips" id="quickModelsChips">
+              <!-- Renderizado dinámico según los equipos registrados en el inventario -->
             </div>
           </div>
           
@@ -1012,6 +999,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=20.0"></script>
+  <script src="js/app.js?v=21.0"></script>
 </body>
 </html>
