@@ -2189,24 +2189,23 @@ body {
 
 .cell-tipo {
   white-space: nowrap;
-  max-width: 100px;
+  min-width: 125px;
   text-align: center;
-  overflow: hidden;
   box-sizing: border-box;
+  padding: 6px 8px !important;
 }
 
 .tipo-badge {
-  font-size: 0.69rem;
+  font-size: 0.73rem;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 3px 9px;
   border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  justify-content: center;
+  gap: 5px;
   white-space: nowrap;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.2;
   box-sizing: border-box;
 }
 
@@ -2529,9 +2528,14 @@ body {
     padding: 4px 3px;
   }
 
-  .serial-badge, .placa-badge, .tipo-badge {
-    font-size: 0.66rem;
-    padding: 1px 3px;
+  .serial-badge, .placa-badge {
+    font-size: 0.68rem;
+    padding: 2px 5px;
+  }
+
+  .tipo-badge {
+    font-size: 0.7rem;
+    padding: 2px 7px;
   }
 
   .spec-cpu-title {
