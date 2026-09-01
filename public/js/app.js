@@ -419,26 +419,74 @@ function initEventListeners() {
   // Auto-detección en tiempo real de Especificaciones de Fábrica (CPU, RAM, Almacenamiento, Placa, Marca, Consumible)
   // Base de datos cliente de Auto-Llenado Rápido con Coincidencia Difusa Ultra-Flexible (0ms)
   const CLIENT_SPECS_CATALOG = [
+    // GAMING & HIGH-PERFORMANCE LAPTOPS
     { keywords: ['victus', '15-fb', 'gaming 15', 'fb3021la'], brand: 'HP', type: 'Laptop', cpu: 'AMD Ryzen 5 8645HS @ 4.30GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050 (6GB)', ram: '16 GB DDR5 (5600MHz)', storage: '512 GB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP 8B9D (AMD Promontory/Bixby Chipset)' },
-    { keywords: ['omen'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-13700HX / AMD Ryzen 7 (NVIDIA GeForce RTX 4060)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2', motherboard: 'HP OMEN Gaming Motherboard' },
+    { keywords: ['omen'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-13700HX / AMD Ryzen 7 (NVIDIA GeForce RTX 4060/4070)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP OMEN Gaming Motherboard' },
+    { keywords: ['tuf', 'fx506', 'fa506', 'tuf gaming'], brand: 'ASUS', type: 'Laptop', cpu: 'Intel Core i5-11400H @ 2.70GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'ASUS TUF GAMING F15 FX506' },
+    { keywords: ['rog', 'strix', 'zephyrus'], brand: 'ASUS', type: 'Laptop', cpu: 'AMD Ryzen 7 7735HS / Intel Core i7 (NVIDIA GeForce RTX 4060)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2', motherboard: 'ASUS ROG Gaming Motherboard' },
+    { keywords: ['nitro', 'an515', 'nitro 5'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i5-10300H @ 2.50GHz / AMD Ryzen 5 4600H (NVIDIA GeForce RTX)', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'Acer Nitro AN515' },
+    { keywords: ['predator', 'helios'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i7-12700H @ 2.30GHz (14 Núcleos, 20 Hilos) / NVIDIA GeForce RTX 3070', ram: '16 GB DDR5', storage: '1 TB SSD NVMe', motherboard: 'Acer Predator Helios Board' },
+    { keywords: ['legion', 'legion 5'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 7 5800H / Intel Core i7 (NVIDIA GeForce RTX 3060)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe', motherboard: 'Lenovo Legion Gaming Board' },
+
+    // HP CORPORATIVO
     { keywords: ['probook', '450'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2 PCIe', motherboard: 'HP 880D' },
+    { keywords: ['probook', '440'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe', motherboard: 'HP 880C' },
     { keywords: ['elitebook', '840'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-1165G7 @ 2.80GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP 8809' },
-    { keywords: ['optiplex', '7080', '7070', '7090', '3080', '3070', '3060', '3050'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell OptiPlex 7080 (Intel Q470)' },
-    { keywords: ['latitude', '5420', '5430', '5410', '5400', '3420', '3410'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Latitude 5420 System Board' },
-    { keywords: ['inspiron', '3501', '3511'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Inspiron Mainboard' },
-    { keywords: ['thinkpad', 't14', 't490', 't480', 'e14'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkPad T14 Gen 2' },
-    { keywords: ['thinkcentre', 'm70q', 'm720q'], brand: 'Lenovo', type: 'Mini PC', cpu: 'Intel Core i5-10400T @ 2.00GHz (6 Núcleos, 12 Hilos)', ram: '8 GB DDR4 (2666MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkCentre M70q' },
-    { keywords: ['ideapad'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 5 5500U @ 2.10GHz / Intel Core i5', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo IdeaPad 3 System Board' },
-    { keywords: ['tuf', 'fx506', 'fa506'], brand: 'ASUS', type: 'Laptop', cpu: 'Intel Core i5-11400H @ 2.70GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'ASUS TUF GAMING F15 FX506' },
-    { keywords: ['nitro', 'an515'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i5-10300H @ 2.50GHz / NVIDIA GeForce RTX', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'Acer Nitro AN515' },
-    { keywords: ['macbook', 'air m1', 'air m2', 'm1', 'm2', 'm3'], brand: 'Apple', type: 'Laptop', cpu: 'Apple Silicon M-Series (8-Core CPU, 16-Core Neural Engine)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD PCIe', motherboard: 'Apple Silicon Logic Board' },
+    { keywords: ['elitebook', '850'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-10510U @ 1.80GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'HP 8723' },
+    { keywords: ['hp 240', '240 g8', '240 g7', '245 g8', '245 g7'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i3-1115G4 @ 3.00GHz / AMD Ryzen 3 5300U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'HP 881D' },
+    { keywords: ['pavilion', 'hp 15'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB / 16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'HP Pavilion Motherboard' },
+    { keywords: ['prodesk', '400', '600'], brand: 'HP', type: 'PC de Escritorio', cpu: 'Intel Core i5-10500 @ 3.10GHz (6 Núcleos, 12 Hilos)', ram: '8 GB / 16 GB DDR4', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'HP ProDesk System Board' },
+    { keywords: ['elitedesk', '800'], brand: 'HP', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP EliteDesk System Board' },
+
+    // DELL CORPORATIVO & CONSUMO
+    { keywords: ['optiplex', '7080', '7070', '7090', '7060', '7050'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell OptiPlex 7080 (Intel Q470)' },
+    { keywords: ['optiplex', '3080', '3070', '3060', '3050', '3020'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i5-10500 / i5-7500 @ 3.10GHz (4/6 Núcleos)', ram: '8 GB DDR4', storage: '256 GB SSD / 500GB HDD', motherboard: 'Dell OptiPlex System Board' },
+    { keywords: ['latitude', '5430', '5420', '5410', '5400'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / i5-1235U @ 2.40GHz (4/10 Núcleos)', ram: '16 GB DDR4 (3200MHz)', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Dell Latitude 5420 System Board' },
+    { keywords: ['latitude', '3420', '3410'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Latitude 3420 System Board' },
+    { keywords: ['latitude', '7420', '7430'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i7-1185G7 @ 3.00GHz (4 Núcleos, 8 Hilos)', ram: '16 GB LPDDR4x', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell Latitude 7420 System Board' },
+    { keywords: ['inspiron', '3501', '3511', 'inspiron 15'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Inspiron Mainboard' },
+    { keywords: ['vostro', '3400', '3500'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz', ram: '8 GB DDR4', storage: '256 GB SSD NVMe', motherboard: 'Dell Vostro System Board' },
+    { keywords: ['xps', 'xps 13', 'xps 15'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i7-12700H / i7-1185G7 (14 Núcleos)', ram: '16 GB / 32 GB LPDDR5', storage: '512 GB / 1 TB SSD NVMe', motherboard: 'Dell XPS Motherboard' },
+
+    // LENOVO CORPORATIVO
+    { keywords: ['thinkpad', 't14', 't490', 't480'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkPad T14 Gen 2' },
+    { keywords: ['thinkpad', 'e14', 'e15', 'l14'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB / 16 GB DDR4', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Lenovo ThinkPad System Board' },
+    { keywords: ['thinkcentre', 'm70q', 'm720q', 'm920q', 'tiny'], brand: 'Lenovo', type: 'Mini PC', cpu: 'Intel Core i5-10400T @ 2.00GHz (6 Núcleos, 12 Hilos)', ram: '8 GB / 16 GB DDR4', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkCentre M70q' },
+    { keywords: ['ideapad', 'ideapad 3', 'ideapad 5'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 5 5500U @ 2.10GHz / Intel Core i5', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Lenovo IdeaPad 3 System Board' },
+
+    // APPLE
+    { keywords: ['macbook', 'air m1', 'm1'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M1 (8-Core CPU, 7-Core/8-Core GPU)', ram: '8 GB Memoria Unificada', storage: '256 GB SSD PCIe', motherboard: 'Apple M1 Logic Board' },
+    { keywords: ['air m2', 'm2'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M2 (8-Core CPU, 8-Core/10-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD PCIe', motherboard: 'Apple M2 Logic Board' },
+    { keywords: ['air m3', 'm3', 'macbook pro'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M3 / M3 Pro (8/12-Core CPU, 10/18-Core GPU)', ram: '16 GB / 36 GB Memoria Unificada', storage: '512 GB SSD PCIe', motherboard: 'Apple M3 Logic Board' },
+    { keywords: ['imac', 'imac 24'], brand: 'Apple', type: 'All-in-One', cpu: 'Apple M1 / M3 (8-Core CPU, 8-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD', motherboard: 'Apple iMac Logic Board' },
+
+    // IMPRESORAS & MULTIFUNCIONALES
+    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
+    { keywords: ['l4260', 'l4160', 'l4150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson ESC/P-R Dual Engine (Duplex Automático)', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank L4000 Controller Board', consumible: 'Tinta Epson T504' },
+    { keywords: ['l6270', 'l6171', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'PrecisionCore Print Head Controller (ADF)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Board', consumible: 'Tinta Epson T504' },
+    { keywords: ['l805', 'l1800'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
+    { keywords: ['laserjet', 'm404', 'm402'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
+    { keywords: ['m428', 'laserjet pro mfp'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Dual Core 1200MHz Formatter Engine', ram: '512 MB DDR3', storage: '512 MB Flash', motherboard: 'HP MFP Formatter Board', consumible: 'Tóner HP 58A' },
+    { keywords: ['p1102', 'm1132', 'm1212'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP RISC 266MHz Processor', ram: '8 MB / 64 MB Buffer', storage: 'Flash ROM', motherboard: 'HP LaserJet P1100 Formatter Board', consumible: 'Tóner HP 85A' },
+    { keywords: ['smart tank', '580', '530', '515', '720'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
+    { keywords: ['107a', '107w', '135a', '135w', '137fnw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP ARM 600MHz Processor', ram: '128 MB Memory', storage: '128 MB Flash', motherboard: 'HP Laser 100 Formatter Board', consumible: 'Tóner HP 105A' },
+    { keywords: ['g2110', 'g3110', 'g3160', 'g4110', 'pixma'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon FINE Print Engine Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon PIXMA MegaTank Mainboard', consumible: 'Tinta Canon GI-190' },
+    { keywords: ['mf3010', 'lbp6030', 'imageclass'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon On-Demand SURF Laser Processor', ram: '64 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon imageCLASS Laser Formatter Board', consumible: 'Tóner Canon 125' },
+    { keywords: ['t520w', 't510w', 't720dw', 't710w', 'brother'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
+    { keywords: ['hl-1212w', 'dcp-1617nw', 'hl-1112'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother 200MHz Laser Controller', ram: '32 MB Buffer', storage: 'Flash ROM', motherboard: 'Brother Laser Engine Board', consumible: 'Tóner Brother TN-1060' },
+    { keywords: ['m2040dn', 'm2135dn', 'ecosys', 'kyocera'], brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: 'Cortex-A9 800MHz Processor', ram: '512 MB RAM', storage: 'Flash Memory', motherboard: 'Kyocera ECOSYS System Controller Board', consumible: 'Tóner Kyocera TK-1175' },
+
+    // SWITCHES, ROUTERS & ACCESS POINTS
     { keywords: ['catalyst', '2960', '9200', '3560', '3750', '3850', 'cisco'], brand: 'Cisco', type: 'Switch de Red', cpu: 'Cisco Enterprise MIPS/ARM Switch Engine', ram: '512 MB DRAM', storage: '128 MB Flash Memory', motherboard: 'Cisco Catalyst 24/48 Puertos Gigabit PoE+ / SFP+' },
-    { keywords: ['crs', 'mikrotik', 'rb750', 'rb3011', 'rb4011', 'hex'], brand: 'MikroTik', type: 'Switch de Red', cpu: 'Marvell Dual Core 800MHz (RouterOS / SwOS)', ram: '512 MB RAM', storage: '16 MB Flash', motherboard: 'MikroTik Cloud Gigabit Switch / Router Board' },
-    { keywords: ['unifi', 'usw', 'u6', 'udm'], brand: 'Ubiquiti', type: 'Switch de Red', cpu: 'Ubiquiti UniFi ARM Processor', ram: '512 MB DDR3', storage: '256 MB Flash', motherboard: 'Ubiquiti UniFi Managed Gigabit Board (PoE+)' },
-    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l4260', 'l4160', 'l6270', 'l14150', 'l805', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
-    { keywords: ['laserjet', 'm404', 'm428', 'p1102', 'm102', '107a', '135a'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
-    { keywords: ['poweredge', 'r740', 'r730', 'r640', 'r440'], brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge Server Motherboard (iDRAC9)' },
-    { keywords: ['proliant', 'dl380', 'dl360'], brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array RAID)', motherboard: 'HPE ProLiant Server Board (iLO 5)' }
+    { keywords: ['crs', 'crs326', 'crs328', 'mikrotik', 'rb750', 'rb3011', 'rb4011', 'hex'], brand: 'MikroTik', type: 'Switch de Red', cpu: 'Marvell Dual Core 800MHz (RouterOS / SwOS)', ram: '512 MB RAM', storage: '16 MB Flash', motherboard: 'MikroTik Cloud Gigabit Switch / Router Board' },
+    { keywords: ['unifi', 'usw', 'u6', 'u6-pro', 'udm', 'ubiquiti'], brand: 'Ubiquiti', type: 'Switch de Red', cpu: 'Ubiquiti UniFi ARM Processor', ram: '512 MB DDR3', storage: '256 MB Flash', motherboard: 'Ubiquiti UniFi Managed Gigabit Board (PoE+)' },
+    { keywords: ['sg1024', 'sg1016', 'sg2428p', 'jetstream', 'tp-link'], brand: 'TP-Link', type: 'Switch de Red', cpu: 'Realtek Gigabit Switch Engine', ram: '256 MB RAM', storage: '32 MB Flash', motherboard: 'TP-Link JetStream Rackmount Switch Board' },
+
+    // SERVIDORES & PROYECTORES
+    { keywords: ['poweredge', 'r740', 'r730', 'r640', 'r440', 't440'], brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge Server Motherboard (iDRAC9)' },
+    { keywords: ['proliant', 'dl380', 'dl360', 'ml350', 'gen10'], brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array RAID)', motherboard: 'HPE ProLiant Server Board (iLO 5)' },
+    { keywords: ['powerlite', 'e20', 'x41', 'fh52', 'w49'], brand: 'Epson', type: 'Proyector', cpu: 'Epson 3LCD Image Processing Engine', ram: 'Video Processing Buffer', storage: 'Firmware Flash ROM', motherboard: 'Epson 3LCD Optical Engine Mainboard (HDMI/VGA)' },
+    { keywords: ['mw560', 'mx560', 'benq'], brand: 'BenQ', type: 'Proyector', cpu: 'Texas Instruments DLP Image Processor', ram: 'DLP Video Buffer', storage: 'Firmware Flash', motherboard: 'BenQ DLP High-Brightness Mainboard' }
   ];
 
   function findClientSpecsMatch(query) {
@@ -581,6 +629,17 @@ function initEventListeners() {
 
   const formModelo = document.getElementById('formModelo');
   const btnLookupSpecs = document.getElementById('btnLookupSpecs');
+
+  // Chips de modelos rápidos en el modal (1 clic)
+  document.querySelectorAll('.chip-model-quick').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const modelName = chip.getAttribute('data-model');
+      if (formModelo && modelName) {
+        formModelo.value = modelName;
+        triggerModelSpecsAutofill(modelName, true);
+      }
+    });
+  });
 
   if (formModelo) {
     formModelo.addEventListener('input', (e) => {
