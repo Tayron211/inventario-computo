@@ -417,6 +417,47 @@ function initEventListeners() {
   }
 
   // Auto-detección en tiempo real de Especificaciones de Fábrica (CPU, RAM, Almacenamiento, Placa, Marca, Consumible)
+  // Base de datos cliente de Auto-Llenado Rápido con Coincidencia Difusa Ultra-Flexible (0ms)
+  const CLIENT_SPECS_CATALOG = [
+    { keywords: ['victus', '15-fb', 'gaming 15', 'fb3021la'], brand: 'HP', type: 'Laptop', cpu: 'AMD Ryzen 5 8645HS @ 4.30GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050 (6GB)', ram: '16 GB DDR5 (5600MHz)', storage: '512 GB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP 8B9D (AMD Promontory/Bixby Chipset)' },
+    { keywords: ['omen'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-13700HX / AMD Ryzen 7 (NVIDIA GeForce RTX 4060)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2', motherboard: 'HP OMEN Gaming Motherboard' },
+    { keywords: ['probook', '450'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2 PCIe', motherboard: 'HP 880D' },
+    { keywords: ['elitebook', '840'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-1165G7 @ 2.80GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP 8809' },
+    { keywords: ['optiplex', '7080', '7070', '7090', '3080', '3070', '3060', '3050'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell OptiPlex 7080 (Intel Q470)' },
+    { keywords: ['latitude', '5420', '5430', '5410', '5400', '3420', '3410'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Latitude 5420 System Board' },
+    { keywords: ['inspiron', '3501', '3511'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Inspiron Mainboard' },
+    { keywords: ['thinkpad', 't14', 't490', 't480', 'e14'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkPad T14 Gen 2' },
+    { keywords: ['thinkcentre', 'm70q', 'm720q'], brand: 'Lenovo', type: 'Mini PC', cpu: 'Intel Core i5-10400T @ 2.00GHz (6 Núcleos, 12 Hilos)', ram: '8 GB DDR4 (2666MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkCentre M70q' },
+    { keywords: ['ideapad'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 5 5500U @ 2.10GHz / Intel Core i5', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo IdeaPad 3 System Board' },
+    { keywords: ['tuf', 'fx506', 'fa506'], brand: 'ASUS', type: 'Laptop', cpu: 'Intel Core i5-11400H @ 2.70GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'ASUS TUF GAMING F15 FX506' },
+    { keywords: ['nitro', 'an515'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i5-10300H @ 2.50GHz / NVIDIA GeForce RTX', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'Acer Nitro AN515' },
+    { keywords: ['macbook', 'air m1', 'air m2', 'm1', 'm2', 'm3'], brand: 'Apple', type: 'Laptop', cpu: 'Apple Silicon M-Series (8-Core CPU, 16-Core Neural Engine)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD PCIe', motherboard: 'Apple Silicon Logic Board' },
+    { keywords: ['catalyst', '2960', '9200', '3560', '3750', '3850', 'cisco'], brand: 'Cisco', type: 'Switch de Red', cpu: 'Cisco Enterprise MIPS/ARM Switch Engine', ram: '512 MB DRAM', storage: '128 MB Flash Memory', motherboard: 'Cisco Catalyst 24/48 Puertos Gigabit PoE+ / SFP+' },
+    { keywords: ['crs', 'mikrotik', 'rb750', 'rb3011', 'rb4011', 'hex'], brand: 'MikroTik', type: 'Switch de Red', cpu: 'Marvell Dual Core 800MHz (RouterOS / SwOS)', ram: '512 MB RAM', storage: '16 MB Flash', motherboard: 'MikroTik Cloud Gigabit Switch / Router Board' },
+    { keywords: ['unifi', 'usw', 'u6', 'udm'], brand: 'Ubiquiti', type: 'Switch de Red', cpu: 'Ubiquiti UniFi ARM Processor', ram: '512 MB DDR3', storage: '256 MB Flash', motherboard: 'Ubiquiti UniFi Managed Gigabit Board (PoE+)' },
+    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l4260', 'l4160', 'l6270', 'l14150', 'l805', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
+    { keywords: ['laserjet', 'm404', 'm428', 'p1102', 'm102', '107a', '135a'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
+    { keywords: ['poweredge', 'r740', 'r730', 'r640', 'r440'], brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge Server Motherboard (iDRAC9)' },
+    { keywords: ['proliant', 'dl380', 'dl360'], brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array RAID)', motherboard: 'HPE ProLiant Server Board (iLO 5)' }
+  ];
+
+  function findClientSpecsMatch(query) {
+    if (!query || typeof query !== 'string') return null;
+    const lower = query.toLowerCase().trim();
+    if (lower.length < 2) return null;
+
+    // Buscar si alguna palabra clave coincide
+    for (const item of CLIENT_SPECS_CATALOG) {
+      for (const kw of item.keywords) {
+        if (lower.includes(kw)) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  // Auto-detección en tiempo real de Especificaciones de Fábrica
   let specLookupTimeout = null;
 
   async function triggerModelSpecsAutofill(modelQuery, isManual = false) {
@@ -439,61 +480,26 @@ function initEventListeners() {
       btnLookup.disabled = true;
     }
 
+    // 1. Intento Inmediato con Catálogo Cliente (0ms de latencia)
+    const clientMatch = findClientSpecsMatch(cleanModel);
+    if (clientMatch) {
+      applyAutofillData(clientMatch, isManual);
+      if (btnLookup) {
+        btnLookup.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Auto-Llenar</span>';
+        btnLookup.disabled = false;
+      }
+      return;
+    }
+
+    // 2. Consulta al Servidor / API de Internet si no hubo match local
     try {
       const res = await fetch(`/api/lookup-specs?model=${encodeURIComponent(cleanModel)}`);
       const data = await res.json();
 
       if (data && data.found) {
-        if (formTipo && data.tipo_equipo) {
-          formTipo.value = data.tipo_equipo;
-          adaptFormFieldsByType(data.tipo_equipo);
-        }
-
-        if (formFab && data.fabricante && data.fabricante !== 'Genérico') {
-          formFab.value = data.fabricante;
-        }
-
-        if (formCpu && data.procesador) {
-          formCpu.value = data.procesador;
-        }
-
-        if (formRam && data.ram_total) {
-          formRam.value = data.ram_total;
-        }
-
-        if (formDisk && data.almacenamiento) {
-          formDisk.value = data.almacenamiento;
-        }
-
-        if (formPlaca && data.placa_base && data.placa_base !== 'N/A') {
-          formPlaca.value = data.placa_base;
-        }
-
-        if (formCons && data.consumible) {
-          formCons.value = data.consumible;
-          if (badgeConsAuto) {
-            badgeConsAuto.style.display = 'inline-flex';
-            badgeConsAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Consumible Auto-Detectado`;
-          }
-        }
-
-        if (badgeAuto) {
-          badgeAuto.style.display = 'inline-flex';
-          badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Ficha Cargada (${data.fabricante})`;
-        }
-
-        const fieldsToAnimate = [formTipo, formFab, formCpu, formRam, formDisk, formPlaca, formCons].filter(Boolean);
-        fieldsToAnimate.forEach(f => {
-          f.classList.remove('input-autofill-glow');
-          void f.offsetWidth;
-          f.classList.add('input-autofill-glow');
-        });
-
-        if (isManual) {
-          showToast(`Ficha técnica cargada: ${data.fabricante} (${data.tipo_equipo})`, 'success');
-        }
+        applyAutofillData(data, isManual);
       } else if (isManual) {
-        showToast('No se encontraron especificaciones automáticas para este modelo', 'error');
+        showToast('No se encontraron especificaciones para este modelo', 'error');
       }
     } catch (err) {
       console.warn('Error en auto-lookup de hardware:', err);
@@ -506,6 +512,73 @@ function initEventListeners() {
     }
   }
 
+  function applyAutofillData(data, isManual) {
+    const formTipo = document.getElementById('formTipoEquipo');
+    const formFab = document.getElementById('formFabricante');
+    const formCpu = document.getElementById('formProcesador');
+    const formRam = document.getElementById('formRamTotal');
+    const formDisk = document.getElementById('formAlmacenamiento');
+    const formPlaca = document.getElementById('formPlacaBase');
+    const formCons = document.getElementById('formConsumible');
+    const badgeAuto = document.getElementById('badgeSpecAuto');
+    const badgeConsAuto = document.getElementById('badgeConsumibleAuto');
+
+    if (formTipo && data.type) {
+      formTipo.value = data.type;
+      adaptFormFieldsByType(data.type);
+    } else if (formTipo && data.tipo_equipo) {
+      formTipo.value = data.tipo_equipo;
+      adaptFormFieldsByType(data.tipo_equipo);
+    }
+
+    if (formFab && data.brand && data.brand !== 'Genérico') {
+      formFab.value = data.brand;
+    } else if (formFab && data.fabricante && data.fabricante !== 'Genérico') {
+      formFab.value = data.fabricante;
+    }
+
+    if (formCpu && (data.cpu || data.procesador)) {
+      formCpu.value = data.cpu || data.procesador;
+    }
+
+    if (formRam && (data.ram || data.ram_total)) {
+      formRam.value = data.ram || data.ram_total;
+    }
+
+    if (formDisk && (data.storage || data.almacenamiento)) {
+      formDisk.value = data.storage || data.almacenamiento;
+    }
+
+    if (formPlaca && (data.motherboard || data.placa_base) && (data.motherboard !== 'N/A' && data.placa_base !== 'N/A')) {
+      formPlaca.value = data.motherboard || data.placa_base;
+    }
+
+    if (formCons && (data.consumible || data.tinta_toner)) {
+      formCons.value = data.consumible || data.tinta_toner;
+      if (badgeConsAuto) {
+        badgeConsAuto.style.display = 'inline-flex';
+        badgeConsAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Consumible Auto-Detectado`;
+      }
+    }
+
+    const brandName = data.brand || data.fabricante || 'Hardware';
+    if (badgeAuto) {
+      badgeAuto.style.display = 'inline-flex';
+      badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Ficha Cargada (${brandName})`;
+    }
+
+    const fieldsToAnimate = [formTipo, formFab, formCpu, formRam, formDisk, formPlaca, formCons].filter(Boolean);
+    fieldsToAnimate.forEach(f => {
+      f.classList.remove('input-autofill-glow');
+      void f.offsetWidth;
+      f.classList.add('input-autofill-glow');
+    });
+
+    if (isManual) {
+      showToast(`Ficha técnica cargada: ${brandName}`, 'success');
+    }
+  }
+
   const formModelo = document.getElementById('formModelo');
   const btnLookupSpecs = document.getElementById('btnLookupSpecs');
 
@@ -513,10 +586,10 @@ function initEventListeners() {
     formModelo.addEventListener('input', (e) => {
       clearTimeout(specLookupTimeout);
       const val = e.target.value;
-      if (val && val.trim().length >= 3) {
+      if (val && val.trim().length >= 2) {
         specLookupTimeout = setTimeout(() => {
           triggerModelSpecsAutofill(val, false);
-        }, 600);
+        }, 300);
       }
     });
 
@@ -529,7 +602,7 @@ function initEventListeners() {
     btnLookupSpecs.addEventListener('click', () => {
       const val = formModelo ? formModelo.value : '';
       if (!val || val.trim().length < 2) {
-        showToast('Escribe primero el modelo para buscar sus especificaciones', 'error');
+        showToast('Escribe una palabra o modelo (ej. victus, optiplex, probook)', 'info');
         if (formModelo) formModelo.focus();
         return;
       }
@@ -595,7 +668,7 @@ function initEventListeners() {
     });
   }
 
-  // Cerrar modales con botones 'data-close-modal' o clic fuera
+  // Cerrar modales ÚNICAMENTE con botones explícitos 'data-close-modal' (No al hacer clic afuera)
   document.querySelectorAll('[data-close-modal]').forEach(btn => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-close-modal');
@@ -607,16 +680,7 @@ function initEventListeners() {
     });
   });
 
-  document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeModal(modal.id);
-      }
-    });
-  });
-
-  // Copiar URL local
-  // Inicializar Arrastre con Mouse para Scroll Horizontal Cómodo
+  // Arrastre con Mouse para Scroll Horizontal Cómodo
   initTableDragScroll();
 }
 

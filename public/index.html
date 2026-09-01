@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=14.0">
+  <link rel="stylesheet" href="css/styles.css?v=15.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -599,11 +599,25 @@
                 <span class="auto-badge" id="badgeSpecAuto" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Completado</span>
               </label>
               <div class="input-with-action">
-                <input type="text" id="formModelo" required placeholder="Ej: HP ProBook 450 G8, Dell OptiPlex 7080, ThinkPad T14" class="form-control">
+                <input type="text" id="formModelo" list="modelSuggestionsList" required placeholder="Ej: Victus, OptiPlex, ProBook, ThinkPad, L3250..." class="form-control" autocomplete="off">
                 <button type="button" class="btn-input-action" id="btnLookupSpecs" title="Buscar ficha técnica en Internet">
                   <i class="fa-solid fa-bolt"></i> <span>Auto-Llenar</span>
                 </button>
               </div>
+              <datalist id="modelSuggestionsList">
+                <option value="Laptop Gamer Victus by HP 15">
+                <option value="HP ProBook 450 G8">
+                <option value="Dell OptiPlex 7080">
+                <option value="Dell Latitude 5420">
+                <option value="Lenovo ThinkPad T14">
+                <option value="ASUS TUF Gaming F15">
+                <option value="Acer Nitro 5">
+                <option value="Apple MacBook Air M1">
+                <option value="Epson EcoTank L3250">
+                <option value="HP LaserJet Pro M404">
+                <option value="Switch Cisco Catalyst 2960-X">
+                <option value="MikroTik CRS326 Gigabit Switch">
+              </datalist>
             </div>
 
             <div class="form-group">
@@ -854,6 +868,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=14.0"></script>
+  <script src="js/app.js?v=15.0"></script>
 </body>
 </html>
