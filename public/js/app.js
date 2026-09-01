@@ -1889,10 +1889,17 @@ function adaptFormFieldsByType(selectedType) {
   const sectionPerifericos = document.getElementById('formSectionPerifericos');
   const groupConsumible = document.getElementById('formGroupConsumible');
   const groupMacAddress = document.getElementById('formGroupMacAddress');
+  const groupHostname = document.getElementById('formGroupHostname');
   const labelHostname = document.getElementById('labelFormHostname');
   const inputHostname = document.getElementById('formHostname');
   const labelUsuario = document.getElementById('labelFormUsuario');
   const inputUsuario = document.getElementById('formUsuario');
+  const sectionComponente = document.getElementById('formSectionComponente');
+  const labelHeaderComp = document.getElementById('labelHeaderComponente');
+  const labelCompCap = document.getElementById('labelCompCapacidad');
+  const inputCompCap = document.getElementById('formCompCapacidad');
+  const labelCompInt = document.getElementById('labelCompInterfaz');
+  const inputCompInt = document.getElementById('formCompInterfaz');
 
   const isComputer = t.includes('pc de escritorio') || t.includes('laptop') || t.includes('all-in-one') || t.includes('mini pc') || t.includes('servidor') || t.includes('computadora');
   const isPrinter = t.includes('impresora') || t.includes('multifuncional') || t.includes('fotocopiadora') || t.includes('plotter');
@@ -1901,42 +1908,91 @@ function adaptFormFieldsByType(selectedType) {
   const isPeripheral = t.includes('teclado') || t.includes('mouse') || t.includes('audífono') || t.includes('audifono') || t.includes('monitor') || t.includes('otro periférico') || t.includes('periférico');
   const isComponent = t.includes('tarjeta de video') || t.includes('gpu') || t.includes('memoria ram') || t.includes('ram') || t.includes('disco') || t.includes('almacenamiento') || t.includes('procesador') || t.includes('cpu') || t.includes('placa base') || t.includes('motherboard') || t.includes('fuente de poder') || t.includes('psu') || t.includes('refrigeración') || t.includes('cooler') || t.includes('componente');
 
-  const sectionComponente = document.getElementById('formSectionComponente');
+  // 1. Mostrar/Ocultar Sección de Componente Independiente
   if (sectionComponente) {
     sectionComponente.style.display = isComponent ? 'block' : 'none';
   }
 
-  // 1. Placa Base (Solo en computadoras)
+  // 2. Ocultar Hostname/IP de Red en Componentes Independientes
+  if (groupHostname) {
+    groupHostname.style.display = isComponent ? 'none' : 'block';
+  }
+
+  // 3. Placa Base de PC (Solo en computadoras armadas / completas)
   if (groupPlacaBase) {
-    groupPlacaBase.style.display = isComputer ? 'block' : 'none';
+    groupPlacaBase.style.display = (isComputer && !isComponent) ? 'block' : 'none';
   }
 
-  // 2. Hardware Interno (CPU, RAM, Discos - Solo en computadoras)
+  // 4. Hardware Interno de PC (CPU, RAM, Discos en bloque - Solo en computadoras)
   if (sectionHardware) {
-    sectionHardware.style.display = isComputer ? 'block' : 'none';
+    sectionHardware.style.display = (isComputer && !isComponent) ? 'block' : 'none';
   }
 
-  // 3. Periféricos y Monitores Asociados (Solo en computadoras)
+  // 5. Periféricos y Monitores Asociados (Solo en computadoras completas)
   if (sectionPerifericos) {
-    sectionPerifericos.style.display = isComputer ? 'block' : 'none';
+    sectionPerifericos.style.display = (isComputer && !isComponent) ? 'block' : 'none';
   }
 
-  // 4. Consumible / Tinta / Tóner (ÚNICA Y EXCLUSIVAMENTE en Impresoras)
+  // 6. Consumible / Tinta / Tóner (ÚNICA Y EXCLUSIVAMENTE en Impresoras)
   if (groupConsumible) {
     groupConsumible.style.display = isPrinter ? 'block' : 'none';
   }
 
-  // 5. Campo MAC Address (Solo para Dispositivos de Red e Impresoras en Red)
+  // 7. Campo MAC Address (Solo para Dispositivos de Red e Impresoras en Red)
   if (groupMacAddress) {
     groupMacAddress.style.display = (isNetwork || isPrinter) ? 'block' : 'none';
   }
 
-  // 6. Adaptar textos y placeholders contextuales
+  // 8. Personalización Dinámica de Campos Específicos para cada Componente
+  if (isComponent) {
+    if (t.includes('tarjeta de video') || t.includes('gpu')) {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DE LA TARJETA DE VIDEO (GPU)';
+      if (labelCompCap) labelCompCap.textContent = 'MEMORIA VRAM (GB GDDR)';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: 12 GB GDDR6 (192-bit)';
+      if (labelCompInt) labelCompInt.textContent = 'INTERFAZ / BUS / PUERTOS';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: PCIe 4.0 x16, 3x DisplayPort, 1x HDMI';
+    } else if (t.includes('memoria ram') || t.includes('ram')) {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DE LA MEMORIA RAM';
+      if (labelCompCap) labelCompCap.textContent = 'CAPACIDAD & VELOCIDAD / FRECUENCIA';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: 16 GB DDR4 3200MHz / 32 GB DDR5 6000MHz';
+      if (labelCompInt) labelCompInt.textContent = 'FORMATO / LATENCIA / PERFIL';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: DIMM 288-pin, CL16, Intel XMP / AMD EXPO';
+    } else if (t.includes('disco') || t.includes('almacenamiento')) {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DE LA UNIDAD DE ALMACENAMIENTO';
+      if (labelCompCap) labelCompCap.textContent = 'CAPACIDAD DE ALMACENAMIENTO';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: 1 TB / 512 GB / 2 TB SSD NVMe';
+      if (labelCompInt) labelCompInt.textContent = 'TECNOLOGÍA, INTERFAZ & FORMATO';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: M.2 NVMe PCIe Gen4 x4 / SSD SATA 2.5" / HDD 3.5"';
+    } else if (t.includes('procesador') || t.includes('cpu')) {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DEL PROCESADOR (CPU)';
+      if (labelCompCap) labelCompCap.textContent = 'NÚCLEOS, HILOS & VELOCIDAD TURBO';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: 6 Núcleos / 12 Hilos @ 4.60GHz Turbo';
+      if (labelCompInt) labelCompInt.textContent = 'SOCKET / CHIPSETS COMPATIBLES';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: Socket AMD AM4 / Intel LGA 1700';
+    } else if (t.includes('placa base') || t.includes('motherboard')) {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DE LA PLACA BASE';
+      if (labelCompCap) labelCompCap.textContent = 'CHIPSET & SOCKET';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: Chipset AMD B550 (Socket AM4)';
+      if (labelCompInt) labelCompInt.textContent = 'FACTOR DE FORMA & RANURAS';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: Micro-ATX, 4x DDR4, 2x M.2 NVMe, PCIe 4.0';
+    } else if (t.includes('fuente de poder') || t.includes('psu')) {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DE LA FUENTE DE PODER (PSU)';
+      if (labelCompCap) labelCompCap.textContent = 'POTENCIA EN WATTS';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: 750 Watts / 850 Watts';
+      if (labelCompInt) labelCompInt.textContent = 'CERTIFICACIÓN & MODULARIDAD';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: 80 Plus Gold, Full Modular';
+    } else {
+      if (labelHeaderComp) labelHeaderComp.textContent = 'ESPECIFICACIONES DEL COMPONENTE';
+      if (labelCompCap) labelCompCap.textContent = 'CAPACIDAD / ESPECIFICACIÓN PRINCIPAL';
+      if (inputCompCap) inputCompCap.placeholder = 'Ej: Especificación técnica principal';
+      if (labelCompInt) labelCompInt.textContent = 'INTERFAZ / CONECTOR / FORMATO';
+      if (inputCompInt) inputCompInt.placeholder = 'Ej: Interfaz de conexión o compatibilidad';
+    }
+  }
+
+  // 9. Adaptar textos y placeholders contextuales
   if (labelHostname && inputHostname) {
-    if (isComponent) {
-      labelHostname.textContent = 'ASIGNADO A / EQUIPO DESTINO';
-      inputHostname.placeholder = 'Ej: En Stock / Bodega o PC-SOPORTE-01';
-    } else if (isNetwork) {
+    if (isNetwork) {
       labelHostname.textContent = 'NOMBRE / IP DEL EQUIPO DE RED';
       inputHostname.placeholder = 'Ej: SWITCH-CORE-01, AP-AULA201 o 192.168.89.254';
     } else if (isPrinter) {
@@ -1957,7 +2013,7 @@ function adaptFormFieldsByType(selectedType) {
   if (labelUsuario && inputUsuario) {
     if (isComponent) {
       labelUsuario.textContent = 'RESPONSABLE / CUSTODIO';
-      inputUsuario.placeholder = 'Ej: Soporte TI / Stock de Repuestos';
+      inputUsuario.placeholder = 'Ej: Soporte TI / Stock de Bodega / Repuesto';
     } else if (isNetwork) {
       labelUsuario.textContent = 'ADMINISTRADOR / RESPONSABLE TI';
       inputUsuario.placeholder = 'Ej: Administrador de Red / Soporte TI';

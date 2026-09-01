@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=33.0">
+  <link rel="stylesheet" href="css/styles.css?v=34.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -843,15 +843,15 @@
             <!-- SECCIÓN COMPONENTE INDEPENDIENTE (GPU, RAM, DISCO, CPU, PLACA, PSU) -->
             <div class="form-group full-width" id="formSectionComponente" style="display: none; background: rgba(147, 51, 234, 0.08); border: 1px dashed rgba(168, 85, 247, 0.4); border-radius: 8px; padding: 12px; margin-top: 6px;">
               <div style="font-size: 0.78rem; font-weight: 700; color: #c084fc; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                <i class="fa-solid fa-microchip"></i> <span>ESPECIFICACIONES DEL COMPONENTE INDEPENDIENTE</span>
+                <i class="fa-solid fa-microchip"></i> <span id="labelHeaderComponente">ESPECIFICACIONES DEL COMPONENTE INDEPENDIENTE</span>
               </div>
               <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div class="form-group">
-                  <label for="formCompCapacidad">CAPACIDAD / VRAM / POTENCIA</label>
+                  <label for="formCompCapacidad" id="labelCompCapacidad">CAPACIDAD / VRAM / POTENCIA</label>
                   <input type="text" id="formCompCapacidad" placeholder="Ej: 12 GB GDDR6 / 16 GB DDR4 / 1 TB NVMe / 750W" class="form-control">
                 </div>
                 <div class="form-group">
-                  <label for="formCompInterfaz">INTERFAZ / SOCKET / FORMATO</label>
+                  <label for="formCompInterfaz" id="labelCompInterfaz">INTERFAZ / SOCKET / FORMATO</label>
                   <input type="text" id="formCompInterfaz" placeholder="Ej: PCIe 4.0 x16 / Socket AM4 / M.2 2280 / DIMM" class="form-control">
                 </div>
               </div>
@@ -902,12 +902,12 @@
           </div>
 
           <!-- SECCIÓN 4: ASIGNACIÓN Y UBICACIÓN -->
-          <div class="form-section-title mt-4">
-            <i class="fa-solid fa-location-dot"></i> UBICACIÓN & RESPONSABLE
+          <div class="form-section-title mt-4" id="titleSectionUbicacion">
+            <i class="fa-solid fa-location-dot"></i> <span>UBICACIÓN & RESPONSABLE</span>
           </div>
 
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group" id="formGroupHostname">
               <label for="formHostname" id="labelFormHostname">NOMBRE DE EQUIPO / HOSTNAME</label>
               <input type="text" id="formHostname" placeholder="Ej: DESKTOP-PC01 o 192.168.1.50" class="form-control mono-font">
             </div>
@@ -1037,6 +1037,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=33.0"></script>
+  <script src="js/app.js?v=34.0"></script>
 </body>
 </html>

@@ -1576,17 +1576,31 @@ app.get('/api/export-excel', async (req, res) => {
     };
 
     // -------------------------------------------------------------
-    // HOJA 1: CASE (PCs de Escritorio, All-in-One, Mini PCs)
+    // HOJA 1: RESUMEN GENERAL EJECUTIVO
     // -------------------------------------------------------------
-    const wsCase = workbook.addWorksheet('CASE', { views: [{ showGridLines: true }] });
+    const wsResumen = workbook.addWorksheet('RESUMEN GENERAL', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsResumen, [
+      { header: 'CATEGORÍA / TIPO', key: 'categoria', width: 32 },
+      { header: 'TOTAL AUDITADOS', key: 'total', width: 20 },
+      { header: 'OPERATIVOS', key: 'operativos', width: 18 },
+      { header: 'EN USO', key: 'en_uso', width: 18 },
+      { header: 'EN BODEGA / STOCK', key: 'en_bodega', width: 22 },
+      { header: 'EN MANTENIMIENTO', key: 'mantenimiento', width: 22 },
+      { header: 'DE BAJA', key: 'de_baja', width: 18 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 2: CASE & SERVIDORES (PCs de Escritorio, All-in-One, Mini PCs, Servidores)
+    // -------------------------------------------------------------
+    const wsCase = workbook.addWorksheet('CASE Y SERVIDORES', { views: [{ showGridLines: true }] });
     styleWorksheet(wsCase, [
       { header: 'HOSTNAME', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'USUARIO / CUSTODIO', key: 'usuario', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
-      { header: 'MODELO PC', key: 'modelo', width: 28 },
+      { header: 'MODELO EQUIPO', key: 'modelo', width: 28 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
-      { header: 'PLACA BASE', key: 'placa_base', width: 22 },
+      { header: 'PLACA BASE', key: 'placa_base', width: 24 },
       { header: 'PROCESADOR', key: 'procesador', width: 34 },
       { header: 'MEMORIA RAM', key: 'ram', width: 20 },
       { header: 'DISCOS / SSD', key: 'almacenamiento', width: 38 },
@@ -1595,12 +1609,12 @@ app.get('/api/export-excel', async (req, res) => {
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 2: LAPTOPS
+    // HOJA 3: LAPTOPS
     // -------------------------------------------------------------
     const wsLaptops = workbook.addWorksheet('LAPTOPS', { views: [{ showGridLines: true }] });
     styleWorksheet(wsLaptops, [
       { header: 'HOSTNAME', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'USUARIO / DOCENTE', key: 'usuario', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
       { header: 'MODELO LAPTOP', key: 'modelo', width: 28 },
@@ -1613,75 +1627,125 @@ app.get('/api/export-excel', async (req, res) => {
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 3: MONITOR
+    // HOJA 4: TARJETAS DE VIDEO DEDICADAS (GPU)
     // -------------------------------------------------------------
-    const wsMonitor = workbook.addWorksheet('MONITOR', { views: [{ showGridLines: true }] });
-    styleWorksheet(wsMonitor, [
-      { header: 'MONITOR MODELO / MARCA', key: 'monitor', width: 30 },
-      { header: 'NÚMERO DE SERIE (S/N)', key: 'serie', width: 24 },
-      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+    const wsGPU = workbook.addWorksheet('TARJETAS DE VIDEO (GPU)', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsGPU, [
+      { header: 'MODELO DE GPU / TARJETA', key: 'modelo', width: 32 },
+      { header: 'ENSAMBLADOR / MARCA', key: 'fabricante', width: 22 },
+      { header: 'VRAM / MEMORIA', key: 'vram', width: 24 },
+      { header: 'INTERFAZ / PUERTOS', key: 'interfaz', width: 30 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'ASIGNADO A / HOST', key: 'asignado', width: 24 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
-      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'UBICACIÓN / BODEGA', key: 'ubicacion', width: 26 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 4: TECLADO
+    // HOJA 5: MEMORIAS RAM
     // -------------------------------------------------------------
-    const wsTeclado = workbook.addWorksheet('TECLADO', { views: [{ showGridLines: true }] });
-    styleWorksheet(wsTeclado, [
-      { header: 'TECLADO / MARCA', key: 'dispositivo', width: 32 },
-      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+    const wsRAM = workbook.addWorksheet('MEMORIAS RAM', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsRAM, [
+      { header: 'MODELO DE MEMORIA', key: 'modelo', width: 30 },
+      { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
+      { header: 'CAPACIDAD & VELOCIDAD', key: 'capacidad', width: 26 },
+      { header: 'FORMATO / TIPO', key: 'tipo', width: 24 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'ASIGNADO A / HOST', key: 'asignado', width: 24 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
-      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'UBICACIÓN / BODEGA', key: 'ubicacion', width: 26 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 5: AUDÍFONOS
+    // HOJA 6: DISCOS Y ALMACENAMIENTO
     // -------------------------------------------------------------
-    const wsAudifonos = workbook.addWorksheet('AUDÍFONOS', { views: [{ showGridLines: true }] });
-    styleWorksheet(wsAudifonos, [
-      { header: 'DISPOSITIVO DE AUDIO / DIADEMA', key: 'dispositivo', width: 34 },
-      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+    const wsDiscos = workbook.addWorksheet('DISCOS Y SSD', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsDiscos, [
+      { header: 'MODELO DE DISCO / SSD', key: 'modelo', width: 32 },
+      { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
+      { header: 'CAPACIDAD', key: 'capacidad', width: 20 },
+      { header: 'TECNOLOGÍA / INTERFAZ', key: 'interfaz', width: 28 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'ASIGNADO A / HOST', key: 'asignado', width: 24 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
-      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'UBICACIÓN / BODEGA', key: 'ubicacion', width: 26 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 6: MOUSE
+    // HOJA 7: PROCESADORES (CPU)
     // -------------------------------------------------------------
-    const wsMouse = workbook.addWorksheet('MOUSE', { views: [{ showGridLines: true }] });
-    styleWorksheet(wsMouse, [
-      { header: 'MOUSE / MARCA', key: 'dispositivo', width: 32 },
-      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+    const wsCPU = workbook.addWorksheet('PROCESADORES (CPU)', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsCPU, [
+      { header: 'MODELO DE PROCESADOR', key: 'modelo', width: 32 },
+      { header: 'FABRICANTE (INTEL/AMD)', key: 'fabricante', width: 22 },
+      { header: 'NÚCLEOS / FRECUENCIA', key: 'specs', width: 30 },
+      { header: 'SOCKET / COMPATIBILIDAD', key: 'socket', width: 24 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'ASIGNADO A / HOST', key: 'asignado', width: 24 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
-      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'UBICACIÓN / BODEGA', key: 'ubicacion', width: 26 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 7: IMPRESORAS
+    // HOJA 8: PLACAS BASE
+    // -------------------------------------------------------------
+    const wsPlacas = workbook.addWorksheet('PLACAS BASE', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsPlacas, [
+      { header: 'MODELO DE PLACA BASE', key: 'modelo', width: 32 },
+      { header: 'FABRICANTE / MARCA', key: 'fabricante', width: 22 },
+      { header: 'CHIPSET & SOCKET', key: 'chipset', width: 26 },
+      { header: 'FACTOR DE FORMA / RANURAS', key: 'formato', width: 28 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'ASIGNADO A / HOST', key: 'asignado', width: 24 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'UBICACIÓN / BODEGA', key: 'ubicacion', width: 26 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 9: FUENTES Y COMPONENTES
+    // -------------------------------------------------------------
+    const wsFuentes = workbook.addWorksheet('FUENTES Y COMPONENTES', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsFuentes, [
+      { header: 'COMPONENTE / MODELO', key: 'modelo', width: 32 },
+      { header: 'TIPO DE COMPONENTE', key: 'tipo', width: 24 },
+      { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
+      { header: 'POTENCIA / ESPECIFICACIÓN', key: 'specs', width: 28 },
+      { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'UBICACIÓN / BODEGA', key: 'ubicacion', width: 26 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 10: IMPRESORAS
     // -------------------------------------------------------------
     const wsImpresoras = workbook.addWorksheet('IMPRESORAS', { views: [{ showGridLines: true }] });
     styleWorksheet(wsImpresoras, [
       { header: 'EQUIPO / MODELO', key: 'modelo', width: 30 },
       { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
+      { header: 'CONSUMIBLE (TINTA/TÓNER)', key: 'consumible', width: 26 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 24 },
-      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'DIRECCIÓN MAC', key: 'mac', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
       { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'RESPONSABLE', key: 'usuario', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 8: PROYECTORES
+    // HOJA 11: PROYECTORES
     // -------------------------------------------------------------
     const wsProyectores = workbook.addWorksheet('PROYECTORES', { views: [{ showGridLines: true }] });
     styleWorksheet(wsProyectores, [
@@ -1696,11 +1760,11 @@ app.get('/api/export-excel', async (req, res) => {
     ]);
 
     // -------------------------------------------------------------
-    // HOJA 9: WIFI / RED
+    // HOJA 12: WIFI Y RED
     // -------------------------------------------------------------
-    const wsWifi = workbook.addWorksheet('WIFI', { views: [{ showGridLines: true }] });
+    const wsWifi = workbook.addWorksheet('WIFI Y RED', { views: [{ showGridLines: true }] });
     styleWorksheet(wsWifi, [
-      { header: 'DISPOSITIVO / ACCESS POINT', key: 'dispositivo', width: 32 },
+      { header: 'DISPOSITIVO / SWITCH / AP', key: 'dispositivo', width: 32 },
       { header: 'MARCA / FABRICANTE', key: 'marca', width: 22 },
       { header: 'DIRECCIÓN MAC', key: 'mac', width: 24 },
       { header: 'NÚMERO DE SERIE (S/N)', key: 'numero_serie', width: 24 },
@@ -1710,6 +1774,84 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
+    // -------------------------------------------------------------
+    // HOJA 13: MONITORES
+    // -------------------------------------------------------------
+    const wsMonitor = workbook.addWorksheet('MONITORES', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsMonitor, [
+      { header: 'MONITOR MODELO / MARCA', key: 'monitor', width: 30 },
+      { header: 'NÚMERO DE SERIE (S/N)', key: 'serie', width: 24 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO / CUSTODIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 14: TECLADOS
+    // -------------------------------------------------------------
+    const wsTeclado = workbook.addWorksheet('TECLADOS', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsTeclado, [
+      { header: 'TECLADO / MARCA', key: 'dispositivo', width: 32 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 15: MOUSE
+    // -------------------------------------------------------------
+    const wsMouse = workbook.addWorksheet('MOUSE', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsMouse, [
+      { header: 'MOUSE / MARCA', key: 'dispositivo', width: 32 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 16: AUDÍFONOS
+    // -------------------------------------------------------------
+    const wsAudifonos = workbook.addWorksheet('AUDÍFONOS', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsAudifonos, [
+      { header: 'DISPOSITIVO DE AUDIO / DIADEMA', key: 'dispositivo', width: 34 },
+      { header: 'CONECTADO A (HOSTNAME)', key: 'hostname', width: 24 },
+      { header: 'USUARIO', key: 'usuario', width: 22 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // -------------------------------------------------------------
+    // HOJA 17: INVENTARIO CONSOLIDADO TOTAL
+    // -------------------------------------------------------------
+    const wsTotal = workbook.addWorksheet('INVENTARIO TOTAL', { views: [{ showGridLines: true }] });
+    styleWorksheet(wsTotal, [
+      { header: 'ID', key: 'id', width: 16 },
+      { header: 'TIPO DE EQUIPO / COMPONENTE', key: 'tipo', width: 28 },
+      { header: 'MODELO', key: 'modelo', width: 30 },
+      { header: 'FABRICANTE', key: 'fabricante', width: 20 },
+      { header: 'NÚMERO DE SERIE', key: 'serie', width: 22 },
+      { header: 'ESPECIFICACIONES / DETALLES', key: 'specs', width: 38 },
+      { header: 'BLOQUE', key: 'bloque', width: 18 },
+      { header: 'UBICACIÓN / AMBIENTE', key: 'ubicacion', width: 26 },
+      { header: 'USUARIO / CUSTODIO', key: 'usuario', width: 22 },
+      { header: 'ESTADO', key: 'estado', width: 16 }
+    ]);
+
+    // Mapas para estadísticas de resumen general
+    const categoryStats = {};
+    const initCategoryStat = (cat) => {
+      if (!categoryStats[cat]) {
+        categoryStats[cat] = { total: 0, operativo: 0, en_uso: 0, en_bodega: 0, mantenimiento: 0, de_baja: 0 };
+      }
+    };
+
     // Poblado de Datos en todas las hojas categorizadas
     items.forEach((item) => {
       const bloque = getBloqueName(item);
@@ -1718,6 +1860,7 @@ app.get('/api/export-excel', async (req, res) => {
       const user = toUpper(item.usuario_actual || 'ADMIN');
       const status = toUpper(item.estado || 'OPERATIVO');
       const ip = toUpper(item.ip_red || 'N/A');
+      const tipo = (item.tipo_equipo || '').toLowerCase();
 
       let almacenamientoStr = '';
       if (item.almacenamiento && Array.isArray(item.almacenamiento) && item.almacenamiento.length > 0) {
@@ -1729,16 +1872,123 @@ app.get('/api/export-excel', async (req, res) => {
         almacenamientoStr = item.almacenamiento_resumen || 'Disco Principal';
       }
 
-      const isLaptop = /laptop|port[aá]til|notebook/i.test(item.tipo_equipo || '');
-      const isProyector = /proyector|multimedia|datashow/i.test(item.tipo_equipo || '') || /proyector|datashow/i.test(item.modelo || '');
-      const isImpresora = !isProyector && (/impresora|multifuncional|fotocopiadora/i.test(item.tipo_equipo || '') || /impresora/i.test(item.modelo || ''));
-      const isWifiDevice = /wi-fi|wifi|access point|ap|router|switch/i.test(item.tipo_equipo || '') || /wi-fi|wifi|access point|router/i.test(item.modelo || '');
+      // Conteo estadístico
+      let mainCat = 'Computadoras';
+      if (/tarjeta de video|gpu/i.test(tipo)) mainCat = 'Tarjetas de Video (GPU)';
+      else if (/memoria ram|ram/i.test(tipo)) mainCat = 'Memorias RAM';
+      else if (/disco|almacenamiento|ssd|nvme|hdd/i.test(tipo)) mainCat = 'Discos y Almacenamiento';
+      else if (/procesador|cpu/i.test(tipo)) mainCat = 'Procesadores (CPU)';
+      else if (/placa base|motherboard/i.test(tipo)) mainCat = 'Placas Base';
+      else if (/fuente de poder|psu|refrigeraci|cooler/i.test(tipo)) mainCat = 'Fuentes y Componentes';
+      else if (/proyector/i.test(tipo) || /proyector/i.test(item.modelo || '')) mainCat = 'Proyectores';
+      else if (/impresora|multifuncional/i.test(tipo) || /impresora/i.test(item.modelo || '')) mainCat = 'Impresoras';
+      else if (/switch|access point|router|wifi/i.test(tipo)) mainCat = 'Equipos de Red / Wi-Fi';
+      else if (/laptop|port[aá]til/i.test(tipo)) mainCat = 'Laptops';
 
-      // 1. CLASIFICACIÓN PRINCIPAL DE EQUIPO
-      if (isProyector) {
+      initCategoryStat(mainCat);
+      categoryStats[mainCat].total++;
+      if (status.includes('BODEGA') || status.includes('STOCK')) categoryStats[mainCat].en_bodega++;
+      else if (status.includes('USO')) categoryStats[mainCat].en_uso++;
+      else if (status.includes('MANTEN')) categoryStats[mainCat].mantenimiento++;
+      else if (status.includes('BAJA')) categoryStats[mainCat].de_baja++;
+      else categoryStats[mainCat].operativo++;
+
+      // Ficha consolidada total
+      wsTotal.addRow({
+        id: item.id || '',
+        tipo: toUpper(item.tipo_equipo || 'PC'),
+        modelo: toUpper(item.modelo || ''),
+        fabricante: toUpper(item.fabricante || 'OEM'),
+        serie: toUpper(item.numero_serie || 'N/A'),
+        specs: toUpper(item.hardware_specs || item.procesador || item.ram_total || almacenamientoStr || 'Estándar'),
+        bloque: bloque,
+        ubicacion: amb,
+        usuario: user,
+        estado: status
+      });
+
+      // 1. CLASIFICACIÓN EXACTA EN CADA HOJA DE EXCEL
+      if (/tarjeta de video|gpu/i.test(tipo)) {
+        wsGPU.addRow({
+          modelo: toUpper(item.modelo || 'GPU Dedicada'),
+          fabricante: toUpper(item.fabricante || 'NVIDIA / AMD'),
+          vram: toUpper(item.ram_total || item.hardware_specs || 'VRAM Dedicada'),
+          interfaz: toUpper(item.placa_base || 'PCIe x16'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          asignado: host,
+          bloque: bloque,
+          ubicacion: amb,
+          usuario: user,
+          estado: status
+        });
+      } else if (/memoria ram|ram/i.test(tipo)) {
+        wsRAM.addRow({
+          modelo: toUpper(item.modelo || 'Memoria RAM'),
+          fabricante: toUpper(item.fabricante || 'Kingston / Corsair'),
+          capacidad: toUpper(item.ram_total || item.almacenamiento_resumen || '16 GB'),
+          tipo: toUpper(item.placa_base || item.hardware_specs || 'DDR4 / DDR5'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          asignado: host,
+          bloque: bloque,
+          ubicacion: amb,
+          usuario: user,
+          estado: status
+        });
+      } else if (/disco|almacenamiento|ssd|nvme|hdd/i.test(tipo)) {
+        wsDiscos.addRow({
+          modelo: toUpper(item.modelo || 'Unidad de Almacenamiento'),
+          fabricante: toUpper(item.fabricante || 'Samsung / Kingston / WD'),
+          capacidad: toUpper(item.almacenamiento_resumen || '1 TB'),
+          interfaz: toUpper(item.placa_base || item.hardware_specs || 'M.2 NVMe PCIe'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          asignado: host,
+          bloque: bloque,
+          ubicacion: amb,
+          usuario: user,
+          estado: status
+        });
+      } else if (/procesador|cpu/i.test(tipo)) {
+        wsCPU.addRow({
+          modelo: toUpper(item.modelo || 'Procesador CPU'),
+          fabricante: toUpper(item.fabricante || 'Intel / AMD'),
+          specs: toUpper(item.procesador || item.hardware_specs || 'Multi-Core'),
+          socket: toUpper(item.placa_base || 'Socket Estándar'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          asignado: host,
+          bloque: bloque,
+          ubicacion: amb,
+          usuario: user,
+          estado: status
+        });
+      } else if (/placa base|motherboard/i.test(tipo)) {
+        wsPlacas.addRow({
+          modelo: toUpper(item.modelo || 'Placa Base'),
+          fabricante: toUpper(item.fabricante || 'ASUS / MSI / Gigabyte'),
+          chipset: toUpper(item.placa_base || item.hardware_specs || 'Chipset Estándar'),
+          formato: toUpper(item.almacenamiento_resumen || 'ATX / Micro-ATX'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          asignado: host,
+          bloque: bloque,
+          ubicacion: amb,
+          usuario: user,
+          estado: status
+        });
+      } else if (/fuente de poder|psu|refrigeraci|cooler/i.test(tipo)) {
+        wsFuentes.addRow({
+          modelo: toUpper(item.modelo || 'Fuente de Poder / Componente'),
+          tipo: toUpper(item.tipo_equipo || 'Componente'),
+          fabricante: toUpper(item.fabricante || 'Corsair / EVGA'),
+          specs: toUpper(item.hardware_specs || item.almacenamiento_resumen || '80 Plus Gold'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          bloque: bloque,
+          ubicacion: amb,
+          usuario: user,
+          estado: status
+        });
+      } else if (/proyector|datashow/i.test(tipo) || /proyector/i.test(item.modelo || '')) {
         wsProyectores.addRow({
           modelo: toUpper(item.modelo || 'Proyector Multimedia'),
-          fabricante: toUpper(item.fabricante || 'Epson'),
+          fabricante: toUpper(item.fabricante || 'Epson / BenQ'),
           numero_serie: toUpper(item.numero_serie || 'N/A'),
           bloque: bloque,
           ubicacion: amb,
@@ -1746,18 +1996,20 @@ app.get('/api/export-excel', async (req, res) => {
           estado: status,
           notas: toUpper(item.notas || 'Equipo audiovisual')
         });
-      } else if (isImpresora) {
+      } else if (/impresora|multifuncional|fotocopiadora/i.test(tipo) || /impresora/i.test(item.modelo || '')) {
         wsImpresoras.addRow({
           modelo: toUpper(item.modelo || ''),
-          fabricante: toUpper(item.fabricante || 'Epson/HP'),
+          fabricante: toUpper(item.fabricante || 'Epson / HP / Canon'),
+          consumible: toUpper(item.consumible || item.tinta_toner || 'Tinta / Tóner'),
           numero_serie: toUpper(item.numero_serie || ''),
-          usuario: user,
+          mac: toUpper(item.mac_address || 'N/A'),
           bloque: bloque,
           ubicacion: amb,
           ip: ip,
+          usuario: user,
           estado: status
         });
-      } else if (isLaptop) {
+      } else if (/laptop|port[aá]til|notebook/i.test(tipo)) {
         wsLaptops.addRow({
           hostname: host,
           usuario: user,
@@ -1771,7 +2023,19 @@ app.get('/api/export-excel', async (req, res) => {
           ip: ip,
           estado: status
         });
-      } else if (!isWifiDevice) {
+      } else if (/switch|access point|router|wifi/i.test(tipo)) {
+        wsWifi.addRow({
+          dispositivo: toUpper(item.modelo || 'Equipo de Red'),
+          marca: toUpper(item.fabricante || 'Cisco / Ubiquiti / Mikrotik'),
+          mac: toUpper(item.mac_address || item.mac || 'N/A'),
+          numero_serie: toUpper(item.numero_serie || 'N/A'),
+          bloque: bloque,
+          ubicacion: amb,
+          ip: ip,
+          estado: status
+        });
+      } else {
+        // Computadoras de Escritorio, All-in-One, Mini PC, Servidores
         wsCase.addRow({
           hostname: host,
           usuario: user,
@@ -1788,24 +2052,11 @@ app.get('/api/export-excel', async (req, res) => {
         });
       }
 
-      // 2. REGISTRO EN HOJA WIFI (Equipos de red dedicados o interfaces Wi-Fi/MAC detectadas)
-      if (isWifiDevice) {
+      // Registro adicional en hoja WIFI si tiene MAC address detectada
+      if (!/switch|access point|router/i.test(tipo) && item.mac_address && item.mac_address !== 'N/A' && item.mac_address !== '') {
         wsWifi.addRow({
-          dispositivo: toUpper(item.modelo || 'Access Point Wi-Fi'),
-          marca: toUpper(item.fabricante || 'Cisco / Ubiquiti / Mikrotik'),
-          mac: toUpper(item.mac_address || item.mac || 'N/A'),
-          numero_serie: toUpper(item.numero_serie || 'N/A'),
-          bloque: bloque,
-          ubicacion: amb,
-          ip: ip,
-          estado: status
-        });
-      } else if (item.mac_address && item.mac_address !== 'N/A' && item.mac_address !== '') {
-        const devDesc = isLaptop ? `LAPTOP WI-FI (${item.hostname || item.modelo})` : `INTERFAZ RED / WI-FI (${item.hostname})`;
-        const brandDesc = item.fabricante || (isLaptop ? 'HP / INTEL' : 'GIGABIT ADAPTER');
-        wsWifi.addRow({
-          dispositivo: toUpper(devDesc),
-          marca: toUpper(brandDesc),
+          dispositivo: toUpper(`INTERFAZ RED (${item.hostname || item.modelo})`),
+          marca: toUpper(item.fabricante || 'GIGABIT ADAPTER'),
           mac: toUpper(item.mac_address),
           numero_serie: toUpper(item.numero_serie || 'N/A'),
           bloque: bloque,
@@ -1815,7 +2066,7 @@ app.get('/api/export-excel', async (req, res) => {
         });
       }
 
-      // 3. Monitores a su propia hoja
+      // Monitores conectados a la hoja de Monitores
       (item.monitores || []).forEach(m => {
         wsMonitor.addRow({
           monitor: toUpper(`${m.modelo || m.fabricante || 'Monitor'}`),
@@ -1828,9 +2079,8 @@ app.get('/api/export-excel', async (req, res) => {
         });
       });
 
-      // 4. Periféricos clasificados en TECLADO, MOUSE, AUDÍFONOS (Solo hardware propietario/marca)
+      // Periféricos clasificados
       const validPerifericos = (item.perifericos || []).filter(isValidPeripheral);
-
       validPerifericos.forEach(p => {
         const pName = toUpper(p.nombre || p.tipo || '');
         const pType = (p.tipo || '').toLowerCase();
@@ -1854,7 +2104,7 @@ app.get('/api/export-excel', async (req, res) => {
             ubicacion: amb,
             estado: status
           });
-        } else if (/aud[ií]fono|diadema|headset|auricular|hyperx|jabra|poly|plantronics|kraken|void|quantum|sennheiser|audio-technica/i.test(pNameLower) || /aud[ií]fono|diadema|headset|auricular/i.test(pType)) {
+        } else if (/aud[ií]fono|diadema|headset|auricular/i.test(pNameLower) || /aud[ií]fono|diadema|headset|auricular/i.test(pType)) {
           wsAudifonos.addRow({
             dispositivo: pName,
             hostname: host,
@@ -1867,8 +2117,26 @@ app.get('/api/export-excel', async (req, res) => {
       });
     });
 
+    // Llenar Hoja de Resumen General Ejecutivo
+    Object.entries(categoryStats).forEach(([cat, stats]) => {
+      wsResumen.addRow({
+        categoria: cat,
+        total: stats.total,
+        operativos: stats.operativo,
+        en_uso: stats.en_uso,
+        en_bodega: stats.en_bodega,
+        mantenimiento: stats.mantenimiento,
+        de_baja: stats.de_baja
+      });
+    });
+
     // Aplicar estilos y auto-ajustar anchos a todas las hojas categorizadas
-    [wsCase, wsLaptops, wsMonitor, wsTeclado, wsAudifonos, wsMouse, wsImpresoras, wsProyectores, wsWifi].forEach(ws => {
+    const allSheets = [
+      wsResumen, wsCase, wsLaptops, wsGPU, wsRAM, wsDiscos, wsCPU, wsPlacas, wsFuentes, 
+      wsImpresoras, wsProyectores, wsWifi, wsMonitor, wsTeclado, wsMouse, wsAudifonos, wsTotal
+    ];
+
+    allSheets.forEach(ws => {
       styleDataRows(ws);
       if (ws.columns) {
         ws.columns.forEach((column) => {
