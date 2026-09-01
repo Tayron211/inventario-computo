@@ -622,6 +622,15 @@ function initEventListeners() {
       }
     }
 
+    const formCompCap = document.getElementById('formCompCapacidad');
+    const formCompInt = document.getElementById('formCompInterfaz');
+    if (formCompCap) {
+      formCompCap.value = data.ram || data.ram_total || data.storage || data.almacenamiento || '';
+    }
+    if (formCompInt) {
+      formCompInt.value = data.motherboard || data.placa_base || '';
+    }
+
     const brandName = data.brand || data.fabricante || 'Hardware';
     if (badgeAuto) {
       badgeAuto.style.display = 'inline-flex';
@@ -1137,6 +1146,27 @@ function getDeviceTypeInfo(tipo) {
   if (t.includes('servidor') || t.includes('server')) {
     return { icon: 'fa-server', class: 'servidor', label: 'Servidor', category: 'Computadoras' };
   }
+  if (t.includes('tarjeta de video') || t.includes('gpu') || t.includes('gráfica') || t.includes('grafica') || t.includes('geforce') || t.includes('radeon') || t.includes('rtx') || t.includes('gtx') || t.includes('quadro') || t.includes('arc')) {
+    return { icon: 'fa-gamepad', class: 'gpu', label: 'GPU Dedicada', category: 'Componentes' };
+  }
+  if (t.includes('memoria ram') || t.includes('ram') || t.includes('ddr4') || t.includes('ddr5') || t.includes('ddr3') || t.includes('dimm')) {
+    return { icon: 'fa-memory', class: 'ram', label: 'Memoria RAM', category: 'Componentes' };
+  }
+  if (t.includes('disco') || t.includes('almacenamiento') || t.includes('ssd') || t.includes('nvme') || t.includes('hdd') || t.includes('m.2')) {
+    return { icon: 'fa-hard-drive', class: 'disco', label: 'Almacenamiento', category: 'Componentes' };
+  }
+  if (t.includes('procesador') || t.includes('cpu') || t.includes('ryzen') || t.includes('intel core')) {
+    return { icon: 'fa-microchip', class: 'cpu', label: 'Procesador CPU', category: 'Componentes' };
+  }
+  if (t.includes('placa base') || t.includes('motherboard') || t.includes('mainboard') || t.includes('tarjeta madre')) {
+    return { icon: 'fa-chess-board', class: 'motherboard', label: 'Placa Base', category: 'Componentes' };
+  }
+  if (t.includes('fuente de poder') || t.includes('psu') || t.includes('power supply')) {
+    return { icon: 'fa-plug', class: 'psu', label: 'Fuente PSU', category: 'Componentes' };
+  }
+  if (t.includes('refrigeración') || t.includes('refrigeracion') || t.includes('cooler') || t.includes('disipador')) {
+    return { icon: 'fa-snowflake', class: 'cooler', label: 'Refrigeración', category: 'Componentes' };
+  }
   return { icon: 'fa-desktop', class: 'desktop', label: tipo || 'PC de Escritorio', category: 'Computadoras' };
 }
 
@@ -1272,6 +1302,13 @@ function renderData() {
             equipoAsignado: item.hostname || item.modelo || 'Equipo'
           });
         });
+      }
+    });
+  } else if (currentCategory === 'Componentes' || currentCategory === 'Componente') {
+    inventoryData.forEach(item => {
+      const info = getDeviceTypeInfo(item.tipo_equipo);
+      if (info.category === 'Componentes') {
+        displayItems.push(item);
       }
     });
   } else {
@@ -1674,12 +1711,21 @@ function updateMetrics() {
   if (statMonitors) statMonitors.textContent = monitores;
   if (statPeripherals) statPeripherals.textContent = perifericos;
 
+  let componentes = 0;
+  inventoryData.forEach(item => {
+    const info = getDeviceTypeInfo(item.tipo_equipo);
+    if (info.category === 'Componentes') {
+      componentes++;
+    }
+  });
+
   const countAll = document.getElementById('countAll');
   const countLaptops = document.getElementById('countLaptops');
   const countDesktop = document.getElementById('countDesktop');
   const countAIO = document.getElementById('countAIO');
   const countMonitores = document.getElementById('countMonitores');
   const countPerifericos = document.getElementById('countPerifericos');
+  const countComponentes = document.getElementById('countComponentes');
 
   if (countAll) countAll.textContent = total;
   if (countLaptops) countLaptops.textContent = laptops;
@@ -1687,6 +1733,7 @@ function updateMetrics() {
   if (countAIO) countAIO.textContent = aio;
   if (countMonitores) countMonitores.textContent = monitores;
   if (countPerifericos) countPerifericos.textContent = perifericos;
+  if (countComponentes) countComponentes.textContent = componentes;
 }
 
 // -------------------------------------------------------------
@@ -1852,6 +1899,12 @@ function adaptFormFieldsByType(selectedType) {
   const isProjector = t.includes('proyector');
   const isNetwork = t.includes('switch') || t.includes('access point') || t.includes('router') || t.includes('red');
   const isPeripheral = t.includes('teclado') || t.includes('mouse') || t.includes('audífono') || t.includes('audifono') || t.includes('monitor') || t.includes('otro periférico') || t.includes('periférico');
+  const isComponent = t.includes('tarjeta de video') || t.includes('gpu') || t.includes('memoria ram') || t.includes('ram') || t.includes('disco') || t.includes('almacenamiento') || t.includes('procesador') || t.includes('cpu') || t.includes('placa base') || t.includes('motherboard') || t.includes('fuente de poder') || t.includes('psu') || t.includes('refrigeración') || t.includes('cooler') || t.includes('componente');
+
+  const sectionComponente = document.getElementById('formSectionComponente');
+  if (sectionComponente) {
+    sectionComponente.style.display = isComponent ? 'block' : 'none';
+  }
 
   // 1. Placa Base (Solo en computadoras)
   if (groupPlacaBase) {
@@ -1880,7 +1933,10 @@ function adaptFormFieldsByType(selectedType) {
 
   // 6. Adaptar textos y placeholders contextuales
   if (labelHostname && inputHostname) {
-    if (isNetwork) {
+    if (isComponent) {
+      labelHostname.textContent = 'ASIGNADO A / EQUIPO DESTINO';
+      inputHostname.placeholder = 'Ej: En Stock / Bodega o PC-SOPORTE-01';
+    } else if (isNetwork) {
       labelHostname.textContent = 'NOMBRE / IP DEL EQUIPO DE RED';
       inputHostname.placeholder = 'Ej: SWITCH-CORE-01, AP-AULA201 o 192.168.89.254';
     } else if (isPrinter) {
@@ -1899,7 +1955,10 @@ function adaptFormFieldsByType(selectedType) {
   }
 
   if (labelUsuario && inputUsuario) {
-    if (isNetwork) {
+    if (isComponent) {
+      labelUsuario.textContent = 'RESPONSABLE / CUSTODIO';
+      inputUsuario.placeholder = 'Ej: Soporte TI / Stock de Repuestos';
+    } else if (isNetwork) {
       labelUsuario.textContent = 'ADMINISTRADOR / RESPONSABLE TI';
       inputUsuario.placeholder = 'Ej: Administrador de Red / Soporte TI';
     } else if (isProjector) {
@@ -1984,6 +2043,15 @@ function editEquipment(id) {
   if (formConsumible) {
     formConsumible.value = item.consumible || item.tinta_toner || (autoDetectPrinterConsumables(item.modelo)?.consumable || '');
   }
+
+  const formCompCap = document.getElementById('formCompCapacidad');
+  if (formCompCap) {
+    formCompCap.value = item.ram_total || item.almacenamiento_resumen || (item.hardware_specs ? item.hardware_specs.split('|')[0].trim() : '');
+  }
+  const formCompInt = document.getElementById('formCompInterfaz');
+  if (formCompInt) {
+    formCompInt.value = item.placa_base || (item.hardware_specs && item.hardware_specs.includes('|') ? item.hardware_specs.split('|')[1].trim() : '');
+  }
   
   // Monitores & Periféricos
   const monStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante} (${m.serie || 'S/N: N/A'})`).join(', ');
@@ -2067,6 +2135,9 @@ async function handleFormSubmit(e) {
     }).filter(p => p.nombre);
   }
 
+  const compCapacidad = (document.getElementById('formCompCapacidad') ? document.getElementById('formCompCapacidad').value : '').trim();
+  const compInterfaz = (document.getElementById('formCompInterfaz') ? document.getElementById('formCompInterfaz').value : '').trim();
+
   const payload = {
     modelo: (document.getElementById('formModelo').value || '').trim(),
     numero_serie: (document.getElementById('formNumeroSerie').value || '').trim(),
@@ -2082,8 +2153,13 @@ async function handleFormSubmit(e) {
     usuario_actual: (document.getElementById('formUsuario').value || '').trim(),
     ubicacion: finalUbicacion,
     consumible: (document.getElementById('formConsumible') ? document.getElementById('formConsumible').value : '').trim(),
+    hardware_specs: compCapacidad || compInterfaz ? [compCapacidad, compInterfaz].filter(Boolean).join(' | ') : '',
     notas: (document.getElementById('formNotas').value || '').trim()
   };
+
+  if (compCapacidad && !payload.almacenamiento_resumen) payload.almacenamiento_resumen = compCapacidad;
+  if (compCapacidad && payload.tipo_equipo.includes('Memoria RAM') && !payload.ram_total) payload.ram_total = compCapacidad;
+  if (compCapacidad && payload.tipo_equipo.includes('Procesador') && !payload.procesador) payload.procesador = `${payload.modelo} ${compCapacidad}`.trim();
 
   if (parsedMonitores !== undefined) {
     payload.monitores = parsedMonitores;

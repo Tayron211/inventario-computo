@@ -753,15 +753,105 @@ const HARDWARE_MODELS_CATALOG = [
   { pattern: /panasonic\s*(pt[- ]?vmz|pt[- ]?frq|pt[- ]?mz)|infocus\s*(in114|in116|in118)/i, brand: 'Panasonic / InFocus', type: 'Proyector', cpu: 'Solid Shine Laser / BrilliantColor DLP Engine (4000-6000 Lúmenes)', ram: 'High-Definition Frame Buffer', storage: 'Firmware Flash', motherboard: 'Enterprise High-Brightness Projector Mainboard' },
 
   // ==========================================
-  // SERVIDORES (DELL POWEREDGE, HP PROLIANT, LENOVO THINKSYSTEM, SYNOLOGY NAS)
+  // TARJETAS DE VIDEO DEDICADAS / GPUs (NVIDIA, AMD, INTEL - 2009 A 2026)
   // ==========================================
-  { pattern: /poweredge\s*r740/i, brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge R740 Server Motherboard (iDRAC9 Enterprise)' },
-  { pattern: /poweredge\s*r730/i, brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon E5-2630 v4 @ 2.20GHz (20 Núcleos, 40 Hilos)', ram: '32 GB DDR4 ECC Registered', storage: '2x 600 GB SAS + 2x 2 TB SATA (PERC H730 RAID)', motherboard: 'Dell PowerEdge R730 Server Motherboard (iDRAC8 Enterprise)' },
-  { pattern: /poweredge\s*(r640|r440|t440|t340|t140)/i, brand: 'Dell', type: 'Servidor', cpu: 'Intel Xeon Silver 4208 / Xeon E-2224 @ 3.40GHz (4/8 Núcleos)', ram: '32 GB DDR4 ECC', storage: '2x 480 GB SSD Enterprise + 2x 2 TB HDD (PERC RAID)', motherboard: 'Dell PowerEdge System Board (iDRAC9)' },
-  { pattern: /proliant\s*dl380\s*gen10|dl380\s*gen10/i, brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4-2933 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array P408i-a RAID)', motherboard: 'HPE ProLiant DL380 Gen10 Server Board (iLO 5 Advanced)' },
-  { pattern: /proliant\s*dl360|proliant\s*ml350|proliant\s*ml110/i, brand: 'HP', type: 'Servidor', cpu: 'Intel Xeon Bronze / Silver Scalable Processor (8/16 Núcleos)', ram: '32 GB DDR4 ECC SmartMemory', storage: '2x 480 GB SSD SATA + 2x 1 TB SAS (HPE Smart Array)', motherboard: 'HPE ProLiant Server Board (iLO 5)' },
-  { pattern: /thinksystem\s*(sr650|sr530|st550)/i, brand: 'Lenovo', type: 'Servidor', cpu: 'Intel Xeon Silver 4214 @ 2.20GHz (12 Núcleos, 24 Hilos)', ram: '32 GB DDR4-2933 ECC', storage: '2x 480 GB SSD NVMe + RAID 930-8i', motherboard: 'Lenovo ThinkSystem Server Motherboard (XClarity Controller)' },
-  { pattern: /synology\s*(ds920\+|ds220\+|ds423\+|rs1221\+)|qnap\s*ts/i, brand: 'Synology', type: 'Servidor', cpu: 'Intel Celeron J4125 Quad-Core @ 2.00GHz / AMD Ryzen V1500B', ram: '4 GB / 8 GB DDR4', storage: '4x Bahías SATA 3.5" (Synology Hybrid RAID / Btrfs)', motherboard: 'Synology DiskStation NAS Motherboard (DSM 7 OS)' },
+  // NVIDIA RTX Serie 40 y 50
+  { pattern: /rtx\s*5090/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Blackwell GB202 GPU (21760 CUDA Cores)', ram: '32 GB GDDR7 (512-bit, 28 Gbps)', storage: 'PCIe 5.0 x16 (600W 12V-2x6)', motherboard: 'Tarjeta Gráfica Dedicada (3x DisplayPort 2.1, 1x HDMI 2.1a)' },
+  { pattern: /rtx\s*5080/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Blackwell GB203 GPU (10752 CUDA Cores)', ram: '16 GB GDDR7 (256-bit, 30 Gbps)', storage: 'PCIe 5.0 x16 (400W 12V-2x6)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 2.1, 1x HDMI 2.1a)' },
+  { pattern: /rtx\s*4090/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ada Lovelace AD102 GPU (16384 CUDA Cores @ 2.52GHz)', ram: '24 GB GDDR6X (384-bit)', storage: 'PCIe 4.0 x16 (450W TDP, 1x 16-pin 12VHPWR)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*4080\s*super|rtx\s*4080/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ada Lovelace AD103 GPU (10240 CUDA Cores @ 2.55GHz)', ram: '16 GB GDDR6X (256-bit)', storage: 'PCIe 4.0 x16 (320W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*4070\s*ti\s*super|rtx\s*4070\s*ti/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ada Lovelace AD103/AD104 GPU (8448 CUDA Cores)', ram: '16 GB / 12 GB GDDR6X (256-bit / 192-bit)', storage: 'PCIe 4.0 x16 (285W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*4070\s*super|rtx\s*4070/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ada Lovelace AD104 GPU (7168 CUDA Cores @ 2.48GHz)', ram: '12 GB GDDR6X (192-bit)', storage: 'PCIe 4.0 x16 (220W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*4060\s*ti/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ada Lovelace AD106 GPU (4352 CUDA Cores @ 2.54GHz)', ram: '8 GB / 16 GB GDDR6 (128-bit)', storage: 'PCIe 4.0 x8 (160W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*4060/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ada Lovelace AD107 GPU (3072 CUDA Cores @ 2.46GHz)', ram: '8 GB GDDR6 (128-bit)', storage: 'PCIe 4.0 x8 (115W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+
+  // NVIDIA RTX Serie 30
+  { pattern: /rtx\s*3090\s*ti|rtx\s*3090/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ampere GA102 GPU (10496 CUDA Cores @ 1.70GHz)', ram: '24 GB GDDR6X (384-bit)', storage: 'PCIe 4.0 x16 (350W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*3080\s*ti|rtx\s*3080/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ampere GA102 GPU (8704/10240 CUDA Cores)', ram: '10 GB / 12 GB GDDR6X (320-bit / 384-bit)', storage: 'PCIe 4.0 x16 (320W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*3070\s*ti|rtx\s*3070/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ampere GA104 GPU (5888/6144 CUDA Cores @ 1.73GHz)', ram: '8 GB GDDR6 / GDDR6X (256-bit)', storage: 'PCIe 4.0 x16 (220W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*3060\s*ti/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ampere GA104 GPU (4864 CUDA Cores @ 1.67GHz)', ram: '8 GB GDDR6 (256-bit)', storage: 'PCIe 4.0 x16 (200W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*3060/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ampere GA106 GPU (3584 CUDA Cores @ 1.78GHz)', ram: '12 GB GDDR6 (192-bit)', storage: 'PCIe 4.0 x16 (170W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4a, 1x HDMI 2.1)' },
+  { pattern: /rtx\s*3050/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Ampere GA106/GA107 GPU (2560/2048 CUDA Cores)', ram: '6 GB / 8 GB GDDR6 (128-bit / 96-bit)', storage: 'PCIe 4.0 x8 (70W-130W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+
+  // NVIDIA RTX Serie 20 & GTX 16
+  { pattern: /rtx\s*2080\s*ti|rtx\s*2080\s*super|rtx\s*2080/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Turing TU102/TU104 GPU (2944-4352 CUDA Cores)', ram: '8 GB / 11 GB GDDR6 (256-bit / 352-bit)', storage: 'PCIe 3.0 x16 (215W-250W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4, 1x HDMI 2.0b, Type-C)' },
+  { pattern: /rtx\s*2070\s*super|rtx\s*2070/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Turing TU104/TU106 GPU (2304-2560 CUDA Cores)', ram: '8 GB GDDR6 (256-bit)', storage: 'PCIe 3.0 x16 (175W-215W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / USB-C)' },
+  { pattern: /rtx\s*2060\s*super|rtx\s*2060/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Turing TU106 GPU (1920/2176 CUDA Cores @ 1.68GHz)', ram: '6 GB / 8 GB / 12 GB GDDR6 (192-bit / 256-bit)', storage: 'PCIe 3.0 x16 (160W-175W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /gtx\s*1660\s*ti|gtx\s*1660\s*super|gtx\s*1660/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Turing TU116 GPU (1408-1536 CUDA Cores @ 1.78GHz)', ram: '6 GB GDDR5 / GDDR6 (192-bit)', storage: 'PCIe 3.0 x16 (120W-125W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP 1.4, HDMI 2.0b, DVI)' },
+  { pattern: /gtx\s*1650\s*super|gtx\s*1650/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Turing TU117/TU116 GPU (896-1280 CUDA Cores)', ram: '4 GB GDDR5 / GDDR6 (128-bit)', storage: 'PCIe 3.0 x16 (75W-100W TDP, Bajo Consumo)', motherboard: 'Tarjeta Gráfica Dedicada (HDMI / DP / DVI)' },
+
+  // NVIDIA GTX Serie 10, 900, 700, 600, 500, 400, 200 (2009-2018)
+  { pattern: /gtx\s*1080\s*ti|gtx\s*1080/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Pascal GP102/GP104 GPU (2560-3584 CUDA Cores @ 1.73GHz)', ram: '8 GB / 11 GB GDDR5X (256-bit / 352-bit)', storage: 'PCIe 3.0 x16 (180W-250W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP, 1x HDMI)' },
+  { pattern: /gtx\s*1070\s*ti|gtx\s*1070/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Pascal GP104 GPU (1920-2432 CUDA Cores @ 1.68GHz)', ram: '8 GB GDDR5 (256-bit)', storage: 'PCIe 3.0 x16 (150W-180W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /gtx\s*1060/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Pascal GP106 GPU (1152-1280 CUDA Cores @ 1.70GHz)', ram: '3 GB / 6 GB GDDR5 (192-bit)', storage: 'PCIe 3.0 x16 (120W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /gtx\s*1050\s*ti|gtx\s*1050/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Pascal GP107 GPU (640-768 CUDA Cores @ 1.39GHz)', ram: '2 GB / 4 GB GDDR5 (128-bit)', storage: 'PCIe 3.0 x16 (75W TDP Sin Conector)', motherboard: 'Tarjeta Gráfica Dedicada (HDMI / DP / DVI)' },
+  { pattern: /gtx\s*980\s*ti|gtx\s*980|gtx\s*970/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Maxwell GM204/GM200 GPU (1664-2816 CUDA Cores)', ram: '4 GB / 6 GB GDDR5 (256-bit / 384-bit)', storage: 'PCIe 3.0 x16 (145W-250W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /gtx\s*960|gtx\s*950/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Maxwell GM206 GPU (768-1024 CUDA Cores)', ram: '2 GB / 4 GB GDDR5 (128-bit)', storage: 'PCIe 3.0 x16 (90W-120W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /gtx\s*780\s*ti|gtx\s*780|gtx\s*770|gtx\s*760/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Kepler GK110/GK104 GPU (1152-2880 CUDA Cores)', ram: '2 GB / 3 GB / 4 GB GDDR5 (256-bit / 384-bit)', storage: 'PCIe 3.0 x16 (170W-250W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (2x DVI, HDMI, DP)' },
+  { pattern: /gtx\s*750\s*ti|gtx\s*750/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Maxwell 1st Gen GM107 GPU (512-640 CUDA Cores)', ram: '1 GB / 2 GB / 4 GB GDDR5 (128-bit)', storage: 'PCIe 3.0 x16 (55W-60W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (HDMI / DVI / VGA)' },
+  { pattern: /gt\s*1030|gt\s*730|gt\s*710|gt\s*610/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Low-Profile Video Processor (384/192 CUDA Cores)', ram: '1 GB / 2 GB / 4 GB GDDR5 / DDR3 / DDR4', storage: 'PCIe 3.0 / 2.0 x8/x16 (19W-38W TDP Pasiva/Activa)', motherboard: 'Tarjeta Gráfica de Salida de Video (HDMI / DVI / VGA)' },
+  { pattern: /gtx\s*680|gtx\s*670|gtx\s*660|gtx\s*650/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Kepler GK104/GK106/GK107 GPU', ram: '1 GB / 2 GB GDDR5 (128-bit / 192-bit / 256-bit)', storage: 'PCIe 3.0 x16 (64W-195W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DVI / HDMI / DP)' },
+  { pattern: /gtx\s*580|gtx\s*570|gtx\s*560|gtx\s*550/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Fermi GF110/GF114/GF116 GPU (192-512 CUDA Cores)', ram: '1 GB / 1.5 GB GDDR5 (192-bit / 320-bit / 384-bit)', storage: 'PCIe 2.0 x16 (116W-244W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (2x DVI, Mini-HDMI)' },
+  { pattern: /gtx\s*480|gtx\s*470|gtx\s*460|gtx\s*280|gtx\s*260/i, brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Fermi GF100/GT200 Architecture (216-480 Cores)', ram: '896 MB / 1 GB / 1.5 GB GDDR3 / GDDR5', storage: 'PCIe 2.0 x16 (160W-250W TDP)', motherboard: 'Tarjeta Gráfica Dedicada Vintage (Dual DVI / S-Video)' },
+  { pattern: /quadro\s*(rtx\s*4000|rtx\s*5000|p4000|p2000|k4000|k2000|k620|t1000|t600|t400)/i, brand: 'NVIDIA Quadro', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA Quadro Professional Workstation GPU (ECC / CAD / 3D)', ram: '2 GB / 4 GB / 8 GB / 16 GB GDDR5 / GDDR6', storage: 'PCIe 3.0 / 4.0 x16 (Workstation ISV Certified)', motherboard: 'Tarjeta Gráfica Profesional (4x DisplayPort / Mini-DP)' },
+
+  // AMD Radeon GPUs (RX 7000, 6000, 5000, 500, 400, R9/R7, HD 7000/6000/5000)
+  { pattern: /rx\s*7900\s*xtx|rx\s*7900\s*xt|rx\s*7900\s*gre/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 3 Navi 31 GPU (5376-6144 Stream Processors)', ram: '16 GB / 20 GB / 24 GB GDDR6 (256-bit / 320-bit / 384-bit)', storage: 'PCIe 4.0 x16 (260W-355W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DisplayPort 2.1, HDMI 2.1a)' },
+  { pattern: /rx\s*7800\s*xt|rx\s*7700\s*xt/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 3 Navi 32 GPU (3456-3840 Stream Processors)', ram: '12 GB / 16 GB GDDR6 (192-bit / 256-bit)', storage: 'PCIe 4.0 x16 (245W-263W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP 2.1, HDMI 2.1)' },
+  { pattern: /rx\s*7600\s*xt|rx\s*7600/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 3 Navi 33 GPU (2048 Stream Processors @ 2.65GHz)', ram: '8 GB / 16 GB GDDR6 (128-bit)', storage: 'PCIe 4.0 x8 (165W-190W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 2.1, 1x HDMI 2.1)' },
+  { pattern: /rx\s*6950\s*xt|rx\s*6900\s*xt|rx\s*6800\s*xt|rx\s*6800/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 2 Navi 21 GPU (3840-5120 Stream Processors, 128MB Infinity Cache)', ram: '16 GB GDDR6 (256-bit)', storage: 'PCIe 4.0 x16 (250W-335W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP 1.4, HDMI 2.1)' },
+  { pattern: /rx\s*6750\s*xt|rx\s*6700\s*xt|rx\s*6700/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 2 Navi 22 GPU (2304-2560 Stream Processors @ 2.42GHz)', ram: '10 GB / 12 GB GDDR6 (160-bit / 192-bit)', storage: 'PCIe 4.0 x16 (175W-250W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4, 1x HDMI 2.1)' },
+  { pattern: /rx\s*6650\s*xt|rx\s*6600\s*xt|rx\s*6600/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 2 Navi 23 GPU (1792-2048 Stream Processors @ 2.49GHz)', ram: '8 GB GDDR6 (128-bit, 32MB Infinity Cache)', storage: 'PCIe 4.0 x8 (132W-180W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (3x DP 1.4, 1x HDMI 2.1)' },
+  { pattern: /rx\s*6500\s*xt|rx\s*6400/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD RDNA 2 Navi 24 GPU (768-1024 Stream Processors)', ram: '4 GB GDDR6 (64-bit)', storage: 'PCIe 4.0 x4 (53W-107W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (1x DP, 1x HDMI)' },
+  { pattern: /rx\s*5700\s*xt|rx\s*5700|rx\s*5600\s*xt|rx\s*5500\s*xt/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD 1st Gen RDNA Navi 10/14 GPU (1408-2560 Stream Processors)', ram: '4 GB / 6 GB / 8 GB GDDR6 (128-bit / 192-bit / 256-bit)', storage: 'PCIe 4.0 x16 (130W-225W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP 1.4 / HDMI 2.0b)' },
+  { pattern: /rx\s*590|rx\s*580|rx\s*570|rx\s*560|rx\s*550/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD Polaris 20/21 Architecture (512-2304 Stream Processors @ 1.34GHz)', ram: '2 GB / 4 GB / 8 GB GDDR5 (128-bit / 256-bit)', storage: 'PCIe 3.0 x16 (50W-185W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /rx\s*480|rx\s*470|rx\s*460/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD Polaris 10/11 Architecture (896-2304 Stream Processors)', ram: '2 GB / 4 GB / 8 GB GDDR5 (128-bit / 256-bit)', storage: 'PCIe 3.0 x16 (75W-150W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DP / HDMI / DVI)' },
+  { pattern: /r9\s*390|r9\s*380|r9\s*290|r9\s*280|r9\s*270|r7\s*260|r7\s*250|r7\s*240/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD GCN 1.0/2.0/3.0 Architecture (Hawaii / Tonga / Curacao / Oland)', ram: '1 GB / 2 GB / 4 GB / 8 GB GDDR5 (128-bit a 512-bit)', storage: 'PCIe 3.0 x16 (30W-275W TDP)', motherboard: 'Tarjeta Gráfica Dedicada (DVI / HDMI / DP)' },
+  { pattern: /hd\s*7970|hd\s*7950|hd\s*7870|hd\s*7850|hd\s*7770|hd\s*6970|hd\s*6870|hd\s*5870|hd\s*5770|hd\s*5450/i, brand: 'AMD Radeon', type: 'Tarjeta de Video (GPU)', cpu: 'AMD TeraScale / GCN Vintage Graphics Core', ram: '512 MB / 1 GB / 2 GB / 3 GB GDDR3 / GDDR5', storage: 'PCIe 2.0 / 3.0 x16 (Legacy Video Output)', motherboard: 'Tarjeta Gráfica Dedicada (DVI / VGA / HDMI / Mini-DP)' },
+  { pattern: /arc\s*a770|arc\s*a750|arc\s*a580|arc\s*a380|arc\s*b580/i, brand: 'Intel Arc', type: 'Tarjeta de Video (GPU)', cpu: 'Intel Alchemist / Battlemage Xe-HPG Architecture (8-32 Xe Cores, Ray Tracing)', ram: '6 GB / 8 GB / 12 GB / 16 GB GDDR6 (96-bit a 256-bit)', storage: 'PCIe 4.0 x16 / x8 (75W-225W TDP)', motherboard: 'Tarjeta Gráfica Dedicada Intel (3x DP 2.0, 1x HDMI 2.1)' },
+
+  // ==========================================
+  // MEMORIAS RAM INDEPENDIENTES (DDR5, DDR4, DDR3)
+  // ==========================================
+  { pattern: /(fury|vengeance|trident\s*z|t-force|xpg|crucial|ballistix|kingston|corsair|g\.skill).*(ddr5|6000|5600|5200|4800|6400|7200)/i, brand: 'Memoria RAM', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB / 32 GB / 64 GB DDR5 (4800MHz - 7200MHz XMP 3.0 / AMD EXPO)', storage: 'On-Die ECC Integrado (1.1V - 1.4V)', motherboard: 'Formato DIMM 288-pin (Compatible Placas Intel LGA1700/1851 & AMD AM5)' },
+  { pattern: /(fury|vengeance|ripjaws|t-force|xpg|crucial|ballistix|hyperx|kingston|corsair).*(ddr4|3200|2666|2400|3000|3600|4000)/i, brand: 'Memoria RAM', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '8 GB / 16 GB / 32 GB DDR4 (2400MHz - 3600MHz CL16/CL18 XMP 2.0)', storage: 'Disipador Térmico de Aluminio (1.2V - 1.35V)', motherboard: 'Formato DIMM 288-pin (Compatible Placas Intel LGA1200/1151 & AMD AM4)' },
+  { pattern: /(ddr3|1600mhz|1333mhz|1866mhz)/i, brand: 'Memoria RAM', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '4 GB / 8 GB DDR3 / DDR3L (1333MHz - 1600MHz)', storage: '1.5V / 1.35V Bajo Voltaje', motherboard: 'Formato DIMM 240-pin / SO-DIMM 204-pin' },
+
+  // ==========================================
+  // DISCOS Y ALMACENAMIENTO INDEPENDIENTE (SSD NVMe M.2, SSD SATA, HDD)
+  // ==========================================
+  { pattern: /(990\s*pro|980\s*pro|970\s*evo|sn850x|sn770|kc3000|fury\s*renegade|p5\s*plus|t500|legend\s*960|nm790)/i, brand: 'Almacenamiento', type: 'Disco / Almacenamiento', cpu: 'Controlador NVMe PCIe Gen4/Gen5 x4', ram: 'DRAM Cache LPDDR4 / HMB', storage: '500 GB / 1 TB / 2 TB / 4 TB SSD NVMe M.2 2280 (Hasta 7400 MB/s)', motherboard: 'Interfaz M.2 PCIe NVMe (M-Key 2280)' },
+  { pattern: /(nv2|sn580|sn570|p3\s*plus|p3|legend\s*800|sx8200|mp600)/i, brand: 'Almacenamiento', type: 'Disco / Almacenamiento', cpu: 'Controlador NVMe PCIe Gen3/Gen4 x4', ram: 'Host Memory Buffer (HMB)', storage: '250 GB / 500 GB / 1 TB / 2 TB SSD M.2 NVMe (Hasta 3500-5000 MB/s)', motherboard: 'Interfaz M.2 PCIe NVMe (M-Key 2280)' },
+  { pattern: /(a400|kc600|bx500|mx500|870\s*evo|870\s*qvo|wd\s*green|wd\s*blue\s*sata|sandisk\s*ssd)/i, brand: 'Almacenamiento', type: 'Disco / Almacenamiento', cpu: 'Controlador SATA III 6Gb/s', ram: 'DRAM Cache / Cache SLC', storage: '120 GB / 240 GB / 480 GB / 960 GB / 1 TB / 2 TB SSD SATA 2.5" (Hasta 550 MB/s)', motherboard: 'Interfaz SATA III 6.0 Gb/s (7mm Factor de Forma 2.5")' },
+  { pattern: /(barracuda|ironwolf|skyhawk|wd\s*purple|wd\s*black|wd\s*red|wd\s*blue|toshiba\s*p300)/i, brand: 'Almacenamiento', type: 'Disco / Almacenamiento', cpu: 'Controlador de Disco Magnético Mecánico', ram: '64 MB / 128 MB / 256 MB Cache Buffer', storage: '1 TB / 2 TB / 4 TB / 6 TB / 8 TB / 12 TB / 16 TB HDD SATA 3.5" (5400 / 7200 RPM)', motherboard: 'Interfaz SATA III 6.0 Gb/s (Factor de Forma 3.5" / 2.5")' },
+
+  // ==========================================
+  // PROCESADORES (CPUs) INDEPENDIENTES
+  // ==========================================
+  { pattern: /(i9[- ]?14900|i9[- ]?13900|i7[- ]?14700|i7[- ]?13700|i5[- ]?14600|i5[- ]?13600|i5[- ]?13400)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 13va/14va Gen Raptor Lake Refresh (10 a 24 Núcleos, hasta 6.0GHz Turbo)', ram: 'Soporte Dual Channel DDR5-5600 / DDR4-3200', storage: 'Intel Smart Cache 20MB a 36MB (PCIe 5.0 x16)', motherboard: 'Socket Intel LGA 1700 (Chipsets B760, Z790, B660, Z690)' },
+  { pattern: /(i7[- ]?12700|i5[- ]?12600|i5[- ]?12400|i3[- ]?12100)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 12va Gen Alder Lake (4 a 12 Núcleos, hasta 4.90GHz Turbo)', ram: 'Soporte DDR5 / DDR4 (PCIe Gen5)', storage: 'Intel Smart Cache 12MB a 25MB', motherboard: 'Socket Intel LGA 1700 (Chipsets H610, B660, Z690, B760)' },
+  { pattern: /(i7[- ]?1[01]700|i5[- ]?1[01]400|i3[- ]?10100)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 10ma/11va Gen Comet Lake / Rocket Lake (4 a 8 Núcleos, hasta 5.0GHz)', ram: 'Soporte DDR4-2666 / DDR4-3200', storage: 'Intel Smart Cache 8MB a 16MB', motherboard: 'Socket Intel LGA 1200 (Chipsets H410, B460, Z490, H510, B560, Z590)' },
+  { pattern: /(i7[- ]?[89]700|i5[- ]?[89]400|i3[- ]?[89]100)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 8va/9na Gen Coffee Lake (4 a 8 Núcleos, hasta 4.7GHz)', ram: 'Soporte DDR4-2400 / DDR4-2666', storage: 'Intel Smart Cache 6MB a 12MB', motherboard: 'Socket Intel LGA 1151 v2 (Chipsets H310, B360, B365, Z390)' },
+  { pattern: /(i7[- ]?[67]700|i5[- ]?[67]400|i3[- ]?[67]100)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 6ta/7ma Gen Skylake / Kaby Lake (2 a 4 Núcleos, 4/8 Hilos)', ram: 'Soporte DDR4 / DDR3L', storage: 'Intel Smart Cache 3MB a 8MB', motherboard: 'Socket Intel LGA 1151 v1 (Chipsets H110, B150, B250, Z170, Z270)' },
+  { pattern: /(i7[- ]?4790|i5[- ]?4590|i5[- ]?4460|i3[- ]?4160)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 4ta Gen Haswell Refresh (2 a 4 Núcleos, hasta 4.0GHz)', ram: 'Soporte Dual Channel DDR3-1600', storage: 'Intel Smart Cache 3MB a 8MB', motherboard: 'Socket Intel LGA 1150 (Chipsets H81, B85, H87, Z97)' },
+  { pattern: /(i7[- ]?3770|i5[- ]?3470|i7[- ]?2600|i5[- ]?2400|core\s*2\s*quad)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 2da/3ra Gen Sandy Bridge / Ivy Bridge (2 a 4 Núcleos @ 3.40GHz)', ram: 'Soporte DDR3-1333 / 1600', storage: 'Intel Smart Cache 6MB a 8MB', motherboard: 'Socket Intel LGA 1155 (Chipsets H61, B75, Z68, Z77)' },
+  { pattern: /(ryzen\s*9\s*9950x|ryzen\s*9\s*7950x|ryzen\s*7\s*9800x3d|ryzen\s*7\s*7800x3d|ryzen\s*7\s*7700|ryzen\s*5\s*7600)/i, brand: 'AMD Ryzen', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 7000/9000 Zen 4 / Zen 5 (6 a 16 Núcleos, 3D V-Cache hasta 5.7GHz)', ram: 'Soporte Dual Channel DDR5 (AMD EXPO)', storage: 'Cache L3 hasta 96MB (PCIe 5.0 x16)', motherboard: 'Socket AMD AM5 (Chipsets A620, B650, X670, B850, X870)' },
+  { pattern: /(ryzen\s*9\s*5900|ryzen\s*7\s*5800x3d|ryzen\s*7\s*5700x|ryzen\s*5\s*5600x|ryzen\s*5\s*5600g|ryzen\s*5\s*5500)/i, brand: 'AMD Ryzen', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 5000 Zen 3 Architecture (6 a 16 Núcleos, hasta 4.90GHz Turbo)', ram: 'Soporte Dual Channel DDR4-3200', storage: 'Cache L3 16MB a 96MB (PCIe 4.0)', motherboard: 'Socket AMD AM4 (Chipsets A520, B450, B550, X570)' },
+  { pattern: /(ryzen\s*5\s*3600|ryzen\s*5\s*2600|ryzen\s*5\s*1600|ryzen\s*3\s*3200g|ryzen\s*3\s*2200g)/i, brand: 'AMD Ryzen', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 1000/2000/3000 Zen / Zen 2 (4 a 8 Núcleos, hasta 4.2GHz)', ram: 'Soporte Dual Channel DDR4 (2666-3200MHz)', storage: 'Cache L3 4MB a 32MB', motherboard: 'Socket AMD AM4 (Chipsets A320, B350, B450, X470)' },
+
+  // ==========================================
+  // PLACAS BASE / MOTHERBOARDS INDEPENDIENTES
+  // ==========================================
+  { pattern: /(tuf\s*gaming\s*b760|rog\s*strix\s*b760|prime\s*b760|mag\s*b760|b760m\s*ds3h|b760)/i, brand: 'Placa Base', type: 'Placa Base', cpu: 'Socket Intel LGA 1700 (Soporte Intel 12va, 13va y 14va Gen)', ram: '4x Ranuras DDR5 / DDR4 (Hasta 128GB / 192GB XMP)', storage: '2x-3x Ranuras M.2 PCIe 4.0 NVMe + 4x SATA III', motherboard: 'Placa Base Chipset Intel B760 (VRM Disipado, PCIe 5.0/4.0 x16, 2.5Gb LAN)' },
+  { pattern: /(z790|z690|z890)/i, brand: 'Placa Base', type: 'Placa Base', cpu: 'Socket Intel LGA 1700 / LGA 1851 (Overclocking K-Series)', ram: '4x DDR5 Dual Channel (Hasta 8000+ MHz OC)', storage: '4x-5x Ranuras M.2 PCIe Gen4/Gen5 + 6x SATA III', motherboard: 'Placa Base Enthusiast Chipset Intel Z790/Z890 (Wi-Fi 6E/7, PCIe 5.0, Thunderbolt 4)' },
+  { pattern: /(b650|b650m|x670|x870|a620)/i, brand: 'Placa Base', type: 'Placa Base', cpu: 'Socket AMD AM5 (Soporte AMD Ryzen Serie 7000, 8000 y 9000)', ram: '4x Ranuras DDR5 Dual Channel (AMD EXPO hasta 6400+ MHz)', storage: '2x-3x Ranuras M.2 PCIe 5.0/4.0 NVMe + 4x SATA', motherboard: 'Placa Base Chipset AMD B650/X870 (VRM Digital, PCIe 5.0 x16, 2.5Gb LAN, Wi-Fi 6E)' },
+  { pattern: /(b550|b550m|b450|b450m|a520|a520m|x570|a320)/i, brand: 'Placa Base', type: 'Placa Base', cpu: 'Socket AMD AM4 (Soporte AMD Ryzen Serie 1000 a 5000 / 5000X3D)', ram: '2x/4x Ranuras DDR4 Dual Channel (Hasta 128GB 3600MHz)', storage: '1x-2x Ranuras M.2 NVMe PCIe 4.0/3.0 + 4x SATA III', motherboard: 'Placa Base Chipset AMD B550/B450 (PCIe 4.0 x16, Gigabit LAN, Audio HD)' },
+  { pattern: /(h610|h510|h410|h310|h110|h81|h61)/i, brand: 'Placa Base', type: 'Placa Base', cpu: 'Socket Intel (LGA 1700 / 1200 / 1151 / 1150 / 1155)', ram: '2x Ranuras DDR4 / DDR3 (Hasta 32GB/64GB Dual Channel)', storage: '1x Ranura M.2 NVMe + 4x SATA III', motherboard: 'Placa Base Chipset Intel Serie H (Factor Micro-ATX, Salidas HDMI/VGA)' },
+
+  // ==========================================
+  // FUENTES DE PODER (PSU) INDEPENDIENTES
+  // ==========================================
+  { pattern: /(rm1000|rm850|rm750|rm650|cx650|cv550|supernova|focus\s*gx|mwe\s*gold|toughpower|smart\s*600|kiris|rpbs)/i, brand: 'Fuente de Poder', type: 'Fuente de Poder (PSU)', cpu: 'N/A (Unidad de Suministro de Energía)', ram: 'Protecciones OVP, UVP, OCP, OPP, SCP, OTP', storage: 'Cables Mallados / Full Modular / Semi Modular', motherboard: 'Fuente de Poder ATX 500W a 1000W (Certificación 80 Plus Bronce / Gold / Platino)' },
 
   // ==========================================
   // IMPRESORAS & MULTIFUNCIONALES
@@ -931,14 +1021,35 @@ async function lookupHardwareSpecsOnline(modelText) {
   const combinedText = (clean + ' ' + (onlineSnippet || '')).toLowerCase();
   
   let brand = 'Genérico';
-  if (/cisco/i.test(combinedText)) brand = 'Cisco';
+  if (/nvidia/i.test(combinedText)) brand = 'NVIDIA';
+  else if (/amd|radeon/i.test(combinedText)) brand = 'AMD';
+  else if (/intel/i.test(combinedText)) brand = 'Intel';
+  else if (/kingston|hyperx|fury/i.test(combinedText)) brand = 'Kingston';
+  else if (/corsair/i.test(combinedText)) brand = 'Corsair';
+  else if (/samsung/i.test(combinedText)) brand = 'Samsung';
+  else if (/crucial|ballistix|micron/i.test(combinedText)) brand = 'Crucial';
+  else if (/western\s*digital|wd/i.test(combinedText)) brand = 'Western Digital';
+  else if (/seagate/i.test(combinedText)) brand = 'Seagate';
+  else if (/g\.?skill/i.test(combinedText)) brand = 'G.Skill';
+  else if (/adata|xpg/i.test(combinedText)) brand = 'Adata';
+  else if (/teamgroup|t-force/i.test(combinedText)) brand = 'TeamGroup';
+  else if (/msi/i.test(combinedText)) brand = 'MSI';
+  else if (/asus|rog|tuf/i.test(combinedText)) brand = 'ASUS';
+  else if (/gigabyte|aorus/i.test(combinedText)) brand = 'Gigabyte';
+  else if (/asrock/i.test(combinedText)) brand = 'ASRock';
+  else if (/evga/i.test(combinedText)) brand = 'EVGA';
+  else if (/zotac/i.test(combinedText)) brand = 'ZOTAC';
+  else if (/sapphire/i.test(combinedText)) brand = 'Sapphire';
+  else if (/seasonic/i.test(combinedText)) brand = 'Seasonic';
+  else if (/cooler\s*master/i.test(combinedText)) brand = 'Cooler Master';
+  else if (/thermaltake/i.test(combinedText)) brand = 'Thermaltake';
+  else if (/cisco/i.test(combinedText)) brand = 'Cisco';
   else if (/mikrotik/i.test(combinedText)) brand = 'MikroTik';
   else if (/tp[- ]?link|omada|jetstream/i.test(combinedText)) brand = 'TP-Link';
   else if (/ubiquiti|unifi/i.test(combinedText)) brand = 'Ubiquiti';
   else if (/dell|poweredge|optiplex|latitude/i.test(combinedText)) brand = 'Dell';
   else if (/hp|proliant|prodesk|elitedesk|probook|elitebook|laserjet/i.test(combinedText)) brand = 'HP';
   else if (/lenovo|thinkpad|thinkcentre|thinksystem/i.test(combinedText)) brand = 'Lenovo';
-  else if (/asus|rog|tuf/i.test(combinedText)) brand = 'ASUS';
   else if (/acer|nitro|predator/i.test(combinedText)) brand = 'Acer';
   else if (/apple|macbook|imac/i.test(combinedText)) brand = 'Apple';
   else if (/epson|powerlite|ecotank/i.test(combinedText)) brand = 'Epson';
@@ -952,7 +1063,13 @@ async function lookupHardwareSpecsOnline(modelText) {
   else if (/synology/i.test(combinedText)) brand = 'Synology';
 
   let type = 'Laptop';
-  if (/switch|catalyst|managed|rackmount|ports|puertos\s*gigabit/i.test(combinedText)) type = 'Switch de Red';
+  if (/geforce|radeon|rtx|gtx|quadro|intel\s*arc|graphics|video\s*card|tarjeta\s*de\s*video|gpu/i.test(combinedText)) type = 'Tarjeta de Video (GPU)';
+  else if (/ddr5|ddr4|ddr3|ram|memoria\s*ram|dimm|so-dimm|vengeance|fury\s*beast/i.test(combinedText)) type = 'Memoria RAM';
+  else if (/ssd|nvme|m\.2|sata|hdd|disco\s*duro|almacenamiento|barracuda|ironwolf|990\s*pro|980\s*pro|a400/i.test(combinedText)) type = 'Disco / Almacenamiento';
+  else if (/intel\s*core|ryzen|core\s*i[3579]|threadripper|xeon|procesador|cpu/i.test(combinedText)) type = 'Procesador (CPU)';
+  else if (/motherboard|placa\s*madre|placa\s*base|mainboard|b760|b650|b550|z790|z690|h610|h510/i.test(combinedText)) type = 'Placa Base';
+  else if (/fuente\s*de\s*poder|psu|power\s*supply|80\s*plus|modular/i.test(combinedText)) type = 'Fuente de Poder (PSU)';
+  else if (/switch|catalyst|managed|rackmount|ports|puertos\s*gigabit/i.test(combinedText)) type = 'Switch de Red';
   else if (/access\s*point|ap|router|wi[- ]?fi|mesh|routerboard/i.test(combinedText)) type = 'Access Point Wi-Fi';
   else if (/proyector|projector|3lcd|dlp|lumen/i.test(combinedText)) type = 'Proyector';
   else if (/server|servidor|poweredge|proliant|thinksystem|xeon|nas|rack\s*server/i.test(combinedText)) type = 'Servidor';
@@ -968,7 +1085,37 @@ async function lookupHardwareSpecsOnline(modelText) {
   let motherboard = '';
   let consumible = '';
 
-  if (type === 'Switch de Red') {
+  if (type === 'Tarjeta de Video (GPU)') {
+    cpu = `${brand} Graphics Processing Unit (GPU Dedicada)`;
+    ram = 'VRAM Dedicada (GDDR6 / GDDR6X / GDDR5)';
+    storage = 'Interfaz PCIe x16 (DirectX 12 Ultimate / Vulkan / Ray Tracing)';
+    motherboard = 'Tarjeta Gráfica Dedicada (Salidas DisplayPort / HDMI)';
+  } else if (type === 'Memoria RAM') {
+    cpu = 'N/A (Módulo de Memoria)';
+    ram = `${brand} Memoria RAM (DDR4 / DDR5 High Speed)`;
+    storage = 'Disipador Térmico / Perfil XMP / EXPO';
+    motherboard = 'Formato DIMM / SO-DIMM Estándar JEDEC';
+  } else if (type === 'Disco / Almacenamiento') {
+    cpu = 'Controlador de Almacenamiento';
+    ram = 'Cache DRAM / SLC Buffer';
+    storage = `${brand} Unidad de Almacenamiento (SSD NVMe / SATA / HDD)`;
+    motherboard = 'Interfaz M.2 PCIe / SATA III 6.0Gb/s';
+  } else if (type === 'Procesador (CPU)') {
+    cpu = `${brand} Procesador Multi-Core (Arquitectura Alto Rendimiento)`;
+    ram = 'Controlador de Memoria Integrado Dual Channel';
+    storage = 'Memoria Cache L2 / L3 Integrada';
+    motherboard = `Socket Compatible ${brand}`;
+  } else if (type === 'Placa Base') {
+    cpu = 'Socket de Procesador Multi-Generación';
+    ram = 'Ranuras de Memoria RAM Dual Channel';
+    storage = 'Puertos M.2 NVMe PCIe + SATA III';
+    motherboard = `${brand} Placa Base / Mainboard`;
+  } else if (type === 'Fuente de Poder (PSU)') {
+    cpu = 'N/A (Suministro de Energía Eléctrica)';
+    ram = 'Protecciones Eléctricas OVP / UVP / OCP / SCP';
+    storage = 'Cableado ATX / EPS / PCIe / SATA';
+    motherboard = `${brand} Fuente de Poder ATX (Certificación 80 Plus)`;
+  } else if (type === 'Switch de Red') {
     cpu = `${brand} Managed Gigabit Switch ASIC Engine`;
     ram = '256 MB / 512 MB DRAM';
     storage = '64 MB / 128 MB Flash Memory';
@@ -996,9 +1143,9 @@ async function lookupHardwareSpecsOnline(modelText) {
     consumible = autoDetectPrinterConsumables(clean)?.consumable || 'Tinta / Tóner Estándar';
   } else {
     // Computadoras / Laptops
-    if (/i7[- ]?1[123].../i.test(combinedText)) cpu = 'Intel Core i7 (11va/12va Gen) @ 2.80GHz (8+ Núcleos)';
+    if (/i7[- ]?1[1234].../i.test(combinedText)) cpu = 'Intel Core i7 (11va a 14va Gen) @ 2.80GHz-5.00GHz (8+ Núcleos)';
     else if (/i7[- ]?[89].../i.test(combinedText)) cpu = 'Intel Core i7 (8va/9na Gen) @ 3.00GHz (6/8 Núcleos)';
-    else if (/i5[- ]?1[123].../i.test(combinedText)) cpu = 'Intel Core i5 (11va/12va Gen) @ 2.40GHz (4/10 Núcleos)';
+    else if (/i5[- ]?1[1234].../i.test(combinedText)) cpu = 'Intel Core i5 (11va a 14va Gen) @ 2.40GHz-4.60GHz (6 a 14 Núcleos)';
     else if (/i5[- ]?[789].../i.test(combinedText)) cpu = 'Intel Core i5 (8va/9na Gen) @ 1.60GHz-3.00GHz (4/6 Núcleos)';
     else if (/i3/i.test(combinedText)) cpu = 'Intel Core i3 @ 3.00GHz (2/4 Núcleos)';
     else if (/ryzen\s*7/i.test(combinedText)) cpu = 'AMD Ryzen 7 @ 3.20GHz (8 Núcleos, 16 Hilos)';
@@ -1016,7 +1163,7 @@ async function lookupHardwareSpecsOnline(modelText) {
   return {
     success: true,
     found: true,
-    source: onlineSnippet ? 'Internet & Conocimiento Web' : 'Inferencia Inteligente de Hardware',
+    source: onlineSnippet ? 'Internet & Base de Datos Global' : 'Inferencia Inteligente de Hardware',
     fabricante: brand,
     tipo_equipo: type,
     procesador: cpu,
