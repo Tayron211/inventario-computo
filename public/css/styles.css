@@ -52,11 +52,11 @@
    TEMA CLARO (MODO CLARO) - ALTA LEGIBILIDAD, CONTRASTE ELEGANTE Y PROFUNDIDAD
    ============================================================================== */
 [data-theme="light"] {
-  --bg-dark: #f0f2f5;
-  --bg-surface: #ffffff;
-  --bg-surface-elevated: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f1f5f9;
+  --bg-dark: #e8ecf1;
+  --bg-surface: #f4f6f9;
+  --bg-surface-elevated: #eaedf2;
+  --bg-card: #f8fafc;
+  --bg-card-hover: #eef2f6;
 
   --gray-100: #0f172a;
   --gray-200: #1e293b;
@@ -88,11 +88,11 @@
 }
 
 [data-theme="light"] .glow-orb {
-  opacity: 0.08;
+  opacity: 0.05;
 }
 
 [data-theme="light"] .app-header {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(244, 246, 249, 0.95) !important;
   border-bottom: 1px solid #cbd5e1 !important;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
 }
@@ -333,7 +333,7 @@
 
 [data-theme="light"] .serial-badge {
   background: #ffe4e6 !important;
-  border-color: #fecdd3 !important;
+  border: 1px solid #fca5a5 !important;
   color: #9f1239 !important;
 }
 
@@ -343,9 +343,48 @@
 }
 
 [data-theme="light"] .placa-badge {
-  background: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
+}
+
+[data-theme="light"] .tipo-badge.desktop {
+  background: #dbeafe !important;
+  border: 1px solid #93c5fd !important;
+  color: #1d4ed8 !important;
+}
+
+[data-theme="light"] .tipo-badge.laptop {
+  background: #cffafe !important;
+  border: 1px solid #67e8f9 !important;
+  color: #0e7490 !important;
+}
+
+[data-theme="light"] .tipo-badge.aio {
+  background: #f3e8ff !important;
+  border: 1px solid #d8b4fe !important;
+  color: #7e22ce !important;
+}
+
+[data-theme="light"] .tipo-badge.impresora {
+  background: #d1fae5 !important;
+  border: 1px solid #6ee7b7 !important;
+  color: #047857 !important;
+}
+
+[data-theme="light"] .tipo-badge.switch,
+[data-theme="light"] .tipo-badge.ap {
+  background: #fef3c7 !important;
+  border: 1px solid #fde68a !important;
+  color: #b45309 !important;
+}
+
+[data-theme="light"] .tipo-badge.perifericos,
+[data-theme="light"] .tipo-badge.teclado,
+[data-theme="light"] .tipo-badge.mouse {
+  background: #e0e7ff !important;
+  border: 1px solid #c7d2fe !important;
+  color: #4338ca !important;
 }
 
 [data-theme="light"] .spec-cpu-title {
@@ -2105,6 +2144,103 @@ body {
 .action-btn-mini.delete-btn:hover {
   background: #990000;
   border-color: #ff3333;
+}
+
+/* ==============================================================================
+   CENTRADO PERFECTO DE COLUMNAS DE LA TABLA
+   ============================================================================== */
+.custom-excel-table th.col-serie, .custom-excel-table td.cell-serie,
+.custom-excel-table th.col-ambiente, .custom-excel-table td.cell-ambiente,
+.custom-excel-table th.col-placa, .custom-excel-table td.cell-placa,
+.custom-excel-table th.col-tipo, .custom-excel-table td.cell-tipo,
+.custom-excel-table th.col-usuario, .custom-excel-table td.cell-usuario,
+.custom-excel-table th.col-estado, .custom-excel-table td.cell-estado,
+.custom-excel-table th.col-acciones, .custom-excel-table td.cell-acciones {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.cell-serie {
+  text-align: center !important;
+}
+
+.cell-serie .serial-badge {
+  margin: 0 auto !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+}
+
+.cell-ambiente {
+  text-align: center !important;
+}
+
+.cell-ambiente .user-loc {
+  margin: 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.cell-placa {
+  text-align: center !important;
+}
+
+.cell-placa .placa-badge {
+  margin: 0 auto !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+}
+
+.cell-tipo {
+  text-align: center !important;
+}
+
+.cell-tipo .tipo-badge {
+  margin: 0 auto !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+}
+
+.cell-usuario {
+  text-align: center !important;
+}
+
+.cell-usuario .user-block {
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.cell-usuario .user-name,
+.cell-usuario .user-host {
+  justify-content: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.cell-estado {
+  text-align: center !important;
+}
+
+.cell-estado .status-indicator {
+  margin: 0 auto !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+}
+
+.cell-acciones {
+  text-align: center !important;
+}
+
+.cell-acciones .table-actions-cell {
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 /* GRID VIEW */
