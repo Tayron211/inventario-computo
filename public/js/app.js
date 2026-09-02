@@ -1584,7 +1584,9 @@ function renderTable(items) {
   const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
   const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
   const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
-  const canEdit = isSuperAdmin;
+  const isGoldAdmin = (userRole === 'gold_admin' || /tayron|cristian|david/i.test(loggedUser));
+  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+  const canEdit = (isSuperAdmin || isGoldAdmin) && !isObservador;
   const canDelete = isSuperAdmin;
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
@@ -1743,12 +1745,12 @@ function renderTable(items) {
               <i class="fa-solid fa-eye"></i>
             </button>
             ${canEdit && !item.isDiscreteDevice ? `
-            <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro (Solo Platinum)">
+            <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
             ` : ''}
             ${canDelete && !item.isDiscreteDevice ? `
-            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar Registro (Solo Platinum Admin)">
+            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar Registro (Solo Super Admin)">
               <i class="fa-solid fa-trash-can"></i>
             </button>
             ` : ''}
@@ -1763,7 +1765,9 @@ function renderGrid(items) {
   const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
   const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
   const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
-  const canEdit = isSuperAdmin;
+  const isGoldAdmin = (userRole === 'gold_admin' || /tayron|cristian|david/i.test(loggedUser));
+  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+  const canEdit = (isSuperAdmin || isGoldAdmin) && !isObservador;
   const canDelete = isSuperAdmin;
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
@@ -1814,12 +1818,12 @@ function renderGrid(items) {
             <i class="fa-solid fa-eye"></i> Ver Ficha
           </button>
           ${canEdit ? `
-          <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar (Solo Platinum)">
+          <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
           ` : ''}
           ${canDelete ? `
-          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar (Solo Platinum Admin)">
+          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar (Solo Super Admin)">
             <i class="fa-solid fa-trash-can"></i>
           </button>
           ` : ''}
@@ -2805,12 +2809,16 @@ function viewDetails(id) {
   const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
   const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
   const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
+  const isGoldAdmin = (userRole === 'gold_admin' || /tayron|cristian|david/i.test(loggedUser));
+  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+  const canEdit = (isSuperAdmin || isGoldAdmin) && !isObservador;
+  const canDelete = isSuperAdmin;
 
   const btnDeleteFromDetails = document.getElementById('btnDeleteFromDetails');
   const btnEditFromDetails = document.getElementById('btnEditFromDetails');
 
   if (btnDeleteFromDetails) {
-    if (isSuperAdmin && !item.isDiscreteDevice) {
+    if (canDelete && !item.isDiscreteDevice) {
       btnDeleteFromDetails.style.display = 'inline-flex';
       btnDeleteFromDetails.onclick = () => {
         closeModal('detailsModal');
@@ -2823,7 +2831,7 @@ function viewDetails(id) {
   }
 
   if (btnEditFromDetails) {
-    if (isSuperAdmin && !item.isDiscreteDevice) {
+    if (canEdit && !item.isDiscreteDevice) {
       btnEditFromDetails.style.display = 'inline-flex';
       btnEditFromDetails.onclick = () => {
         closeModal('detailsModal');
