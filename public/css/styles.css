@@ -3937,10 +3937,6 @@ body {
 .user-session-badge {
   display: flex;
   align-items: center;
-/* User Session Badge en Header */
-.user-session-badge {
-  display: flex;
-  align-items: center;
   gap: 8px;
   padding: 4px 12px;
   border-radius: var(--radius-full);

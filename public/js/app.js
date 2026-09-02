@@ -1583,8 +1583,9 @@ function highlightMatch(text, query) {
 function renderTable(items) {
   const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
   const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isObservador = userRole === 'observador' || userRole === 'operador';
-  const canDelete = (sessionStorage.getItem('sysinventario_can_delete') === 'true') || (userRole === 'admin' && !/tayron|cristian|david/i.test(loggedUser));
+  const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
+  const canEdit = isSuperAdmin;
+  const canDelete = isSuperAdmin;
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   tableBody.innerHTML = items.map(item => {
@@ -1741,8 +1742,8 @@ function renderTable(items) {
             <button class="action-btn-mini" onclick="viewDetails('${item.parentId || item.id}')" title="Ver Ficha Técnica Completa">
               <i class="fa-solid fa-eye"></i>
             </button>
-            ${!isObservador && !item.isDiscreteDevice ? `
-            <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
+            ${canEdit && !item.isDiscreteDevice ? `
+            <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro (Solo Platinum)">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
             ` : ''}
@@ -1761,8 +1762,9 @@ function renderTable(items) {
 function renderGrid(items) {
   const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
   const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isObservador = userRole === 'observador' || userRole === 'operador';
-  const canDelete = (sessionStorage.getItem('sysinventario_can_delete') === 'true') || (userRole === 'admin' && !/tayron|cristian|david/i.test(loggedUser));
+  const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
+  const canEdit = isSuperAdmin;
+  const canDelete = isSuperAdmin;
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   gridContainer.innerHTML = items.map(item => {
@@ -1811,8 +1813,8 @@ function renderGrid(items) {
           <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="viewDetails('${item.id}')">
             <i class="fa-solid fa-eye"></i> Ver Ficha
           </button>
-          ${!isObservador ? `
-          <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar">
+          ${canEdit ? `
+          <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar (Solo Platinum)">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
           ` : ''}
