@@ -490,7 +490,8 @@ const USERS = [
   // Observador con etiqueta de bronce mate sin brillos (Solo Visualización)
   { username: 'observador', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
   { username: 'observador', password: 'observador', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
-  { username: 'user', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false }
+  { username: 'user', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'user', canDelete: false },
+  { username: 'user', password: 'user', role: 'observador', badge: 'bronze', displayName: 'user', canDelete: false }
 ];
 
 // Obtener información completa del usuario actual basado en el token Bearer o query param
@@ -1669,11 +1670,11 @@ app.post('/api/restore-json', async (req, res) => {
   }
 });
 
-// Exportación a Excel con hojas separadas por categoría y tipo de hardware (Solo Administrador)
+// Exportación a Excel con hojas separadas por categoría y tipo de hardware (Bloqueado para Observador)
 app.get('/api/export-excel', async (req, res) => {
   try {
-    const role = getUserRole(req);
-    if (role === 'operador') {
+    const userInfo = getUserInfo(req);
+    if (userInfo.role === 'observador' || userInfo.role === 'operador') {
       return res.status(403).json({ 
         error: 'Acceso denegado: El usuario Observador solo tiene permisos de visualización y no puede exportar el inventario en Excel.' 
       });

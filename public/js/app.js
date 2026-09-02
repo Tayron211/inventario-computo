@@ -156,24 +156,19 @@ function initAuth() {
 // Generador de Etiqueta / Badge Visual de Usuario (Platinum, Gold, Bronze)
 function getUserBadgeHtml(username, badge, role) {
   const user = (username || 'admin').trim();
-  let b = badge;
-  if (!b) {
-    if (user.toLowerCase() === 'admin' || role === 'admin') b = 'platinum';
-    else if (/tayron|cristian|david/i.test(user) || role === 'gold_admin') b = 'gold';
-    else b = 'bronze';
-  }
+  const isObs = /^(user|observador)$/i.test(user) || role === 'observador' || role === 'operador' || badge === 'bronze';
+  const isGold = /^(tayron|cristian|david)$/i.test(user) || role === 'gold_admin' || badge === 'gold';
+  const isPlat = user.toLowerCase() === 'admin' || role === 'admin' || badge === 'platinum';
 
-  if (b === 'platinum' || user.toLowerCase() === 'admin') {
+  if (isObs) {
     return `
-      <span class="badge-role-tag badge-user-platinum" title="Super Administrador Platinum ✨ (Acceso Total)">
-        <span class="sparkle-star-anim">✨</span>
-        <i class="fa-solid fa-crown platinum-crown"></i>
+      <span class="badge-role-tag badge-user-bronze" title="Usuario Observador 🥉 (Solo Lectura)">
+        <i class="fa-solid fa-shield"></i>
         <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
-        <span class="badge-tier-label">PLATINUM</span>
-        <span class="sparkle-star-anim">✨</span>
+        <span class="badge-tier-label">BRONCE</span>
       </span>
     `;
-  } else if (b === 'gold' || /tayron|cristian|david/i.test(user)) {
+  } else if (isGold) {
     return `
       <span class="badge-role-tag badge-user-gold" title="Administrador Gold ⭐ (Gestión Completa sin eliminación)">
         <span class="gold-glitter-star">🌟</span>
@@ -185,10 +180,12 @@ function getUserBadgeHtml(username, badge, role) {
     `;
   } else {
     return `
-      <span class="badge-role-tag badge-user-bronze" title="Observador 🥉 (Solo Lectura)">
-        <i class="fa-solid fa-shield"></i>
+      <span class="badge-role-tag badge-user-platinum" title="Super Administrador Platinum ✨ (Acceso Total)">
+        <span class="sparkle-star-anim">✨</span>
+        <i class="fa-solid fa-crown platinum-crown"></i>
         <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
-        <span class="badge-tier-label">BRONCE</span>
+        <span class="badge-tier-label">PLATINUM</span>
+        <span class="sparkle-star-anim">✨</span>
       </span>
     `;
   }
@@ -198,9 +195,30 @@ function getUserBadgeHtml(username, badge, role) {
 // ACTUALIZACIÓN DE INTERFAZ SEGÚN ROL DE USUARIO
 // -------------------------------------------------------------
 function updateAuthUI() {
-  const role = sessionStorage.getItem('sysinventario_role') || 'admin';
-  const username = sessionStorage.getItem('sysinventario_user') || 'admin';
-  const badge = sessionStorage.getItem('sysinventario_badge') || (role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(username) ? 'gold' : 'bronze'));
+  const username = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
+  let role = sessionStorage.getItem('sysinventario_role') || 'admin';
+  let badge = sessionStorage.getItem('sysinventario_badge');
+
+  // Forzar consistencia estricta según el nombre de usuario
+  if (/^(user|observador)$/i.test(username)) {
+    role = 'observador';
+    badge = 'bronze';
+    sessionStorage.setItem('sysinventario_role', 'observador');
+    sessionStorage.setItem('sysinventario_badge', 'bronze');
+    sessionStorage.setItem('sysinventario_can_delete', 'false');
+  } else if (/^(tayron|cristian|david)$/i.test(username)) {
+    role = 'gold_admin';
+    badge = 'gold';
+    sessionStorage.setItem('sysinventario_role', 'gold_admin');
+    sessionStorage.setItem('sysinventario_badge', 'gold');
+    sessionStorage.setItem('sysinventario_can_delete', 'false');
+  } else if (/^admin$/i.test(username)) {
+    role = 'admin';
+    badge = 'platinum';
+    sessionStorage.setItem('sysinventario_role', 'admin');
+    sessionStorage.setItem('sysinventario_badge', 'platinum');
+    sessionStorage.setItem('sysinventario_can_delete', 'true');
+  }
   
   const userSessionBox = document.getElementById('userSessionBox');
   const sessionUserIcon = document.getElementById('sessionUserIcon');
@@ -208,31 +226,31 @@ function updateAuthUI() {
   
   if (userSessionBox) {
     userSessionBox.classList.remove('badge-role-admin', 'badge-role-operador', 'badge-role-platinum', 'badge-role-gold', 'badge-role-bronze');
-    if (badge === 'platinum' || role === 'admin') {
-      userSessionBox.classList.add('badge-role-platinum');
-    } else if (badge === 'gold' || role === 'gold_admin' || /tayron|cristian|david/i.test(username)) {
+    if (badge === 'bronze' || role === 'observador') {
+      userSessionBox.classList.add('badge-role-bronze');
+    } else if (badge === 'gold' || role === 'gold_admin') {
       userSessionBox.classList.add('badge-role-gold');
     } else {
-      userSessionBox.classList.add('badge-role-bronze');
+      userSessionBox.classList.add('badge-role-platinum');
     }
   }
   
   if (sessionUserIcon) {
-    if (badge === 'platinum' || role === 'admin') {
-      sessionUserIcon.innerHTML = `<span class="sparkle-star-anim">✨</span> <i class="fa-solid fa-crown platinum-crown"></i>`;
-    } else if (badge === 'gold' || /tayron|cristian|david/i.test(username)) {
+    if (badge === 'bronze' || role === 'observador') {
+      sessionUserIcon.innerHTML = `<i class="fa-solid fa-shield"></i>`;
+    } else if (badge === 'gold' || role === 'gold_admin') {
       sessionUserIcon.innerHTML = `<span class="gold-glitter-star">🌟</span> <i class="fa-solid fa-medal gold-medal-icon"></i>`;
     } else {
-      sessionUserIcon.innerHTML = `<i class="fa-solid fa-shield"></i>`;
+      sessionUserIcon.innerHTML = `<span class="sparkle-star-anim">✨</span> <i class="fa-solid fa-crown platinum-crown"></i>`;
     }
   }
   
   if (sessionUserName) {
-    const tierText = (badge === 'platinum' || role === 'admin') ? 'PLATINUM' : ((badge === 'gold' || /tayron|cristian|david/i.test(username)) ? 'GOLD' : 'BRONCE');
+    const tierText = (badge === 'bronze' || role === 'observador') ? 'BRONCE' : ((badge === 'gold' || role === 'gold_admin') ? 'GOLD' : 'PLATINUM');
     sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">${tierText}</span>`;
   }
   
-  const isObservador = role === 'observador' || role === 'operador';
+  const isObservador = role === 'observador' || role === 'operador' || /^(user|observador)$/i.test(username);
 
   // 1. Botón "Nuevo" (Registrar Equipo / Componente)
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
@@ -246,10 +264,19 @@ function updateAuthUI() {
     btnScanLocal.style.display = isObservador ? 'none' : 'inline-flex';
   }
 
-  // 3. Botón "Excel" (Exportación del inventario)
+  // 3. Botón "Excel" (Exportación del inventario - Bloqueado totalmente para Observador)
   const btnExportExcel = document.getElementById('btnExportExcel');
   if (btnExportExcel) {
-    btnExportExcel.style.display = isObservador ? 'none' : 'inline-flex';
+    if (isObservador) {
+      btnExportExcel.style.display = 'none';
+      btnExportExcel.setAttribute('disabled', 'true');
+      btnExportExcel.removeAttribute('href');
+    } else {
+      btnExportExcel.style.display = 'inline-flex';
+      btnExportExcel.removeAttribute('disabled');
+      const token = sessionStorage.getItem('sysinventario_session_token');
+      btnExportExcel.href = token ? `/api/export-excel?token=${encodeURIComponent(token)}` : '/api/export-excel';
+    }
   }
 }
 
