@@ -94,7 +94,7 @@
     "hostname": "DESKTOP-6S90FTV",
     "usuario_actual": "Arianny",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.18.187, fe80::cc58:fcfb:ed60:b456",
+    "ip_red": "192.168.18.187",
     "ubicacion": "Soporte Técnico",
     "estado": "Operativo",
     "notas": "Registrado por escáner automático",
@@ -116,7 +116,7 @@
     "almacenamiento_resumen": "PC SN5000S SDEPNSJ-512G-1006 (477 GB)",
     "almacenamiento": [
       {
-        "serie": "E823_8FA6_BF53_0001_001B_448B_4F0B_52A1.",
+        "serie": "E823_8FA6_BF53_0001_001B_448B_4F0B_52A1",
         "tipo": "Disco",
         "capacidad": "477 GB",
         "modelo": "PC SN5000S SDEPNSJ-512G-1006"
@@ -178,7 +178,7 @@
     "hostname": "DESKTOP-I557FLQ",
     "usuario_actual": "EZEQUIEL",
     "sistema_operativo": "Microsoft Windows 10 Pro (64 bits)",
-    "ip_red": "192.168.1.20, fe80::2f76:3c9:55fd:8ea8",
+    "ip_red": "192.168.1.20",
     "mac_address": "50:65:F3:4A:85:37",
     "ubicacion": "Infraestructura",
     "estado": "Operativo",
@@ -207,7 +207,7 @@
     "almacenamiento_resumen": "KINGSTON SFYRS1000G (932 GB, S/N: 0000_0000_0000_0000_0026_B768_727F_6FC5.)",
     "almacenamiento": [
       {
-        "serie": "0000_0000_0000_0000_0026_B768_727F_6FC5.",
+        "serie": "0026_B768_727F_6FC5",
         "tipo": "Disco",
         "capacidad": "932 GB",
         "interfaz": "SCSI",
@@ -236,7 +236,7 @@
     "hostname": "DESKTOP-SK8G14I",
     "usuario_actual": "autonoma",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.1.51, fe80::1372:4649:6c81:7a8d",
+    "ip_red": "192.168.1.51",
     "mac_address": "A8:E2:91:0A:F5:F0",
     "ubicacion": "Infraestructura",
     "estado": "Operativo",
@@ -262,7 +262,7 @@
     "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_FB99.)",
     "almacenamiento": [
       {
-        "serie": "8CE3_8E10_0728_FB99.",
+        "serie": "8CE3_8E10_0728_FB99",
         "tipo": "Disco",
         "capacidad": "477 GB",
         "interfaz": "SCSI",
@@ -280,7 +280,7 @@
     "hostname": "DESKTOP-4T6RKVO",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.1.205, fe80::e3d3:2532:f557:27d4, fd20:9fa8:3d5b:8:584b:7ce3:cde8:d804, 2803:9810:6014:1408:584b:7ce3:cde8:d804, fd20:9fa8:3d5b:8:8052:2de2:b227:2a84, 2803:9810:6014:1408:33f1:bb8:993d:107c",
+    "ip_red": "192.168.1.205",
     "mac_address": "C8:95:CE:1B:9D:1A",
     "ubicacion": "Sala Gamer",
     "estado": "Operativo",
@@ -307,7 +307,7 @@
     "almacenamiento_resumen": "KINGSTON SNV3S2000G (1863 GB, S/N: 0000_0000_0000_0000_0026_B768_76B2_9A25.)",
     "almacenamiento": [
       {
-        "serie": "0000_0000_0000_0000_0026_B768_76B2_9A25.",
+        "serie": "0026_B768_76B2_9A25",
         "tipo": "Disco",
         "capacidad": "1863 GB",
         "interfaz": "SCSI",
@@ -325,7 +325,7 @@
     "hostname": "PC-GAMER01",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.1.46, fe80::2956:30e1:5334:81f",
+    "ip_red": "192.168.1.46",
     "mac_address": "A0:AD:9F:07:3F:5A",
     "ubicacion": "Sala Gamer",
     "estado": "Operativo",
@@ -352,14 +352,14 @@
     "almacenamiento_resumen": "Lexar SSD NM610 PRO 500GB (466 GB, S/N: 0000_0006_2505_3005_CAF2_5B03_8000_015F.) | Yotta (1908 GB, S/N: 0000_0000_0000_0000_0C82_D509_0400_0900.)",
     "almacenamiento": [
       {
-        "serie": "0000_0006_2505_3005_CAF2_5B03_8000_015F.",
+        "serie": "0000_0006_2505_3005_CAF2_5B03_8000_015F",
         "tipo": "SATA SSD",
         "capacidad": "466 GB",
         "interfaz": "SCSI",
         "modelo": "Lexar SSD NM610 PRO 500GB"
       },
       {
-        "serie": "0000_0000_0000_0000_0C82_D509_0400_0900.",
+        "serie": "0C82_D509_0400_0900",
         "tipo": "Disco",
         "capacidad": "1908 GB",
         "interfaz": "SCSI",
@@ -377,7 +377,7 @@
     "hostname": "DESKTOP-CM42MCR",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.1.119, fe80::524:51ce:d74:58d6",
+    "ip_red": "192.168.1.119",
     "mac_address": "A0:AD:9F:88:B5:78",
     "ubicacion": "Sala Gamer",
     "estado": "Operativo",
@@ -403,7 +403,7 @@
     "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_EFB5.)",
     "almacenamiento": [
       {
-        "serie": "8CE3_8E10_0728_EFB5.",
+        "serie": "8CE3_8E10_0728_EFB5",
         "tipo": "Disco",
         "capacidad": "477 GB",
         "interfaz": "SCSI",
@@ -421,7 +421,7 @@
     "hostname": "DESKTOP-4T6RKVO",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.1.124, fe80::c2bd:7a6a:5ffd:9fdf",
+    "ip_red": "192.168.1.124",
     "mac_address": "5C:28:86:1F:73:75",
     "ubicacion": "CAE",
     "estado": "Operativo",
@@ -446,7 +446,7 @@
     "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_DF2D.)",
     "almacenamiento": [
       {
-        "serie": "8CE3_8E10_0728_DF2D.",
+        "serie": "8CE3_8E10_0728_DF2D",
         "tipo": "Disco",
         "capacidad": "477 GB",
         "interfaz": "SCSI",
@@ -464,7 +464,7 @@
     "hostname": "NUEVO-ADM",
     "usuario_actual": "AUTONOMA",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "192.168.91.150, fe80::a04a:3994:f496:6b8f",
+    "ip_red": "192.168.91.150",
     "mac_address": "C8:95:CE:1B:88:66",
     "ubicacion": "Soporte Técnico",
     "estado": "Operativo",
@@ -490,7 +490,7 @@
     "almacenamiento_resumen": "KBG60ZNV512G KIOXIA (477 GB, S/N: 8CE3_8E10_0728_EFB9.)",
     "almacenamiento": [
       {
-        "serie": "8CE3_8E10_0728_EFB9.",
+        "serie": "8CE3_8E10_0728_EFB9",
         "tipo": "Disco",
         "capacidad": "477 GB",
         "interfaz": "SCSI",
@@ -508,7 +508,7 @@
     "hostname": "PC-CAMARASOP",
     "usuario_actual": "Camaritas",
     "sistema_operativo": "Microsoft Windows 11 Pro (64 bits)",
-    "ip_red": "176.100.0.253, fe80::5223:8735:7882:4fd0",
+    "ip_red": "176.100.0.253",
     "mac_address": "5C:28:86:1F:73:3C",
     "ubicacion": "Soporte Técnico",
     "estado": "Operativo",

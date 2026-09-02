@@ -1345,7 +1345,10 @@ app.post('/api/inventory', async (req, res) => {
     monitores: body.monitores || [],
     perifericos: body.perifericos || [],
     hostname: body.hostname || '',
-    mac_address: body.mac_address || '',
+    mac_ethernet: body.mac_ethernet || '',
+    mac_wifi: body.mac_wifi || '',
+    mac_bluetooth: body.mac_bluetooth || '',
+    mac_address: body.mac_address || [body.mac_ethernet, body.mac_wifi, body.mac_bluetooth].filter(Boolean).join(' | '),
     ip_red: body.ip_red || '',
     usuario_actual: body.usuario_actual || '',
     ubicacion: body.ubicacion || 'Sin asignar',
@@ -1430,6 +1433,9 @@ app.post('/api/agent/report', async (req, res) => {
     
     const serialNormalized = (payload.numero_serie || '').trim();
     const macNormalized = (payload.mac_address || '').trim().toLowerCase();
+    const ethMacNorm = (payload.mac_ethernet || '').trim().toLowerCase();
+    const wifiMacNorm = (payload.mac_wifi || '').trim().toLowerCase();
+    const btMacNorm = (payload.mac_bluetooth || '').trim().toLowerCase();
     const mbSerialNormalized = (payload.placa_base_serial || '').trim().toLowerCase();
 
     // Lista de seriales genéricos o no disponibles que NO deben usarse para reemplazar equipos distintos
@@ -1446,11 +1452,22 @@ app.post('/api/agent/report', async (req, res) => {
       });
     }
 
-    // 2. Si el serial es genérico o no coincidió, buscar por intersección de MAC Address física
-    if (existingIndex === -1 && macNormalized && macNormalized !== 'n/a' && macNormalized !== '') {
-      const reportMacs = macNormalized.split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
+    // 2. Si el serial es genérico o no coincidió, buscar por intersección de MAC Address física (Ethernet, Wi-Fi o Bluetooth)
+    const reportMacs = [
+      ethMacNorm,
+      wifiMacNorm,
+      btMacNorm,
+      ...(macNormalized ? macNormalized.split(/[\s|,]+/) : [])
+    ].map(m => m.trim().toLowerCase()).filter(m => m.length >= 12 && m !== 'n/a');
+
+    if (existingIndex === -1 && reportMacs.length > 0) {
       existingIndex = items.findIndex(i => {
-        const itemMacs = (i.mac_address || '').trim().toLowerCase().split(/[\s|,]+/).map(m => m.trim().toLowerCase()).filter(m => m.length >= 12);
+        const itemMacs = [
+          (i.mac_ethernet || '').trim().toLowerCase(),
+          (i.mac_wifi || '').trim().toLowerCase(),
+          (i.mac_bluetooth || '').trim().toLowerCase(),
+          ...((i.mac_address || '').trim().toLowerCase().split(/[\s|,]+/))
+        ].map(m => m.trim().toLowerCase()).filter(m => m.length >= 12 && m !== 'n/a');
         return reportMacs.some(rm => itemMacs.includes(rm));
       });
     }
@@ -1499,6 +1516,10 @@ app.post('/api/agent/report', async (req, res) => {
       usuario_actual: payload.usuario_actual || '',
       sistema_operativo: payload.sistema_operativo || '',
       ip_red: payload.ip_red || '',
+      mac_ethernet: payload.mac_ethernet || (existingIndex >= 0 ? items[existingIndex].mac_ethernet : '') || '',
+      mac_wifi: payload.mac_wifi || (existingIndex >= 0 ? items[existingIndex].mac_wifi : '') || '',
+      mac_bluetooth: payload.mac_bluetooth || (existingIndex >= 0 ? items[existingIndex].mac_bluetooth : '') || '',
+      mac_address: payload.mac_address || [payload.mac_ethernet, payload.mac_wifi, payload.mac_bluetooth].filter(Boolean).join(' | '),
       ubicacion: (payload.ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(payload.ubicacion)) 
         ? payload.ubicacion 
         : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'Soporte Técnico'),
@@ -1678,7 +1699,13 @@ app.get('/api/export-excel', async (req, res) => {
     const styleDataRows = (ws) => {
       ws.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return;
-        row.height = 24;
+        let maxLines = 1;
+        row.eachCell((cell) => {
+          const val = cell.value ? cell.value.toString() : '';
+          const lineCount = val.split(/\r\n|\r|\n/).length;
+          if (lineCount > maxLines) maxLines = lineCount;
+        });
+        row.height = Math.max(26, maxLines * 20);
         const isEven = rowNumber % 2 === 0;
         row.eachCell((cell) => {
           cell.font = {
@@ -1704,6 +1731,151 @@ app.get('/api/export-excel', async (req, res) => {
           };
         });
       });
+    };
+
+    // Función para simplificar y limpiar la información del disco: Marca Modelo (S/N: Serial)
+    const formatCleanDisk = (rawModel, rawSerial, rawCap) => {
+      let model = (rawModel || '').trim();
+      let serial = (rawSerial || '').trim();
+
+      // Si el modelo contiene el serial empaquetado (ej: "KBG60ZNV512G KIOXIA (477 GB, S/N: ...)")
+      if (!serial && model.includes('S/N:')) {
+        const sMatch = model.match(/S\/N:\s*([^)]+)/i);
+        if (sMatch) {
+          serial = sMatch[1].trim();
+          model = model.replace(/\s*\([^)]*S\/N:[^)]*\)/i, '').trim();
+        }
+      }
+
+      if (!model && rawCap) {
+        model = rawCap;
+      }
+
+      // 1. Limpiar Número de Serie
+      serial = serial.replace(/[._\s\r\n]+$/, '').trim();
+
+      // Si el serial tiene padding de ceros como 0000_0000_... o 0000 0000 ...
+      if (/(?:0000[_ ]+){2,}/i.test(serial)) {
+        serial = serial.replace(/^(?:0000[_ ]+)+/i, '');
+      }
+
+      // Si tiene saltos de línea internos o espacios múltiples
+      serial = serial.replace(/[\r\n\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      if (/\b[0-9A-Fa-f]{4}\s+[0-9A-Fa-f]{4}\b/.test(serial)) {
+        serial = serial.replace(/\s+/g, '');
+      }
+      serial = serial.replace(/\.+$/g, '').trim();
+
+      // 2. Limpiar Marca y Modelo
+      let brand = '';
+      let cleanModel = model;
+
+      // Remover sufijos y capacidades crudas del nombre del modelo
+      cleanModel = cleanModel.replace(/-\s*\d+\s*(?:GB|TB)/i, '').trim();
+      cleanModel = cleanModel.replace(/\b\d+\s*(?:GB|TB)\b/i, '').trim();
+      cleanModel = cleanModel.replace(/SDEPNSJ[\w-]+/i, '').trim();
+
+      if (/kioxia/i.test(cleanModel)) {
+        brand = 'KIOXIA';
+        cleanModel = cleanModel.replace(/kioxia/i, '').trim();
+      } else if (/sk\s*hynix/i.test(cleanModel)) {
+        brand = 'SK HYNIX';
+        cleanModel = cleanModel.replace(/sk\s*hynix/i, '').replace(/pvc\d+/i, '').trim();
+      } else if (/kingston/i.test(cleanModel)) {
+        brand = 'KINGSTON';
+        cleanModel = cleanModel.replace(/kingston/i, '').trim();
+      } else if (/lexar/i.test(cleanModel)) {
+        brand = 'LEXAR';
+        cleanModel = cleanModel.replace(/lexar/i, '').replace(/ssd/i, '').trim();
+      } else if (/samsung/i.test(cleanModel)) {
+        brand = 'SAMSUNG';
+        cleanModel = cleanModel.replace(/samsung/i, '').replace(/ssd/i, '').trim();
+      } else if (/wdc|western\s*digital|wd\b|sn5000|sn850|sn770|sn580|sn570/i.test(cleanModel)) {
+        brand = 'WESTERN DIGITAL';
+        cleanModel = cleanModel.replace(/wdc\s*/i, '').replace(/western\s*digital\s*/i, '').trim();
+      } else if (/st\d{4}dm|st\d{3}dm|seagate|barracuda/i.test(cleanModel)) {
+        brand = 'SEAGATE';
+        cleanModel = cleanModel.replace(/seagate\s*/i, '').trim();
+      } else if (/crucial|micron/i.test(cleanModel)) {
+        brand = 'CRUCIAL';
+        cleanModel = cleanModel.replace(/crucial\s*/i, '').replace(/micron\s*/i, '').trim();
+      } else if (/adata|xpg/i.test(cleanModel)) {
+        brand = 'ADATA';
+        cleanModel = cleanModel.replace(/adata\s*/i, '').trim();
+      } else if (/toshiba/i.test(cleanModel)) {
+        brand = 'TOSHIBA';
+        cleanModel = cleanModel.replace(/toshiba\s*/i, '').trim();
+      } else if (/hp\b/i.test(cleanModel)) {
+        brand = 'HP';
+        cleanModel = cleanModel.replace(/hp\s*/i, '').trim();
+      }
+
+      cleanModel = cleanModel.replace(/-\w{5,8}$/, '').trim();
+      cleanModel = cleanModel.replace(/\s+/g, ' ').trim();
+
+      let finalName = brand ? `${brand} ${cleanModel}`.trim() : cleanModel;
+      finalName = finalName.toUpperCase();
+
+      const serialStr = (serial && serial !== 'N/A' && serial !== 'NONE') ? ` (S/N: ${serial.toUpperCase()})` : '';
+      return `${finalName}${serialStr}`;
+    };
+
+    // Función para obtener detalles de red separados (IP, MAC Ethernet, MAC Wi-Fi, MAC Bluetooth)
+    const getNetworkDetails = (item) => {
+      let ip = '';
+      if (item.ip_red) {
+        // Filtrar estrictamente solo direcciones IPv4 válidas (descartando IPv6 como FE80::... o FD20::...)
+        const ipv4Matches = String(item.ip_red).match(/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g);
+        if (ipv4Matches && ipv4Matches.length > 0) {
+          const validIps = ipv4Matches.filter(ipStr => !ipStr.startsWith('127.') && !ipStr.startsWith('169.254.'));
+          ip = (validIps.length > 0 ? validIps : ipv4Matches).join(' | ');
+        }
+      }
+      ip = toUpper(ip || 'N/A');
+      if (ip === '' || ip === 'NULL' || ip === 'UNDEFINED') ip = 'N/A';
+
+      let macEth = item.mac_ethernet ? String(item.mac_ethernet).trim() : '';
+      let macWifi = item.mac_wifi ? String(item.mac_wifi).trim() : '';
+      let macBt = item.mac_bluetooth ? String(item.mac_bluetooth).trim() : '';
+
+      // Fallback si el equipo fue registrado antes y solo tiene mac_address legacy
+      if ((!macEth || macEth === 'N/A') && (!macWifi || macWifi === 'N/A') && (!macBt || macBt === 'N/A') && item.mac_address) {
+        const rawMacs = String(item.mac_address).split(/[\s|,\n]+/).map(m => m.trim().toUpperCase()).filter(m => m.length >= 12 && m !== 'N/A');
+        if (rawMacs.length === 1) {
+          if (/wifi|access point|router|laptop|notebook|port[aá]til/i.test(item.tipo_equipo || '')) {
+            macWifi = rawMacs[0];
+          } else {
+            macEth = rawMacs[0];
+          }
+        } else if (rawMacs.length === 2) {
+          macEth = rawMacs[0];
+          macWifi = rawMacs[1];
+        } else if (rawMacs.length >= 3) {
+          macEth = rawMacs[0];
+          macWifi = rawMacs[1];
+          macBt = rawMacs[2];
+        }
+      }
+
+      // Fallback si el serial fue generado como MAC-XXXXXXXXXXXX
+      if ((!macEth || macEth === 'N/A') && (!macWifi || macWifi === 'N/A') && (!macBt || macBt === 'N/A')) {
+        if (item.numero_serie && /^MAC-[0-9a-fA-F]{12}$/i.test(item.numero_serie)) {
+          const rawHex = item.numero_serie.replace(/^MAC-/i, '');
+          const formatted = rawHex.replace(/..(?!$)/g, '$&:').toUpperCase();
+          if (/laptop|notebook|port[aá]til/i.test(item.tipo_equipo || '')) {
+            macWifi = formatted;
+          } else {
+            macEth = formatted;
+          }
+        }
+      }
+
+      return {
+        ip: ip,
+        mac_ethernet: macEth ? toUpper(macEth) : 'N/A',
+        mac_wifi: macWifi ? toUpper(macWifi) : 'N/A',
+        mac_bluetooth: macBt ? toUpper(macBt) : 'N/A'
+      };
     };
 
     // -------------------------------------------------------------
@@ -1735,7 +1907,10 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'PROCESADOR', key: 'procesador', width: 34 },
       { header: 'MEMORIA RAM', key: 'ram', width: 20 },
       { header: 'DISCOS / SSD', key: 'almacenamiento', width: 38 },
-      { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 22 },
+      { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
+      { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
+      { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -1753,7 +1928,10 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'PROCESADOR', key: 'procesador', width: 34 },
       { header: 'MEMORIA RAM', key: 'ram', width: 20 },
       { header: 'DISCOS / SSD', key: 'almacenamiento', width: 38 },
-      { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 22 },
+      { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
+      { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
+      { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -1867,10 +2045,12 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
       { header: 'CONSUMIBLE (TINTA/TÓNER)', key: 'consumible', width: 26 },
       { header: 'NÚMERO DE SERIE', key: 'numero_serie', width: 24 },
-      { header: 'DIRECCIÓN MAC', key: 'mac', width: 22 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 22 },
+      { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
+      { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
+      { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE', key: 'ubicacion', width: 26 },
-      { header: 'DIRECCIÓN IP', key: 'ip', width: 20 },
       { header: 'RESPONSABLE', key: 'usuario', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
@@ -1883,9 +2063,11 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'MODELO PROYECTOR', key: 'modelo', width: 30 },
       { header: 'MARCA / FABRICANTE', key: 'fabricante', width: 22 },
       { header: 'NÚMERO DE SERIE (S/N)', key: 'numero_serie', width: 24 },
+      { header: 'DIRECCIÓN IP / RED', key: 'ip', width: 22 },
+      { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
+      { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE (UBICACIÓN)', key: 'ubicacion', width: 28 },
-      { header: 'DIRECCIÓN IP / RED', key: 'ip', width: 20 },
       { header: 'ESTADO', key: 'estado', width: 16 },
       { header: 'NOTAS / OBSERVACIONES', key: 'notas', width: 30 }
     ]);
@@ -1897,11 +2079,13 @@ app.get('/api/export-excel', async (req, res) => {
     styleWorksheet(wsWifi, [
       { header: 'DISPOSITIVO / SWITCH / AP', key: 'dispositivo', width: 32 },
       { header: 'MARCA / FABRICANTE', key: 'marca', width: 22 },
-      { header: 'DIRECCIÓN MAC', key: 'mac', width: 24 },
+      { header: 'DIRECCIÓN IP / RED', key: 'ip', width: 22 },
+      { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
+      { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
+      { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
       { header: 'NÚMERO DE SERIE (S/N)', key: 'numero_serie', width: 24 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'AULA / AMBIENTE (UBICACIÓN)', key: 'ubicacion', width: 28 },
-      { header: 'DIRECCIÓN IP / RED', key: 'ip', width: 20 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -1969,6 +2153,10 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'FABRICANTE', key: 'fabricante', width: 20 },
       { header: 'NÚMERO DE SERIE', key: 'serie', width: 22 },
       { header: 'ESPECIFICACIONES / DETALLES', key: 'specs', width: 38 },
+      { header: 'DIRECCIÓN IP', key: 'ip', width: 22 },
+      { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
+      { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
+      { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'UBICACIÓN / AMBIENTE', key: 'ubicacion', width: 26 },
       { header: 'USUARIO / CUSTODIO', key: 'usuario', width: 22 },
@@ -1990,17 +2178,17 @@ app.get('/api/export-excel', async (req, res) => {
       const host = toUpper(item.hostname || 'PC-EQUIPO');
       const user = toUpper(item.usuario_actual || 'ADMIN');
       const status = toUpper(item.estado || 'OPERATIVO');
-      const ip = toUpper(item.ip_red || 'N/A');
+      const netInfo = getNetworkDetails(item);
       const tipo = (item.tipo_equipo || '').toLowerCase();
 
       let almacenamientoStr = '';
       if (item.almacenamiento && Array.isArray(item.almacenamiento) && item.almacenamiento.length > 0) {
-        almacenamientoStr = item.almacenamiento.map(d => {
-          const serialPart = d.serie && d.serie !== 'N/A' ? ` (S/N: ${d.serie})` : '';
-          return `${d.modelo || d.tipo || 'Disco'} - ${d.capacidad || ''}${serialPart}`;
-        }).join('\n');
+        almacenamientoStr = item.almacenamiento.map(d => formatCleanDisk(d.modelo || d.tipo, d.serie, d.capacidad)).join('\n');
+      } else if (item.almacenamiento_resumen) {
+        const rawDisks = item.almacenamiento_resumen.split(/\s*\|\s*/);
+        almacenamientoStr = rawDisks.map(rd => formatCleanDisk(rd, '', '')).join('\n');
       } else {
-        almacenamientoStr = item.almacenamiento_resumen || 'Disco Principal';
+        almacenamientoStr = 'DISCO PRINCIPAL';
       }
 
       // Conteo estadístico
@@ -2032,6 +2220,10 @@ app.get('/api/export-excel', async (req, res) => {
         fabricante: toUpper(item.fabricante || 'OEM'),
         serie: toUpper(item.numero_serie || 'N/A'),
         specs: toUpper(item.hardware_specs || item.procesador || item.ram_total || almacenamientoStr || 'Estándar'),
+        ip: netInfo.ip,
+        mac_ethernet: netInfo.mac_ethernet,
+        mac_wifi: netInfo.mac_wifi,
+        mac_bluetooth: netInfo.mac_bluetooth,
         bloque: bloque,
         ubicacion: amb,
         usuario: user,
@@ -2121,9 +2313,11 @@ app.get('/api/export-excel', async (req, res) => {
           modelo: toUpper(item.modelo || 'Proyector Multimedia'),
           fabricante: toUpper(item.fabricante || 'Epson / BenQ'),
           numero_serie: toUpper(item.numero_serie || 'N/A'),
+          ip: netInfo.ip,
+          mac_ethernet: netInfo.mac_ethernet,
+          mac_wifi: netInfo.mac_wifi,
           bloque: bloque,
           ubicacion: amb,
-          ip: ip,
           estado: status,
           notas: toUpper(item.notas || 'Equipo audiovisual')
         });
@@ -2133,10 +2327,12 @@ app.get('/api/export-excel', async (req, res) => {
           fabricante: toUpper(item.fabricante || 'Epson / HP / Canon'),
           consumible: toUpper(item.consumible || item.tinta_toner || 'Tinta / Tóner'),
           numero_serie: toUpper(item.numero_serie || ''),
-          mac: toUpper(item.mac_address || 'N/A'),
+          ip: netInfo.ip,
+          mac_ethernet: netInfo.mac_ethernet,
+          mac_wifi: netInfo.mac_wifi,
+          mac_bluetooth: netInfo.mac_bluetooth,
           bloque: bloque,
           ubicacion: amb,
-          ip: ip,
           usuario: user,
           estado: status
         });
@@ -2151,18 +2347,23 @@ app.get('/api/export-excel', async (req, res) => {
           procesador: toUpper(item.procesador || 'N/A'),
           ram: toUpper(item.ram_total || 'N/A'),
           almacenamiento: toUpper(almacenamientoStr),
-          ip: ip,
+          ip: netInfo.ip,
+          mac_ethernet: netInfo.mac_ethernet,
+          mac_wifi: netInfo.mac_wifi,
+          mac_bluetooth: netInfo.mac_bluetooth,
           estado: status
         });
       } else if (/switch|access point|router|wifi/i.test(tipo)) {
         wsWifi.addRow({
           dispositivo: toUpper(item.modelo || 'Equipo de Red'),
           marca: toUpper(item.fabricante || 'Cisco / Ubiquiti / Mikrotik'),
-          mac: toUpper(item.mac_address || item.mac || 'N/A'),
+          ip: netInfo.ip,
+          mac_ethernet: netInfo.mac_ethernet,
+          mac_wifi: netInfo.mac_wifi,
+          mac_bluetooth: netInfo.mac_bluetooth,
           numero_serie: toUpper(item.numero_serie || 'N/A'),
           bloque: bloque,
           ubicacion: amb,
-          ip: ip,
           estado: status
         });
       } else {
@@ -2178,21 +2379,26 @@ app.get('/api/export-excel', async (req, res) => {
           procesador: toUpper(item.procesador || 'N/A'),
           ram: toUpper(item.ram_total || 'N/A'),
           almacenamiento: toUpper(almacenamientoStr),
-          ip: ip,
+          ip: netInfo.ip,
+          mac_ethernet: netInfo.mac_ethernet,
+          mac_wifi: netInfo.mac_wifi,
+          mac_bluetooth: netInfo.mac_bluetooth,
           estado: status
         });
       }
 
-      // Registro adicional en hoja WIFI si tiene MAC address detectada
-      if (!/switch|access point|router/i.test(tipo) && item.mac_address && item.mac_address !== 'N/A' && item.mac_address !== '') {
+      // Registro adicional en hoja WIFI si tiene interfaz de red detectada
+      if (!/switch|access point|router/i.test(tipo) && (netInfo.mac_wifi !== 'N/A' || netInfo.mac_ethernet !== 'N/A' || netInfo.mac_bluetooth !== 'N/A')) {
         wsWifi.addRow({
           dispositivo: toUpper(`INTERFAZ RED (${item.hostname || item.modelo})`),
-          marca: toUpper(item.fabricante || 'GIGABIT ADAPTER'),
-          mac: toUpper(item.mac_address),
+          marca: toUpper(item.fabricante || 'ADAPTADOR DE RED'),
+          ip: netInfo.ip,
+          mac_ethernet: netInfo.mac_ethernet,
+          mac_wifi: netInfo.mac_wifi,
+          mac_bluetooth: netInfo.mac_bluetooth,
           numero_serie: toUpper(item.numero_serie || 'N/A'),
           bloque: bloque,
           ubicacion: amb,
-          ip: ip,
           estado: status
         });
       }
@@ -2276,12 +2482,13 @@ app.get('/api/export-excel', async (req, res) => {
             const val = cell.value ? cell.value.toString() : '';
             const lines = val.split(/\r\n|\r|\n/);
             lines.forEach(line => {
-              if (line.length > maxLen) {
-                maxLen = line.length;
+              const cleanLineLen = line.trim().length;
+              if (cleanLineLen > maxLen) {
+                maxLen = cleanLineLen;
               }
             });
           });
-          column.width = Math.min(Math.max(maxLen + 4, 18), 65);
+          column.width = Math.min(Math.max(maxLen + 5, 20), 85);
         });
       }
     });

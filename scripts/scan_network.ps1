@@ -150,6 +150,12 @@ foreach ($hostIP in $activeHosts) {
             }
         }
 
+        # Obtener MACs locales separadas
+        $localAdapters = Get-NetAdapter -ErrorAction SilentlyContinue
+        $ethLocal = ($localAdapters | Where-Object { ($_.PhysicalMediaType -eq '802.3' -or $_.InterfaceDescription -match 'Ethernet|GbE|Gigabit|LAN|I219') -and $_.InterfaceDescription -notmatch 'Virtual|Wi-Fi|Bluetooth|TAP|VPN' } | Select-Object -First 1).MacAddress
+        $wifiLocal = ($localAdapters | Where-Object { ($_.PhysicalMediaType -match '802\.11' -or $_.InterfaceDescription -match 'Wi-Fi|Wireless|802\.11|WLAN') -and $_.InterfaceDescription -notmatch 'Virtual|Direct|TAP' } | Select-Object -First 1).MacAddress
+        $btLocal = ($localAdapters | Where-Object { $_.PhysicalMediaType -match 'Bluetooth' -or $_.InterfaceDescription -match 'Bluetooth' } | Select-Object -First 1).MacAddress
+
         $deviceData = [ordered]@{
             modelo = $modeloLocal
             numero_serie = $serialLocal
@@ -164,6 +170,9 @@ foreach ($hostIP in $activeHosts) {
             hostname = $env:COMPUTERNAME
             usuario_actual = $env:USERNAME
             ip_red = $hostIP
+            mac_ethernet = if ($ethLocal) { $ethLocal } else { "N/A" }
+            mac_wifi = if ($wifiLocal) { $wifiLocal } else { "N/A" }
+            mac_bluetooth = if ($btLocal) { $btLocal } else { "N/A" }
             mac_address = $mac
             ubicacion = "Red Local ($SubnetBase.0/24)"
             estado = "Operativo"
@@ -193,6 +202,9 @@ foreach ($hostIP in $activeHosts) {
                 hostname = $hostname
                 usuario_actual = $remCs.UserName
                 ip_red = $hostIP
+                mac_ethernet = $mac
+                mac_wifi = "N/A"
+                mac_bluetooth = "N/A"
                 mac_address = $mac
                 ubicacion = "Red Local ($SubnetBase.0/24)"
                 estado = "Operativo"
@@ -217,6 +229,9 @@ foreach ($hostIP in $activeHosts) {
                 hostname = $hostname
                 usuario_actual = "Usuario en Red"
                 ip_red = $hostIP
+                mac_ethernet = $mac
+                mac_wifi = "N/A"
+                mac_bluetooth = "N/A"
                 mac_address = $mac
                 ubicacion = "Red Local ($SubnetBase.0/24)"
                 estado = "Operativo"

@@ -132,7 +132,16 @@ $almacenamientoResumenList = @()
 foreach ($d in $disks) {
     $diskModel = ($d.Model -replace '\s+', ' ').Trim()
     $diskSerial = ($d.SerialNumber -replace '\s+', ' ').Trim()
+    $diskSerial = $diskSerial -replace '[._\s]+$', ''
+    if ($diskSerial -match '(?:0000[_ ]+){2,}') {
+        $diskSerial = $diskSerial -replace '^(?:0000[_ ]+)+', ''
+    }
+    if ($diskSerial -match '^[0-9A-Fa-f]{4}\s+[0-9A-Fa-f]{4}') {
+        $diskSerial = $diskSerial -replace '\s+', ''
+    }
+    $diskSerial = $diskSerial.Trim().TrimEnd('.')
     if (-not $diskSerial) { $diskSerial = "N/A" }
+
     $diskSizeGB = [Math]::Round($d.Size / 1GB)
     if ($diskModel -match "NVMe" -or $d.MediaType -match "NVMe") {
         $diskType = "NVMe SSD"
@@ -148,7 +157,7 @@ foreach ($d in $disks) {
         tipo = $diskType
         interfaz = $d.InterfaceType
     }
-    $almacenamientoResumenList += "${diskModel} (${diskSizeGB} GB, S/N: ${diskSerial})"
+    $almacenamientoResumenList += if ($diskSerial -and $diskSerial -ne "N/A") { "${diskModel} (S/N: ${diskSerial})" } else { "${diskModel}" }
 }
 $almacenamientoResumen = $almacenamientoResumenList -join " | "
 
@@ -261,22 +270,99 @@ foreach ($dev in $pnpPeripherals) {
     }
 }
 
-# 9. SISTEMA OPERATIVO Y RED
+# 9. SISTEMA OPERATIVO Y RED DETALLADA (ETHERNET, WI-FI, BLUETOOTH SEPARADOS)
 $os = Get-CimInstance Win32_OperatingSystem
 $osName = $os.Caption
 $osArch = $os.OSArchitecture
 $hostname = $env:COMPUTERNAME
 $usuario = $env:USERNAME
 
-$netAdapters = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = TRUE" -ErrorAction SilentlyContinue
-$ipAddresses = @()
-$macAddresses = @()
-foreach ($net in $netAdapters) {
-    $ipAddresses += ($net.IPAddress -join ", ")
-    $macAddresses += $net.MACAddress
+# Función formateadora de MAC a formato estándar XX:XX:XX:XX:XX:XX
+$formatMacAddress = {
+    param($rawMac)
+    if (-not $rawMac -or $rawMac -eq "N/A" -or $rawMac -eq "") { return "N/A" }
+    $clean = ($rawMac -replace '[:\-\.]', '').ToUpper().Trim()
+    if ($clean.Length -eq 12) {
+        return ($clean -replace '..(?!$)', '$&:')
+    }
+    return $rawMac.ToUpper().Trim()
 }
-$ipPrincipal = ($ipAddresses -join " | ")
-$macPrincipal = ($macAddresses -join " | ")
+
+$adapters = Get-NetAdapter -ErrorAction SilentlyContinue
+
+$ethAdapter = $null
+$wifiAdapter = $null
+$btAdapter = $null
+
+if ($adapters) {
+    # 1. Adaptador Ethernet Físico (LAN)
+    $ethAdapter = $adapters | Where-Object { 
+        ($_.PhysicalMediaType -eq '802.3' -or $_.InterfaceDescription -match 'Ethernet|GbE|Gigabit|Realtek|LAN|I219|Intel.*Ethernet|Broadcom') -and 
+        $_.InterfaceDescription -notmatch 'Virtual|Wi-Fi|Wireless|Bluetooth|VPN|Loopback|Hyper-V|TAP|Direct'
+    } | Select-Object -First 1
+
+    # 2. Adaptador Wi-Fi / Inalámbrico
+    $wifiAdapter = $adapters | Where-Object { 
+        ($_.PhysicalMediaType -match '802\.11' -or $_.InterfaceDescription -match 'Wi-Fi|Wireless|802\.11|WLAN' -or $_.Name -match 'Wi-Fi|Wireless') -and 
+        $_.InterfaceDescription -notmatch 'Virtual|Direct|TAP|Bluetooth'
+    } | Select-Object -First 1
+
+    # 3. Adaptador Bluetooth
+    $btAdapter = $adapters | Where-Object { 
+        $_.PhysicalMediaType -match 'Bluetooth' -or $_.InterfaceDescription -match 'Bluetooth' -or $_.Name -match 'Bluetooth'
+    } | Select-Object -First 1
+}
+
+$ethMac = if ($ethAdapter -and $ethAdapter.MacAddress) { $ethAdapter.MacAddress.Trim() } else { "" }
+$wifiMac = if ($wifiAdapter -and $wifiAdapter.MacAddress) { $wifiAdapter.MacAddress.Trim() } else { "" }
+$btMac = if ($btAdapter -and $btAdapter.MacAddress) { $btAdapter.MacAddress.Trim() } else { "" }
+
+# Respaldo WMI / CIM si no se detectó por Get-NetAdapter
+if (-not $ethMac -or -not $wifiMac -or -not $btMac) {
+    $cimAdapters = Get-CimInstance Win32_NetworkAdapter -Filter "MACAddress IS NOT NULL" -ErrorAction SilentlyContinue
+    if ($cimAdapters) {
+        if (-not $ethMac) {
+            $ethCim = $cimAdapters | Where-Object {
+                $_.PhysicalAdapter -eq $true -and
+                ($_.AdapterType -match 'Ethernet' -or $_.Description -match 'Ethernet|GbE|Gigabit|LAN') -and
+                $_.Description -notmatch 'Wireless|Wi-Fi|Bluetooth|Virtual|TAP|VPN|Direct'
+            } | Select-Object -First 1
+            if ($ethCim) { $ethMac = $ethCim.MACAddress }
+        }
+        if (-not $wifiMac) {
+            $wifiCim = $cimAdapters | Where-Object {
+                ($_.Description -match 'Wireless|Wi-Fi|802\.11|WLAN' -or $_.Name -match 'Wi-Fi|Wireless') -and
+                $_.Description -notmatch 'Virtual|Direct|TAP'
+            } | Select-Object -First 1
+            if ($wifiCim) { $wifiMac = $wifiCim.MACAddress }
+        }
+        if (-not $btMac) {
+            $btCim = $cimAdapters | Where-Object {
+                $_.Description -match 'Bluetooth' -or $_.Name -match 'Bluetooth'
+            } | Select-Object -First 1
+            if ($btCim) { $btMac = $btCim.MACAddress }
+        }
+    }
+}
+
+$ethMacFormatted = & $formatMacAddress $ethMac
+$wifiMacFormatted = & $formatMacAddress $wifiMac
+$btMacFormatted = & $formatMacAddress $btMac
+
+# Extracción limpia de Direcciones IPv4 activas
+$ipConfigs = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = TRUE" -ErrorAction SilentlyContinue
+$ips = @()
+foreach ($cfg in $ipConfigs) {
+    $validIps = $cfg.IPAddress | Where-Object { $_ -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$' -and $_ -notmatch '^169\.254\.' -and $_ -notmatch '^127\.' }
+    if ($validIps) { $ips += $validIps }
+}
+$ipPrincipal = if ($ips.Count -gt 0) { ($ips -join " | ") } else { "N/A" }
+
+$activeMacsList = @()
+if ($ethMacFormatted -ne "N/A") { $activeMacsList += $ethMacFormatted }
+if ($wifiMacFormatted -ne "N/A") { $activeMacsList += $wifiMacFormatted }
+if ($btMacFormatted -ne "N/A") { $activeMacsList += $btMacFormatted }
+$macPrincipal = if ($activeMacsList.Count -gt 0) { ($activeMacsList -join " | ") } else { "N/A" }
 
 # CONSTRUIR PAYLOAD DE AUDITORÍA
 $hardwarePayload = [ordered]@{
@@ -299,6 +385,9 @@ $hardwarePayload = [ordered]@{
     ubicacion = $Ubicacion
     sistema_operativo = "$osName ($osArch)"
     ip_red = $ipPrincipal
+    mac_ethernet = $ethMacFormatted
+    mac_wifi = $wifiMacFormatted
+    mac_bluetooth = $btMacFormatted
     mac_address = $macPrincipal
     fecha_escaneo = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
 }
@@ -340,7 +429,11 @@ Write-Host "  - MONITORES:        $monResumen" -ForegroundColor White
 $perifResumen = ($perifericosDetalles | ForEach-Object { "$($_.tipo): $($_.nombre)" }) -join " | "
 if (-not $perifResumen) { $perifResumen = "Estándar / Integrado" }
 Write-Host "  - PERIFERICOS:      $perifResumen" -ForegroundColor White
-Write-Host "  - HOSTNAME / IP:    $hostname ($ipPrincipal)" -ForegroundColor White
+Write-Host "  - HOSTNAME:         $hostname" -ForegroundColor White
+Write-Host "  - DIRECCION IP:     $ipPrincipal" -ForegroundColor White
+Write-Host "  - MAC ETHERNET:     $ethMacFormatted" -ForegroundColor White
+Write-Host "  - MAC WI-FI:        $wifiMacFormatted" -ForegroundColor White
+Write-Host "  - MAC BLUETOOTH:    $btMacFormatted" -ForegroundColor White
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "[+] Copia local guardada en: $filePath" -ForegroundColor DarkGray
 
@@ -373,13 +466,13 @@ foreach ($targetUrl in $urlsToTry) {
             $wc.Headers.Add("Content-Type", "application/json; charset=utf-8")
             $responseBytes = $wc.UploadData($apiUrl, "POST", $payloadBytes)
             $responseStr = $utf8NoBom.GetString($responseBytes)
-            Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
+            Write-Host "[OK] DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
             $sentSuccess = $true
             break
         } catch {
             try {
                 $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
-                Write-Host "[OK] ¡DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
+                Write-Host "[OK] DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
                 $sentSuccess = $true
                 break
             } catch {
@@ -393,12 +486,12 @@ foreach ($targetUrl in $urlsToTry) {
 }
 
 if (-not $sentSuccess) {
-    Write-Host "[!] El servidor web no respondió tras varios intentos." -ForegroundColor Yellow
-    Write-Host "    (No te preocupes: el archivo JSON quedó guardado localmente en $filePath)." -ForegroundColor Gray
+    Write-Host "[!] El servidor web no respondio tras varios intentos." -ForegroundColor Yellow
+    Write-Host "    (No te preocupes: el archivo JSON quedo guardado localmente en $filePath)." -ForegroundColor Gray
 }
 
 Write-Host ""
-Write-Host "[✓] Registro completado con éxito. Cerrando ventana..." -ForegroundColor Cyan
+Write-Host "[OK] Registro completado con exito. Cerrando ventana..." -ForegroundColor Cyan
 Start-Sleep -Milliseconds 1500
 
 try {

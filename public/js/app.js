@@ -1421,6 +1421,10 @@ function renderData() {
           item.usuario_actual || '',
           item.ubicacion || '',
           item.ip_red || '',
+          item.mac_ethernet || '',
+          item.mac_wifi || '',
+          item.mac_bluetooth || '',
+          item.mac_address || '',
           item.procesador || '',
           item.ram_total || '',
           item.tipo_equipo || '',
@@ -2174,6 +2178,18 @@ function editEquipment(id) {
 
   document.getElementById('formHostname').value = item.hostname || '';
   
+  const formIpRed = document.getElementById('formIpRed');
+  if (formIpRed) formIpRed.value = item.ip_red || '';
+
+  const formMacEthernet = document.getElementById('formMacEthernet');
+  if (formMacEthernet) formMacEthernet.value = item.mac_ethernet || '';
+
+  const formMacWifi = document.getElementById('formMacWifi');
+  if (formMacWifi) formMacWifi.value = item.mac_wifi || '';
+
+  const formMacBluetooth = document.getElementById('formMacBluetooth');
+  if (formMacBluetooth) formMacBluetooth.value = item.mac_bluetooth || '';
+
   const formMacAddress = document.getElementById('formMacAddress');
   if (formMacAddress) formMacAddress.value = item.mac_address || '';
   
@@ -2250,6 +2266,12 @@ async function handleFormSubmit(e) {
   const compCapacidad = (document.getElementById('formCompCapacidad') ? document.getElementById('formCompCapacidad').value : '').trim();
   const compInterfaz = (document.getElementById('formCompInterfaz') ? document.getElementById('formCompInterfaz').value : '').trim();
 
+  const ipRedVal = (document.getElementById('formIpRed') ? document.getElementById('formIpRed').value : '').trim();
+  const macEthVal = (document.getElementById('formMacEthernet') ? document.getElementById('formMacEthernet').value : '').trim();
+  const macWifiVal = (document.getElementById('formMacWifi') ? document.getElementById('formMacWifi').value : '').trim();
+  const macBtVal = (document.getElementById('formMacBluetooth') ? document.getElementById('formMacBluetooth').value : '').trim();
+  const macLegacyVal = (document.getElementById('formMacAddress') ? document.getElementById('formMacAddress').value : '').trim();
+
   const payload = {
     modelo: (document.getElementById('formModelo').value || '').trim(),
     numero_serie: (document.getElementById('formNumeroSerie').value || '').trim(),
@@ -2261,7 +2283,11 @@ async function handleFormSubmit(e) {
     ram_total: (document.getElementById('formRamTotal').value || '').trim(),
     almacenamiento_resumen: (document.getElementById('formAlmacenamiento').value || '').trim(),
     hostname: (document.getElementById('formHostname').value || '').trim(),
-    mac_address: (document.getElementById('formMacAddress') ? document.getElementById('formMacAddress').value : '').trim(),
+    ip_red: ipRedVal,
+    mac_ethernet: macEthVal,
+    mac_wifi: macWifiVal,
+    mac_bluetooth: macBtVal,
+    mac_address: macLegacyVal || [macEthVal, macWifiVal, macBtVal].filter(Boolean).join(' | '),
     usuario_actual: (document.getElementById('formUsuario').value || '').trim(),
     ubicacion: finalUbicacion,
     consumible: (document.getElementById('formConsumible') ? document.getElementById('formConsumible').value : '').trim(),
@@ -2616,18 +2642,45 @@ function viewDetails(id) {
     <div class="specs-detail-grid">
       <div class="spec-box">
         <div class="spec-box-title">HOSTNAME / EQUIPO</div>
-        <div class="spec-box-val mono">${escapeHTML(item.hostname || 'N/A')}</div>
+        <div class="spec-box-val mono" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>${escapeHTML(item.hostname || 'N/A')}</span>
+          ${item.hostname ? `<button class="btn-copy-chip" onclick="copyText('${escapeHTML(item.hostname)}')" title="Copiar Hostname"><i class="fa-regular fa-copy"></i></button>` : ''}
+        </div>
       </div>
       <div class="spec-box">
         <div class="spec-box-title">USUARIO RESPONSABLE</div>
         <div class="spec-box-val">${escapeHTML(item.usuario_actual || 'N/A')}</div>
       </div>
       <div class="spec-box">
-        <div class="spec-box-title">DIRECCIÓN IP / MAC</div>
-        <div class="spec-box-val mono">${escapeHTML(item.ip_red || 'N/A')} (${escapeHTML(item.mac_address || 'N/A')})</div>
+        <div class="spec-box-title"><i class="fa-solid fa-globe"></i> DIRECCIÓN IP DE RED</div>
+        <div class="spec-box-val mono" style="display: flex; justify-content: space-between; align-items: center; color: #38bdf8;">
+          <span>${escapeHTML(item.ip_red || 'N/A')}</span>
+          ${item.ip_red && item.ip_red !== 'N/A' ? `<button class="btn-copy-chip" onclick="copyText('${escapeHTML(item.ip_red)}')" title="Copiar IP"><i class="fa-regular fa-copy"></i></button>` : ''}
+        </div>
       </div>
       <div class="spec-box">
-        <div class="spec-box-title">ORIGEN Y FECHA</div>
+        <div class="spec-box-title"><i class="fa-solid fa-network-wired"></i> MAC ETHERNET (LAN)</div>
+        <div class="spec-box-val mono" style="display: flex; justify-content: space-between; align-items: center; color: #4ade80;">
+          <span>${escapeHTML(item.mac_ethernet || (!item.mac_wifi && !item.mac_bluetooth && item.mac_address ? item.mac_address : 'N/A'))}</span>
+          ${(item.mac_ethernet && item.mac_ethernet !== 'N/A') || (!item.mac_wifi && !item.mac_bluetooth && item.mac_address) ? `<button class="btn-copy-chip" onclick="copyText('${escapeHTML(item.mac_ethernet || item.mac_address)}')" title="Copiar MAC Ethernet"><i class="fa-regular fa-copy"></i></button>` : ''}
+        </div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title"><i class="fa-solid fa-wifi"></i> MAC WI-FI (WLAN)</div>
+        <div class="spec-box-val mono" style="display: flex; justify-content: space-between; align-items: center; color: #a78bfa;">
+          <span>${escapeHTML(item.mac_wifi || 'N/A')}</span>
+          ${item.mac_wifi && item.mac_wifi !== 'N/A' ? `<button class="btn-copy-chip" onclick="copyText('${escapeHTML(item.mac_wifi)}')" title="Copiar MAC Wi-Fi"><i class="fa-regular fa-copy"></i></button>` : ''}
+        </div>
+      </div>
+      <div class="spec-box">
+        <div class="spec-box-title"><i class="fa-brands fa-bluetooth-b"></i> MAC BLUETOOTH</div>
+        <div class="spec-box-val mono" style="display: flex; justify-content: space-between; align-items: center; color: #f472b6;">
+          <span>${escapeHTML(item.mac_bluetooth || 'N/A')}</span>
+          ${item.mac_bluetooth && item.mac_bluetooth !== 'N/A' ? `<button class="btn-copy-chip" onclick="copyText('${escapeHTML(item.mac_bluetooth)}')" title="Copiar MAC Bluetooth"><i class="fa-regular fa-copy"></i></button>` : ''}
+        </div>
+      </div>
+      <div class="spec-box" style="grid-column: 1 / -1;">
+        <div class="spec-box-title">ORIGEN Y FECHA DE AUDITORÍA</div>
         <div class="spec-box-val">${escapeHTML(item.origen || 'Manual')} - ${escapeHTML(item.fecha_escaneo || 'N/A')}</div>
       </div>
     </div>
