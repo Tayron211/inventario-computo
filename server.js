@@ -82,9 +82,37 @@ function isValidPeripheral(p) {
   return PROPRIETARY_BRANDS_PATTERN.test(full) || p.es_marca === true;
 }
 
+function cleanGenericModel(val, placaBase, tipo) {
+  if (!val) return 'PC Ensamblada';
+  const str = String(val).trim();
+  if (/^(system product name|to be filled by o\.e\.m\.|default string|system manufacturer|all series|generic|desconocido)$/i.test(str)) {
+    if (placaBase && placaBase !== 'N/A' && !/^(system|default|generic|to be filled)/i.test(placaBase)) {
+      return `PC Ensamblada (${placaBase})`;
+    }
+    return 'PC Ensamblada';
+  }
+  return str;
+}
+
+function cleanGenericManufacturer(val, placaBase) {
+  if (!val) return 'Ensamblado';
+  const str = String(val).trim();
+  if (/^(system manufacturer|to be filled by o\.e\.m\.|default string|oem|generic|desconocido)$/i.test(str)) {
+    if (placaBase && placaBase !== 'N/A' && !/^(system|default|generic|to be filled)/i.test(placaBase)) {
+      const parts = placaBase.split(' ');
+      return parts[0] || 'Ensamblado';
+    }
+    return 'Ensamblado';
+  }
+  return str;
+}
+
 function normalizeItem(item) {
   if (!item) return item;
   const { _id, ...clean } = item;
+  clean.modelo = cleanGenericModel(clean.modelo, clean.placa_base, clean.tipo_equipo);
+  clean.fabricante = cleanGenericManufacturer(clean.fabricante, clean.placa_base);
+
   if (clean.monitores && Array.isArray(clean.monitores)) {
     clean.monitores = clean.monitores.map(m => {
       const rawManuf = (m.fabricante || '').trim().toUpperCase();

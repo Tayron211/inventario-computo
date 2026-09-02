@@ -1231,34 +1231,40 @@ function setFilterCategory(category) {
 }
 
 // Función para limpiar nombres genéricos de BIOS (ej: "System manufacturer System Product Name")
-function getCleanModelName(item) {
-  if (!item) return 'Equipo';
+function getCleanItemModel(item) {
+  if (!item) return 'PC Ensamblada';
   let m = (item.modelo || '').trim();
-  let f = (item.fabricante || '').trim();
   let p = (item.placa_base || '').trim();
-
-  const isGenericModel = !m || /^(system product name|to be filled by o\.e\.m\.|default string|generic|desconocido|standard pc|all series)/i.test(m);
-  const isGenericFab = !f || /^(system manufacturer|to be filled by o\.e\.m\.|default string|generic|desconocido|o\.e\.m\.)/i.test(f);
-
-  if (isGenericModel && isGenericFab) {
-    if (p && p !== 'N/A' && !/^(default|generic)/i.test(p)) {
+  if (!m || /^(system product name|to be filled by o\.e\.m\.|default string|generic|desconocido|standard pc|all series)/i.test(m)) {
+    if (p && p !== 'N/A' && !/^(default|generic|system|to be filled)/i.test(p)) {
       return `PC Ensamblada (${p})`;
     }
-    return item.tipo_equipo ? `PC Ensamblada (${item.tipo_equipo})` : 'PC Ensamblada Estándar';
+    return 'PC Ensamblada';
   }
+  return m;
+}
 
-  if (isGenericModel) {
-    if (p && p !== 'N/A' && !/^(default|generic)/i.test(p)) {
-      return `${f} (${p})`;
+function getCleanItemManufacturer(item) {
+  if (!item) return 'Ensamblado';
+  let f = (item.fabricante || '').trim();
+  let p = (item.placa_base || '').trim();
+  if (!f || /^(system manufacturer|to be filled by o\.e\.m\.|default string|oem|generic|desconocido)/i.test(f)) {
+    if (p && p !== 'N/A' && !/^(default|generic|system|to be filled)/i.test(p)) {
+      const parts = p.split(' ');
+      return parts[0] || 'Ensamblado';
     }
-    return `${f} PC de Escritorio`;
+    return 'Ensamblado';
   }
+  return f;
+}
 
-  if (isGenericFab) {
-    return m;
-  }
+function getCleanModelName(item) {
+  if (!item) return 'PC Ensamblada';
+  let m = getCleanItemModel(item);
+  let f = getCleanItemManufacturer(item);
 
-  if (!m.toLowerCase().includes(f.toLowerCase())) {
+  if (m.startsWith('PC Ensamblada')) return m;
+  if (!m.toLowerCase().includes(f.toLowerCase()) && f !== 'Ensamblado') {
     return `${f} ${m}`;
   }
   return m;
@@ -1578,8 +1584,10 @@ function renderTable(items) {
     }
 
     const statusClass = (item.estado || 'Operativo').toLowerCase().replace(/\s+/g, '-');
-    const primaryName = item.hostname || item.modelo || 'Equipo';
-    const subName = item.hostname ? (item.modelo || '') : '';
+    const cleanModel = getCleanItemModel(item);
+    const cleanFab = getCleanItemManufacturer(item);
+    const primaryName = item.hostname || cleanModel || 'Equipo';
+    const subName = item.hostname ? (cleanModel || '') : '';
     const isRowHighlighted = queryActive ? 'row-highlight-pulse' : '';
 
     return `
@@ -1591,7 +1599,7 @@ function renderTable(items) {
               <strong class="modelo-text">${highlightMatch(primaryName, currentSearchQuery)}</strong>
             </div>
             ${subName ? `<span style="font-size: 0.74rem; color: var(--gray-400); margin-left: 20px; line-height: 1.2;">${highlightMatch(subName, currentSearchQuery)}</span>` : ''}
-            ${item.fabricante ? `<span class="fabricante-tag">${highlightMatch(item.fabricante, currentSearchQuery)}</span>` : ''}
+            ${cleanFab ? `<span class="fabricante-tag">${highlightMatch(cleanFab, currentSearchQuery)}</span>` : ''}
           </div>
         </td>
         <td class="cell-serie">
@@ -1657,8 +1665,10 @@ function renderGrid(items) {
 
   gridContainer.innerHTML = items.map(item => {
     const typeInfo = getDeviceTypeInfo(item.tipo_equipo);
-    const primaryName = item.hostname || item.modelo || 'Equipo';
-    const subName = item.hostname ? (item.modelo || '') : '';
+    const cleanModel = getCleanItemModel(item);
+    const cleanFab = getCleanItemManufacturer(item);
+    const primaryName = item.hostname || cleanModel || 'Equipo';
+    const subName = item.hostname ? (cleanModel || '') : '';
     const highlightCardClass = queryActive ? 'card-highlight-pulse' : '';
 
     return `
@@ -2402,8 +2412,9 @@ function viewDetails(id) {
   if (!item) return;
 
   const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const cleanModel = getCleanItemModel(item);
 
-  document.getElementById('detailsTitle').textContent = item.hostname || item.modelo || 'Ficha Técnica';
+  document.getElementById('detailsTitle').textContent = item.hostname || cleanModel || 'Ficha Técnica';
   document.getElementById('detailsSubtitle').textContent = `S/N: ${item.numero_serie || 'N/A'} | Tipo: ${item.tipo_equipo || 'PC'}`;
 
   // Configurar botones de editar y eliminar desde ficha técnica
@@ -2546,7 +2557,7 @@ function viewDetails(id) {
       </div>
       <div class="spec-box">
         <div class="spec-box-title">MODELO DE EQUIPO</div>
-        <div class="spec-box-val">${escapeHTML(item.modelo || 'N/A')}</div>
+        <div class="spec-box-val">${escapeHTML(cleanModel || item.modelo || 'N/A')}</div>
       </div>
       <div class="spec-box">
         <div class="spec-box-title">NÚMERO DE SERIE (S/N)</div>

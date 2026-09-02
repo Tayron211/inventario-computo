@@ -30,10 +30,10 @@ $bios = Get-CimInstance Win32_BIOS
 $baseBoard = Get-CimInstance Win32_BaseBoard
 $enclosure = Get-CimInstance Win32_SystemEnclosure
 
-$fabricante = ($compSystem.Manufacturer -replace '\s+', ' ').Trim()
-$modelo = ($compSystem.Model -replace '\s+', ' ').Trim()
-if (-not $modelo -or $modelo -eq "System Product Name" -or $modelo -eq "To be filled by O.E.M.") {
-    $modelo = ($compSystemProduct.Name -replace '\s+', ' ').Trim()
+$fabricanteRaw = ($compSystem.Manufacturer -replace '\s+', ' ').Trim()
+$modeloRaw = ($compSystem.Model -replace '\s+', ' ').Trim()
+if (-not $modeloRaw -or $modeloRaw -match '^(System Product Name|To be filled by O\.E\.M\.|Default string|System manufacturer|Generic|All Series)$' -or $modeloRaw -eq "") {
+    $modeloRaw = ($compSystemProduct.Name -replace '\s+', ' ').Trim()
 }
 
 $numeroSerie = ($bios.SerialNumber -replace '\s+', ' ').Trim()
@@ -57,6 +57,27 @@ if ($placaBaseFabricante -and $placaBase -notmatch $placaBaseFabricante) {
     $placaBaseCompleta = "$placaBaseFabricante $placaBaseModelo".Trim()
 } else {
     $placaBaseCompleta = $placaBaseModelo
+}
+
+# Limpieza y asignación automática para PCs Ensambladas
+if (-not $modeloRaw -or $modeloRaw -match '^(System Product Name|To be filled by O\.E\.M\.|Default string|System manufacturer|Generic|All Series)$' -or $modeloRaw -eq "") {
+    if ($placaBaseModelo -and $placaBaseModelo -notmatch '^(System Product Name|To be filled by O\.E\.M\.|Default string|Base Board Product Name)$') {
+        $modelo = "PC Ensamblada ($placaBaseModelo)"
+    } else {
+        $modelo = "PC Ensamblada"
+    }
+} else {
+    $modelo = $modeloRaw
+}
+
+if (-not $fabricanteRaw -or $fabricanteRaw -match '^(System manufacturer|To be filled by O\.E\.M\.|Default string|OEM|Generic)$' -or $fabricanteRaw -eq "") {
+    if ($placaBaseFabricante -and $placaBaseFabricante -notmatch '^(System manufacturer|To be filled by O\.E\.M\.|Default string)$') {
+        $fabricante = $placaBaseFabricante
+    } else {
+        $fabricante = "Ensamblado"
+    }
+} else {
+    $fabricante = $fabricanteRaw
 }
 
 # 3. DETERMINACIÓN DEL TIPO DE EQUIPO (Laptop vs PC de Escritorio vs All-in-One)
