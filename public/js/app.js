@@ -2549,25 +2549,6 @@ function viewDetails(id) {
   document.getElementById('detailsTitle').textContent = item.hostname || cleanModel || 'Ficha Técnica';
   document.getElementById('detailsSubtitle').textContent = `S/N: ${item.numero_serie || 'N/A'} | Tipo: ${item.tipo_equipo || 'PC'}`;
 
-  // Configurar botones de editar y eliminar desde ficha técnica
-  const btnEditFromDetails = document.getElementById('btnEditFromDetails');
-  const btnDeleteFromDetails = document.getElementById('btnDeleteFromDetails');
-
-  if (btnEditFromDetails) {
-    btnEditFromDetails.style.display = isOperador ? 'none' : 'inline-flex';
-    btnEditFromDetails.onclick = () => {
-      editEquipment(item.id);
-    };
-  }
-
-  if (btnDeleteFromDetails) {
-    btnDeleteFromDetails.style.display = isOperador ? 'none' : 'inline-flex';
-    btnDeleteFromDetails.onclick = () => {
-      closeModal('detailsModal');
-      deleteEquipment(item.id, item.hostname || item.modelo);
-    };
-  }
-
   // Monitores List
   let monitoresHtml = '<p class="text-gray-400" style="font-size: 0.85rem;">Sin pantallas adicionales</p>';
   if (item.monitores && item.monitores.length > 0) {
