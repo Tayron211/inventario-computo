@@ -477,26 +477,50 @@ function getServerUrl(req) {
 
 // Credenciales de acceso y roles del sistema
 const USERS = [
-  { username: 'admin', password: 'S0p0rt3pp', role: 'admin', displayName: 'Administrador' },
-  { username: 'user', password: 'solover', role: 'operador', displayName: 'Observador' }
+  // Super Administrador Platinum (Acceso Total: Crear, Editar, Eliminar, Exportar)
+  { username: 'admin', password: 'admin', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true },
+  { username: 'admin', password: 'S0p0rt3pp', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true },
+
+  // Administradores Gold con etiqueta dorada y brillos (Pueden Crear, Escanear, Editar, Exportar - NO PUEDEN ELIMINAR)
+  { username: 'Tayron', password: '210391', role: 'gold_admin', badge: 'gold', displayName: 'Tayron', canDelete: false },
+  { username: 'Cristian', password: 'Joel0209', role: 'gold_admin', badge: 'gold', displayName: 'Cristian', canDelete: false },
+  { username: 'David', password: 'Goñigo', role: 'gold_admin', badge: 'gold', displayName: 'David', canDelete: false },
+  { username: 'David', password: 'Gonigo', role: 'gold_admin', badge: 'gold', displayName: 'David', canDelete: false },
+
+  // Observador con etiqueta de bronce mate sin brillos (Solo Visualización)
+  { username: 'observador', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
+  { username: 'observador', password: 'observador', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
+  { username: 'user', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false }
 ];
 
-// Obtener rol del usuario actual basado en el token Bearer o query param
-function getUserRole(req) {
+// Obtener información completa del usuario actual basado en el token Bearer o query param
+function getUserInfo(req) {
   let token = req.headers['authorization'] || (req.query && req.query.token);
-  if (!token) return 'admin'; // Fallback por defecto si no se especifica
+  if (!token) return { username: 'admin', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true };
   
   try {
     const cleanToken = String(token).replace(/^Bearer\s+/i, '').trim();
     const decoded = Buffer.from(cleanToken, 'base64').toString('utf8');
-    const [username, role] = decoded.split(':');
-    return role || 'admin';
+    const [username, role, badge] = decoded.split(':');
+    const matched = USERS.find(u => u.username.toLowerCase() === (username || '').toLowerCase());
+    if (matched) return matched;
+    return {
+      username: username || 'admin',
+      role: role || 'admin',
+      badge: badge || (role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(username) ? 'gold' : 'bronze')),
+      displayName: username || 'Usuario',
+      canDelete: role === 'admin'
+    };
   } catch (e) {
-    return 'admin';
+    return { username: 'admin', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true };
   }
 }
 
-// Login de Usuarios (Admin / Operador)
+function getUserRole(req) {
+  return getUserInfo(req).role;
+}
+
+// Login de Usuarios (Admin Platinum / Gold Admins / Observador Bronce)
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
   
@@ -510,11 +534,13 @@ app.post('/api/login', (req, res) => {
   );
   
   if (foundUser) {
-    const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${Date.now()}`).toString('base64');
+    const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${foundUser.badge}:${Date.now()}`).toString('base64');
     return res.json({
       success: true,
       user: foundUser.username,
       role: foundUser.role,
+      badge: foundUser.badge,
+      canDelete: foundUser.canDelete,
       displayName: foundUser.displayName,
       token: token,
       message: 'Inicio de sesión exitoso'
@@ -1314,11 +1340,11 @@ app.get('/api/lookup-specs', async (req, res) => {
   }
 });
 
-// Crear registro manual (Bloqueado para operador)
+// Crear registro manual (Bloqueado para observador)
 app.post('/api/inventory', async (req, res) => {
-  const role = getUserRole(req);
-  if (role === 'operador') {
-    return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede crear registros.' });
+  const userInfo = getUserInfo(req);
+  if (userInfo.role === 'observador') {
+    return res.status(403).json({ error: 'Acceso denegado: El usuario observador solo tiene permisos de visualización y no puede crear registros.' });
   }
 
   const items = loadDB();
@@ -1355,6 +1381,10 @@ app.post('/api/inventory', async (req, res) => {
     estado: body.estado || 'Operativo',
     consumible: body.consumible || body.tinta_toner || '',
     notas: body.notas || '',
+    creado_por: userInfo.username || 'admin',
+    creado_por_badge: userInfo.badge || (userInfo.role === 'admin' ? 'platinum' : (userInfo.role === 'gold_admin' ? 'gold' : 'bronze')),
+    creado_por_rol: userInfo.role || 'admin',
+    creado_por_nombre: userInfo.displayName || userInfo.username || 'Admin',
     fecha_escaneo: new Date().toISOString().replace('T', ' ').substring(0, 19),
     origen: 'Manual'
   };
@@ -1365,11 +1395,11 @@ app.post('/api/inventory', async (req, res) => {
   res.status(201).json({ message: 'Equipo registrado exitosamente', item: newItem });
 });
 
-// Actualizar equipo (Bloqueado para operador)
+// Actualizar equipo (Bloqueado para observador)
 app.put('/api/inventory/:id', async (req, res) => {
-  const role = getUserRole(req);
-  if (role === 'operador') {
-    return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede editar registros.' });
+  const userInfo = getUserInfo(req);
+  if (userInfo.role === 'observador') {
+    return res.status(403).json({ error: 'Acceso denegado: El usuario observador solo tiene permisos de visualización y no puede editar registros.' });
   }
 
   const items = loadDB();
@@ -1390,6 +1420,8 @@ app.put('/api/inventory/:id', async (req, res) => {
     ...items[index],
     ...req.body,
     id: items[index].id, // preservar ID
+    modificado_por: userInfo.username || 'admin',
+    modificado_por_badge: userInfo.badge || 'gold',
     fecha_modificacion: new Date().toISOString().replace('T', ' ').substring(0, 19)
   };
   
@@ -1399,11 +1431,13 @@ app.put('/api/inventory/:id', async (req, res) => {
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
 
-// Eliminar equipo (Bloqueado para operador)
+// Eliminar equipo (SOLO permitido para Administrador Platinum / Super Admin)
 app.delete('/api/inventory/:id', async (req, res) => {
-  const role = getUserRole(req);
-  if (role === 'operador') {
-    return res.status(403).json({ error: 'Acceso denegado: El usuario operador solo tiene permisos de visualización y no puede eliminar registros.' });
+  const userInfo = getUserInfo(req);
+  if (!userInfo.canDelete || userInfo.role !== 'admin') {
+    return res.status(403).json({ 
+      error: 'Acceso denegado: Solo el Administrador Platinum tiene permisos para eliminar registros. Los Administradores Gold y Observadores no pueden borrar registros.' 
+    });
   }
 
   let items = loadDB();

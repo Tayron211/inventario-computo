@@ -100,6 +100,8 @@ function initAuth() {
           sessionStorage.setItem('sysinventario_session_token', data.token);
           sessionStorage.setItem('sysinventario_user', data.user);
           sessionStorage.setItem('sysinventario_role', data.role || 'admin');
+          sessionStorage.setItem('sysinventario_badge', data.badge || (data.role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(data.user) ? 'gold' : 'bronze')));
+          sessionStorage.setItem('sysinventario_can_delete', data.canDelete ? 'true' : 'false');
           sessionStorage.setItem('sysinventario_display', data.displayName || data.user);
           localStorage.removeItem('sysinventario_token');
           
@@ -151,52 +153,103 @@ function initAuth() {
   }
 }
 
+// Generador de Etiqueta / Badge Visual de Usuario (Platinum, Gold, Bronze)
+function getUserBadgeHtml(username, badge, role) {
+  const user = (username || 'admin').trim();
+  let b = badge;
+  if (!b) {
+    if (user.toLowerCase() === 'admin' || role === 'admin') b = 'platinum';
+    else if (/tayron|cristian|david/i.test(user) || role === 'gold_admin') b = 'gold';
+    else b = 'bronze';
+  }
+
+  if (b === 'platinum' || user.toLowerCase() === 'admin') {
+    return `
+      <span class="badge-role-tag badge-user-platinum" title="Super Administrador Platinum ✨ (Acceso Total)">
+        <span class="sparkle-star-anim">✨</span>
+        <i class="fa-solid fa-crown platinum-crown"></i>
+        <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
+        <span class="badge-tier-label">PLATINUM</span>
+        <span class="sparkle-star-anim">✨</span>
+      </span>
+    `;
+  } else if (b === 'gold' || /tayron|cristian|david/i.test(user)) {
+    return `
+      <span class="badge-role-tag badge-user-gold" title="Administrador Gold ⭐ (Gestión Completa sin eliminación)">
+        <span class="gold-glitter-star">🌟</span>
+        <i class="fa-solid fa-medal gold-medal-icon"></i>
+        <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
+        <span class="badge-tier-label">GOLD</span>
+        <span class="gold-glitter-star">🌟</span>
+      </span>
+    `;
+  } else {
+    return `
+      <span class="badge-role-tag badge-user-bronze" title="Observador 🥉 (Solo Lectura)">
+        <i class="fa-solid fa-shield"></i>
+        <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
+        <span class="badge-tier-label">BRONCE</span>
+      </span>
+    `;
+  }
+}
+
 // -------------------------------------------------------------
 // ACTUALIZACIÓN DE INTERFAZ SEGÚN ROL DE USUARIO
 // -------------------------------------------------------------
 function updateAuthUI() {
   const role = sessionStorage.getItem('sysinventario_role') || 'admin';
   const username = sessionStorage.getItem('sysinventario_user') || 'admin';
+  const badge = sessionStorage.getItem('sysinventario_badge') || (role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(username) ? 'gold' : 'bronze'));
   
   const userSessionBox = document.getElementById('userSessionBox');
   const sessionUserIcon = document.getElementById('sessionUserIcon');
   const sessionUserName = document.getElementById('sessionUserName');
   
   if (userSessionBox) {
-    userSessionBox.classList.remove('badge-role-admin', 'badge-role-operador');
-    userSessionBox.classList.add(role === 'operador' ? 'badge-role-operador' : 'badge-role-admin');
+    userSessionBox.classList.remove('badge-role-admin', 'badge-role-operador', 'badge-role-platinum', 'badge-role-gold', 'badge-role-bronze');
+    if (badge === 'platinum' || role === 'admin') {
+      userSessionBox.classList.add('badge-role-platinum');
+    } else if (badge === 'gold' || role === 'gold_admin' || /tayron|cristian|david/i.test(username)) {
+      userSessionBox.classList.add('badge-role-gold');
+    } else {
+      userSessionBox.classList.add('badge-role-bronze');
+    }
   }
   
   if (sessionUserIcon) {
-    sessionUserIcon.innerHTML = role === 'operador' 
-      ? `<i class="fa-solid fa-eye"></i>` 
-      : `<i class="fa-solid fa-crown gold-crown-icon"></i>`;
+    if (badge === 'platinum' || role === 'admin') {
+      sessionUserIcon.innerHTML = `<span class="sparkle-star-anim">✨</span> <i class="fa-solid fa-crown platinum-crown"></i>`;
+    } else if (badge === 'gold' || /tayron|cristian|david/i.test(username)) {
+      sessionUserIcon.innerHTML = `<span class="gold-glitter-star">🌟</span> <i class="fa-solid fa-medal gold-medal-icon"></i>`;
+    } else {
+      sessionUserIcon.innerHTML = `<i class="fa-solid fa-shield"></i>`;
+    }
   }
   
   if (sessionUserName) {
-    sessionUserName.innerHTML = role === 'operador' 
-      ? `<b>OBSERVADOR</b>` 
-      : `<b>${escapeHTML(username)}</b>`;
+    const tierText = (badge === 'platinum' || role === 'admin') ? 'PLATINUM' : ((badge === 'gold' || /tayron|cristian|david/i.test(username)) ? 'GOLD' : 'BRONCE');
+    sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">${tierText}</span>`;
   }
   
-  const isOperador = role === 'operador';
+  const isObservador = role === 'observador' || role === 'operador';
 
   // 1. Botón "Nuevo" (Registrar Equipo / Componente)
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
   if (btnOpenManualModal) {
-    btnOpenManualModal.style.display = isOperador ? 'none' : 'inline-flex';
+    btnOpenManualModal.style.display = isObservador ? 'none' : 'inline-flex';
   }
 
   // 2. Botón "Escanear PC" (Auditoría / Registro automático)
   const btnScanLocal = document.getElementById('btnScanLocal');
   if (btnScanLocal) {
-    btnScanLocal.style.display = isOperador ? 'none' : 'inline-flex';
+    btnScanLocal.style.display = isObservador ? 'none' : 'inline-flex';
   }
 
   // 3. Botón "Excel" (Exportación del inventario)
   const btnExportExcel = document.getElementById('btnExportExcel');
   if (btnExportExcel) {
-    btnExportExcel.style.display = isOperador ? 'none' : 'inline-flex';
+    btnExportExcel.style.display = isObservador ? 'none' : 'inline-flex';
   }
 }
 
@@ -1497,7 +1550,10 @@ function highlightMatch(text, query) {
 }
 
 function renderTable(items) {
-  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+  const isObservador = userRole === 'observador' || userRole === 'operador';
+  const canDelete = (sessionStorage.getItem('sysinventario_can_delete') === 'true') || (userRole === 'admin' && !/tayron|cristian|david/i.test(loggedUser));
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   tableBody.innerHTML = items.map(item => {
@@ -1654,11 +1710,13 @@ function renderTable(items) {
             <button class="action-btn-mini" onclick="viewDetails('${item.parentId || item.id}')" title="Ver Ficha Técnica Completa">
               <i class="fa-solid fa-eye"></i>
             </button>
-            ${!isOperador && !item.isDiscreteDevice ? `
+            ${!isObservador && !item.isDiscreteDevice ? `
             <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar Registro">
               <i class="fa-solid fa-pen-to-square"></i>
             </button>
-            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar Registro">
+            ` : ''}
+            ${canDelete && !item.isDiscreteDevice ? `
+            <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar Registro (Solo Platinum Admin)">
               <i class="fa-solid fa-trash-can"></i>
             </button>
             ` : ''}
@@ -1670,7 +1728,10 @@ function renderTable(items) {
 }
 
 function renderGrid(items) {
-  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+  const isObservador = userRole === 'observador' || userRole === 'operador';
+  const canDelete = (sessionStorage.getItem('sysinventario_can_delete') === 'true') || (userRole === 'admin' && !/tayron|cristian|david/i.test(loggedUser));
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   gridContainer.innerHTML = items.map(item => {
@@ -1719,11 +1780,13 @@ function renderGrid(items) {
           <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="viewDetails('${item.id}')">
             <i class="fa-solid fa-eye"></i> Ver Ficha
           </button>
-          ${!isOperador ? `
+          ${!isObservador ? `
           <button class="action-btn-mini" onclick="editEquipment('${item.id}')" title="Editar">
             <i class="fa-solid fa-pen-to-square"></i>
           </button>
-          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar">
+          ` : ''}
+          ${canDelete ? `
+          <button class="action-btn-mini delete-btn" onclick="deleteEquipment('${item.id}', '${escapeHTML(primaryName)}')" title="Eliminar (Solo Platinum Admin)">
             <i class="fa-solid fa-trash-can"></i>
           </button>
           ` : ''}
@@ -2685,9 +2748,20 @@ function viewDetails(id) {
           ${item.mac_bluetooth && item.mac_bluetooth !== 'N/A' ? `<button class="btn-copy-chip" onclick="copyText('${escapeHTML(item.mac_bluetooth)}')" title="Copiar MAC Bluetooth"><i class="fa-regular fa-copy"></i></button>` : ''}
         </div>
       </div>
-      <div class="spec-box" style="grid-column: 1 / -1;">
-        <div class="spec-box-title">ORIGEN Y FECHA DE AUDITORÍA</div>
-        <div class="spec-box-val">${escapeHTML(item.origen || 'Manual')} - ${escapeHTML(item.fecha_escaneo || 'N/A')}</div>
+      <div class="spec-box" style="grid-column: 1 / -1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px; border-radius: 8px;">
+        <div class="spec-box-title" style="color: #fbbf24; font-size: 0.78rem; letter-spacing: 0.5px; margin-bottom: 6px;">
+          <i class="fa-solid fa-user-check"></i> USUARIO QUE REGISTRÓ EL EQUIPO (AUDITORÍA)
+        </div>
+        <div class="spec-box-val" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; color: var(--gray-400);">Registrado por:</span>
+            ${getUserBadgeHtml(item.creado_por || item.usuario_actual || 'admin', item.creado_por_badge, item.creado_por_rol)}
+          </div>
+          <div style="font-size: 0.78rem; color: var(--gray-300); font-family: var(--font-mono); display: flex; align-items: center; gap: 6px;">
+            <i class="fa-regular fa-clock text-crimson"></i> ${escapeHTML(item.fecha_escaneo || item.fecha_modificacion || 'N/A')}
+            <span style="background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; color: #38bdf8;">${escapeHTML(item.origen || 'Manual')}</span>
+          </div>
+        </div>
       </div>
     </div>
   `;
