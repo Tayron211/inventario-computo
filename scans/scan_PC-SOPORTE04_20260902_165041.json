@@ -1,0 +1,50 @@
+﻿{
+    "modelo":  "HP ProStudio 4 All-in-One G1i 23.8 inch Desktop AI PC",
+    "numero_serie":  "8CN60500YC",
+    "placa_base":  "8D19",
+    "placa_base_completa":  "HP 8D19",
+    "placa_base_serial":  "PUNNL0DWBLZ0OQ",
+    "fabricante":  "HP",
+    "tipo_equipo":  "All-in-One",
+    "procesador":  "Intel(R) Core(TM) Ultra 5 225 (10 Nucleos / 10 Hilos)",
+    "ram_total":  "16 GB (1 modulo(s))",
+    "ram_detalles":  [
+                         "DIMM1 - 16GB @ 5600MHz (S/N: 34A9674D - Modelo: M425R2GA3EB0-CWMOL)"
+                     ],
+    "almacenamiento_resumen":  "PC SN5000S SDEPNSJ-512G-1006 (S/N: E823_8FA6_BF53_0001_001B_448B_4F0B_52A1)",
+    "almacenamiento":  [
+                           {
+                               "serie":  "E823_8FA6_BF53_0001_001B_448B_4F0B_52A1",
+                               "tipo":  "Disco",
+                               "capacidad":  "477 GB",
+                               "interfaz":  "SCSI",
+                               "modelo":  "PC SN5000S SDEPNSJ-512G-1006"
+                           }
+                       ],
+    "monitores":  [
+                      {
+                          "serie":  "8CN60500YC",
+                          "fabricante":  "HP",
+                          "modelo":  "HP ProStudio 4"
+                      }
+                  ],
+    "perifericos":  [
+                        {
+                            "fabricante":  "SunplusIT",
+                            "nombre":  "HP 5MP Camera",
+                            "tipo":  "CÃ¡mara Web",
+                            "es_marca":  true,
+                            "id_hardware":  "USB\\VID_04F2\u0026PID_B795\u0026MI_00\\6\u00262A0629BB\u00260\u00260000"
+                        }
+                    ],
+    "hostname":  "PC-SOPORTE04",
+    "usuario_actual":  "AUTONOMA",
+    "ubicacion":  "Soporte TÃ©cnico",
+    "sistema_operativo":  "Microsoft Windows 11 Pro (64 bits)",
+    "ip_red":  "192.168.95.34 | 192.168.137.1",
+    "mac_ethernet":  "5C:28:86:1F:98:AD",
+    "mac_wifi":  "40:D1:33:8F:11:64",
+    "mac_bluetooth":  "40:D1:33:8F:11:68",
+    "mac_address":  "5C:28:86:1F:98:AD | 40:D1:33:8F:11:64 | 40:D1:33:8F:11:68",
+    "fecha_escaneo":  "2026-09-02 16:50:41"
+}
