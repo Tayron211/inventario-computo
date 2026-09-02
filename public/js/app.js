@@ -475,19 +475,22 @@ function initEventListeners() {
     { keywords: ['air m3', 'm3', 'macbook pro'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M3 / M3 Pro (8/12-Core CPU, 10/18-Core GPU)', ram: '16 GB / 36 GB Memoria Unificada', storage: '512 GB SSD PCIe', motherboard: 'Apple M3 Logic Board' },
     { keywords: ['imac', 'imac 24'], brand: 'Apple', type: 'All-in-One', cpu: 'Apple M1 / M3 (8-Core CPU, 8-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD', motherboard: 'Apple iMac Logic Board' },
 
-    // IMPRESORAS & MULTIFUNCIONALES
-    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
-    { keywords: ['l4260', 'l4160', 'l4150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson ESC/P-R Dual Engine (Duplex Automático)', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank L4000 Controller Board', consumible: 'Tinta Epson T504' },
-    { keywords: ['l6270', 'l6171', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'PrecisionCore Print Head Controller (ADF)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Board', consumible: 'Tinta Epson T504' },
-    { keywords: ['l805', 'l1800'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
+    // IMPRESORAS & MULTIFUNCIONALES (EPSON, HP, CANON, BROTHER, KYOCERA, RICOH)
+    { keywords: ['l575', 'l555', 'l565', 'l355', 'l365', 'l375', 'l380', 'l395', 'l455', 'l475', 'l495', 'l210', 'l220', 'l110', 'l120', 'l1300'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R (4 Colores)', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L500/L300 Series Controller Board', consumible: 'Tinta Epson T664' },
+    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l1250', 'l1210', 'l5190', 'l5290', 'l5590', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
+    { keywords: ['l4260', 'l4160', 'l4150', 'l6161', 'l6171', 'l6191', 'l6270', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Dual Engine (Duplex Automático)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Board', consumible: 'Tinta Epson T504' },
+    { keywords: ['l805', 'l1800', 'l800', 'l810', 'l850'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
+    { keywords: ['l8050', 'l18050'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson High-Speed 6-Color Photo Print Engine', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo EcoTank Controller Board', consumible: 'Tinta Epson 108' },
+    { keywords: ['m1100', 'm1120', 'm2140', 'm2170', 'm3170', 'm3180'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Monocromático de Alta Velocidad', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank Mono Controller Board', consumible: 'Tinta Epson T534' },
+    { keywords: ['wf-c5790', 'wf-c5290', 'wf-c5710', 'wf-c5890', 'workforce'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'PrecisionCore 4-Color WorkForce Enterprise Engine', ram: '512 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson WorkForce Pro Controller Board', consumible: 'Tinta Epson T941 / T942' },
     { keywords: ['laserjet', 'm404', 'm402'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
     { keywords: ['m428', 'laserjet pro mfp'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Dual Core 1200MHz Formatter Engine', ram: '512 MB DDR3', storage: '512 MB Flash', motherboard: 'HP MFP Formatter Board', consumible: 'Tóner HP 58A' },
     { keywords: ['p1102', 'm1132', 'm1212'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP RISC 266MHz Processor', ram: '8 MB / 64 MB Buffer', storage: 'Flash ROM', motherboard: 'HP LaserJet P1100 Formatter Board', consumible: 'Tóner HP 85A' },
-    { keywords: ['smart tank', '580', '530', '515', '720'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
+    { keywords: ['smart tank', '580', '530', '515', '720', '750'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
     { keywords: ['107a', '107w', '135a', '135w', '137fnw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP ARM 600MHz Processor', ram: '128 MB Memory', storage: '128 MB Flash', motherboard: 'HP Laser 100 Formatter Board', consumible: 'Tóner HP 105A' },
     { keywords: ['g2110', 'g3110', 'g3160', 'g4110', 'pixma'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon FINE Print Engine Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon PIXMA MegaTank Mainboard', consumible: 'Tinta Canon GI-190' },
     { keywords: ['mf3010', 'lbp6030', 'imageclass'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon On-Demand SURF Laser Processor', ram: '64 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon imageCLASS Laser Formatter Board', consumible: 'Tóner Canon 125' },
-    { keywords: ['t520w', 't510w', 't720dw', 't710w', 'brother'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
+    { keywords: ['t520w', 't510w', 't720dw', 't710w', 't310', 't300', 'brother'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
     { keywords: ['hl-1212w', 'dcp-1617nw', 'hl-1112'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother 200MHz Laser Controller', ram: '32 MB Buffer', storage: 'Flash ROM', motherboard: 'Brother Laser Engine Board', consumible: 'Tóner Brother TN-1060' },
     { keywords: ['m2040dn', 'm2135dn', 'ecosys', 'kyocera'], brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: 'Cortex-A9 800MHz Processor', ram: '512 MB RAM', storage: 'Flash Memory', motherboard: 'Kyocera ECOSYS System Controller Board', consumible: 'Tóner Kyocera TK-1175' },
 
@@ -522,7 +525,7 @@ function initEventListeners() {
     const lower = query.toLowerCase().trim();
     if (lower.length < 2) return null;
 
-    // Buscar si alguna palabra clave coincide
+    // 1. Buscar en catálogo cliente exacto
     for (const item of CLIENT_SPECS_CATALOG) {
       for (const kw of item.keywords) {
         if (lower.includes(kw)) {
@@ -530,6 +533,34 @@ function initEventListeners() {
         }
       }
     }
+
+    // 2. Detección Inteligente de Impresoras por Modelo o Consumible
+    const printerConsumable = autoDetectPrinterConsumables(lower);
+    if (printerConsumable) {
+      return {
+        brand: printerConsumable.brand,
+        type: 'Impresora / Multifuncional',
+        cpu: 'Microcontrolador RISC / SoC Integrado',
+        ram: '128 MB Memoria de Buffer',
+        storage: 'Memoria Flash Firmware',
+        motherboard: `${printerConsumable.brand} Controller Board`,
+        consumible: printerConsumable.consumable
+      };
+    }
+
+    // 3. Inferencia de Componentes y Equipos por Patrones Heurísticos
+    if (/epson/i.test(lower)) {
+      return {
+        brand: 'Epson',
+        type: 'Impresora / Multifuncional',
+        cpu: 'Microcontrolador RISC Epson ESC/P-R',
+        ram: '128 MB Buffer',
+        storage: 'Memoria Flash',
+        motherboard: 'Epson Controller Formatter Board',
+        consumible: 'Tinta Epson EcoTank'
+      };
+    }
+
     return null;
   }
 
