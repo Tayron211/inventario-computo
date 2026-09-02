@@ -422,12 +422,56 @@
 }
 
 [data-theme="light"] .custom-excel-table tbody tr:hover {
-  background: #fee2e2 !important;
+  background: #ffe4e6 !important;
+  box-shadow: inset 4px 0 0 #e11d48, 0 2px 8px rgba(225, 29, 72, 0.12) !important;
 }
 
 [data-theme="light"] .custom-excel-table tbody td {
   border: 1px solid #e2e8f0 !important;
   color: #0f172a !important;
+}
+
+[data-theme="light"] .custom-excel-table tbody tr:hover td {
+  border-color: #fca5a5 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .date-badge-cell .date-part,
+[data-theme="light"] .custom-excel-table tbody tr:hover .date-badge-cell .date-part {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .date-badge-cell .time-part,
+[data-theme="light"] .custom-excel-table tbody tr:hover .date-badge-cell .time-part {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="light"] .status-indicator,
+[data-theme="light"] .custom-excel-table tbody tr:hover .status-indicator {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="light"] .status-operativo,
+[data-theme="light"] .custom-excel-table tbody tr:hover .status-operativo {
+  color: #047857 !important;
+}
+
+[data-theme="light"] .status-uso,
+[data-theme="light"] .custom-excel-table tbody tr:hover .status-uso {
+  color: #1d4ed8 !important;
+}
+
+[data-theme="light"] .status-mantenimiento,
+[data-theme="light"] .custom-excel-table tbody tr:hover .status-mantenimiento {
+  color: #b45309 !important;
+}
+
+[data-theme="light"] .status-baja,
+[data-theme="light"] .custom-excel-table tbody tr:hover .status-baja {
+  color: #be123c !important;
 }
 
 [data-theme="light"] .modelo-text {
@@ -2116,12 +2160,12 @@ body {
 
 /* Hover de Fila de Alto Contraste & Resplandor en Modo Oscuro */
 .custom-excel-table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(220, 20, 60, 0.32) 0%, rgba(220, 20, 60, 0.16) 40%, rgba(220, 20, 60, 0.28) 100%) !important;
-  box-shadow: inset 4px 0 0 #ff2d55, 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+  background: linear-gradient(90deg, rgba(220, 20, 60, 0.32) 0%, rgba(220, 20, 60, 0.16) 40%, rgba(220, 20, 60, 0.28) 100%);
+  box-shadow: inset 4px 0 0 #ff2d55, 0 4px 20px rgba(0, 0, 0, 0.6);
   z-index: 5;
 }
 
-.custom-excel-table tbody tr:hover td {
+[data-theme="dark"] .custom-excel-table tbody tr:hover td {
   border-color: rgba(220, 20, 60, 0.45) !important;
   color: #ffffff !important;
 }
@@ -2193,7 +2237,7 @@ body {
 }
 
 .date-badge-cell .date-part {
-  font-weight: 600;
+  font-weight: 700;
   color: #f1f5f9;
   display: inline-flex;
   align-items: center;
@@ -2202,7 +2246,7 @@ body {
 
 .date-badge-cell .time-part {
   font-size: 0.67rem;
-  color: var(--gray-400);
+  color: #94a3b8;
   display: inline-flex;
   align-items: center;
   gap: 3px;
