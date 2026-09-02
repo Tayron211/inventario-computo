@@ -1911,6 +1911,7 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
       { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
       { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
+      { header: 'FECHA Y HORA', key: 'fecha', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -1932,6 +1933,7 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'MAC ETHERNET', key: 'mac_ethernet', width: 22 },
       { header: 'MAC WI-FI', key: 'mac_wifi', width: 22 },
       { header: 'MAC BLUETOOTH', key: 'mac_bluetooth', width: 22 },
+      { header: 'FECHA Y HORA', key: 'fecha', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -2160,6 +2162,7 @@ app.get('/api/export-excel', async (req, res) => {
       { header: 'BLOQUE', key: 'bloque', width: 18 },
       { header: 'UBICACIÓN / AMBIENTE', key: 'ubicacion', width: 26 },
       { header: 'USUARIO / CUSTODIO', key: 'usuario', width: 22 },
+      { header: 'FECHA Y HORA', key: 'fecha', width: 22 },
       { header: 'ESTADO', key: 'estado', width: 16 }
     ]);
 
@@ -2178,6 +2181,7 @@ app.get('/api/export-excel', async (req, res) => {
       const host = toUpper(item.hostname || 'PC-EQUIPO');
       const user = toUpper(item.usuario_actual || 'ADMIN');
       const status = toUpper(item.estado || 'OPERATIVO');
+      const fechaReg = toUpper(item.fecha_escaneo || item.fecha_modificacion || 'N/A');
       const netInfo = getNetworkDetails(item);
       const tipo = (item.tipo_equipo || '').toLowerCase();
 
@@ -2227,6 +2231,7 @@ app.get('/api/export-excel', async (req, res) => {
         bloque: bloque,
         ubicacion: amb,
         usuario: user,
+        fecha: fechaReg,
         estado: status
       });
 
@@ -2318,6 +2323,7 @@ app.get('/api/export-excel', async (req, res) => {
           mac_wifi: netInfo.mac_wifi,
           bloque: bloque,
           ubicacion: amb,
+          fecha: fechaReg,
           estado: status,
           notas: toUpper(item.notas || 'Equipo audiovisual')
         });
@@ -2334,6 +2340,7 @@ app.get('/api/export-excel', async (req, res) => {
           bloque: bloque,
           ubicacion: amb,
           usuario: user,
+          fecha: fechaReg,
           estado: status
         });
       } else if (/laptop|port[aá]til|notebook/i.test(tipo)) {
@@ -2351,6 +2358,7 @@ app.get('/api/export-excel', async (req, res) => {
           mac_ethernet: netInfo.mac_ethernet,
           mac_wifi: netInfo.mac_wifi,
           mac_bluetooth: netInfo.mac_bluetooth,
+          fecha: fechaReg,
           estado: status
         });
       } else if (/switch|access point|router|wifi/i.test(tipo)) {
@@ -2364,6 +2372,7 @@ app.get('/api/export-excel', async (req, res) => {
           numero_serie: toUpper(item.numero_serie || 'N/A'),
           bloque: bloque,
           ubicacion: amb,
+          fecha: fechaReg,
           estado: status
         });
       } else {
@@ -2383,6 +2392,7 @@ app.get('/api/export-excel', async (req, res) => {
           mac_ethernet: netInfo.mac_ethernet,
           mac_wifi: netInfo.mac_wifi,
           mac_bluetooth: netInfo.mac_bluetooth,
+          fecha: fechaReg,
           estado: status
         });
       }

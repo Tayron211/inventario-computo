@@ -1637,6 +1637,12 @@ function renderTable(items) {
             ${item.ip_red ? `<div class="user-host"><i class="fa-solid fa-network-wired"></i> ${highlightMatch(item.ip_red.split(',')[0].trim(), currentSearchQuery)}</div>` : ''}
           </div>
         </td>
+        <td class="cell-fecha">
+          <div class="date-badge-cell" title="Fecha y hora de escaneo / auditoría">
+            <span class="date-part"><i class="fa-regular fa-calendar text-crimson"></i> ${(item.fecha_escaneo || item.fecha_modificacion || 'N/A').split(' ')[0]}</span>
+            ${(item.fecha_escaneo || item.fecha_modificacion || '').split(' ')[1] ? `<span class="time-part"><i class="fa-regular fa-clock"></i> ${(item.fecha_escaneo || item.fecha_modificacion).split(' ')[1]}</span>` : ''}
+          </div>
+        </td>
         <td class="cell-estado">
           <span class="status-indicator status-${statusClass}">
             <span class="status-dot"></span>
