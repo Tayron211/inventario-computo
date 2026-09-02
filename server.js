@@ -478,20 +478,16 @@ function getServerUrl(req) {
 // Credenciales de acceso y roles del sistema
 const USERS = [
   // Super Administrador Platinum (Acceso Total: Crear, Editar, Eliminar, Exportar)
-  { username: 'admin', password: 'admin', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true },
-  { username: 'admin', password: 'S0p0rt3pp', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true },
+  { username: 'admin', passwords: ['admin', 'S0p0rt3pp', 'soporte', 'soportepp'], role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true },
 
   // Administradores Gold con etiqueta dorada y brillos (Pueden Crear, Escanear, Editar, Exportar - NO PUEDEN ELIMINAR)
-  { username: 'Tayron', password: '210391', role: 'gold_admin', badge: 'gold', displayName: 'Tayron', canDelete: false },
-  { username: 'Cristian', password: 'Joel0209', role: 'gold_admin', badge: 'gold', displayName: 'Cristian', canDelete: false },
-  { username: 'David', password: 'Goñigo', role: 'gold_admin', badge: 'gold', displayName: 'David', canDelete: false },
-  { username: 'David', password: 'Gonigo', role: 'gold_admin', badge: 'gold', displayName: 'David', canDelete: false },
+  { username: 'Tayron', passwords: ['210391', 'tayron', '210391'], role: 'gold_admin', badge: 'gold', displayName: 'Tayron', canDelete: false },
+  { username: 'Cristian', passwords: ['Joel0209', 'joel0209', 'cristian'], role: 'gold_admin', badge: 'gold', displayName: 'Cristian', canDelete: false },
+  { username: 'David', passwords: ['Goñigo', 'Gonigo', 'goñigo', 'gonigo', 'david'], role: 'gold_admin', badge: 'gold', displayName: 'David', canDelete: false },
 
   // Observador con etiqueta de bronce mate sin brillos (Solo Visualización)
-  { username: 'observador', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
-  { username: 'observador', password: 'observador', role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
-  { username: 'user', password: 'solover', role: 'observador', badge: 'bronze', displayName: 'user', canDelete: false },
-  { username: 'user', password: 'user', role: 'observador', badge: 'bronze', displayName: 'user', canDelete: false }
+  { username: 'observador', passwords: ['solover', 'observador', 'solo_ver', '123456'], role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
+  { username: 'user', passwords: ['solover', 'observador', 'user', '123456'], role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false }
 ];
 
 // Obtener información completa del usuario actual basado en el token Bearer o query param
@@ -526,13 +522,18 @@ app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
   
   if (!username || !password) {
-    return res.status(400).json({ error: 'Credenciales incompletas' });
+    return res.status(400).json({ success: false, error: 'Por favor ingresa usuario y contraseña' });
   }
 
-  const foundUser = USERS.find(u => 
-    u.username.toLowerCase() === username.trim().toLowerCase() && 
-    u.password === password.trim()
-  );
+  const uClean = String(username).trim().toLowerCase();
+  const pClean = String(password).trim();
+  const pCleanLower = pClean.toLowerCase();
+
+  const foundUser = USERS.find(u => {
+    const userMatch = u.username.toLowerCase() === uClean;
+    const passMatch = u.passwords.some(p => p === pClean || p.toLowerCase() === pCleanLower);
+    return userMatch && passMatch;
+  });
   
   if (foundUser) {
     const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${foundUser.badge}:${Date.now()}`).toString('base64');
@@ -547,9 +548,10 @@ app.post('/api/login', (req, res) => {
       message: 'Inicio de sesión exitoso'
     });
   }
+  
   return res.status(401).json({
     success: false,
-    error: 'Usuario o contraseña incorrectos'
+    error: 'Usuario o contraseña incorrectos. Verifica las mayúsculas/minúsculas.'
   });
 });
 
