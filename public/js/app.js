@@ -162,10 +162,9 @@ function getUserBadgeHtml(username, badge, role) {
 
   if (isObs) {
     return `
-      <span class="badge-role-tag badge-user-bronze" title="Usuario Observador 🥉 (Solo Lectura)">
+      <span class="badge-role-tag badge-user-bronze" title="Usuario Observador (Solo Lectura)">
         <i class="fa-solid fa-shield"></i>
-        <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
-        <span class="badge-tier-label">BRONCE</span>
+        <strong class="user-badge-name">OBSERVADOR</strong>
       </span>
     `;
   } else if (isGold) {
@@ -246,8 +245,13 @@ function updateAuthUI() {
   }
   
   if (sessionUserName) {
-    const tierText = (badge === 'bronze' || role === 'observador') ? 'BRONCE' : ((badge === 'gold' || role === 'gold_admin') ? 'GOLD' : 'PLATINUM');
-    sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">${tierText}</span>`;
+    if (badge === 'bronze' || role === 'observador' || /^(user|observador)$/i.test(username)) {
+      sessionUserName.innerHTML = `<b>OBSERVADOR</b>`;
+    } else if (badge === 'gold' || role === 'gold_admin') {
+      sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">GOLD</span>`;
+    } else {
+      sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">PLATINUM</span>`;
+    }
   }
   
   const isObservador = role === 'observador' || role === 'operador' || /^(user|observador)$/i.test(username);

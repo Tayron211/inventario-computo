@@ -4114,14 +4114,15 @@ body {
 }
 
 /* =======================================================
-   3. OBSERVADOR: BRONCE MATE ELEGANTE SIN BRILLOS NI EFECTOS 🥉
+   3. OBSERVADOR: BRONCE APAGADO MATE TOTAL SIN BRILLOS NI EFECTOS 🥉
    ======================================================= */
 .user-session-badge.badge-role-bronze,
 .user-session-badge.badge-role-operador {
-  background: #4a2e1b !important;
-  border: 1.5px solid #7c4c2d !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  background: #251810 !important;
+  border: 1px solid #4a3020 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
   position: relative !important;
+  background-image: none !important;
 }
 
 .user-session-badge.badge-role-bronze::before,
@@ -4129,48 +4130,55 @@ body {
   display: none !important;
   content: none !important;
   animation: none !important;
+  background: none !important;
 }
 
 .user-session-badge.badge-role-bronze .user-pill,
 .user-session-badge.badge-role-operador .user-pill {
   font-size: 0.82rem !important;
-  font-weight: 700 !important;
-  color: #eed5c4 !important;
+  font-weight: 800 !important;
+  color: #ba9982 !important;
   display: flex !important;
   align-items: center !important;
   gap: 7px !important;
   text-shadow: none !important;
+  letter-spacing: 0.5px !important;
 }
 
 .user-session-badge.badge-role-bronze span,
 .user-session-badge.badge-role-bronze b,
 .user-session-badge.badge-role-operador span,
 .user-session-badge.badge-role-operador b {
-  color: #eed5c4 !important;
+  color: #ba9982 !important;
   text-shadow: none !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
 }
 
 .user-session-badge.badge-role-bronze i,
 .user-session-badge.badge-role-operador i,
 .user-session-badge.badge-role-bronze #sessionUserIcon i {
-  color: #c99a77 !important;
+  color: #8c6a53 !important;
   font-size: 0.88rem !important;
   filter: none !important;
   animation: none !important;
+  text-shadow: none !important;
 }
 
 .user-session-badge.badge-role-bronze .role-sublabel,
 .user-session-badge.badge-role-operador .role-sublabel {
-  font-size: 0.65rem !important;
-  padding: 1px 7px !important;
-  border-radius: var(--radius-full) !important;
-  background: #5a3821 !important;
-  color: #eed5c4 !important;
-  font-weight: 700 !important;
-  border: 1px solid #7c4c2d !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  box-shadow: none !important;
+  display: none !important;
+}
+
+.user-session-badge.badge-role-bronze .btn-logout,
+.user-session-badge.badge-role-operador .btn-logout {
+  color: #8c6a53 !important;
+}
+
+.user-session-badge.badge-role-bronze .btn-logout:hover,
+.user-session-badge.badge-role-operador .btn-logout:hover {
+  background: rgba(220, 20, 60, 0.2) !important;
+  color: #ff4d6d !important;
 }
 
 /* =======================================================
@@ -4226,21 +4234,18 @@ body {
   font-weight: 900;
 }
 
-/* Etiqueta Bronce en Modal */
+/* Etiqueta Bronce Apagado Mate en Modal */
 .badge-role-tag.badge-user-bronze {
-  background: linear-gradient(135deg, #4a2e1b, #3b2212);
-  border: 1.5px solid #7c4c2d;
-  color: #eed5c4;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  background: #251810 !important;
+  border: 1px solid #4a3020 !important;
+  color: #ba9982 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background-image: none !important;
 }
 
 .badge-role-tag.badge-user-bronze .badge-tier-label {
-  background: #5a3821;
-  color: #eed5c4;
-  font-size: 0.62rem;
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-weight: 700;
+  display: none !important;
 }
 
 /* Adaptación a Modo Claro */
@@ -4265,13 +4270,19 @@ body {
 }
 
 [data-theme="light"] .user-session-badge.badge-role-bronze {
-  background: linear-gradient(135deg, #e8d5c4, #d4b8a0) !important;
-  border-color: #8c5832 !important;
+  background: #dfd2c6 !important;
+  border: 1px solid #9c7b64 !important;
+  box-shadow: none !important;
 }
 [data-theme="light"] .user-session-badge.badge-role-bronze .user-pill,
 [data-theme="light"] .user-session-badge.badge-role-bronze span,
 [data-theme="light"] .user-session-badge.badge-role-bronze b {
-  color: #4a2e1b !important;
+  color: #452b1a !important;
+  text-shadow: none !important;
+}
+[data-theme="light"] .user-session-badge.badge-role-bronze i {
+  color: #6b4730 !important;
+  text-shadow: none !important;
 }
 
 .btn-logout {
