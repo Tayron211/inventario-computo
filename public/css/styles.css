@@ -3945,15 +3945,21 @@ body {
 }
 
 /* =======================================================
-   1. SUPER ADMIN PLATINUM: HOLOGRAMA, ESTRELLAS & BRILLOS ✨
+   1. SUPER ADMIN PLATINUM: HOLOGRAMA DIAMANTE, ESTRELLAS & AURA ✨
    ======================================================= */
 .user-session-badge.badge-role-platinum,
 .user-session-badge.badge-role-admin {
-  background: linear-gradient(135deg, rgba(224, 231, 255, 0.28), rgba(248, 250, 252, 0.42), rgba(199, 210, 254, 0.25));
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.9), 0 0 22px rgba(165, 180, 252, 0.65), 0 0 8px rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(224, 231, 255, 0.55), rgba(240, 249, 255, 0.5), rgba(216, 180, 254, 0.4)) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.95), 0 0 45px rgba(165, 180, 252, 0.85), 0 0 12px #ffffff, inset 0 1px 5px #ffffff !important;
   position: relative;
   overflow: hidden;
+  animation: platinumAuraPulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes platinumAuraPulse {
+  0% { box-shadow: 0 0 18px rgba(255, 255, 255, 0.8), 0 0 35px rgba(165, 180, 252, 0.6), inset 0 1px 3px #ffffff; border-color: rgba(255, 255, 255, 0.85); }
+  100% { box-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 58px rgba(199, 210, 254, 1), 0 0 15px #e0e7ff, inset 0 1px 6px #ffffff; border-color: #ffffff; }
 }
 
 .user-session-badge.badge-role-platinum::before,
@@ -3966,13 +3972,13 @@ body {
   height: 220%;
   background: linear-gradient(
     115deg,
-    transparent 20%,
-    rgba(199, 210, 254, 0.4) 35%,
-    rgba(255, 255, 255, 0.95) 50%,
-    rgba(224, 231, 255, 0.4) 65%,
-    transparent 80%
+    transparent 15%,
+    rgba(199, 210, 254, 0.5) 30%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(224, 231, 255, 0.65) 70%,
+    transparent 85%
   );
-  animation: platinumShimmerSweep 3.5s infinite linear;
+  animation: platinumShimmerSweep 2.5s infinite linear;
   pointer-events: none;
 }
 
@@ -3983,50 +3989,43 @@ body {
 
 .user-session-badge.badge-role-platinum .user-pill,
 .user-session-badge.badge-role-admin .user-pill {
-  font-size: 0.84rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #ffffff !important;
   display: flex;
   align-items: center;
-  gap: 7px;
-  text-shadow: 0 0 14px rgba(255, 255, 255, 0.9), 0 0 20px rgba(165, 180, 252, 0.8);
+  gap: 8px;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 1), 0 0 26px rgba(165, 180, 252, 1);
+  letter-spacing: 0.6px;
 }
 
 .platinum-crown {
-  color: #e0e7ff;
-  font-size: 0.95rem;
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 16px rgba(165, 180, 252, 0.9));
-  animation: crownPlatinumFloat 2.5s ease-in-out infinite alternate;
+  color: #ffffff;
+  font-size: 1.05rem;
+  filter: drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 18px rgba(165, 180, 252, 1));
+  animation: crownPlatinumFloat 2.2s ease-in-out infinite alternate;
 }
 
 @keyframes crownPlatinumFloat {
-  0% { transform: scale(0.96) translateY(0); }
-  100% { transform: scale(1.12) translateY(-2px); filter: drop-shadow(0 0 14px #ffffff); }
+  0% { transform: scale(0.95) translateY(0) rotate(-2deg); }
+  100% { transform: scale(1.15) translateY(-2px) rotate(3deg); filter: drop-shadow(0 0 16px #ffffff) drop-shadow(0 0 24px #c7d2fe); }
 }
 
 .sparkle-star-anim {
   display: inline-block;
-  font-size: 0.88rem;
-  animation: starTwinkle 1.8s infinite ease-in-out alternate;
+  font-size: 0.95rem;
+  animation: starTwinkle 1.4s infinite ease-in-out alternate;
 }
 
 @keyframes starTwinkle {
-  0% { transform: scale(0.8) rotate(-10deg); opacity: 0.7; filter: drop-shadow(0 0 4px #ffffff); }
-  50% { transform: scale(1.25) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 10px #e0e7ff); }
-  100% { transform: scale(0.9) rotate(-5deg); opacity: 0.85; filter: drop-shadow(0 0 6px #ffffff); }
+  0% { transform: scale(0.8) rotate(-15deg); opacity: 0.75; filter: drop-shadow(0 0 6px #ffffff); }
+  50% { transform: scale(1.35) rotate(20deg); opacity: 1; filter: drop-shadow(0 0 14px #ffffff) drop-shadow(0 0 20px #c7d2fe); }
+  100% { transform: scale(0.9) rotate(-10deg); opacity: 0.85; filter: drop-shadow(0 0 8px #ffffff); }
 }
 
 .user-session-badge.badge-role-platinum .role-sublabel,
 .user-session-badge.badge-role-admin .role-sublabel {
-  font-size: 0.66rem;
-  padding: 1px 8px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #ffffff, #c7d2fe);
-  color: #1e1b4b;
-  font-weight: 900;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  display: none !important;
 }
 
 /* =======================================================
@@ -4196,20 +4195,15 @@ body {
 
 /* Etiqueta Platinum en Modal */
 .badge-role-tag.badge-user-platinum {
-  background: linear-gradient(135deg, rgba(224, 231, 255, 0.35), rgba(248, 250, 252, 0.5), rgba(199, 210, 254, 0.3));
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  color: #ffffff;
-  box-shadow: 0 0 16px rgba(165, 180, 252, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.9);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(224, 231, 255, 0.55), rgba(240, 249, 255, 0.5), rgba(216, 180, 254, 0.4)) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 35px rgba(165, 180, 252, 0.8), inset 0 1px 4px #ffffff !important;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 1), 0 0 20px rgba(165, 180, 252, 1) !important;
 }
 
 .badge-role-tag.badge-user-platinum .badge-tier-label {
-  background: #ffffff;
-  color: #1e1b4b;
-  font-size: 0.62rem;
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-weight: 900;
+  display: none !important;
 }
 
 /* Etiqueta Gold en Modal */

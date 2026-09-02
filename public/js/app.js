@@ -155,10 +155,15 @@ function initAuth() {
 
 // Generador de Etiqueta / Badge Visual de Usuario (Platinum, Gold, Bronze)
 function getUserBadgeHtml(username, badge, role) {
-  const user = (username || 'admin').trim();
+  let user = (username || 'Administrador').trim();
+  
+  // Normalizar autonoma, admin, default, etc. a ADMINISTRADOR
+  if (!user || /^(admin|autonoma|system|sistema|root|default|administrador)$/i.test(user)) {
+    user = 'ADMINISTRADOR';
+  }
+
   const isObs = /^(user|observador)$/i.test(user) || role === 'observador' || role === 'operador' || badge === 'bronze';
   const isGold = /^(tayron|cristian|david)$/i.test(user) || role === 'gold_admin' || badge === 'gold';
-  const isPlat = user.toLowerCase() === 'admin' || role === 'admin' || badge === 'platinum';
 
   if (isObs) {
     return `
@@ -169,21 +174,19 @@ function getUserBadgeHtml(username, badge, role) {
     `;
   } else if (isGold) {
     return `
-      <span class="badge-role-tag badge-user-gold" title="Administrador Gold ⭐ (Gestión Completa sin eliminación)">
+      <span class="badge-role-tag badge-user-gold" title="Administrador Gold ⭐">
         <span class="gold-glitter-star">🌟</span>
         <i class="fa-solid fa-medal gold-medal-icon"></i>
         <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
-        <span class="badge-tier-label">GOLD</span>
         <span class="gold-glitter-star">🌟</span>
       </span>
     `;
   } else {
     return `
-      <span class="badge-role-tag badge-user-platinum" title="Super Administrador Platinum ✨ (Acceso Total)">
+      <span class="badge-role-tag badge-user-platinum" title="Super Administrador Platinum ✨">
         <span class="sparkle-star-anim">✨</span>
         <i class="fa-solid fa-crown platinum-crown"></i>
-        <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
-        <span class="badge-tier-label">PLATINUM</span>
+        <strong class="user-badge-name">ADMINISTRADOR</strong>
         <span class="sparkle-star-anim">✨</span>
       </span>
     `;
@@ -248,9 +251,9 @@ function updateAuthUI() {
     if (badge === 'bronze' || role === 'observador' || /^(user|observador)$/i.test(username)) {
       sessionUserName.innerHTML = `<b>OBSERVADOR</b>`;
     } else if (badge === 'gold' || role === 'gold_admin') {
-      sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">GOLD</span>`;
+      sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="gold-glitter-star">🌟</span>`;
     } else {
-      sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="role-sublabel">PLATINUM</span>`;
+      sessionUserName.innerHTML = `<b>ADMIN</b> <span class="sparkle-star-anim">✨</span>`;
     }
   }
   
