@@ -2199,22 +2199,30 @@ function adaptFormFieldsByType(selectedType) {
   }
 }
 
-function openManualCreateModal(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
-  if (isOperador) {
-    showToast('Acceso denegado: El usuario Observador solo tiene permisos de visualización y no puede registrar equipos ni componentes.', 'error');
+// Abrir Modal de Registro Manual
+function openManualCreateModal() {
+  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+  if (isObservador) {
+    showToast('Acceso denegado: El usuario Observador no tiene permisos para registrar equipos.', 'warning');
     return;
   }
-  const modalTitle = document.getElementById('modalFormTitle');
-  if (modalTitle) modalTitle.textContent = 'Registrar Nuevo Dispositivo / Equipo';
-  
-  const formEqId = document.getElementById('formEquipmentId');
-  if (formEqId) formEqId.value = '';
 
-  const eqForm = document.getElementById('equipmentForm');
-  if (eqForm) {
-    try { eqForm.reset(); } catch(err) {}
+  const manualForm = document.getElementById('manualForm');
+  if (manualForm) manualForm.reset();
+  
+  const formEquipmentId = document.getElementById('formEquipmentId');
+  if (formEquipmentId) formEquipmentId.value = '';
+
+  const modalFormTitle = document.getElementById('modalFormTitle');
+  if (modalFormTitle) {
+    modalFormTitle.innerHTML = `<i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Equipo`;
+  }
+
+  const btnSaveEquipment = document.getElementById('btnSaveEquipment');
+  if (btnSaveEquipment) {
+    btnSaveEquipment.innerHTML = `<i class="fa-solid fa-plus"></i> Guardar Registro`;
   }
 
   const formTipoEquipo = document.getElementById('formTipoEquipo');
@@ -2233,18 +2241,35 @@ function openManualCreateModal(e) {
   openModal('manualModal');
 }
 
-// Editar equipo existente
+// Editar equipo existente (Habilitado para Administradores Platinum y Gold)
 function editEquipment(id) {
-  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
-  if (isOperador) {
-    showToast('Acceso denegado: El usuario operador no tiene permisos para editar equipos.', 'error');
+  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+  if (isObservador) {
+    showToast('Acceso denegado: El usuario Observador solo tiene permisos de lectura.', 'warning');
     return;
   }
 
-  const item = inventoryData.find(i => i.id === id);
-  if (!item) return;
+  const cleanId = String(id || '').trim();
+  const item = inventoryData.find(i => String(i.id).trim() === cleanId || (i.parentId && String(i.parentId).trim() === cleanId));
+  if (!item) {
+    console.warn('Equipo no encontrado para editar:', id);
+    showToast('No se encontró el equipo seleccionado', 'warning');
+    return;
+  }
 
-  document.getElementById('modalFormTitle').textContent = `Editar: ${item.modelo || item.tipo_equipo || 'Equipo'}`;
+  const cleanModel = getCleanItemModel(item);
+  const modalFormTitle = document.getElementById('modalFormTitle');
+  if (modalFormTitle) {
+    modalFormTitle.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editar: ${escapeHTML(item.hostname || cleanModel || item.modelo || 'Equipo')}`;
+  }
+
+  const btnSaveEquipment = document.getElementById('btnSaveEquipment');
+  if (btnSaveEquipment) {
+    btnSaveEquipment.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Guardar Cambios`;
+  }
+
   document.getElementById('formEquipmentId').value = item.id;
   document.getElementById('formModelo').value = item.modelo || '';
   document.getElementById('formNumeroSerie').value = item.numero_serie || '';
