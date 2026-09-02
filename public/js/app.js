@@ -2800,6 +2800,41 @@ function viewDetails(id) {
   `;
 
   document.getElementById('detailsContent').innerHTML = content;
+
+  // Control estricto de permisos para botones en el pie de la Ficha Técnica
+  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+  const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
+
+  const btnDeleteFromDetails = document.getElementById('btnDeleteFromDetails');
+  const btnEditFromDetails = document.getElementById('btnEditFromDetails');
+
+  if (btnDeleteFromDetails) {
+    if (isSuperAdmin && !item.isDiscreteDevice) {
+      btnDeleteFromDetails.style.display = 'inline-flex';
+      btnDeleteFromDetails.onclick = () => {
+        closeModal('detailsModal');
+        deleteEquipment(item.id, item.hostname || item.modelo || 'Equipo');
+      };
+    } else {
+      btnDeleteFromDetails.style.display = 'none';
+      btnDeleteFromDetails.onclick = null;
+    }
+  }
+
+  if (btnEditFromDetails) {
+    if (isSuperAdmin && !item.isDiscreteDevice) {
+      btnEditFromDetails.style.display = 'inline-flex';
+      btnEditFromDetails.onclick = () => {
+        closeModal('detailsModal');
+        editEquipment(item.id);
+      };
+    } else {
+      btnEditFromDetails.style.display = 'none';
+      btnEditFromDetails.onclick = null;
+    }
+  }
+
   openModal('detailsModal');
 }
 
