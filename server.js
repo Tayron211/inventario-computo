@@ -667,6 +667,15 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   }
 });
 
+// Endpoint para descargar la App Android (.APK) de forma garantizada en mayúsculas/minúsculas
+app.get(['/SysInventory.apk', '/sysinventory.apk', '/apk', '/app', '/download-apk', '/api/download-apk'], (req, res) => {
+  const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
+  if (fs.existsSync(localApk)) {
+    return res.download(localApk, 'SysInventory.apk');
+  }
+  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v1.0/SysInventory.apk');
+});
+
 // Endpoint para descargar el archivo .BAT personalizado por usuario con permisos de Administrador por defecto
 app.get(['/api/download-batch', '/download-batch', '/escanear.bat'], (req, res) => {
   const serverUrl = getServerUrl(req);
