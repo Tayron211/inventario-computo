@@ -1,5 +1,6 @@
 # ==============================================================================
 # RECOLECTOR AVANZADO DE HARDWARE Y NÚMEROS DE SERIE - INVENTARIO DE CÓMPUTO
+# Versión: 2.5 - Auditoría Multi-Usuario (Platinum & Golden)
 # ==============================================================================
 
 param(
