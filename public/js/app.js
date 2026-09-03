@@ -2457,18 +2457,22 @@ function adaptFormFieldsByType(selectedType) {
   }
 }
 
-// Abrir Modal de Registro Manual
+// Abrir Modal de Registro Manual (Campos 100% vacíos por defecto)
 function openManualCreateModal() {
-  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
-  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+  const isObservador = getAuthRole() === 'operador' || /^(user|observador)$/i.test(getAuthUser());
   if (isObservador) {
     showToast('Acceso denegado: El usuario Observador no tiene permisos para registrar equipos.', 'warning');
     return;
   }
 
-  const manualForm = document.getElementById('manualForm');
-  if (manualForm) manualForm.reset();
+  const equipmentForm = document.getElementById('equipmentForm');
+  if (equipmentForm) {
+    equipmentForm.reset();
+    // Limpiar explícitamente todos los inputs de texto, números y áreas para asegurar que estén completamente vacíos
+    equipmentForm.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="radio"]):not([type="checkbox"]), textarea').forEach(input => {
+      input.value = '';
+    });
+  }
   
   const formEquipmentId = document.getElementById('formEquipmentId');
   if (formEquipmentId) formEquipmentId.value = '';
@@ -2483,16 +2487,32 @@ function openManualCreateModal() {
     btnSaveEquipment.innerHTML = `<i class="fa-solid fa-plus"></i> Guardar Registro`;
   }
 
+  // Ocultar distintivos de auto-completado
+  const badgeSpecAuto = document.getElementById('badgeSpecAuto');
+  if (badgeSpecAuto) badgeSpecAuto.style.display = 'none';
+  const badgeConsumibleAuto = document.getElementById('badgeConsumibleAuto');
+  if (badgeConsumibleAuto) badgeConsumibleAuto.style.display = 'none';
+
   const formTipoEquipo = document.getElementById('formTipoEquipo');
   if (formTipoEquipo) {
     formTipoEquipo.value = 'PC de Escritorio';
     try { adaptFormFieldsByType('PC de Escritorio'); } catch(err) {}
   }
 
+  const formEstado = document.getElementById('formEstado');
+  if (formEstado) {
+    formEstado.value = 'Operativo';
+  }
+
   const formBloque = document.getElementById('formBloque');
   if (formBloque) {
     formBloque.value = 'Bloque A (Área Administrativa)';
-    try { populateFormAmbientes('Bloque A (Área Administrativa)', 'CAE'); } catch(err) {}
+    try { populateFormAmbientes('Bloque A (Área Administrativa)', ''); } catch(err) {}
+  }
+
+  const formAmbiente = document.getElementById('formAmbiente');
+  if (formAmbiente) {
+    formAmbiente.value = '';
   }
 
   try { updateDynamicQuickModelChips(); } catch(err) {}
