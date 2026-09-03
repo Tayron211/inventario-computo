@@ -56,7 +56,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=63.0">
+  <link rel="stylesheet" href="css/styles.css?v=64.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -165,7 +165,7 @@
               <span>Escanear PC</span>
             </button>
 
-            <button class="btn btn-secondary" id="btnOpenManualModal" onclick="openManualCreateModal()" title="Agregar equipo manualmente">
+            <button class="btn btn-secondary" id="btnOpenManualModal" onclick="try{document.getElementById('equipmentForm').reset();document.querySelectorAll('#equipmentForm input:not([type=button]):not([type=submit]),#equipmentForm textarea').forEach(function(el){el.value='';el.defaultValue='';});if(window.clearEquipmentForm){window.clearEquipmentForm();}if(window.openManualCreateModal){window.openManualCreateModal();}}catch(e){console.error(e);}" title="Agregar equipo manualmente">
               <i class="fa-solid fa-plus"></i>
               <span>Nuevo</span>
             </button>
@@ -1067,6 +1067,60 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=63.0"></script>
+  <script src="js/app.js?v=64.0"></script>
+  <script>
+    window.clearEquipmentForm = function() {
+      try {
+        var form = document.getElementById('equipmentForm');
+        if (form) {
+          form.reset();
+          var inputs = form.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="radio"]):not([type="checkbox"]), textarea');
+          for (var i = 0; i < inputs.length; i++) {
+            inputs[i].value = '';
+            inputs[i].defaultValue = '';
+            try { inputs[i].removeAttribute('value'); } catch(e) {}
+          }
+        }
+        var ids = [
+          'formEquipmentId', 'formModelo', 'formNumeroSerie', 'formPlacaBase',
+          'formFabricante', 'formConsumible', 'formCompCapacidad', 'formCompInterfaz',
+          'formProcesador', 'formRamTotal', 'formAlmacenamiento', 'formMonitor',
+          'formPerifericos', 'formHostname', 'formIpRed', 'formMacEthernet',
+          'formMacWifi', 'formMacBluetooth', 'formMacAddress', 'formUsuario',
+          'formUbicacionCustom', 'formNotas'
+        ];
+        for (var j = 0; j < ids.length; j++) {
+          var el = document.getElementById(ids[j]);
+          if (el) {
+            el.value = '';
+            el.defaultValue = '';
+            try { el.removeAttribute('value'); } catch(e) {}
+          }
+        }
+        var tipo = document.getElementById('formTipoEquipo');
+        if (tipo) { tipo.value = 'PC de Escritorio'; }
+        var estado = document.getElementById('formEstado');
+        if (estado) { estado.value = 'Operativo'; }
+        var bloque = document.getElementById('formBloque');
+        if (bloque) { bloque.value = 'Bloque A (Área Administrativa)'; }
+        var ubi = document.getElementById('formUbicacion');
+        if (ubi) { ubi.value = 'CAE'; }
+        var ubiCustom = document.getElementById('formUbicacionCustom');
+        if (ubiCustom) { ubiCustom.value = ''; ubiCustom.style.display = 'none'; }
+        var title = document.getElementById('modalFormTitle');
+        if (title) { title.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Equipo'; }
+        var btn = document.getElementById('btnSaveEquipment');
+        if (btn) { btn.innerHTML = '<i class="fa-solid fa-plus"></i> Guardar Registro'; }
+        var b1 = document.getElementById('badgeSpecAuto');
+        if (b1) { b1.style.display = 'none'; }
+        var b2 = document.getElementById('badgeConsumibleAuto');
+        if (b2) { b2.style.display = 'none'; }
+        if (typeof adaptFormFieldsByType === 'function') { try { adaptFormFieldsByType('PC de Escritorio'); } catch(e) {} }
+        if (typeof populateFormAmbientes === 'function') { try { populateFormAmbientes('Bloque A (Área Administrativa)', ''); } catch(e) {} }
+      } catch(err) {
+        console.error('Error in clearEquipmentForm:', err);
+      }
+    };
+  </script>
 </body>
 </html>
