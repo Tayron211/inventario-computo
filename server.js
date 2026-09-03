@@ -1318,10 +1318,12 @@ async function lookupHardwareSpecsOnline(modelText) {
   let type = 'Laptop';
   if (/geforce|radeon|rtx|gtx|quadro|intel\s*arc|graphics|video\s*card|tarjeta\s*de\s*video|gpu/i.test(combinedText)) type = 'Tarjeta de Video (GPU)';
   else if (/ddr5|ddr4|ddr3|ram|memoria\s*ram|dimm|so-dimm|vengeance|fury\s*beast/i.test(combinedText)) type = 'Memoria RAM';
-  else if (/ssd|nvme|m\.2|sata|hdd|disco\s*duro|almacenamiento|barracuda|ironwolf|990\s*pro|980\s*pro|a400/i.test(combinedText)) type = 'Disco / Almacenamiento';
+  else if (/ssd|nvme|m\.2|sata|hdd|disco\s*duro|almacenamiento|barracuda|ironwolf|990\s*pro|980\s*pro|a400|nv2|nv3|sn580|sn570|sn770|sn850/i.test(combinedText)) type = 'Disco / Almacenamiento';
   else if (/intel\s*core|ryzen|core\s*i[3579]|threadripper|xeon|procesador|cpu/i.test(combinedText)) type = 'Procesador (CPU)';
   else if (/motherboard|placa\s*madre|placa\s*base|mainboard|b760|b650|b550|z790|z690|h610|h510/i.test(combinedText)) type = 'Placa Base';
   else if (/fuente\s*de\s*poder|psu|power\s*supply|80\s*plus|modular/i.test(combinedText)) type = 'Fuente de Poder (PSU)';
+  else if (/monitor|pantalla|display|ultragear|viewfinity/i.test(combinedText)) type = 'Monitor / Pantalla';
+  else if (/mouse|raton|teclado|keyboard|audifono|headset/i.test(combinedText)) type = 'Teclado / Mouse / Periférico';
   else if (/switch|catalyst|managed|rackmount|ports|puertos\s*gigabit/i.test(combinedText)) type = 'Switch de Red';
   else if (/access\s*point|ap|router|wi[- ]?fi|mesh|routerboard/i.test(combinedText)) type = 'Access Point Wi-Fi';
   else if (/proyector|projector|3lcd|dlp|lumen/i.test(combinedText)) type = 'Proyector';
