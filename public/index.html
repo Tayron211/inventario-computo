@@ -23,7 +23,7 @@
         var theme = localStorage.getItem('sysinventario_theme') || 'dark';
         var isLight = theme === 'light';
         var color = isLight ? '#ffffff' : '#08080c';
-        var bodyBg = isLight ? '#cfd8dc' : '#08080c';
+        var bodyBg = isLight ? '#f8fafc' : '#08080c';
 
         document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
@@ -35,6 +35,10 @@
         if (mMs) mMs.setAttribute('content', color);
         var mApple = document.getElementById('metaAppleStatus');
         if (mApple) mApple.setAttribute('content', isLight ? 'default' : 'black-translucent');
+
+        if (window.AndroidBridge && typeof window.AndroidBridge.onThemeChanged === 'function') {
+          window.AndroidBridge.onThemeChanged(isLight, color);
+        }
       } catch (e) {}
     })();
   </script>

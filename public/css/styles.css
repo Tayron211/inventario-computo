@@ -95,11 +95,12 @@ html[data-theme="light"] {
 }
 
 [data-theme="light"] .app-header {
-  background: rgba(255, 255, 255, 0.72) !important;
+  background: #ffffff !important;
   backdrop-filter: blur(28px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.45) !important;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  border-top: none !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
 }
 
 [data-theme="light"] .brand-text h1 {
@@ -952,16 +953,17 @@ body {
 
 /* HEADER LIQUID GLASS */
 .app-header {
-  background: rgba(12, 16, 28, 0.7) !important;
+  background: rgba(12, 16, 28, 0.95) !important;
   backdrop-filter: blur(28px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border-top: none !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
   transition: all 0.3s ease;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 6px);
 }
 
 .header-container {

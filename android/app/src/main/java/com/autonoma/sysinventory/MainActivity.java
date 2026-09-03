@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,21 +39,38 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ValueCallback<Uri[]> fileUploadCallback;
+    private WindowInsetsControllerCompat insetsController;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 1. Integración Edge-to-Edge total: elimina la barra negra y la raya divisoria
+        // La app y la parte superior forman una sola pieza continua e inmersiva
+        Window window = getWindow();
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+        }
+
+        insetsController = WindowCompat.getInsetsController(window, window.getDecorView());
+        if (insetsController != null) {
+            insetsController.setAppearanceLightStatusBars(true);
+            insetsController.setAppearanceLightNavigationBars(true);
+        }
+
         setContentView(R.layout.activity_main);
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         webView = findViewById(R.id.webView);
 
-        // Aceleración por hardware para máxima fluidez a 60/120 FPS
+        // Aceleración por hardware GPU para transiciones ultra fluidas (60/120 FPS)
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-        // Inicializar barra superior en blanco/claro u oscuro por defecto
-        updateStatusBar(true, "#ffffff");
 
         // Configurar colores de la barra de actualización
         swipeRefreshLayout.setColorSchemeColors(
@@ -80,50 +99,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Puente JavaScript para adaptar la barra superior (Status Bar)
-     * al tema Claro u Oscuro en tiempo real sin recargar la app.
+     * Puente JavaScript para adaptar los íconos de la barra de estado
+     * al tema Claro u Oscuro en tiempo real de forma instantánea y fluida.
      */
     public class AndroidBridgeInterface {
         @JavascriptInterface
         public void onThemeChanged(final boolean isLight, final String hexColor) {
-            runOnUiThread(() -> updateStatusBar(isLight, hexColor));
+            runOnUiThread(() -> updateStatusBarTheme(isLight));
         }
     }
 
-    public void updateStatusBar(boolean isLight, String hexColor) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-            int color;
-            try {
-                color = Color.parseColor(hexColor);
-            } catch (Exception e) {
-                color = isLight ? Color.WHITE : Color.parseColor("#08080C");
-            }
-
-            window.setStatusBarColor(color);
-            window.setNavigationBarColor(color);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                View decor = window.getDecorView();
-                int flags = decor.getSystemUiVisibility();
-                if (isLight) {
-                    // Íconos oscuros en la barra de estado (hora, wifi, batería)
-                    flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                    }
-                } else {
-                    // Íconos blancos en la barra de estado
-                    flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-                    }
-                }
-                decor.setSystemUiVisibility(flags);
-            }
+    public void updateStatusBarTheme(boolean isLight) {
+        if (insetsController != null) {
+            // En modo claro: íconos oscuros sobre el fondo claro de la app
+            // En modo oscuro: íconos blancos sobre el fondo oscuro de la app
+            insetsController.setAppearanceLightStatusBars(isLight);
+            insetsController.setAppearanceLightNavigationBars(isLight);
         }
     }
 
@@ -189,14 +180,11 @@ public class MainActivity extends AppCompatActivity {
                 view.evaluateJavascript(
                         "(function() { " +
                         "  var theme = document.documentElement.getAttribute('data-theme') || 'dark'; " +
-                        "  var isLight = theme === 'light'; " +
-                        "  var color = isLight ? '#ffffff' : '#08080c'; " +
-                        "  return isLight ? 'light' : 'dark'; " +
+                        "  return theme === 'light' ? 'light' : 'dark'; " +
                         "})()",
                         value -> {
                             boolean isLight = value != null && value.contains("light");
-                            String color = isLight ? "#ffffff" : "#08080C";
-                            updateStatusBar(isLight, color);
+                            updateStatusBarTheme(isLight);
                         }
                 );
             }

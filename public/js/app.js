@@ -411,6 +411,14 @@ function initTheme() {
 
 function setTheme(theme) {
   const isLight = theme === 'light';
+
+  // Activar transición ultra fluida en todo el DOM durante el cambio de tema
+  document.documentElement.classList.add('theme-transitioning');
+  clearTimeout(window.__themeTransTimer);
+  window.__themeTransTimer = setTimeout(() => {
+    document.documentElement.classList.remove('theme-transitioning');
+  }, 420);
+
   document.documentElement.setAttribute('data-theme', theme);
   document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
   localStorage.setItem('sysinventario_theme', theme);
