@@ -475,41 +475,118 @@ function getServerUrl(req) {
 // RUTAS DE LA API REST
 // -------------------------------------------------------------
 
-// Credenciales de acceso y roles del sistema
+// =============================================================
+// SISTEMA DE CATEGORÍAS Y PRIVILEGIOS DE USUARIOS
+// =============================================================
+const USER_CATEGORIES = {
+  // 1. PLATINUM: Acceso Total a todo el sistema y todos los privilegios
+  Platinum: {
+    categoria: 'Platinum',
+    role: 'admin',
+    badge: 'platinum',
+    canCreate: true,
+    canScan: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true
+  },
+  // 2. GOLDEN: Todos los privilegios EXCEPTO eliminar registros
+  Golden: {
+    categoria: 'Golden',
+    role: 'gold_admin',
+    badge: 'gold',
+    canCreate: true,
+    canScan: true,
+    canEdit: true,
+    canDelete: false,
+    canExport: true
+  },
+  // 3. BRONCE: Solo lectura, sin edición, sin Excel, sin registro ni eliminación
+  Bronce: {
+    categoria: 'Bronce',
+    role: 'observador',
+    badge: 'bronze',
+    canCreate: false,
+    canScan: false,
+    canEdit: false,
+    canDelete: false,
+    canExport: false
+  }
+};
+
+// Listado de usuarios del sistema organizados por Categoría
 const USERS = [
-  // Super Administrador Platinum (Acceso Total: Crear, Editar, Eliminar, Exportar)
-  { username: 'admin', passwords: ['admin', 'S0p0rt3pp', 'soporte', 'soportepp'], role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true },
+  // --- CATEGORÍA PLATINUM (Acceso Total: Crear, Escanear, Editar, Eliminar, Exportar) ---
+  { 
+    username: 'admin', 
+    passwords: ['admin', 'S0p0rt3pp', 'soporte', 'soportepp'], 
+    categoria: 'Platinum',
+    displayName: 'Administrador',
+    ...USER_CATEGORIES.Platinum 
+  },
 
-  // Administradores Gold con etiqueta dorada y brillos (Pueden Crear, Escanear, Editar, Exportar - NO PUEDEN ELIMINAR)
-  { username: 'Tayron', passwords: ['210391', 'tayron', '210391'], role: 'gold_admin', badge: 'gold', displayName: 'Tayron', canDelete: false },
-  { username: 'Cristian', passwords: ['Joel0209', 'joel0209', 'cristian'], role: 'gold_admin', badge: 'gold', displayName: 'Cristian', canDelete: false },
-  { username: 'David', passwords: ['Goñigo', 'Gonigo', 'goñigo', 'gonigo', 'david'], role: 'gold_admin', badge: 'gold', displayName: 'David', canDelete: false },
+  // --- CATEGORÍA GOLDEN (Todos los privilegios EXCEPTO Eliminar) ---
+  { 
+    username: 'Tayron', 
+    passwords: ['210391', 'tayron'], 
+    categoria: 'Golden',
+    displayName: 'Tayron',
+    ...USER_CATEGORIES.Golden 
+  },
+  { 
+    username: 'Cristian', 
+    passwords: ['Joel0209', 'joel0209', 'cristian'], 
+    categoria: 'Golden',
+    displayName: 'Cristian',
+    ...USER_CATEGORIES.Golden 
+  },
+  { 
+    username: 'David', 
+    passwords: ['Goñigo', 'Gonigo', 'goñigo', 'gonigo', 'david'], 
+    categoria: 'Golden',
+    displayName: 'David',
+    ...USER_CATEGORIES.Golden 
+  },
 
-  // Observador con etiqueta de bronce mate sin brillos (Solo Visualización)
-  { username: 'observador', passwords: ['solover', 'observador', 'solo_ver', '123456'], role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false },
-  { username: 'user', passwords: ['solover', 'observador', 'user', '123456'], role: 'observador', badge: 'bronze', displayName: 'Observador', canDelete: false }
+  // --- CATEGORÍA BRONCE (Solo Lectura: No registrar, No escanear, No editar, No exportar, No eliminar) ---
+  { 
+    username: 'observador', 
+    passwords: ['solover', 'observador', 'solo_ver', '123456'], 
+    categoria: 'Bronce',
+    displayName: 'Observador',
+    ...USER_CATEGORIES.Bronce 
+  },
+  { 
+    username: 'user', 
+    passwords: ['solover', 'observador', 'user', '123456'], 
+    categoria: 'Bronce',
+    displayName: 'Observador',
+    ...USER_CATEGORIES.Bronce 
+  }
 ];
 
-// Obtener información completa del usuario actual basado en el token Bearer o query param
+// Obtener información y privilegios completos del usuario actual
 function getUserInfo(req) {
   let token = req.headers['authorization'] || (req.query && req.query.token);
-  if (!token) return { username: 'admin', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true };
+  if (!token) return { ...USER_CATEGORIES.Platinum, username: 'admin', displayName: 'Administrador' };
   
   try {
     const cleanToken = String(token).replace(/^Bearer\s+/i, '').trim();
     const decoded = Buffer.from(cleanToken, 'base64').toString('utf8');
-    const [username, role, badge] = decoded.split(':');
+    const [username, role, badge, categoria] = decoded.split(':');
     const matched = USERS.find(u => u.username.toLowerCase() === (username || '').toLowerCase());
     if (matched) return matched;
+
+    const catKey = categoria || (role === 'admin' ? 'Platinum' : (role === 'gold_admin' ? 'Golden' : 'Bronce'));
+    const baseCat = USER_CATEGORIES[catKey] || USER_CATEGORIES.Platinum;
+
     return {
       username: username || 'admin',
-      role: role || 'admin',
-      badge: badge || (role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(username) ? 'gold' : 'bronze')),
       displayName: username || 'Usuario',
-      canDelete: role === 'admin'
+      ...baseCat
     };
   } catch (e) {
-    return { username: 'admin', role: 'admin', badge: 'platinum', displayName: 'Admin Platinum', canDelete: true };
+    return { ...USER_CATEGORIES.Platinum, username: 'admin', displayName: 'Administrador' };
   }
 }
 
@@ -517,7 +594,7 @@ function getUserRole(req) {
   return getUserInfo(req).role;
 }
 
-// Login de Usuarios (Admin Platinum / Gold Admins / Observador Bronce)
+// Login de Usuarios con resolución automática de categoría y privilegios
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
   
@@ -536,13 +613,18 @@ app.post('/api/login', (req, res) => {
   });
   
   if (foundUser) {
-    const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${foundUser.badge}:${Date.now()}`).toString('base64');
+    const token = Buffer.from(`${foundUser.username}:${foundUser.role}:${foundUser.badge}:${foundUser.categoria}:${Date.now()}`).toString('base64');
     return res.json({
       success: true,
       user: foundUser.username,
+      categoria: foundUser.categoria,
       role: foundUser.role,
       badge: foundUser.badge,
+      canCreate: foundUser.canCreate,
+      canScan: foundUser.canScan,
+      canEdit: foundUser.canEdit,
       canDelete: foundUser.canDelete,
+      canExport: foundUser.canExport,
       displayName: foundUser.displayName,
       token: token,
       message: 'Inicio de sesión exitoso'

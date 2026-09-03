@@ -99,6 +99,7 @@ function initAuth() {
           // Guardar en sessionStorage (se borra automáticamente al cerrar la página/navegador)
           sessionStorage.setItem('sysinventario_session_token', data.token);
           sessionStorage.setItem('sysinventario_user', data.user);
+          sessionStorage.setItem('sysinventario_categoria', data.categoria || (data.role === 'admin' ? 'Platinum' : (/tayron|cristian|david/i.test(data.user) ? 'Golden' : 'Bronce')));
           sessionStorage.setItem('sysinventario_role', data.role || 'admin');
           sessionStorage.setItem('sysinventario_badge', data.badge || (data.role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(data.user) ? 'gold' : 'bronze')));
           sessionStorage.setItem('sysinventario_can_delete', data.canDelete ? 'true' : 'false');
@@ -153,6 +154,85 @@ function initAuth() {
   }
 }
 
+// =============================================================
+// MATRIZ DE CATEGORÍAS Y PRIVILEGIOS DE USUARIOS
+// =============================================================
+const USER_CATEGORIES = {
+  Platinum: {
+    categoria: 'Platinum',
+    badge: 'platinum',
+    canCreate: true,
+    canScan: true,
+    canEdit: true,
+    canDelete: true,
+    canExport: true
+  },
+  Golden: {
+    categoria: 'Golden',
+    badge: 'gold',
+    canCreate: true,
+    canScan: true,
+    canEdit: true,
+    canDelete: false,
+    canExport: true
+  },
+  Bronce: {
+    categoria: 'Bronce',
+    badge: 'bronze',
+    canCreate: false,
+    canScan: false,
+    canEdit: false,
+    canDelete: false,
+    canExport: false
+  }
+};
+
+// Obtener permisos y categoría activa del usuario actual
+function getCurrentUserPermissions() {
+  const username = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
+  const role = sessionStorage.getItem('sysinventario_role') || 'admin';
+  const categoria = sessionStorage.getItem('sysinventario_categoria');
+  const badge = sessionStorage.getItem('sysinventario_badge');
+
+  if (categoria && USER_CATEGORIES[categoria]) {
+    return {
+      ...USER_CATEGORIES[categoria],
+      username,
+      isPlatinum: categoria === 'Platinum',
+      isGolden: categoria === 'Golden',
+      isBronce: categoria === 'Bronce'
+    };
+  }
+
+  if (/^(user|observador)$/i.test(username) || role === 'observador' || role === 'operador' || badge === 'bronze') {
+    return {
+      ...USER_CATEGORIES.Bronce,
+      username,
+      isPlatinum: false,
+      isGolden: false,
+      isBronce: true
+    };
+  }
+
+  if (/^(tayron|cristian|david)$/i.test(username) || role === 'gold_admin' || role === 'golden' || badge === 'gold') {
+    return {
+      ...USER_CATEGORIES.Golden,
+      username,
+      isPlatinum: false,
+      isGolden: true,
+      isBronce: false
+    };
+  }
+
+  return {
+    ...USER_CATEGORIES.Platinum,
+    username,
+    isPlatinum: true,
+    isGolden: false,
+    isBronce: false
+  };
+}
+
 // Generador de Etiqueta / Badge Visual de Usuario (Platinum, Gold, Bronze)
 function getUserBadgeHtml(username, badge, role) {
   let user = (username || 'Administrador').trim();
@@ -163,18 +243,18 @@ function getUserBadgeHtml(username, badge, role) {
   }
 
   const isObs = /^(user|observador)$/i.test(user) || role === 'observador' || role === 'operador' || badge === 'bronze';
-  const isGold = /^(tayron|cristian|david)$/i.test(user) || role === 'gold_admin' || badge === 'gold';
+  const isGold = /^(tayron|cristian|david)$/i.test(user) || role === 'gold_admin' || role === 'golden' || badge === 'gold';
 
   if (isObs) {
     return `
-      <span class="badge-role-tag badge-user-bronze" title="Usuario Observador (Solo Lectura)">
+      <span class="badge-role-tag badge-user-bronze" title="Categoría Bronce (Solo Lectura)">
         <i class="fa-solid fa-shield"></i>
         <strong class="user-badge-name">OBSERVADOR</strong>
       </span>
     `;
   } else if (isGold) {
     return `
-      <span class="badge-role-tag badge-user-gold" title="Administrador Gold ⭐">
+      <span class="badge-role-tag badge-user-gold" title="Categoría Golden ⭐ (Gestión Completa sin eliminación)">
         <span class="gold-glitter-star">🌟</span>
         <i class="fa-solid fa-medal gold-medal-icon"></i>
         <strong class="user-badge-name">${escapeHTML(user.toUpperCase())}</strong>
@@ -183,7 +263,7 @@ function getUserBadgeHtml(username, badge, role) {
     `;
   } else {
     return `
-      <span class="badge-role-tag badge-user-platinum" title="Super Administrador Platinum ✨">
+      <span class="badge-role-tag badge-user-platinum" title="Categoría Platinum ✨ (Acceso Total)">
         <span class="sparkle-star-anim">✨</span>
         <i class="fa-solid fa-crown platinum-crown"></i>
         <strong class="user-badge-name">ADMINISTRADOR</strong>
@@ -194,33 +274,11 @@ function getUserBadgeHtml(username, badge, role) {
 }
 
 // -------------------------------------------------------------
-// ACTUALIZACIÓN DE INTERFAZ SEGÚN ROL DE USUARIO
+// ACTUALIZACIÓN DE INTERFAZ SEGÚN CATEGORÍA Y PRIVILEGIOS
 // -------------------------------------------------------------
 function updateAuthUI() {
-  const username = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
-  let role = sessionStorage.getItem('sysinventario_role') || 'admin';
-  let badge = sessionStorage.getItem('sysinventario_badge');
-
-  // Forzar consistencia estricta según el nombre de usuario
-  if (/^(user|observador)$/i.test(username)) {
-    role = 'observador';
-    badge = 'bronze';
-    sessionStorage.setItem('sysinventario_role', 'observador');
-    sessionStorage.setItem('sysinventario_badge', 'bronze');
-    sessionStorage.setItem('sysinventario_can_delete', 'false');
-  } else if (/^(tayron|cristian|david)$/i.test(username)) {
-    role = 'gold_admin';
-    badge = 'gold';
-    sessionStorage.setItem('sysinventario_role', 'gold_admin');
-    sessionStorage.setItem('sysinventario_badge', 'gold');
-    sessionStorage.setItem('sysinventario_can_delete', 'false');
-  } else if (/^admin$/i.test(username)) {
-    role = 'admin';
-    badge = 'platinum';
-    sessionStorage.setItem('sysinventario_role', 'admin');
-    sessionStorage.setItem('sysinventario_badge', 'platinum');
-    sessionStorage.setItem('sysinventario_can_delete', 'true');
-  }
+  const perms = getCurrentUserPermissions();
+  const username = perms.username;
   
   const userSessionBox = document.getElementById('userSessionBox');
   const sessionUserIcon = document.getElementById('sessionUserIcon');
@@ -228,9 +286,9 @@ function updateAuthUI() {
   
   if (userSessionBox) {
     userSessionBox.classList.remove('badge-role-admin', 'badge-role-operador', 'badge-role-platinum', 'badge-role-gold', 'badge-role-bronze');
-    if (badge === 'bronze' || role === 'observador') {
+    if (perms.isBronce) {
       userSessionBox.classList.add('badge-role-bronze');
-    } else if (badge === 'gold' || role === 'gold_admin') {
+    } else if (perms.isGolden) {
       userSessionBox.classList.add('badge-role-gold');
     } else {
       userSessionBox.classList.add('badge-role-platinum');
@@ -238,9 +296,9 @@ function updateAuthUI() {
   }
   
   if (sessionUserIcon) {
-    if (badge === 'bronze' || role === 'observador') {
+    if (perms.isBronce) {
       sessionUserIcon.innerHTML = `<i class="fa-solid fa-shield"></i>`;
-    } else if (badge === 'gold' || role === 'gold_admin') {
+    } else if (perms.isGolden) {
       sessionUserIcon.innerHTML = `<span class="gold-glitter-star">🌟</span> <i class="fa-solid fa-medal gold-medal-icon"></i>`;
     } else {
       sessionUserIcon.innerHTML = `<span class="sparkle-star-anim">✨</span> <i class="fa-solid fa-crown platinum-crown"></i>`;
@@ -248,33 +306,31 @@ function updateAuthUI() {
   }
   
   if (sessionUserName) {
-    if (badge === 'bronze' || role === 'observador' || /^(user|observador)$/i.test(username)) {
+    if (perms.isBronce) {
       sessionUserName.innerHTML = `<b>OBSERVADOR</b>`;
-    } else if (badge === 'gold' || role === 'gold_admin') {
+    } else if (perms.isGolden) {
       sessionUserName.innerHTML = `<b>${escapeHTML(username.toUpperCase())}</b> <span class="gold-glitter-star">🌟</span>`;
     } else {
       sessionUserName.innerHTML = `<b>ADMIN</b> <span class="sparkle-star-anim">✨</span>`;
     }
   }
-  
-  const isObservador = role === 'observador' || role === 'operador' || /^(user|observador)$/i.test(username);
 
   // 1. Botón "Nuevo" (Registrar Equipo / Componente)
   const btnOpenManualModal = document.getElementById('btnOpenManualModal');
   if (btnOpenManualModal) {
-    btnOpenManualModal.style.display = isObservador ? 'none' : 'inline-flex';
+    btnOpenManualModal.style.display = perms.canCreate ? 'inline-flex' : 'none';
   }
 
   // 2. Botón "Escanear PC" (Auditoría / Registro automático)
   const btnScanLocal = document.getElementById('btnScanLocal');
   if (btnScanLocal) {
-    btnScanLocal.style.display = isObservador ? 'none' : 'inline-flex';
+    btnScanLocal.style.display = perms.canScan ? 'inline-flex' : 'none';
   }
 
-  // 3. Botón "Excel" (Exportación del inventario - Bloqueado totalmente para Observador)
+  // 3. Botón "Excel" (Exportación del inventario - Bloqueado totalmente para Bronce)
   const btnExportExcel = document.getElementById('btnExportExcel');
   if (btnExportExcel) {
-    if (isObservador) {
+    if (!perms.canExport) {
       btnExportExcel.style.display = 'none';
       btnExportExcel.setAttribute('disabled', 'true');
       btnExportExcel.removeAttribute('href');
@@ -1584,13 +1640,9 @@ function highlightMatch(text, query) {
 }
 
 function renderTable(items) {
-  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
-  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
-  const isGoldAdmin = (userRole === 'gold_admin' || /tayron|cristian|david/i.test(loggedUser));
-  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
-  const canEdit = (isSuperAdmin || isGoldAdmin) && !isObservador;
-  const canDelete = isSuperAdmin;
+  const perms = getCurrentUserPermissions();
+  const canEdit = perms.canEdit;
+  const canDelete = perms.canDelete;
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   tableBody.innerHTML = items.map(item => {
@@ -1765,13 +1817,9 @@ function renderTable(items) {
 }
 
 function renderGrid(items) {
-  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
-  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
-  const isGoldAdmin = (userRole === 'gold_admin' || /tayron|cristian|david/i.test(loggedUser));
-  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
-  const canEdit = (isSuperAdmin || isGoldAdmin) && !isObservador;
-  const canDelete = isSuperAdmin;
+  const perms = getCurrentUserPermissions();
+  const canEdit = perms.canEdit;
+  const canDelete = perms.canDelete;
   const queryActive = Boolean(currentSearchQuery && currentSearchQuery.trim());
 
   gridContainer.innerHTML = items.map(item => {
@@ -2814,14 +2862,10 @@ function viewDetails(id) {
 
   document.getElementById('detailsContent').innerHTML = content;
 
-  // Control estricto de permisos para botones en el pie de la Ficha Técnica
-  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
-  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isSuperAdmin = (userRole === 'admin' && loggedUser.toLowerCase() === 'admin');
-  const isGoldAdmin = (userRole === 'gold_admin' || /tayron|cristian|david/i.test(loggedUser));
-  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
-  const canEdit = (isSuperAdmin || isGoldAdmin) && !isObservador;
-  const canDelete = isSuperAdmin;
+  // Control de permisos basado en categorías para botones en el pie de la Ficha Técnica
+  const perms = getCurrentUserPermissions();
+  const canEdit = perms.canEdit;
+  const canDelete = perms.canDelete;
 
   const btnDeleteFromDetails = document.getElementById('btnDeleteFromDetails');
   const btnEditFromDetails = document.getElementById('btnEditFromDetails');
