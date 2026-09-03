@@ -1256,6 +1256,72 @@ function closeModal(modalId) {
     modal.classList.remove('active');
     document.body.style.overflow = '';
   }
+  if (modalId === 'manualModal') {
+    clearEquipmentForm();
+  }
+}
+
+// Limpiar 100% todos los campos del formulario de registro/edición de equipo
+function clearEquipmentForm() {
+  const equipmentForm = document.getElementById('equipmentForm');
+  if (equipmentForm) {
+    try { equipmentForm.reset(); } catch(e) {}
+    
+    equipmentForm.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="radio"]):not([type="checkbox"]), textarea').forEach(el => {
+      el.value = '';
+    });
+  }
+
+  // Limpieza exhaustiva campo por campo por ID
+  const allFieldIds = [
+    'formEquipmentId',
+    'formModelo',
+    'formNumeroSerie',
+    'formPlacaBase',
+    'formFabricante',
+    'formConsumible',
+    'formCompCapacidad',
+    'formCompInterfaz',
+    'formProcesador',
+    'formRamTotal',
+    'formAlmacenamiento',
+    'formMonitor',
+    'formPerifericos',
+    'formHostname',
+    'formIpRed',
+    'formMacEthernet',
+    'formMacWifi',
+    'formMacBluetooth',
+    'formMacAddress',
+    'formUsuario',
+    'formUbicacionCustom',
+    'formNotas'
+  ];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  const formTipoEquipo = document.getElementById('formTipoEquipo');
+  if (formTipoEquipo) formTipoEquipo.value = 'PC de Escritorio';
+
+  const formEstado = document.getElementById('formEstado');
+  if (formEstado) formEstado.value = 'Operativo';
+
+  const formBloque = document.getElementById('formBloque');
+  if (formBloque) formBloque.value = 'Bloque A (Área Administrativa)';
+
+  const formAmbiente = document.getElementById('formAmbiente');
+  if (formAmbiente) formAmbiente.value = '';
+
+  const badgeSpecAuto = document.getElementById('badgeSpecAuto');
+  if (badgeSpecAuto) badgeSpecAuto.style.display = 'none';
+  const badgeConsumibleAuto = document.getElementById('badgeConsumibleAuto');
+  if (badgeConsumibleAuto) badgeConsumibleAuto.style.display = 'none';
+
+  try { adaptFormFieldsByType('PC de Escritorio'); } catch(e) {}
+  try { populateFormAmbientes('Bloque A (Área Administrativa)', ''); } catch(e) {}
 }
 
 function setFilterPill(type) {
@@ -2465,17 +2531,8 @@ function openManualCreateModal() {
     return;
   }
 
-  const equipmentForm = document.getElementById('equipmentForm');
-  if (equipmentForm) {
-    equipmentForm.reset();
-    // Limpiar explícitamente todos los inputs de texto, números y áreas para asegurar que estén completamente vacíos
-    equipmentForm.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="radio"]):not([type="checkbox"]), textarea').forEach(input => {
-      input.value = '';
-    });
-  }
-  
-  const formEquipmentId = document.getElementById('formEquipmentId');
-  if (formEquipmentId) formEquipmentId.value = '';
+  // Limpieza total y exhaustiva de todos los campos
+  clearEquipmentForm();
 
   const modalFormTitle = document.getElementById('modalFormTitle');
   if (modalFormTitle) {
@@ -2485,34 +2542,6 @@ function openManualCreateModal() {
   const btnSaveEquipment = document.getElementById('btnSaveEquipment');
   if (btnSaveEquipment) {
     btnSaveEquipment.innerHTML = `<i class="fa-solid fa-plus"></i> Guardar Registro`;
-  }
-
-  // Ocultar distintivos de auto-completado
-  const badgeSpecAuto = document.getElementById('badgeSpecAuto');
-  if (badgeSpecAuto) badgeSpecAuto.style.display = 'none';
-  const badgeConsumibleAuto = document.getElementById('badgeConsumibleAuto');
-  if (badgeConsumibleAuto) badgeConsumibleAuto.style.display = 'none';
-
-  const formTipoEquipo = document.getElementById('formTipoEquipo');
-  if (formTipoEquipo) {
-    formTipoEquipo.value = 'PC de Escritorio';
-    try { adaptFormFieldsByType('PC de Escritorio'); } catch(err) {}
-  }
-
-  const formEstado = document.getElementById('formEstado');
-  if (formEstado) {
-    formEstado.value = 'Operativo';
-  }
-
-  const formBloque = document.getElementById('formBloque');
-  if (formBloque) {
-    formBloque.value = 'Bloque A (Área Administrativa)';
-    try { populateFormAmbientes('Bloque A (Área Administrativa)', ''); } catch(err) {}
-  }
-
-  const formAmbiente = document.getElementById('formAmbiente');
-  if (formAmbiente) {
-    formAmbiente.value = '';
   }
 
   try { updateDynamicQuickModelChips(); } catch(err) {}
