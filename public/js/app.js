@@ -412,12 +412,12 @@ function initTheme() {
 function setTheme(theme) {
   const isLight = theme === 'light';
 
-  // Activar transición ultra fluida en todo el DOM durante el cambio de tema
+  // Activar transición ultra suave durante el cambio de tema (320ms)
   document.documentElement.classList.add('theme-transitioning');
   clearTimeout(window.__themeTransTimer);
   window.__themeTransTimer = setTimeout(() => {
     document.documentElement.classList.remove('theme-transitioning');
-  }, 180);
+  }, 350);
 
   document.documentElement.setAttribute('data-theme', theme);
   document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
@@ -428,12 +428,11 @@ function setTheme(theme) {
   }
 
   const color = isLight ? '#ffffff' : '#08080c';
-  const bodyBg = isLight ? '#cfd8dc' : '#08080c';
 
-  // Forzar repintado de fondo en html y body para navegadores móviles
-  document.documentElement.style.backgroundColor = color;
+  // Permitir que la transición CSS opere suavemente sin saltos inline bruscos
+  document.documentElement.style.backgroundColor = '';
   if (document.body) {
-    document.body.style.backgroundColor = bodyBg;
+    document.body.style.backgroundColor = '';
   }
 
   // Eliminar cualquier meta previo con media queries para evitar que Android fuerce tema oscuro

@@ -673,7 +673,7 @@ app.get(['/SysInventory.apk', '/sysinventory.apk', '/apk', '/app', '/download-ap
   if (fs.existsSync(localApk)) {
     return res.download(localApk, 'SysInventory.apk');
   }
-  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v1.3/SysInventory.apk');
+  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v1.4/SysInventory.apk');
 });
 
 // Endpoint para descargar el archivo .BAT personalizado por usuario con permisos de Administrador por defecto
