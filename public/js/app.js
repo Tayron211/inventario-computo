@@ -2243,112 +2243,112 @@ function openManualCreateModal() {
 
 // Editar equipo existente (Habilitado para Administradores Platinum y Gold)
 function editEquipment(id) {
-  const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
-  const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
-  const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
-  if (isObservador) {
-    showToast('Acceso denegado: El usuario Observador solo tiene permisos de lectura.', 'warning');
-    return;
+  try {
+    const userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+    const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+    const isObservador = userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser);
+    if (isObservador) {
+      showToast('Acceso denegado: El usuario Observador solo tiene permisos de lectura.', 'warning');
+      return;
+    }
+
+    const cleanId = String(id || '').trim();
+    let item = inventoryData.find(i => 
+      String(i.id).trim() === cleanId || 
+      (i.parentId && String(i.parentId).trim() === cleanId) ||
+      (i.numero_serie && cleanId && String(i.numero_serie).trim().toLowerCase() === cleanId.toLowerCase())
+    );
+
+    if (!item) {
+      item = inventoryData.find(i => String(i.id).includes(cleanId) || (i.hostname && String(i.hostname).trim() === cleanId));
+    }
+
+    if (!item) {
+      console.warn('Equipo no encontrado para editar con ID:', id);
+      showToast('No se encontró el equipo seleccionado para editar', 'warning');
+      return;
+    }
+
+    const setVal = (elemId, val) => {
+      const el = document.getElementById(elemId);
+      if (el) el.value = (val !== undefined && val !== null) ? val : '';
+    };
+
+    const cleanModel = getCleanItemModel(item);
+    const modalFormTitle = document.getElementById('modalFormTitle');
+    if (modalFormTitle) {
+      modalFormTitle.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editar: ${escapeHTML(item.hostname || cleanModel || item.modelo || 'Equipo')}`;
+    }
+
+    const btnSaveEquipment = document.getElementById('btnSaveEquipment');
+    if (btnSaveEquipment) {
+      btnSaveEquipment.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Guardar Cambios`;
+    }
+
+    setVal('formEquipmentId', item.id);
+    setVal('formModelo', item.modelo || '');
+    setVal('formNumeroSerie', item.numero_serie || '');
+    setVal('formPlacaBase', item.placa_base || '');
+    setVal('formFabricante', item.fabricante || '');
+    setVal('formEstado', item.estado || 'Operativo');
+    setVal('formProcesador', item.procesador || '');
+    setVal('formRamTotal', item.ram_total || '');
+    setVal('formAlmacenamiento', item.almacenamiento_resumen || '');
+    setVal('formHostname', item.hostname || '');
+    setVal('formIpRed', item.ip_red || '');
+    setVal('formMacEthernet', item.mac_ethernet || '');
+    setVal('formMacWifi', item.mac_wifi || '');
+    setVal('formMacBluetooth', item.mac_bluetooth || '');
+    setVal('formMacAddress', item.mac_address || '');
+    setVal('formUsuario', item.usuario_actual || '');
+    setVal('formNotas', item.notas || '');
+
+    const formTipoEquipo = document.getElementById('formTipoEquipo');
+    if (formTipoEquipo) {
+      formTipoEquipo.value = item.tipo_equipo || 'PC de Escritorio';
+      try { adaptFormFieldsByType(item.tipo_equipo || 'PC de Escritorio'); } catch(e) {}
+    }
+
+    setVal('formConsumible', item.consumible || item.tinta_toner || (autoDetectPrinterConsumables(item.modelo)?.consumable || ''));
+
+    if (item.monitores && item.monitores.length > 0) {
+      const monStr = item.monitores.map(m => `${m.modelo || m.fabricante || 'Monitor'} (${m.serie || 'S/N: N/A'})`).join(', ');
+      setVal('formMonitor', monStr);
+    } else {
+      setVal('formMonitor', '');
+    }
+
+    if (item.perifericos && item.perifericos.length > 0) {
+      const perStr = item.perifericos.map(p => p.nombre || p.tipo).join(', ');
+      setVal('formPerifericos', perStr);
+    } else {
+      setVal('formPerifericos', '');
+    }
+
+    const currentUbicacion = item.ubicacion || 'CAE';
+    const blockBadge = getBlockBadgeForAmbiente(currentUbicacion);
+    let matchingBloque = 'Bloque A (Área Administrativa)';
+
+    if (blockBadge && blockBadge.class === 'block-a-aulas') matchingBloque = 'Bloque A (Aulas y Laboratorios)';
+    else if (blockBadge && blockBadge.class === 'block-a') matchingBloque = 'Bloque A (Área Administrativa)';
+    else if (blockBadge && blockBadge.class === 'block-b') matchingBloque = 'Bloque B (Área Administrativa)';
+    else if (blockBadge && blockBadge.class === 'block-c') matchingBloque = 'Bloque C (Área Administrativa)';
+    else matchingBloque = 'Bloque A (Área Administrativa)';
+
+    const formBloque = document.getElementById('formBloque');
+    if (formBloque) {
+      formBloque.value = matchingBloque;
+      try { populateFormAmbientes(matchingBloque, currentUbicacion); } catch(e) {}
+    }
+
+    try { updateDynamicQuickModelChips(); } catch(e) {}
+
+    closeModal('detailsModal');
+    openModal('manualModal');
+  } catch (err) {
+    console.error('Error al abrir editor de equipo:', err);
+    showToast('Error al abrir el editor: ' + err.message, 'error');
   }
-
-  const cleanId = String(id || '').trim();
-  const item = inventoryData.find(i => String(i.id).trim() === cleanId || (i.parentId && String(i.parentId).trim() === cleanId));
-  if (!item) {
-    console.warn('Equipo no encontrado para editar:', id);
-    showToast('No se encontró el equipo seleccionado', 'warning');
-    return;
-  }
-
-  const cleanModel = getCleanItemModel(item);
-  const modalFormTitle = document.getElementById('modalFormTitle');
-  if (modalFormTitle) {
-    modalFormTitle.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Editar: ${escapeHTML(item.hostname || cleanModel || item.modelo || 'Equipo')}`;
-  }
-
-  const btnSaveEquipment = document.getElementById('btnSaveEquipment');
-  if (btnSaveEquipment) {
-    btnSaveEquipment.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Guardar Cambios`;
-  }
-
-  document.getElementById('formEquipmentId').value = item.id;
-  document.getElementById('formModelo').value = item.modelo || '';
-  document.getElementById('formNumeroSerie').value = item.numero_serie || '';
-  document.getElementById('formPlacaBase').value = item.placa_base || '';
-  
-  const formTipoEquipo = document.getElementById('formTipoEquipo');
-  if (formTipoEquipo) {
-    formTipoEquipo.value = item.tipo_equipo || 'PC de Escritorio';
-    adaptFormFieldsByType(item.tipo_equipo || 'PC de Escritorio');
-  }
-
-  updateDynamicQuickModelChips();
-  
-  document.getElementById('formFabricante').value = item.fabricante || '';
-  document.getElementById('formEstado').value = item.estado || 'Operativo';
-  document.getElementById('formProcesador').value = item.procesador || '';
-  document.getElementById('formRamTotal').value = item.ram_total || '';
-  document.getElementById('formAlmacenamiento').value = item.almacenamiento_resumen || '';
-  
-  const formConsumible = document.getElementById('formConsumible');
-  if (formConsumible) {
-    formConsumible.value = item.consumible || item.tinta_toner || (autoDetectPrinterConsumables(item.modelo)?.consumable || '');
-  }
-
-  const formCompCap = document.getElementById('formCompCapacidad');
-  if (formCompCap) {
-    formCompCap.value = item.ram_total || item.almacenamiento_resumen || (item.hardware_specs ? item.hardware_specs.split('|')[0].trim() : '');
-  }
-  const formCompInt = document.getElementById('formCompInterfaz');
-  if (formCompInt) {
-    formCompInt.value = item.placa_base || (item.hardware_specs && item.hardware_specs.includes('|') ? item.hardware_specs.split('|')[1].trim() : '');
-  }
-  
-  // Monitores & Periféricos
-  const monStr = (item.monitores || []).map(m => `${m.modelo || m.fabricante} (${m.serie || 'S/N: N/A'})`).join(', ');
-  document.getElementById('formMonitor').value = monStr;
-  
-  const perStr = (item.perifericos || []).map(p => p.nombre || p.tipo).join(', ');
-  document.getElementById('formPerifericos').value = perStr;
-
-  document.getElementById('formHostname').value = item.hostname || '';
-  
-  const formIpRed = document.getElementById('formIpRed');
-  if (formIpRed) formIpRed.value = item.ip_red || '';
-
-  const formMacEthernet = document.getElementById('formMacEthernet');
-  if (formMacEthernet) formMacEthernet.value = item.mac_ethernet || '';
-
-  const formMacWifi = document.getElementById('formMacWifi');
-  if (formMacWifi) formMacWifi.value = item.mac_wifi || '';
-
-  const formMacBluetooth = document.getElementById('formMacBluetooth');
-  if (formMacBluetooth) formMacBluetooth.value = item.mac_bluetooth || '';
-
-  const formMacAddress = document.getElementById('formMacAddress');
-  if (formMacAddress) formMacAddress.value = item.mac_address || '';
-  
-  document.getElementById('formUsuario').value = item.usuario_actual || '';
-
-  const currentUbicacion = item.ubicacion || 'CAE';
-  const blockBadge = getBlockBadgeForAmbiente(currentUbicacion);
-  let matchingBloque = 'Bloque A (Área Administrativa)';
-
-  if (blockBadge.class === 'block-a-aulas') matchingBloque = 'Bloque A (Aulas y Laboratorios)';
-  else if (blockBadge.class === 'block-a') matchingBloque = 'Bloque A (Área Administrativa)';
-  else if (blockBadge.class === 'block-b') matchingBloque = 'Bloque B (Área Administrativa)';
-  else if (blockBadge.class === 'block-c') matchingBloque = 'Bloque C (Área Administrativa)';
-  else matchingBloque = 'Bloque A (Área Administrativa)';
-
-  const formBloque = document.getElementById('formBloque');
-  if (formBloque) {
-    formBloque.value = matchingBloque;
-    populateFormAmbientes(matchingBloque, currentUbicacion);
-  }
-
-  document.getElementById('formNotas').value = item.notas || '';
-
-  closeModal('detailsModal');
-  openModal('manualModal');
 }
 
 // Enviar Formulario Manual
