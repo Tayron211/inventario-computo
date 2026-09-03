@@ -417,7 +417,7 @@ function setTheme(theme) {
   clearTimeout(window.__themeTransTimer);
   window.__themeTransTimer = setTimeout(() => {
     document.documentElement.classList.remove('theme-transitioning');
-  }, 420);
+  }, 180);
 
   document.documentElement.setAttribute('data-theme', theme);
   document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
