@@ -4281,22 +4281,45 @@ body {
 }
 
 [data-theme="light"] .user-session-badge.badge-role-gold {
-  background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+  background: linear-gradient(135deg, #fef3c7, #fde68a, #fcd34d) !important;
   border: 1.5px solid #d97706 !important;
-  box-shadow: 0 0 14px rgba(217, 119, 6, 0.35) !important;
+  box-shadow: 0 0 14px rgba(217, 119, 6, 0.35), inset 0 1px 2px #ffffff !important;
 }
 [data-theme="light"] .user-session-badge.badge-role-gold .user-pill,
 [data-theme="light"] .user-session-badge.badge-role-gold span,
 [data-theme="light"] .user-session-badge.badge-role-gold b {
   color: #78350f !important;
   text-shadow: none !important;
+  font-weight: 900 !important;
 }
 [data-theme="light"] .user-session-badge.badge-role-gold .gold-medal-icon,
 [data-theme="light"] .user-session-badge.badge-role-gold i {
   color: #b45309 !important;
+  filter: drop-shadow(0 0 4px rgba(217, 119, 6, 0.5)) !important;
 }
 [data-theme="light"] .user-session-badge.badge-role-gold .btn-logout {
   color: #78350f !important;
+}
+
+/* Etiqueta Golden en Modal y Fichas Técnicas (Modo Claro) */
+[data-theme="light"] .badge-role-tag.badge-user-gold {
+  background: linear-gradient(135deg, #fef3c7, #fde68a, #fcd34d) !important;
+  border: 1.5px solid #d97706 !important;
+  color: #78350f !important;
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.3), inset 0 1px 2px #ffffff !important;
+  text-shadow: none !important;
+}
+[data-theme="light"] .badge-role-tag.badge-user-gold .user-badge-name,
+[data-theme="light"] .badge-role-tag.badge-user-gold strong {
+  color: #78350f !important;
+  font-weight: 900 !important;
+  text-shadow: none !important;
+  letter-spacing: 0.5px !important;
+}
+[data-theme="light"] .badge-role-tag.badge-user-gold .gold-medal-icon,
+[data-theme="light"] .badge-role-tag.badge-user-gold i {
+  color: #b45309 !important;
+  filter: drop-shadow(0 0 4px rgba(217, 119, 6, 0.5)) !important;
 }
 
 [data-theme="light"] .user-session-badge.badge-role-bronze {
@@ -4309,8 +4332,27 @@ body {
 [data-theme="light"] .user-session-badge.badge-role-bronze b {
   color: #452b1a !important;
   text-shadow: none !important;
+  font-weight: 900 !important;
 }
 [data-theme="light"] .user-session-badge.badge-role-bronze i {
+  color: #6b4730 !important;
+  text-shadow: none !important;
+}
+
+/* Etiqueta Bronze en Modal (Modo Claro) */
+[data-theme="light"] .badge-role-tag.badge-user-bronze {
+  background: #f1ebe5 !important;
+  border: 1.5px solid #8c6a51 !important;
+  color: #452b1a !important;
+  box-shadow: none !important;
+}
+[data-theme="light"] .badge-role-tag.badge-user-bronze strong,
+[data-theme="light"] .badge-role-tag.badge-user-bronze .user-badge-name {
+  color: #452b1a !important;
+  font-weight: 900 !important;
+  text-shadow: none !important;
+}
+[data-theme="light"] .badge-role-tag.badge-user-bronze i {
   color: #6b4730 !important;
   text-shadow: none !important;
 }
