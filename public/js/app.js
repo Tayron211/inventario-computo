@@ -1245,6 +1245,12 @@ function initTableDragScroll() {
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
+    if (modalId === 'manualModal') {
+      const equipId = document.getElementById('formEquipmentId');
+      if (!equipId || !equipId.value) {
+        clearEquipmentForm();
+      }
+    }
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -1256,7 +1262,7 @@ function closeModal(modalId) {
     modal.classList.remove('active');
     document.body.style.overflow = '';
   }
-  if (modalId === 'manualModal') {
+  if (modalId === 'manualModal' || modalId === 'detailsModal') {
     clearEquipmentForm();
   }
 }
@@ -2550,6 +2556,10 @@ function adaptFormFieldsByType(selectedType) {
 
 // Abrir Modal de Registro Manual (Campos 100% vacíos por defecto)
 function openManualCreateModal() {
+  if (typeof openNewEquipmentModal_v65 === 'function') {
+    openNewEquipmentModal_v65();
+    return;
+  }
   const isObservador = getAuthRole() === 'operador' || /^(user|observador)$/i.test(getAuthUser());
   if (isObservador) {
     showToast('Acceso denegado: El usuario Observador no tiene permisos para registrar equipos.', 'warning');
@@ -2572,6 +2582,7 @@ function openManualCreateModal() {
   try { updateDynamicQuickModelChips(); } catch(err) {}
   openModal('manualModal');
 }
+window.openManualCreateModal = openManualCreateModal;
 
 // Editar equipo existente (Habilitado para Administradores Platinum y Gold)
 function editEquipment(id) {

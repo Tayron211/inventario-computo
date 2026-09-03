@@ -56,9 +56,79 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=64.0">
+  <link rel="stylesheet" href="css/styles.css?v=65.0">
 </head>
 <body>
+  <script>
+    function openNewEquipmentModal_v65() {
+      try {
+        var userRole = (sessionStorage.getItem('sysinventario_role') || 'admin');
+        var loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin');
+        if (userRole === 'observador' || userRole === 'operador' || /^(user|observador)$/i.test(loggedUser)) {
+          if (typeof showToast === 'function') showToast('Acceso denegado: El usuario Observador no tiene permisos para registrar equipos.', 'warning');
+          return;
+        }
+
+        var form = document.getElementById('equipmentForm');
+        if (form) {
+          form.reset();
+          var inputs = form.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="radio"]):not([type="checkbox"]), textarea');
+          for (var i = 0; i < inputs.length; i++) {
+            inputs[i].value = '';
+            inputs[i].defaultValue = '';
+            try { inputs[i].removeAttribute('value'); } catch(e) {}
+          }
+        }
+        var ids = [
+          'formEquipmentId', 'formModelo', 'formNumeroSerie', 'formPlacaBase',
+          'formFabricante', 'formConsumible', 'formCompCapacidad', 'formCompInterfaz',
+          'formProcesador', 'formRamTotal', 'formAlmacenamiento', 'formMonitor',
+          'formPerifericos', 'formHostname', 'formIpRed', 'formMacEthernet',
+          'formMacWifi', 'formMacBluetooth', 'formMacAddress', 'formUsuario',
+          'formUbicacionCustom', 'formNotas'
+        ];
+        for (var j = 0; j < ids.length; j++) {
+          var el = document.getElementById(ids[j]);
+          if (el) {
+            el.value = '';
+            el.defaultValue = '';
+            try { el.removeAttribute('value'); } catch(e) {}
+          }
+        }
+        var tipo = document.getElementById('formTipoEquipo');
+        if (tipo) { tipo.value = 'PC de Escritorio'; }
+        var estado = document.getElementById('formEstado');
+        if (estado) { estado.value = 'Operativo'; }
+        var bloque = document.getElementById('formBloque');
+        if (bloque) { bloque.value = 'Bloque A (Área Administrativa)'; }
+        var ubi = document.getElementById('formUbicacion');
+        if (ubi) { ubi.value = 'CAE'; }
+        var ubiCustom = document.getElementById('formUbicacionCustom');
+        if (ubiCustom) { ubiCustom.value = ''; ubiCustom.style.display = 'none'; }
+        var title = document.getElementById('modalFormTitle');
+        if (title) { title.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Equipo'; }
+        var btn = document.getElementById('btnSaveEquipment');
+        if (btn) { btn.innerHTML = '<i class="fa-solid fa-plus"></i> Guardar Registro'; }
+        var b1 = document.getElementById('badgeSpecAuto');
+        if (b1) { b1.style.display = 'none'; }
+        var b2 = document.getElementById('badgeConsumibleAuto');
+        if (b2) { b2.style.display = 'none'; }
+        if (typeof adaptFormFieldsByType === 'function') { try { adaptFormFieldsByType('PC de Escritorio'); } catch(e) {} }
+        if (typeof populateFormAmbientes === 'function') { try { populateFormAmbientes('Bloque A (Área Administrativa)', ''); } catch(e) {} }
+        if (typeof updateDynamicQuickModelChips === 'function') { try { updateDynamicQuickModelChips(); } catch(e) {} }
+        if (typeof openModal === 'function') {
+          openModal('manualModal');
+        } else {
+          var modal = document.getElementById('manualModal');
+          if (modal) { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        }
+      } catch(err) {
+        console.error('Error in openNewEquipmentModal_v65:', err);
+      }
+    }
+    window.openNewEquipmentModal_v65 = openNewEquipmentModal_v65;
+    window.openManualCreateModal = openNewEquipmentModal_v65;
+  </script>
   <!-- Ambient background glow effects -->
   <div class="glow-orb orb-1"></div>
   <div class="glow-orb orb-2"></div>
@@ -165,7 +235,7 @@
               <span>Escanear PC</span>
             </button>
 
-            <button class="btn btn-secondary" id="btnOpenManualModal" onclick="try{document.getElementById('equipmentForm').reset();document.querySelectorAll('#equipmentForm input:not([type=button]):not([type=submit]),#equipmentForm textarea').forEach(function(el){el.value='';el.defaultValue='';});if(window.clearEquipmentForm){window.clearEquipmentForm();}if(window.openManualCreateModal){window.openManualCreateModal();}}catch(e){console.error(e);}" title="Agregar equipo manualmente">
+            <button class="btn btn-secondary" id="btnOpenManualModal" onclick="openNewEquipmentModal_v65()" title="Agregar equipo manualmente">
               <i class="fa-solid fa-plus"></i>
               <span>Nuevo</span>
             </button>
@@ -1067,7 +1137,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=64.0"></script>
+  <script src="js/app.js?v=65.0"></script>
   <script>
     window.clearEquipmentForm = function() {
       try {
