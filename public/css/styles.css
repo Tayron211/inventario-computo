@@ -3,6 +3,7 @@
    ============================================================================== */
 
 :root {
+  color-scheme: dark;
   /* Paleta de Colores: Rojo Carmesí, Negro Profundo y Grises */
   --crimson-primary: #dc143c;
   --crimson-glow: #ff2d55;
@@ -51,7 +52,9 @@
 /* ==============================================================================
    TEMA CLARO (MODO CLARO) - ALTA LEGIBILIDAD, CONTRASTE ELEGANTE Y PROFUNDIDAD
    ============================================================================== */
-[data-theme="light"] {
+[data-theme="light"],
+html[data-theme="light"] {
+  color-scheme: light;
   --bg-dark: #cfd8dc;
   --bg-surface: #ffffff;
   --bg-surface-elevated: #eceff1;

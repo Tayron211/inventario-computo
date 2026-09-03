@@ -38,8 +38,67 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // -------------------------------------------------------------
-// CONTROL DE AUTENTICACIÓN / SESIÓN
+// CONTROL DE AUTENTICACIÓN / SESIÓN PERSISTENTE
 // -------------------------------------------------------------
+function getAuthToken() {
+  return sessionStorage.getItem('sysinventario_session_token') || localStorage.getItem('sysinventario_session_token') || '';
+}
+
+function getAuthUser() {
+  return sessionStorage.getItem('sysinventario_user') || localStorage.getItem('sysinventario_user') || 'admin';
+}
+
+function getAuthCategoria() {
+  return sessionStorage.getItem('sysinventario_categoria') || localStorage.getItem('sysinventario_categoria');
+}
+
+function getAuthRole() {
+  return sessionStorage.getItem('sysinventario_role') || localStorage.getItem('sysinventario_role') || 'admin';
+}
+
+function getAuthBadge() {
+  return sessionStorage.getItem('sysinventario_badge') || localStorage.getItem('sysinventario_badge');
+}
+
+function saveAuthSession(data) {
+  const token = data.token || '';
+  const user = data.user || 'ADMINISTRADOR';
+  const categoria = data.categoria || (data.role === 'admin' ? 'Platinum' : (/tayron|cristian|david/i.test(data.user) ? 'Golden' : 'Bronce'));
+  const role = data.role || 'admin';
+  const badge = data.badge || (data.role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(data.user) ? 'gold' : 'bronze'));
+  const canDelete = data.canDelete ? 'true' : 'false';
+  const display = data.displayName || data.user;
+
+  // Persistir en sessionStorage y localStorage para evitar desconexiones al refrescar la página (F5 o móvil)
+  sessionStorage.setItem('sysinventario_session_token', token);
+  sessionStorage.setItem('sysinventario_user', user);
+  sessionStorage.setItem('sysinventario_categoria', categoria);
+  sessionStorage.setItem('sysinventario_role', role);
+  sessionStorage.setItem('sysinventario_badge', badge);
+  sessionStorage.setItem('sysinventario_can_delete', canDelete);
+  sessionStorage.setItem('sysinventario_display', display);
+
+  localStorage.setItem('sysinventario_session_token', token);
+  localStorage.setItem('sysinventario_user', user);
+  localStorage.setItem('sysinventario_categoria', categoria);
+  localStorage.setItem('sysinventario_role', role);
+  localStorage.setItem('sysinventario_badge', badge);
+  localStorage.setItem('sysinventario_can_delete', canDelete);
+  localStorage.setItem('sysinventario_display', display);
+}
+
+function clearAuthSession() {
+  sessionStorage.clear();
+  localStorage.removeItem('sysinventario_session_token');
+  localStorage.removeItem('sysinventario_user');
+  localStorage.removeItem('sysinventario_categoria');
+  localStorage.removeItem('sysinventario_role');
+  localStorage.removeItem('sysinventario_badge');
+  localStorage.removeItem('sysinventario_can_delete');
+  localStorage.removeItem('sysinventario_display');
+  localStorage.removeItem('sysinventario_token');
+}
+
 function initAuth() {
   const loginOverlay = document.getElementById('loginOverlay');
   const loginForm = document.getElementById('loginForm');
@@ -49,9 +108,9 @@ function initAuth() {
   const btnTogglePass = document.getElementById('btnTogglePass');
   const togglePassIcon = document.getElementById('togglePassIcon');
   const btnLogout = document.getElementById('btnLogout');
-  const sessionToken = sessionStorage.getItem('sysinventario_session_token');
+  const sessionToken = getAuthToken();
 
-  // Si ya tiene sesión activa en esta pestaña/ventana
+  // Si ya tiene sesión activa guardada
   if (sessionToken) {
     if (loginOverlay) loginOverlay.classList.add('hidden');
     const userBox = document.getElementById('userSessionBox');
@@ -96,15 +155,7 @@ function initAuth() {
 
         const data = await res.json();
         if (res.ok && data.success) {
-          // Guardar en sessionStorage (se borra automáticamente al cerrar la página/navegador)
-          sessionStorage.setItem('sysinventario_session_token', data.token);
-          sessionStorage.setItem('sysinventario_user', data.user);
-          sessionStorage.setItem('sysinventario_categoria', data.categoria || (data.role === 'admin' ? 'Platinum' : (/tayron|cristian|david/i.test(data.user) ? 'Golden' : 'Bronce')));
-          sessionStorage.setItem('sysinventario_role', data.role || 'admin');
-          sessionStorage.setItem('sysinventario_badge', data.badge || (data.role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(data.user) ? 'gold' : 'bronze')));
-          sessionStorage.setItem('sysinventario_can_delete', data.canDelete ? 'true' : 'false');
-          sessionStorage.setItem('sysinventario_display', data.displayName || data.user);
-          localStorage.removeItem('sysinventario_token');
+          saveAuthSession(data);
           
           loginOverlay.classList.add('hidden');
           const userBox = document.getElementById('userSessionBox');
@@ -138,9 +189,7 @@ function initAuth() {
   // Logout (Cerrar Sesión)
   if (btnLogout) {
     btnLogout.addEventListener('click', () => {
-      sessionStorage.clear();
-      localStorage.removeItem('sysinventario_token');
-      localStorage.removeItem('sysinventario_user');
+      clearAuthSession();
       if (loginOverlay) {
         loginOverlay.classList.remove('hidden');
         if (loginPass) loginPass.value = '';
@@ -189,10 +238,10 @@ const USER_CATEGORIES = {
 
 // Obtener permisos y categoría activa del usuario actual
 function getCurrentUserPermissions() {
-  const username = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
-  const role = sessionStorage.getItem('sysinventario_role') || 'admin';
-  const categoria = sessionStorage.getItem('sysinventario_categoria');
-  const badge = sessionStorage.getItem('sysinventario_badge');
+  const username = getAuthUser().trim();
+  const role = getAuthRole();
+  const categoria = getAuthCategoria();
+  const badge = getAuthBadge();
 
   if (categoria && USER_CATEGORIES[categoria]) {
     return {
@@ -337,7 +386,7 @@ function updateAuthUI() {
     } else {
       btnExportExcel.style.display = 'inline-flex';
       btnExportExcel.removeAttribute('disabled');
-      const token = sessionStorage.getItem('sysinventario_session_token');
+      const token = getAuthToken();
       btnExportExcel.href = token ? `/api/export-excel?token=${encodeURIComponent(token)}` : '/api/export-excel';
     }
   }
@@ -363,6 +412,7 @@ function initTheme() {
 function setTheme(theme) {
   const isLight = theme === 'light';
   document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
   localStorage.setItem('sysinventario_theme', theme);
   const themeToggleText = document.getElementById('themeToggleText');
   if (themeToggleText) {
@@ -370,27 +420,16 @@ function setTheme(theme) {
   }
 
   const color = isLight ? '#ffffff' : '#08080c';
+  const bodyBg = isLight ? '#cfd8dc' : '#08080c';
 
   // Forzar repintado de fondo en html y body para navegadores móviles
   document.documentElement.style.backgroundColor = color;
   if (document.body) {
-    document.body.style.backgroundColor = isLight ? '#cfd8dc' : '#08080c';
+    document.body.style.backgroundColor = bodyBg;
   }
 
-  // Eliminar y reinsertar dinámicamente meta tag para forzar a Chrome Android y navegadores móviles a repintar la barra superior
+  // Eliminar cualquier meta previo con media queries para evitar que Android fuerce tema oscuro
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
-  
-  const newMetaLight = document.createElement('meta');
-  newMetaLight.name = 'theme-color';
-  newMetaLight.setAttribute('media', '(prefers-color-scheme: light)');
-  newMetaLight.content = isLight ? '#ffffff' : '#08080c';
-  document.head.appendChild(newMetaLight);
-
-  const newMetaDark = document.createElement('meta');
-  newMetaDark.name = 'theme-color';
-  newMetaDark.setAttribute('media', '(prefers-color-scheme: dark)');
-  newMetaDark.content = isLight ? '#ffffff' : '#08080c';
-  document.head.appendChild(newMetaDark);
 
   const newMetaTheme = document.createElement('meta');
   newMetaTheme.name = 'theme-color';
@@ -2668,7 +2707,7 @@ async function handleFormSubmit(e) {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionStorage.getItem('sysinventario_session_token') || ''}`
+        'Authorization': `Bearer ${getAuthToken()}`
       },
       body: JSON.stringify(payload)
     });
@@ -2693,7 +2732,7 @@ async function handleFormSubmit(e) {
 
 // Escanear PC (Ejecución 100% automática y silenciosa sin descargas ni intervención manual)
 async function handleScanLocal() {
-  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const isOperador = getAuthRole() === 'operador';
   if (isOperador) {
     showToast('Acceso denegado: El usuario Observador solo tiene permisos de visualización y no puede ejecutar auditorías ni registros.', 'error');
     return;
@@ -2746,7 +2785,7 @@ async function handleScanLocal() {
 }
 
 async function deleteEquipment(id, modelo) {
-  const isOperador = (sessionStorage.getItem('sysinventario_role') || 'admin') === 'operador';
+  const isOperador = getAuthRole() === 'operador';
   if (isOperador) {
     showToast('Acceso denegado: El usuario Observador no tiene permisos para eliminar registros.', 'error');
     return;
@@ -2760,7 +2799,7 @@ async function deleteEquipment(id, modelo) {
     const res = await fetch(`/api/inventory/${encodeURIComponent(id)}`, { 
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${sessionStorage.getItem('sysinventario_session_token') || ''}`
+        'Authorization': `Bearer ${getAuthToken()}`
       }
     });
 
