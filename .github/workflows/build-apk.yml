@@ -25,11 +25,13 @@ jobs:
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
 
       - name: Compilar APK
         run: |
           cd android
-          gradle assembleRelease --no-daemon
+          gradle :app:assembleRelease --stacktrace --no-daemon
           mkdir -p ../dist-apk
           cp app/build/outputs/apk/release/app-release.apk ../dist-apk/SysInventory.apk
 
