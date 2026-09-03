@@ -361,19 +361,42 @@ function initTheme() {
 }
 
 function setTheme(theme) {
+  const isLight = theme === 'light';
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('sysinventario_theme', theme);
   const themeToggleText = document.getElementById('themeToggleText');
   if (themeToggleText) {
-    themeToggleText.textContent = theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
+    themeToggleText.textContent = isLight ? 'Modo Oscuro' : 'Modo Claro';
   }
 
-  const color = theme === 'light' ? '#ffffff' : '#08080c';
+  const color = isLight ? '#ffffff' : '#08080c';
 
-  const metaThemeColor = document.getElementById('metaThemeColor');
-  if (metaThemeColor) {
-    metaThemeColor.setAttribute('content', color);
+  // Forzar repintado de fondo en html y body para navegadores móviles
+  document.documentElement.style.backgroundColor = color;
+  if (document.body) {
+    document.body.style.backgroundColor = isLight ? '#cfd8dc' : '#08080c';
   }
+
+  // Eliminar y reinsertar dinámicamente meta tag para forzar a Chrome Android y navegadores móviles a repintar la barra superior
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+  
+  const newMetaLight = document.createElement('meta');
+  newMetaLight.name = 'theme-color';
+  newMetaLight.setAttribute('media', '(prefers-color-scheme: light)');
+  newMetaLight.content = isLight ? '#ffffff' : '#08080c';
+  document.head.appendChild(newMetaLight);
+
+  const newMetaDark = document.createElement('meta');
+  newMetaDark.name = 'theme-color';
+  newMetaDark.setAttribute('media', '(prefers-color-scheme: dark)');
+  newMetaDark.content = isLight ? '#ffffff' : '#08080c';
+  document.head.appendChild(newMetaDark);
+
+  const newMetaTheme = document.createElement('meta');
+  newMetaTheme.name = 'theme-color';
+  newMetaTheme.id = 'metaThemeColor';
+  newMetaTheme.content = color;
+  document.head.appendChild(newMetaTheme);
 
   const metaMsNav = document.getElementById('metaMsNav');
   if (metaMsNav) {
@@ -382,13 +405,8 @@ function setTheme(theme) {
 
   const metaAppleStatus = document.getElementById('metaAppleStatus');
   if (metaAppleStatus) {
-    metaAppleStatus.setAttribute('content', theme === 'light' ? 'default' : 'black-translucent');
+    metaAppleStatus.setAttribute('content', isLight ? 'default' : 'black-translucent');
   }
-
-  // Actualizar cualquier otra etiqueta theme-color
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
-    m.setAttribute('content', color);
-  });
 
   updateQrForTheme(theme);
 }

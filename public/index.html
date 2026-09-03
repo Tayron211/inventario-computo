@@ -7,6 +7,8 @@
   
   <!-- PWA & Mobile Status Bar Color Integration -->
   <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#08080c">
   <meta name="theme-color" content="#ffffff" id="metaThemeColor">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default" id="metaAppleStatus">
@@ -22,6 +24,8 @@
         var theme = localStorage.getItem('sysinventario_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
         var color = theme === 'light' ? '#ffffff' : '#08080c';
+        document.documentElement.style.backgroundColor = color;
+        
         var mTheme = document.getElementById('metaThemeColor');
         if (mTheme) mTheme.setAttribute('content', color);
         var mMs = document.getElementById('metaMsNav');
@@ -49,7 +53,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=57.0">
+  <link rel="stylesheet" href="css/styles.css?v=58.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -1060,6 +1064,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=57.0"></script>
+  <script src="js/app.js?v=58.0"></script>
 </body>
 </html>
