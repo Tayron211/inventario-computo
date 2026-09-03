@@ -34,9 +34,15 @@ jobs:
       - name: Compilar APK
         run: |
           cd android
-          gradle :app:assembleRelease --stacktrace --no-daemon 2>&1 | tee ../build_output.log
+          gradle :app:assembleDebug --stacktrace --no-daemon 2>&1 | tee ../build_output.log
+          BUILD_STATUS=${PIPESTATUS[0]}
+          if [ $BUILD_STATUS -ne 0 ]; then
+            echo "==================== LOG DE ERROR ===================="
+            tail -n 120 ../build_output.log
+            exit $BUILD_STATUS
+          fi
           mkdir -p ../dist-apk
-          cp app/build/outputs/apk/release/app-release.apk ../dist-apk/SysInventory.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../dist-apk/SysInventory.apk
 
       - name: Subir log en caso de error
         if: failure()
