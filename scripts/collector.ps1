@@ -4,12 +4,8 @@
 
 param(
     [string]$ServerUrl = "https://ivt.onrender.com",
-    # Ambientes disponibles:
-    # Bloque A (Admin): Topico, Lactario, Guarderia, Psicopedagogico, ATP, Admision, Finanzas, Defensoria, Garita
-    # Bloque A (Aulas y Labs): Aula 201-206, 207 (Sala SUM), Aula 301-303, Laboratorio 304, Laboratorio 305, Aula 306, Centro de Informacion, Aula 401-409, Aula 501-509, Aula 601-609
-    # Bloque B (Admin): Auditorio, Direccion, Counter, GTH, Coordinacion Academica, Retencion, SSOMA, DTC, Sala de Reuniones, Comedor
-    # Bloque A (Admin): Soporte Técnico, CAE, Topico, Lactario, Guarderia, Psicopedagogico, ATP, Admision, Finanzas, Defensoria, Garita
-    [string]$Ubicacion = "Soporte Técnico"
+    [string]$Ubicacion = "Soporte Técnico",
+    [string]$UsuarioScanner = "Administrador"
 )
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -383,6 +379,9 @@ $hardwarePayload = [ordered]@{
     hostname = $hostname
     usuario_actual = $usuario
     ubicacion = $Ubicacion
+    creado_por = $UsuarioScanner
+    registrado_por = $UsuarioScanner
+    creado_por_nombre = $UsuarioScanner
     sistema_operativo = "$osName ($osArch)"
     ip_red = $ipPrincipal
     mac_ethernet = $ethMacFormatted
@@ -416,6 +415,7 @@ Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host " [OK] HARDWARE DETECTADO CON EXITO:" -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
+Write-Host "  - REGISTRADO POR:   $UsuarioScanner" -ForegroundColor Yellow
 Write-Host "  - MODELO:           $modelo" -ForegroundColor White
 Write-Host "  - NUMERO DE SERIE:  $numeroSerie" -ForegroundColor White
 Write-Host "  - PLACA BASE:       $placaBaseCompleta" -ForegroundColor White
@@ -464,14 +464,13 @@ foreach ($targetUrl in $urlsToTry) {
             $wc = New-Object System.Net.WebClient
             $wc.Encoding = $utf8NoBom
             $wc.Headers.Add("Content-Type", "application/json; charset=utf-8")
-            $responseBytes = $wc.UploadData($apiUrl, "POST", $payloadBytes)
-            $responseStr = $utf8NoBom.GetString($responseBytes)
+            $null = $wc.UploadData($apiUrl, "POST", $payloadBytes)
             Write-Host "[OK] DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
             $sentSuccess = $true
             break
         } catch {
             try {
-                $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
+                $null = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonPayload -ContentType "application/json; charset=utf-8" -TimeoutSec 60
                 Write-Host "[OK] DATOS REGISTRADOS EXITOSAMENTE EN EL INVENTARIO EN LINEA!" -ForegroundColor Green
                 $sentSuccess = $true
                 break

@@ -533,14 +533,33 @@ function initEventListeners() {
     btnOpenManualModal.addEventListener('click', openManualCreateModal);
   }
 
-  // Botón Escanear Este Equipo / PC (Abre modal con BAT y Comando)
+  // Botón Escanear Este Equipo / PC (Abre modal con BAT y Comando personalizado por usuario)
   const btnScanLocal = document.getElementById('btnScanLocal');
   if (btnScanLocal) {
     btnScanLocal.addEventListener('click', () => {
       const url = (serverInfo && serverInfo.serverUrl) ? serverInfo.serverUrl : window.location.origin;
-      const cmd = `irm ${url}/scan | iex`;
+      const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
+      const perms = getCurrentUserPermissions();
+      const auditorName = perms.isPlatinum ? 'Administrador' : (loggedUser.charAt(0).toUpperCase() + loggedUser.slice(1));
+      
+      const cmd = `irm ${url}/scan?u=${encodeURIComponent(auditorName)} | iex`;
       const authDisplay = document.getElementById('authCmdDisplay');
       if (authDisplay) authDisplay.textContent = cmd;
+
+      const auditorBadgeElem = document.getElementById('scannerAuditorBadge');
+      if (auditorBadgeElem) {
+        auditorBadgeElem.innerHTML = `
+          <span style="font-size: 0.8rem; color: var(--gray-300); font-weight: 600;">Auditor Responsable:</span>
+          ${getUserBadgeHtml(auditorName, perms.badge, perms.categoria)}
+        `;
+      }
+
+      const btnAuthDownloadBat = document.getElementById('btnAuthDownloadBat');
+      if (btnAuthDownloadBat) {
+        btnAuthDownloadBat.href = `/api/download-batch?u=${encodeURIComponent(auditorName)}`;
+        btnAuthDownloadBat.setAttribute('download', `ESCANEAR_EQUIPO_${auditorName.toUpperCase()}.bat`);
+      }
+
       openModal('agentModal');
     });
   }
@@ -550,10 +569,14 @@ function initEventListeners() {
   if (btnAuthCopyCmd) {
     btnAuthCopyCmd.addEventListener('click', () => {
       const url = (serverInfo && serverInfo.serverUrl) ? serverInfo.serverUrl : window.location.origin;
-      const cmd = `irm ${url}/scan | iex`;
+      const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
+      const perms = getCurrentUserPermissions();
+      const auditorName = perms.isPlatinum ? 'Administrador' : (loggedUser.charAt(0).toUpperCase() + loggedUser.slice(1));
+      
+      const cmd = `irm ${url}/scan?u=${encodeURIComponent(auditorName)} | iex`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(cmd).then(() => {
-          showToast('¡Comando copiado! Abre PowerShell (Ctrl + V) y presiona Enter.', 'success');
+          showToast(`¡Comando de escaneo personalizado para ${auditorName} copiado!`, 'success');
         });
       } else {
         prompt('Copia este comando y pégalo en PowerShell:', cmd);
@@ -565,7 +588,10 @@ function initEventListeners() {
   const btnAuthDownloadBat = document.getElementById('btnAuthDownloadBat');
   if (btnAuthDownloadBat) {
     btnAuthDownloadBat.addEventListener('click', () => {
-      showToast('Descargando script seguro. Ábrelo con 1 clic para auditar la PC.', 'info');
+      const loggedUser = (sessionStorage.getItem('sysinventario_user') || 'admin').trim();
+      const perms = getCurrentUserPermissions();
+      const auditorName = perms.isPlatinum ? 'Administrador' : (loggedUser.charAt(0).toUpperCase() + loggedUser.slice(1));
+      showToast(`Descargando script vinculado a tu usuario: ${auditorName}`, 'info');
     });
   }
 

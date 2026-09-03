@@ -49,7 +49,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=54.0">
+  <link rel="stylesheet" href="css/styles.css?v=55.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -1031,7 +1031,9 @@
       </div>
 
       <div class="modal-body">
-        <p style="font-size: 0.85rem; color: var(--gray-300); margin-bottom: 12px;">
+        <div id="scannerAuditorBadge" style="margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"></div>
+
+        <p style="font-size: 0.85rem; color: var(--gray-300); margin-bottom: 12px; text-align: center;">
           Pega este comando en <b>PowerShell</b> o descarga el archivo <b>.BAT</b>:
         </p>
 
@@ -1058,6 +1060,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=54.0"></script>
+  <script src="js/app.js?v=55.0"></script>
 </body>
 </html>

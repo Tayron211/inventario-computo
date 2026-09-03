@@ -637,16 +637,26 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// Servir script para ejecución remota en 1 sola línea (irm http://IP:3000/scan | iex)
+// Servir script para ejecución remota en 1 sola línea personalizada por usuario (irm http://IP:3000/scan?u=NOMBRE | iex)
 app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   const scriptPath = path.join(__dirname, 'scripts', 'collector.ps1');
   const serverUrl = getServerUrl(req);
-  const ubicacion = (req.query.ubicacion || req.query.amb || req.query.u || 'Soporte Técnico').trim();
+  const ubicacion = (req.query.ubicacion || req.query.amb || 'Soporte Técnico').trim();
+  const rawUser = (req.query.u || req.query.user || req.query.usuario || req.query.registrado_por || req.query.creado_por || 'Administrador').trim();
+  
+  let scannerUser = rawUser;
+  const matchedUser = USERS.find(u => u.username.toLowerCase() === rawUser.toLowerCase());
+  if (matchedUser) {
+    scannerUser = matchedUser.displayName || matchedUser.username;
+  } else if (/^admin$/i.test(rawUser)) {
+    scannerUser = 'Administrador';
+  }
   
   try {
     let scriptContent = fs.readFileSync(scriptPath, 'utf8');
     scriptContent = scriptContent.replace(/\[string\]\$ServerUrl\s*=\s*"[^"]*"/i, `[string]$ServerUrl = "${serverUrl}"`);
     scriptContent = scriptContent.replace(/\[string\]\$Ubicacion\s*=\s*"[^"]*"/i, `[string]$Ubicacion = "${ubicacion}"`);
+    scriptContent = scriptContent.replace(/\[string\]\$UsuarioScanner\s*=\s*"[^"]*"/i, `[string]$UsuarioScanner = "${scannerUser}"`);
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
@@ -657,9 +667,18 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   }
 });
 
-// Endpoint para descargar el archivo ESCANEAR_ESTE_EQUIPO.bat con permisos de Administrador por defecto
+// Endpoint para descargar el archivo .BAT personalizado por usuario con permisos de Administrador por defecto
 app.get(['/api/download-batch', '/download-batch', '/escanear.bat'], (req, res) => {
   const serverUrl = getServerUrl(req);
+  const rawUser = (req.query.u || req.query.user || req.query.usuario || req.query.registrado_por || 'Administrador').trim();
+  
+  let scannerUser = rawUser;
+  const matchedUser = USERS.find(u => u.username.toLowerCase() === rawUser.toLowerCase());
+  if (matchedUser) {
+    scannerUser = matchedUser.displayName || matchedUser.username;
+  } else if (/^admin$/i.test(rawUser)) {
+    scannerUser = 'Administrador';
+  }
   
   const batContent = `@echo off
 chcp 65001 >nul
@@ -684,22 +703,24 @@ echo             SYS-INVENTORY - AUDITORIA TOTAL DE HARDWARE
 echo ====================================================================
 echo.
 echo [*] Permisos de Administrador: [OK - CONCEDIDOS]
+echo [*] Auditor / Usuario Responsable: [${scannerUser.toUpperCase()}]
 echo [*] Conectando con servidor (${serverUrl})...
 echo [*] Extrayendo BIOS, Motherboard, CPU, RAM, Discos y Perifericos...
 echo.
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls; irm ${serverUrl}/scan | iex"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls; irm ${serverUrl}/scan?u=${encodeURIComponent(scannerUser)} | iex"
 
 echo.
 echo ====================================================================
-echo  [OK] Escaneo completado. Los datos se guardaron en el inventario.
+echo  [OK] Escaneo completado. Registrado exitosamente por: ${scannerUser}
 echo ====================================================================
 echo.
 timeout /t 5 >nul
 `;
 
+  const fileNameSafe = `ESCANEAR_EQUIPO_${scannerUser.toUpperCase().replace(/[^A-Z0-9]/gi, '_')}.bat`;
   res.setHeader('Content-Type', 'application/x-bat; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename="ESCANEAR_ESTE_EQUIPO.bat"');
+  res.setHeader('Content-Disposition', `attachment; filename="${fileNameSafe}"`);
   res.send(batContent);
 });
 
@@ -1615,6 +1636,36 @@ app.post('/api/agent/report', async (req, res) => {
 
     const recordHostname = payload.hostname || 'DESKTOP-EQUIPO';
 
+    // Resolver usuario y categoría del auditor que disparó el escáner
+    const rawCreator = (payload.creado_por || payload.registrado_por || payload.usuario_scanner || payload.creado_por_nombre || 'Administrador').trim();
+    let creatorUser = rawCreator;
+    let creatorBadge = 'platinum';
+    let creatorRole = 'admin';
+    let creatorCat = 'Platinum';
+
+    const matchedUser = USERS.find(u => u.username.toLowerCase() === rawCreator.toLowerCase());
+    if (matchedUser) {
+      creatorUser = matchedUser.displayName || matchedUser.username;
+      creatorBadge = matchedUser.badge;
+      creatorRole = matchedUser.role;
+      creatorCat = matchedUser.categoria;
+    } else if (/^(tayron|cristian|david)$/i.test(rawCreator)) {
+      creatorUser = rawCreator.charAt(0).toUpperCase() + rawCreator.slice(1).toLowerCase();
+      creatorBadge = 'gold';
+      creatorRole = 'gold_admin';
+      creatorCat = 'Golden';
+    } else if (/^(user|observador)$/i.test(rawCreator)) {
+      creatorUser = 'Observador';
+      creatorBadge = 'bronze';
+      creatorRole = 'observador';
+      creatorCat = 'Bronce';
+    } else {
+      creatorUser = 'Administrador';
+      creatorBadge = 'platinum';
+      creatorRole = 'admin';
+      creatorCat = 'Platinum';
+    }
+
     const record = {
       id: existingIndex >= 0 ? items[existingIndex].id : `item-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       modelo: payload.modelo,
@@ -1633,6 +1684,14 @@ app.post('/api/agent/report', async (req, res) => {
       perifericos: (payload.perifericos || []).filter(isValidPeripheral),
       hostname: recordHostname,
       usuario_actual: payload.usuario_actual || '',
+      creado_por: (existingIndex >= 0 && items[existingIndex].creado_por) ? items[existingIndex].creado_por : creatorUser,
+      creado_por_nombre: (existingIndex >= 0 && items[existingIndex].creado_por_nombre) ? items[existingIndex].creado_por_nombre : creatorUser,
+      creado_por_badge: (existingIndex >= 0 && items[existingIndex].creado_por_badge) ? items[existingIndex].creado_por_badge : creatorBadge,
+      creado_por_rol: (existingIndex >= 0 && items[existingIndex].creado_por_rol) ? items[existingIndex].creado_por_rol : creatorRole,
+      creado_por_categoria: (existingIndex >= 0 && items[existingIndex].creado_por_categoria) ? items[existingIndex].creado_por_categoria : creatorCat,
+      modificado_por: creatorUser,
+      modificado_por_badge: creatorBadge,
+      modificado_por_categoria: creatorCat,
       sistema_operativo: payload.sistema_operativo || '',
       ip_red: payload.ip_red || '',
       mac_ethernet: payload.mac_ethernet || (existingIndex >= 0 ? items[existingIndex].mac_ethernet : '') || '',
@@ -1643,7 +1702,7 @@ app.post('/api/agent/report', async (req, res) => {
         ? payload.ubicacion 
         : ((existingIndex >= 0 && items[existingIndex].ubicacion && !/detectado autom[aá]ticamente|sin asignar/i.test(items[existingIndex].ubicacion)) ? items[existingIndex].ubicacion : 'Soporte Técnico'),
       estado: existingIndex >= 0 ? (items[existingIndex].estado || 'Operativo') : 'Operativo',
-      notas: existingIndex >= 0 ? items[existingIndex].notas : 'Registrado por escáner automático',
+      notas: existingIndex >= 0 ? items[existingIndex].notas : `Registrado por escáner (${creatorUser})`,
       fecha_escaneo: payload.fecha_escaneo || new Date().toISOString().replace('T', ' ').substring(0, 19),
       origen: 'Escáner Batch/PowerShell'
     };
