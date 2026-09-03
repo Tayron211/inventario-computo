@@ -1267,8 +1267,13 @@ function clearEquipmentForm() {
   if (equipmentForm) {
     try { equipmentForm.reset(); } catch(e) {}
     
-    equipmentForm.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="radio"]):not([type="checkbox"]), textarea').forEach(el => {
-      el.value = '';
+    // Limpiar todos los inputs, textareas y selects
+    equipmentForm.querySelectorAll('input, textarea, select').forEach(el => {
+      if (el.type !== 'button' && el.type !== 'submit' && el.type !== 'reset') {
+        el.value = '';
+        el.defaultValue = '';
+        try { el.removeAttribute('value'); } catch(e) {}
+      }
     });
   }
 
@@ -1300,7 +1305,11 @@ function clearEquipmentForm() {
 
   allFieldIds.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.value = '';
+    if (el) {
+      el.value = '';
+      el.defaultValue = '';
+      try { el.removeAttribute('value'); } catch(e) {}
+    }
   });
 
   const formTipoEquipo = document.getElementById('formTipoEquipo');
@@ -1312,13 +1321,29 @@ function clearEquipmentForm() {
   const formBloque = document.getElementById('formBloque');
   if (formBloque) formBloque.value = 'Bloque A (Área Administrativa)';
 
-  const formAmbiente = document.getElementById('formAmbiente');
-  if (formAmbiente) formAmbiente.value = '';
+  const formUbicacion = document.getElementById('formUbicacion');
+  if (formUbicacion) formUbicacion.value = 'CAE';
+
+  const formUbicacionCustom = document.getElementById('formUbicacionCustom');
+  if (formUbicacionCustom) {
+    formUbicacionCustom.value = '';
+    formUbicacionCustom.style.display = 'none';
+  }
 
   const badgeSpecAuto = document.getElementById('badgeSpecAuto');
   if (badgeSpecAuto) badgeSpecAuto.style.display = 'none';
   const badgeConsumibleAuto = document.getElementById('badgeConsumibleAuto');
   if (badgeConsumibleAuto) badgeConsumibleAuto.style.display = 'none';
+
+  const modalFormTitle = document.getElementById('modalFormTitle');
+  if (modalFormTitle) {
+    modalFormTitle.innerHTML = `<i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Equipo`;
+  }
+
+  const btnSaveEquipment = document.getElementById('btnSaveEquipment');
+  if (btnSaveEquipment) {
+    btnSaveEquipment.innerHTML = `<i class="fa-solid fa-plus"></i> Guardar Registro`;
+  }
 
   try { adaptFormFieldsByType('PC de Escritorio'); } catch(e) {}
   try { populateFormAmbientes('Bloque A (Área Administrativa)', ''); } catch(e) {}

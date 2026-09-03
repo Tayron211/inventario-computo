@@ -56,7 +56,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=62.0">
+  <link rel="stylesheet" href="css/styles.css?v=63.0">
 </head>
 <body>
   <!-- Ambient background glow effects -->
@@ -679,8 +679,8 @@
         <p>Datos del equipo, componentes y números de serie</p>
       </div>
       
-      <form id="equipmentForm">
-        <input type="hidden" id="formEquipmentId">
+      <form id="equipmentForm" autocomplete="off">
+        <input type="hidden" id="formEquipmentId" value="">
         
         <div class="modal-body modal-scrollable">
           
@@ -774,7 +774,7 @@
             <div class="form-group">
               <label for="formNumeroSerie">NÚMERO DE SERIE *</label>
               <div class="input-with-action">
-                <input type="text" id="formNumeroSerie" required placeholder="Ej: 8CN60500Y3" class="form-control mono-font">
+                <input type="text" id="formNumeroSerie" required placeholder="Ej: 8CN60500Y3" class="form-control mono-font" autocomplete="off">
                 <button type="button" class="btn-input-action" id="btnScanSerialCam" title="Escanear con cámara">
                   <i class="fa-solid fa-camera"></i> <span>Escanear</span>
                 </button>
@@ -783,7 +783,7 @@
 
             <div class="form-group" id="formGroupPlacaBase">
               <label for="formPlacaBase">PLACA BASE</label>
-              <input type="text" id="formPlacaBase" placeholder="Ej: HP 832A o N/A" class="form-control mono-font">
+              <input type="text" id="formPlacaBase" placeholder="Ej: HP 832A o N/A" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group">
@@ -825,7 +825,7 @@
 
             <div class="form-group">
               <label for="formFabricante">FABRICANTE / MARCA</label>
-              <input type="text" id="formFabricante" placeholder="Ej: HP, Lenovo, Dell, ASUS" class="form-control">
+              <input type="text" id="formFabricante" placeholder="Ej: HP, Lenovo, Dell, ASUS" class="form-control" autocomplete="off">
             </div>
 
             <div class="form-group">
@@ -845,7 +845,7 @@
                 <span><i class="fa-solid fa-droplet text-cyan"></i> CONSUMIBLE (TINTA / TÓNER)</span>
                 <span class="auto-badge" id="badgeConsumibleAuto" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detectado</span>
               </label>
-              <input type="text" id="formConsumible" placeholder="Ej: Tinta Epson T544 o Tóner HP 85A" class="form-control" style="width: 100%; border-color: rgba(6, 182, 212, 0.4);">
+              <input type="text" id="formConsumible" placeholder="Ej: Tinta Epson T544 o Tóner HP 85A" class="form-control" style="width: 100%; border-color: rgba(6, 182, 212, 0.4);" autocomplete="off">
             </div>
 
             <!-- SECCIÓN COMPONENTE INDEPENDIENTE (GPU, RAM, DISCO, CPU, PLACA, PSU) -->
@@ -856,11 +856,11 @@
               <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div class="form-group">
                   <label for="formCompCapacidad" id="labelCompCapacidad">CAPACIDAD / VRAM / POTENCIA</label>
-                  <input type="text" id="formCompCapacidad" placeholder="Ej: 12 GB GDDR6 / 16 GB DDR4 / 1 TB NVMe / 750W" class="form-control">
+                  <input type="text" id="formCompCapacidad" placeholder="Ej: 12 GB GDDR6 / 16 GB DDR4 / 1 TB NVMe / 750W" class="form-control" autocomplete="off">
                 </div>
                 <div class="form-group">
                   <label for="formCompInterfaz" id="labelCompInterfaz">INTERFAZ / SOCKET / FORMATO</label>
-                  <input type="text" id="formCompInterfaz" placeholder="Ej: PCIe 4.0 x16 / Socket AM4 / M.2 2280 / DIMM" class="form-control">
+                  <input type="text" id="formCompInterfaz" placeholder="Ej: PCIe 4.0 x16 / Socket AM4 / M.2 2280 / DIMM" class="form-control" autocomplete="off">
                 </div>
               </div>
             </div>
@@ -875,17 +875,17 @@
             <div class="form-grid">
               <div class="form-group full-width">
                 <label for="formProcesador">PROCESADOR (CPU)</label>
-                <input type="text" id="formProcesador" placeholder="Ej: Intel Core i5-8250U @ 1.60GHz (4 Núcleos)" class="form-control">
+                <input type="text" id="formProcesador" placeholder="Ej: Intel Core i5-8250U @ 1.60GHz (4 Núcleos)" class="form-control" autocomplete="off">
               </div>
 
               <div class="form-group">
                 <label for="formRamTotal">MEMORIA RAM</label>
-                <input type="text" id="formRamTotal" placeholder="Ej: 16 GB (2x 8GB DDR4)" class="form-control">
+                <input type="text" id="formRamTotal" placeholder="Ej: 16 GB (2x 8GB DDR4)" class="form-control" autocomplete="off">
               </div>
 
               <div class="form-group">
                 <label for="formAlmacenamiento">ALMACENAMIENTO (DISCO / SSD)</label>
-                <input type="text" id="formAlmacenamiento" placeholder="Ej: SSD 512GB (S/N: KX9087123)" class="form-control">
+                <input type="text" id="formAlmacenamiento" placeholder="Ej: SSD 512GB (S/N: KX9087123)" class="form-control" autocomplete="off">
               </div>
             </div>
           </div>
@@ -899,12 +899,12 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="formMonitor">MONITOR / PANTALLA (MODELO Y S/N)</label>
-                <input type="text" id="formMonitor" placeholder="Ej: HP E24 G4 (S/N: CNC1234XYZ)" class="form-control">
+                <input type="text" id="formMonitor" placeholder="Ej: HP E24 G4 (S/N: CNC1234XYZ)" class="form-control" autocomplete="off">
               </div>
 
               <div class="form-group">
                 <label for="formPerifericos">TECLADO, MOUSE Y ACCESORIOS</label>
-                <input type="text" id="formPerifericos" placeholder="Ej: Mouse Logitech M185, Teclado HP" class="form-control">
+                <input type="text" id="formPerifericos" placeholder="Ej: Mouse Logitech M185, Teclado HP" class="form-control" autocomplete="off">
               </div>
             </div>
           </div>
@@ -917,37 +917,37 @@
           <div class="form-grid">
             <div class="form-group" id="formGroupHostname">
               <label for="formHostname" id="labelFormHostname">NOMBRE DE EQUIPO / HOSTNAME</label>
-              <input type="text" id="formHostname" placeholder="Ej: DESKTOP-PC01" class="form-control mono-font">
+              <input type="text" id="formHostname" placeholder="Ej: DESKTOP-PC01" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group" id="formGroupIpRed">
               <label for="formIpRed">DIRECCIÓN IP DE RED</label>
-              <input type="text" id="formIpRed" placeholder="Ej: 192.168.1.100" class="form-control mono-font">
+              <input type="text" id="formIpRed" placeholder="Ej: 192.168.1.100" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group" id="formGroupMacEthernet">
               <label for="formMacEthernet"><i class="fa-solid fa-network-wired"></i> MAC ETHERNET (LAN)</label>
-              <input type="text" id="formMacEthernet" placeholder="Ej: 5C:28:86:1F:98:AD" class="form-control mono-font">
+              <input type="text" id="formMacEthernet" placeholder="Ej: 5C:28:86:1F:98:AD" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group" id="formGroupMacWifi">
               <label for="formMacWifi"><i class="fa-solid fa-wifi"></i> MAC WI-FI (WLAN)</label>
-              <input type="text" id="formMacWifi" placeholder="Ej: 40:D1:33:8F:11:64" class="form-control mono-font">
+              <input type="text" id="formMacWifi" placeholder="Ej: 40:D1:33:8F:11:64" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group" id="formGroupMacBluetooth">
               <label for="formMacBluetooth"><i class="fa-brands fa-bluetooth-b"></i> MAC BLUETOOTH</label>
-              <input type="text" id="formMacBluetooth" placeholder="Ej: 40:D1:33:8F:11:68" class="form-control mono-font">
+              <input type="text" id="formMacBluetooth" placeholder="Ej: 40:D1:33:8F:11:68" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group" id="formGroupMacAddress" style="display: none;">
               <label for="formMacAddress">DIRECCIÓN MAC (GENERAL)</label>
-              <input type="text" id="formMacAddress" placeholder="Ej: 00:1A:2B:3C:4D:5E" class="form-control mono-font">
+              <input type="text" id="formMacAddress" placeholder="Ej: 00:1A:2B:3C:4D:5E" class="form-control mono-font" autocomplete="off">
             </div>
 
             <div class="form-group" id="formGroupUsuario">
               <label for="formUsuario" id="labelFormUsuario">USUARIO / RESPONSABLE</label>
-              <input type="text" id="formUsuario" placeholder="Ej: Juan Pérez / Soporte" class="form-control">
+              <input type="text" id="formUsuario" placeholder="Ej: Juan Pérez / Soporte" class="form-control" autocomplete="off">
             </div>
 
             <div class="form-group">
@@ -976,12 +976,12 @@
                 <option value="Defensoría">📍 Defensoría</option>
                 <option value="Garita">📍 Garita</option>
               </select>
-              <input type="text" id="formUbicacionCustom" placeholder="Nombre del ambiente..." class="form-control mt-2" style="display: none;">
+              <input type="text" id="formUbicacionCustom" placeholder="Nombre del ambiente..." class="form-control mt-2" style="display: none;" autocomplete="off">
             </div>
 
             <div class="form-group full-width">
               <label for="formNotas">NOTAS ADICIONALES</label>
-              <textarea id="formNotas" rows="2" placeholder="Observaciones sobre el equipo..." class="form-control"></textarea>
+              <textarea id="formNotas" rows="2" placeholder="Observaciones sobre el equipo..." class="form-control" autocomplete="off"></textarea>
             </div>
           </div>
 
@@ -1067,6 +1067,6 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=62.0"></script>
+  <script src="js/app.js?v=63.0"></script>
 </body>
 </html>
