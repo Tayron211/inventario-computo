@@ -1,0 +1,60 @@
+name: Compilar APK SysInventory
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Compilar APK Android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar codigo del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Compilar APK
+        run: |
+          cd android
+          gradle assembleRelease --no-daemon
+          mkdir -p ../dist-apk
+          cp app/build/outputs/apk/release/app-release.apk ../dist-apk/SysInventory.apk
+
+      - name: Guardar APK como Artefacto descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SysInventory-Android-APK
+          path: dist-apk/SysInventory.apk
+          retention-days: 60
+
+      - name: Publicar Release con APK adjunto
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: app-v1.0
+          name: "SysInventory Android App (v1.0)"
+          body: |
+            ### 📱 Aplicación Móvil Nativa de SysInventory para Android
+            Esta aplicación abre directamente el sistema en https://ivt.onrender.com/ como una app nativa en tu celular.
+            
+            #### 📥 ¿Cómo instalar en tu celular?
+            1. Descarga el archivo adjunto **`SysInventory.apk`** en tu teléfono Android.
+            2. Toca el archivo descargado para iniciar la instalación.
+            3. Si tu celular muestra la advertencia de *"Instalar aplicaciones de fuentes desconocidas"*, dale **Permitir** o **Instalar de todas formas**.
+            4. ¡Listo! Se creará el ícono **SysInventory** en tu pantalla de inicio.
+          files: dist-apk/SysInventory.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

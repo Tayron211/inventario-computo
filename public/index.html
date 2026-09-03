@@ -244,6 +244,11 @@
               <i class="fa-solid fa-file-excel"></i>
               <span>Excel</span>
             </a>
+
+            <a href="https://github.com/Tayron211/inventario-computo/releases/download/app-v1.0/SysInventory.apk" target="_blank" class="btn btn-outline-crimson" id="btnDownloadApk" title="Descargar APK para celular Android">
+              <i class="fa-brands fa-android"></i>
+              <span>App APK</span>
+            </a>
           </div>
         </div>
       </div>
@@ -1137,6 +1142,13 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=66.0"></script>
+  <script src="js/app.js?v=67.0"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').catch(function() {});
+      });
+    }
+  </script>
 </body>
 </html>
