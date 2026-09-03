@@ -447,6 +447,15 @@ function setTheme(theme) {
     metaAppleStatus.setAttribute('content', isLight ? 'default' : 'black-translucent');
   }
 
+  // Sincronizar dinámicamente con la App nativa Android (Barra de estado / Status Bar)
+  if (window.AndroidBridge && typeof window.AndroidBridge.onThemeChanged === 'function') {
+    try {
+      window.AndroidBridge.onThemeChanged(isLight, color);
+    } catch (e) {
+      console.warn('Error sincronizando tema con Android:', e);
+    }
+  }
+
   updateQrForTheme(theme);
 }
 

@@ -62,8 +62,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: app-v1.0
-          name: "SysInventory Android App (v1.0)"
+          tag_name: app-v1.1
+          name: "SysInventory Android App (v1.1)"
           body: |
             ### 📱 Aplicación Móvil Nativa de SysInventory para Android
             Esta aplicación abre directamente el sistema en https://ivt.onrender.com/ como una app nativa en tu celular.

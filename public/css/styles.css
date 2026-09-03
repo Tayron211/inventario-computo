@@ -5340,3 +5340,43 @@ tr.row-highlight-pulse {
   color: #475569;
   border-color: #cbd5e1;
 }
+
+/* ==============================================================================
+   OPTIMIZACIONES DE RENDIMIENTO Y FLUIDEZ MÓVIL (APK 60/120 FPS)
+   ============================================================================== */
+@media (max-width: 768px) {
+  /* Desactivar blur pesado animado continuo en móvil para evitar caídas de fotogramas */
+  .glow-orb {
+    filter: blur(40px) !important;
+    opacity: 0.25 !important;
+    animation: none !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  /* Transiciones optimizadas por GPU */
+  .modal-overlay,
+  .modal-card,
+  .page-view-container,
+  .metric-card,
+  .device-row,
+  .tab-btn,
+  .btn {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Desplazamiento táctil suave */
+  html, body, .main-content, .modal-scrollable {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Transición suave entre páginas */
+  .page-view-container {
+    transition: opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+
