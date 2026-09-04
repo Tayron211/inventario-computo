@@ -460,18 +460,29 @@ function applyThemeDOM(theme) {
 }
 
 function setTheme(theme) {
-  // Soporte de View Transitions API (120 FPS acelerado por GPU en pantallas modernas)
+  // Activar clase para suavizar la transición en todos los componentes
+  document.documentElement.classList.add('theme-transitioning');
+  clearTimeout(window.__themeTransTimer);
+
   if (document.startViewTransition && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    document.startViewTransition(() => {
+    try {
+      const transition = document.startViewTransition(() => {
+        applyThemeDOM(theme);
+      });
+      transition.finished.finally(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      });
+    } catch (e) {
       applyThemeDOM(theme);
-    });
+      window.__themeTransTimer = setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 160);
+    }
   } else {
-    document.documentElement.classList.add('theme-transitioning');
-    clearTimeout(window.__themeTransTimer);
+    applyThemeDOM(theme);
     window.__themeTransTimer = setTimeout(() => {
       document.documentElement.classList.remove('theme-transitioning');
-    }, 350);
-    applyThemeDOM(theme);
+    }, 160);
   }
 }
 

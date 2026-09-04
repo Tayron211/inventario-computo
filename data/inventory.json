@@ -1,5 +1,43 @@
 [
   {
+    "id": "item-1788471235598-4221",
+    "modelo": "Equipo en Red (PC-RED-126)",
+    "numero_serie": "MAC-9A570713F4CB",
+    "placa_base": "Placa Red Local",
+    "placa_base_completa": "Dispositivo Activo en Subred 192.168.95.0",
+    "placa_base_serial": "",
+    "tipo_equipo": "PC de Escritorio",
+    "fabricante": "Detectado en Red",
+    "procesador": "Hardware en Red (192.168.95.126)",
+    "ram_total": "Conectado en LAN",
+    "ram_detalles": [],
+    "almacenamiento_resumen": "",
+    "almacenamiento": [],
+    "monitores": [],
+    "perifericos": [],
+    "hostname": "PC-RED-126",
+    "usuario_actual": "Usuario en Red",
+    "creado_por": "Administrador",
+    "creado_por_nombre": "Administrador",
+    "creado_por_badge": "platinum",
+    "creado_por_rol": "admin",
+    "creado_por_categoria": "Platinum",
+    "modificado_por": "Administrador",
+    "modificado_por_badge": "platinum",
+    "modificado_por_categoria": "Platinum",
+    "sistema_operativo": "",
+    "ip_red": "192.168.95.126",
+    "mac_ethernet": "9A-57-07-13-F4-CB",
+    "mac_wifi": "N/A",
+    "mac_bluetooth": "N/A",
+    "mac_address": "9A-57-07-13-F4-CB",
+    "ubicacion": "Red Local (192.168.95.0/24)",
+    "estado": "Operativo",
+    "notas": "Registrado por escáner (Administrador)",
+    "fecha_escaneo": "2026-09-03 16:33:55",
+    "origen": "Escáner Batch/PowerShell"
+  },
+  {
     "id": "item-1788407234055-9003",
     "modelo": "Equipo en Red (PC-RED-202)",
     "numero_serie": "MAC-806036CCDA60",
@@ -34,7 +72,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner (Administrador)",
-    "fecha_escaneo": "2026-09-02 22:47:14",
+    "fecha_escaneo": "2026-09-03 20:03:15",
     "origen": "Escáner Batch/PowerShell"
   },
   {
@@ -224,7 +262,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner (Administrador)",
-    "fecha_escaneo": "2026-09-02 22:47:21",
+    "fecha_escaneo": "2026-09-03 20:03:22",
     "origen": "Escáner Batch/PowerShell"
   },
   {
@@ -300,7 +338,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner (Administrador)",
-    "fecha_escaneo": "2026-09-02 22:47:07",
+    "fecha_escaneo": "2026-09-03 20:03:08",
     "origen": "Escáner Batch/PowerShell"
   },
   {
@@ -447,7 +485,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner automático",
-    "fecha_escaneo": "2026-09-02 22:46:53",
+    "fecha_escaneo": "2026-09-03 20:21:42",
     "origen": "Escáner Batch/PowerShell"
   },
   {

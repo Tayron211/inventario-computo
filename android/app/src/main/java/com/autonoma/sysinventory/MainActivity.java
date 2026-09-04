@@ -39,10 +39,19 @@ public class MainActivity extends AppCompatActivity {
     private ValueCallback<Uri[]> fileUploadCallback;
     private WindowInsetsControllerCompat insetsController;
 
+    private android.widget.RelativeLayout splashOverlay;
+    private android.widget.ImageView splashLogo;
+    private boolean isSplashDismissed = false;
+    private boolean isCurrentThemeLight = false;
+    private long splashStartTime = 0;
+    private static final long MIN_SPLASH_TIME = 850;
+    private static final long MAX_SPLASH_TIME = 3500;
+
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        splashStartTime = System.currentTimeMillis();
 
         // 1. Integración Edge-to-Edge total: elimina la barra negra y la raya divisoria
         Window window = getWindow();
@@ -61,14 +70,34 @@ public class MainActivity extends AppCompatActivity {
 
         insetsController = WindowCompat.getInsetsController(window, window.getDecorView());
         if (insetsController != null) {
-            insetsController.setAppearanceLightStatusBars(true);
-            insetsController.setAppearanceLightNavigationBars(true);
+            // Inicialmente tema oscuro para coincidir con la splash screen
+            insetsController.setAppearanceLightStatusBars(false);
+            insetsController.setAppearanceLightNavigationBars(false);
         }
 
         setContentView(R.layout.activity_main);
 
+        splashOverlay = findViewById(R.id.splashOverlay);
+        splashLogo = findViewById(R.id.splashLogo);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         webView = findViewById(R.id.webView);
+
+        // Animación de entrada suave del logo en la Splash Screen
+        if (splashLogo != null) {
+            splashLogo.setScaleX(0.85f);
+            splashLogo.setScaleY(0.85f);
+            splashLogo.setAlpha(0f);
+            splashLogo.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .alpha(1.0f)
+                    .setDuration(450)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
+        }
+
+        // Timer de seguridad: si la red demora, retirar splash tras MAX_SPLASH_TIME
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this::dismissSplashScreen, MAX_SPLASH_TIME);
 
         // Aceleración por hardware GPU dedicada para 120 FPS
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -158,11 +187,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void dismissSplashScreen() {
+        if (isSplashDismissed || isFinishing()) return;
+        isSplashDismissed = true;
+
+        if (splashOverlay != null) {
+            splashOverlay.animate()
+                    .alpha(0f)
+                    .scaleX(1.04f)
+                    .scaleY(1.04f)
+                    .setDuration(340)
+                    .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
+                    .withEndAction(() -> {
+                        splashOverlay.setVisibility(View.GONE);
+                        int bgColor = isCurrentThemeLight ? Color.WHITE : Color.parseColor("#08080C");
+                        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(bgColor));
+                    })
+                    .start();
+        }
+    }
+
     public void updateStatusBarTheme(boolean isLight) {
+        isCurrentThemeLight = isLight;
         if (insetsController != null) {
             insetsController.setAppearanceLightStatusBars(isLight);
             insetsController.setAppearanceLightNavigationBars(isLight);
         }
+        try {
+            int bgColor = isLight ? Color.parseColor("#F8FAFC") : Color.parseColor("#08080C");
+            getWindow().getDecorView().setBackgroundColor(bgColor);
+            if (webView != null) {
+                webView.setBackgroundColor(bgColor);
+            }
+        } catch (Exception ignored) {}
     }
 
     /**
@@ -268,6 +325,11 @@ public class MainActivity extends AppCompatActivity {
                             updateStatusBarTheme(isLight);
                         }
                 );
+
+                // Despedir la Splash Screen con suavidad tras cumplir el tiempo mínimo de visualización
+                long elapsed = System.currentTimeMillis() - splashStartTime;
+                long delay = Math.max(0, MIN_SPLASH_TIME - elapsed);
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(MainActivity.this::dismissSplashScreen, delay);
             }
         });
 

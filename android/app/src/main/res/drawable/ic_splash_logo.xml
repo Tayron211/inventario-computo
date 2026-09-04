@@ -1,0 +1,75 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+
+    <!-- Outer Glow / Background Chip Base (Crimson) -->
+    <path
+        android:fillColor="#DC143C"
+        android:pathData="M18,4 h28 c7.73,0 14,6.27 14,14 v28 c0,7.73 -6.27,14 -14,14 H18 c-7.73,0 -14,-6.27 -14,-14 V18 c0,-7.73 6.27,-14 14,-14 z" />
+
+    <!-- Top Glow Highlight -->
+    <path
+        android:fillColor="#FF2D55"
+        android:pathData="M18,5 h28 c7.18,0 13,5.82 13,13 v14 c0,0 -12,-8 -27,-8 s-27,8 -27,8 V18 c0,-7.18 5.82,-13 13,-13 z" />
+
+    <!-- Outer Border Stroke -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.45"
+        android:strokeWidth="1.5"
+        android:pathData="M18,4.75 h28 c7.32,0 13.25,5.93 13.25,13.25 v28 c0,7.32 -5.93,13.25 -13.25,13.25 H18 c-7.32,0 -13.25,-5.93 -13.25,-13.25 V18 c0,-7.32 5.93,-13.25 13.25,-13.25 z" />
+
+    <!-- Inner Core Plate (Dark Obsidian) -->
+    <path
+        android:fillColor="#0E0508"
+        android:strokeColor="#FF2D55"
+        android:strokeWidth="1.8"
+        android:pathData="M22,14 h20 c4.42,0 8,3.58 8,8 v20 c0,4.42 -3.58,8 -8,8 H22 c-4.42,0 -8,-3.58 -8,-8 V22 c0,-4.42 3.58,-8 8,-8 z" />
+
+    <!-- Microchip Central Crystal Core -->
+    <path
+        android:fillColor="#DC143C"
+        android:pathData="M27,23 h10 c2.21,0 4,1.79 4,4 v10 c0,2.21 -1.79,4 -4,4 H27 c-2.21,0 -4,-1.79 -4,-4 V27 c0,-2.21 1.79,-4 4,-4 z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28.5,25.5 h7 c1.66,0 3,1.34 3,3 v7 c0,1.66 -1.34,3 -3,3 h-7 c-1.66,0 -3,-1.34 -3,-3 v-7 c0,-1.66 1.34,-3 3,-3 z" />
+
+    <!-- Chip Core Cross Emblem -->
+    <path
+        android:strokeColor="#DC143C"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M28,28 L36,36 M36,28 L28,36" />
+
+    <!-- Circuit Connection Pins (Top) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M22,7 L22,14 M32,7 L32,14 M42,7 L42,14" />
+
+    <!-- Circuit Connection Pins (Bottom) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M22,50 L22,57 M32,50 L32,57 M42,50 L42,57" />
+
+    <!-- Circuit Connection Pins (Left) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M7,22 L14,22 M7,32 L14,32 M7,42 L14,42" />
+
+    <!-- Circuit Connection Pins (Right) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M50,22 L57,22 M50,32 L57,32 M50,42 L57,42" />
+
+</vector>

@@ -1,13 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swipeRefreshLayout"
+    android:id="@+id/mainRootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg">
 
-    <WebView
-        android:id="@+id/webView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_bg" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Splash Screen Nativa con Logo y Nombre de la App -->
+    <RelativeLayout
+        android:id="@+id/splashOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_splash"
+        android:clickable="true"
+        android:focusable="true">
+
+        <!-- Contenedor Central -->
+        <LinearLayout
+            android:id="@+id/splashCenterGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Logo con diseño Chip Carmesí & Circuitos -->
+            <ImageView
+                android:id="@+id/splashLogo"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:src="@drawable/ic_splash_logo"
+                android:contentDescription="@string/app_name" />
+
+            <!-- Nombre de la App -->
+            <TextView
+                android:id="@+id/splashTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.04"
+                android:text="SysInventory"
+                android:textColor="#FFFFFF"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <!-- Subtítulo de la App -->
+            <TextView
+                android:id="@+id/splashSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="sans-serif"
+                android:letterSpacing="0.14"
+                android:text="SISTEMA DE INVENTARIO DE CÓMPUTO"
+                android:textColor="#DC143C"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <!-- Indicador de Carga Minimalista Carmesí -->
+            <ProgressBar
+                android:id="@+id/splashLoading"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginTop="32dp"
+                android:indeterminate="true"
+                android:indeterminateTint="#DC143C" />
+
+        </LinearLayout>
+
+        <!-- Pie de página / Versión -->
+        <TextView
+            android:id="@+id/splashFooter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="32dp"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="0.06"
+            android:text="v1.8.0 • Universidad Autónoma"
+            android:textColor="#64748B"
+            android:textSize="12sp" />
+
+    </RelativeLayout>
+
+</FrameLayout>

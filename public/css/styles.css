@@ -50,6 +50,61 @@
 }
 
 /* ==============================================================================
+   TRANSICIÓN DE TEMA ULTRA FLUIDA E IMPERCEPTIBLE (120 FPS / ZERO FLICKER)
+   ============================================================================== */
+::view-transition-group(root) {
+  animation-duration: 0.16s;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.16s;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation-name: theme-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: theme-fade-in;
+}
+
+@keyframes theme-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes theme-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+html.theme-transitioning,
+html.theme-transitioning body,
+html.theme-transitioning .app-header,
+html.theme-transitioning .app-nav-tabs,
+html.theme-transitioning .stat-card,
+html.theme-transitioning .table-container,
+html.theme-transitioning .device-table,
+html.theme-transitioning .device-table th,
+html.theme-transitioning .device-table td,
+html.theme-transitioning .modal-card,
+html.theme-transitioning .modal-header-styled,
+html.theme-transitioning .modal-body,
+html.theme-transitioning .btn,
+html.theme-transitioning .search-box-input,
+html.theme-transitioning .filter-select,
+html.theme-transitioning .network-badge,
+html.theme-transitioning .btn-theme-toggle {
+  transition: background-color 0.16s cubic-bezier(0.25, 1, 0.5, 1),
+              border-color 0.16s cubic-bezier(0.25, 1, 0.5, 1),
+              color 0.16s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.16s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* ==============================================================================
    TEMA CLARO (MODO CLARO) - ALTA LEGIBILIDAD, CONTRASTE ELEGANTE Y PROFUNDIDAD
    ============================================================================== */
 [data-theme="light"],
