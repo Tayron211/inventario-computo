@@ -79,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
 
         splashOverlay = findViewById(R.id.splashOverlay);
         splashLogo = findViewById(R.id.splashLogo);
+        android.widget.TextView splashFooter = findViewById(R.id.splashFooter);
+        if (splashFooter != null) {
+            splashFooter.setText("v" + BuildConfig.VERSION_NAME + " • Universidad Autónoma");
+        }
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         webView = findViewById(R.id.webView);
 
@@ -228,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
     public void triggerDownload(String url) {
         try {
             if (url == null || url.trim().isEmpty()) {
-                url = TARGET_URL + "SysInventory.apk";
+                url = TARGET_URL + "download-apk?v=" + BuildConfig.VERSION_NAME;
             }
             if (url.startsWith("/")) {
                 url = TARGET_URL + url.substring(1);
@@ -236,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            Toast.makeText(this, "Descargando última versión de SysInventory...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Descargando SysInventory v" + BuildConfig.VERSION_NAME + "...", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "No se pudo iniciar la descarga del APK", Toast.LENGTH_SHORT).show();
         }

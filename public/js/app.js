@@ -492,17 +492,17 @@ function initEventListeners() {
   // Inicializar gestos táctiles Swipe en ventanas/modales
   initModalSwipeGestures();
 
-  // Soporte directo para descargar APK en celulares y app nativa
+  // Soporte directo para descargar APK en celulares y app nativa (v2.0.0)
   const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory.apk"], a[href*="download-apk"]');
   apkDownloadBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const targetUrl = window.location.origin + '/SysInventory.apk';
+      const targetUrl = window.location.origin + '/download-apk?v=2.0.0';
       if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
         e.preventDefault();
         window.AndroidBridge.downloadApk(targetUrl);
-        showToast('Iniciando descarga de la última versión del APK...', 'info');
+        showToast('Iniciando descarga de SysInventory v2.0.0...', 'info');
       } else {
-        showToast('Descargando SysInventory.apk...', 'success');
+        showToast('Descargando SysInventory-v2.0.0.apk...', 'success');
       }
     });
   });

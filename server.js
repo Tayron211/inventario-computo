@@ -34,6 +34,21 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.urlencoded({ extended: true }));
+
+// Endpoint prioritario para descargar la App Android (.APK) siempre fresca con no-cache y nombre de versión claro
+app.get(['/SysInventory.apk', '/sysinventory.apk', '/SysInventory-v2.0.0.apk', '/apk', '/app', '/download-apk', '/api/download-apk'], (req, res) => {
+  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
+  const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
+  if (fs.existsSync(localApk)) {
+    return res.download(localApk, 'SysInventory-v2.0.0.apk');
+  }
+  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v2.0/SysInventory.apk');
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
   etag: false,
   maxAge: 0,
@@ -667,15 +682,7 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
   }
 });
 
-// Endpoint para descargar la App Android (.APK) de forma garantizada en mayúsculas/minúsculas
-app.get(['/SysInventory.apk', '/sysinventory.apk', '/apk', '/app', '/download-apk', '/api/download-apk'], (req, res) => {
-  const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
-  if (fs.existsSync(localApk)) {
-    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-    return res.download(localApk, 'SysInventory.apk');
-  }
-  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v1.9/SysInventory.apk');
-});
+
 
 // Endpoint para descargar el archivo .BAT personalizado por usuario con permisos de Administrador por defecto
 app.get(['/api/download-batch', '/download-batch', '/escanear.bat'], (req, res) => {
