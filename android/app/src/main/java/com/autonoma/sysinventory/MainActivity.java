@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         splashLogo = findViewById(R.id.splashLogo);
         android.widget.TextView splashFooter = findViewById(R.id.splashFooter);
         if (splashFooter != null) {
-            splashFooter.setText("v" + BuildConfig.VERSION_NAME + " • Universidad Autónoma");
+            splashFooter.setText("v" + getAppVersionName() + " • Universidad Autónoma");
         }
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         webView = findViewById(R.id.webView);
@@ -226,13 +226,22 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
     }
 
+    private String getAppVersionName() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "2.0.0";
+        }
+    }
+
     /**
      * Dispara la descarga del APK directamente a través del gestor del sistema / navegador
      */
     public void triggerDownload(String url) {
         try {
+            String version = getAppVersionName();
             if (url == null || url.trim().isEmpty()) {
-                url = TARGET_URL + "download-apk?v=" + BuildConfig.VERSION_NAME;
+                url = TARGET_URL + "download-apk?v=" + version;
             }
             if (url.startsWith("/")) {
                 url = TARGET_URL + url.substring(1);
@@ -240,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            Toast.makeText(this, "Descargando SysInventory v" + BuildConfig.VERSION_NAME + "...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Descargando SysInventory v" + version + "...", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "No se pudo iniciar la descarga del APK", Toast.LENGTH_SHORT).show();
         }
