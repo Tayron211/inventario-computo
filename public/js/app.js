@@ -481,6 +481,21 @@ function initEventListeners() {
   // Inicializar Navegación Multi-Página
   initMultiPageNav();
 
+  // Soporte directo para descargar APK en celulares y app nativa
+  const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory.apk"], a[href*="download-apk"]');
+  apkDownloadBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetUrl = window.location.origin + '/SysInventory.apk';
+      if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
+        e.preventDefault();
+        window.AndroidBridge.downloadApk(targetUrl);
+        showToast('Iniciando descarga de la última versión del APK...', 'info');
+      } else {
+        showToast('Descargando SysInventory.apk...', 'success');
+      }
+    });
+  });
+
   // Búsqueda en tiempo real
   searchInput.addEventListener('input', (e) => {
     currentSearchQuery = e.target.value.toLowerCase().trim();

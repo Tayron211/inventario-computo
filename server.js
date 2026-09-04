@@ -671,9 +671,10 @@ app.get(['/scan', '/agent.ps1', '/api/script'], (req, res) => {
 app.get(['/SysInventory.apk', '/sysinventory.apk', '/apk', '/app', '/download-apk', '/api/download-apk'], (req, res) => {
   const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
   if (fs.existsSync(localApk)) {
+    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
     return res.download(localApk, 'SysInventory.apk');
   }
-  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v1.4/SysInventory.apk');
+  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v1.5/SysInventory.apk');
 });
 
 // Endpoint para descargar el archivo .BAT personalizado por usuario con permisos de Administrador por defecto

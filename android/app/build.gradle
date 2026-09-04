@@ -10,21 +10,39 @@ android {
         applicationId "com.autonoma.sysinventory"
         minSdk 24
         targetSdk 34
-        versionCode 5
-        versionName "1.4.0"
+        versionCode 6
+        versionName "1.5.0"
+    }
+
+    signingConfigs {
+        release {
+            if (file("release.jks").exists()) {
+                storeFile file("release.jks")
+                storePassword "sysinventory2026"
+                keyAlias "sysinventory"
+                keyPassword "sysinventory2026"
+                v1SigningEnabled true
+                v2SigningEnabled true
+            }
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            debuggable false
+            if (file("release.jks").exists()) {
+                signingConfig signingConfigs.release
+            }
         }
         debug {
             debuggable true
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

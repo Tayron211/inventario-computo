@@ -2,19 +2,23 @@ name: Compilar APK SysInventory
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+    paths:
+      - 'android/**'
+      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   build-apk:
     name: Compilar APK Android
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
-      - name: Descargar codigo del repositorio
+      - name: Clonar repositorio
         uses: actions/checkout@v4
 
       - name: Configurar JDK 17
@@ -31,10 +35,23 @@ jobs:
         with:
           gradle-version: '8.4'
 
-      - name: Compilar APK
+      - name: Generar Keystore de Firma Release Oficial
+        run: |
+          cd android/app
+          keytool -genkeypair -v \
+            -keystore release.jks \
+            -alias sysinventory \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass sysinventory2026 \
+            -keypass sysinventory2026 \
+            -dname "CN=SysInventory Produccion, OU=Sistemas, O=Autonoma, L=Lima, ST=Lima, C=PE"
+
+      - name: Compilar APK Release Firmada
         run: |
           cd android
-          gradle :app:assembleDebug --stacktrace --no-daemon 2>&1 | tee ../build_output.log
+          gradle :app:assembleRelease --stacktrace --no-daemon 2>&1 | tee ../build_output.log
           BUILD_STATUS=${PIPESTATUS[0]}
           if [ $BUILD_STATUS -ne 0 ]; then
             echo "==================== LOG DE ERROR ===================="
@@ -42,7 +59,7 @@ jobs:
             exit $BUILD_STATUS
           fi
           mkdir -p ../dist-apk
-          cp app/build/outputs/apk/debug/app-debug.apk ../dist-apk/SysInventory.apk
+          cp app/build/outputs/apk/release/app-release.apk ../dist-apk/SysInventory.apk
 
       - name: Subir log en caso de error
         if: failure()
@@ -62,17 +79,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: app-v1.4
-          name: "SysInventory Android App (v1.4 - Ventanas Compactas y Transicion Suave)"
+          tag_name: app-v1.5
+          name: "SysInventory Android App (v1.5 - Firma Limpia de Produccion)"
           body: |
-            ### 📱 Aplicación Móvil Nativa de SysInventory para Android
-            Esta aplicación abre directamente el sistema en https://ivt.onrender.com/ como una app nativa en tu celular.
+            ### 📱 Aplicación Móvil Oficial de SysInventory para Android
+            Esta versión está compilada en modo Release y firmada oficialmente para evitar falsos positivos de Google Play Protect.
             
-            #### 📥 ¿Cómo instalar en tu celular?
+            #### 📥 Instalación:
             1. Descarga el archivo adjunto **`SysInventory.apk`** en tu teléfono Android.
             2. Toca el archivo descargado para iniciar la instalación.
-            3. Si tu celular muestra la advertencia de *"Instalar aplicaciones de fuentes desconocidas"*, dale **Permitir** o **Instalar de todas formas**.
-            4. ¡Listo! Se creará el ícono **SysInventory** en tu pantalla de inicio.
-          files: dist-apk/SysInventory.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            3. ¡Listo! Se instalará limpiamente en tu teléfono.
+          files: |
+            dist-apk/SysInventory.apk

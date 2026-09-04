@@ -12,6 +12,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
@@ -47,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // 1. Integración Edge-to-Edge total: elimina la barra negra y la raya divisoria
-        // La app y la parte superior forman una sola pieza continua e inmersiva
         Window window = getWindow();
         WindowCompat.setDecorFitsSystemWindows(window, false);
 
@@ -99,22 +99,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Puente JavaScript para adaptar los íconos de la barra de estado
-     * al tema Claro u Oscuro en tiempo real de forma instantánea y fluida.
+     * Puente JavaScript para interactuar con la app nativa:
+     * - Tema de la barra de estado
+     * - Descarga directa del APK de actualización
      */
     public class AndroidBridgeInterface {
         @JavascriptInterface
         public void onThemeChanged(final boolean isLight, final String hexColor) {
             runOnUiThread(() -> updateStatusBarTheme(isLight));
         }
+
+        @JavascriptInterface
+        public void downloadApk(final String downloadUrl) {
+            runOnUiThread(() -> triggerDownload(downloadUrl));
+        }
     }
 
     public void updateStatusBarTheme(boolean isLight) {
         if (insetsController != null) {
-            // En modo claro: íconos oscuros sobre el fondo claro de la app
-            // En modo oscuro: íconos blancos sobre el fondo oscuro de la app
             insetsController.setAppearanceLightStatusBars(isLight);
             insetsController.setAppearanceLightNavigationBars(isLight);
+        }
+    }
+
+    /**
+     * Dispara la descarga del APK directamente a través del gestor del sistema / navegador
+     */
+    public void triggerDownload(String url) {
+        try {
+            if (url == null || url.trim().isEmpty()) {
+                url = TARGET_URL + "SysInventory.apk";
+            }
+            if (url.startsWith("/")) {
+                url = TARGET_URL + url.substring(1);
+            }
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            Toast.makeText(this, "Descargando última versión de SysInventory...", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "No se pudo iniciar la descarga del APK", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -140,8 +164,16 @@ public class MainActivity extends AppCompatActivity {
             settings.setOffscreenPreRaster(true);
         }
 
-        // Conectar puente de JavaScript para sincronización de tema en vivo
+        // Conectar puente de JavaScript para sincronización de tema y descargas
         webView.addJavascriptInterface(new AndroidBridgeInterface(), "AndroidBridge");
+
+        // Escuchador de descargas nativo: permite descargar APKs directamente al tocarlos
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                triggerDownload(url);
+            }
+        });
 
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -159,6 +191,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private boolean handleUrl(String url) {
+                // Interceptar enlaces de descarga de APKs para abrirlos en el gestor de descargas
+                if (url.endsWith(".apk") || url.contains("SysInventory.apk") || url.contains("/download-apk") || url.contains("/apk")) {
+                    triggerDownload(url);
+                    return true;
+                }
+
                 if (url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("whatsapp:") || url.startsWith("intent:")) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

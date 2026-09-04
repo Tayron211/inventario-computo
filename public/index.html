@@ -60,7 +60,7 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=71.0">
+  <link rel="stylesheet" href="css/styles.css?v=72.0">
 </head>
 <body>
   <script>
@@ -249,7 +249,7 @@
               <span>Excel</span>
             </a>
 
-            <a href="/SysInventory.apk" download="SysInventory.apk" class="btn btn-outline-crimson" id="btnDownloadApk" title="Descargar APK para celular Android">
+            <a href="/SysInventory.apk" download="SysInventory.apk" class="btn btn-outline-crimson" id="btnDownloadApk" title="Descargar APK para celular Android" target="_blank" rel="noopener">
               <i class="fa-brands fa-android"></i>
               <span>App APK</span>
             </a>
@@ -739,7 +739,7 @@
             <button class="btn-copy-ip" id="btnCopyUrl" title="Copiar URL"><i class="fa-regular fa-copy"></i> Copiar</button>
           </div>
           <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <a href="/SysInventory.apk" download="SysInventory.apk" class="btn btn-crimson w-100" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <a href="/SysInventory.apk" download="SysInventory.apk" id="btnDownloadApkModal" class="btn btn-crimson w-100" style="display: flex; align-items: center; justify-content: center; gap: 8px;" target="_blank" rel="noopener">
               <i class="fa-brands fa-android fa-lg"></i>
               <span>Descargar App (.APK) para Celular</span>
             </a>
@@ -1152,7 +1152,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=71.0"></script>
+  <script src="js/app.js?v=72.0"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
