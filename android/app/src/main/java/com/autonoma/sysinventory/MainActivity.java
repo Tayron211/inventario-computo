@@ -1,13 +1,13 @@
 package com.autonoma.sysinventory;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -23,9 +23,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -34,7 +32,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TARGET_URL = "https://ivt.onrender.com/";
-    private static final int PERMISSION_REQUEST_CAMERA = 1001;
     private static final int FILE_CHOOSER_REQUEST_CODE = 1002;
 
     private WebView webView;
@@ -56,7 +53,11 @@ public class MainActivity extends AppCompatActivity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
+            window.setFormat(PixelFormat.RGBA_8888);
         }
+
+        // 2. Activar tasa de refresco ultra fluida a 120 Hz en pantallas compatibles
+        setupHighRefreshRate();
 
         insetsController = WindowCompat.getInsetsController(window, window.getDecorView());
         if (insetsController != null) {
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         webView = findViewById(R.id.webView);
 
-        // Aceleración por hardware GPU para transiciones ultra fluidas (60/120 FPS)
+        // Aceleración por hardware GPU dedicada para 120 FPS
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
         // Configurar colores de la barra de actualización
@@ -79,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         );
 
         setupWebView();
-        checkCameraPermission();
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
             webView.reload();
@@ -96,6 +96,32 @@ public class MainActivity extends AppCompatActivity {
 
         // Cargar la aplicación web en Render
         webView.loadUrl(TARGET_URL);
+    }
+
+    /**
+     * Activa el modo de 120 Hz / alta tasa de refresco si el panel del teléfono lo soporta
+     */
+    private void setupHighRefreshRate() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            try {
+                Window window = getWindow();
+                Display display = getWindowManager().getDefaultDisplay();
+                Display.Mode[] modes = display.getSupportedModes();
+                Display.Mode highestMode = null;
+                float maxRate = 60.0f;
+                for (Display.Mode mode : modes) {
+                    if (mode.getRefreshRate() > maxRate) {
+                        maxRate = mode.getRefreshRate();
+                        highestMode = mode;
+                    }
+                }
+                if (highestMode != null) {
+                    WindowManager.LayoutParams params = window.getAttributes();
+                    params.preferredDisplayModeId = highestMode.getModeId();
+                    window.setAttributes(params);
+                }
+            } catch (Exception ignored) {}
+        }
     }
 
     /**
@@ -148,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setAllowFileAccess(true);
+        settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
@@ -157,10 +183,10 @@ public class MainActivity extends AppCompatActivity {
         settings.setDisplayZoomControls(false);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // Optimización de rendimiento para animaciones y transiciones ultra fluidas
+        // Optimización de rendimiento para animaciones y transiciones ultra fluidas a 120 FPS
         settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
             settings.setOffscreenPreRaster(true);
         }
 
@@ -197,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
 
-                if (url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("whatsapp:") || url.startsWith("intent:")) {
+                if (url.startsWith("tel:") || url.startsWith("mailto:") || url.startsWith("whatsapp:")) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                         startActivity(intent);
@@ -229,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
-            // Otorgar permiso automático a la cámara web para escaneo de código de barras / QR
+            // Otorgar permiso a la cámara bajo demanda (únicamente cuando el usuario abre el escáner)
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 MainActivity.this.runOnUiThread(() -> {
@@ -262,22 +288,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-    }
-
-    private void checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_REQUEST_CAMERA) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permiso otorgado
-            }
-        }
     }
 
     @Override

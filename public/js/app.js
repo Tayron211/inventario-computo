@@ -409,15 +409,8 @@ function initTheme() {
   }
 }
 
-function setTheme(theme) {
+function applyThemeDOM(theme) {
   const isLight = theme === 'light';
-
-  // Activar transición ultra suave durante el cambio de tema (320ms)
-  document.documentElement.classList.add('theme-transitioning');
-  clearTimeout(window.__themeTransTimer);
-  window.__themeTransTimer = setTimeout(() => {
-    document.documentElement.classList.remove('theme-transitioning');
-  }, 350);
 
   document.documentElement.setAttribute('data-theme', theme);
   document.documentElement.style.colorScheme = isLight ? 'light' : 'dark';
@@ -464,6 +457,22 @@ function setTheme(theme) {
   }
 
   updateQrForTheme(theme);
+}
+
+function setTheme(theme) {
+  // Soporte de View Transitions API (120 FPS acelerado por GPU en pantallas modernas)
+  if (document.startViewTransition && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    document.startViewTransition(() => {
+      applyThemeDOM(theme);
+    });
+  } else {
+    document.documentElement.classList.add('theme-transitioning');
+    clearTimeout(window.__themeTransTimer);
+    window.__themeTransTimer = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 350);
+    applyThemeDOM(theme);
+  }
 }
 
 function updateQrForTheme(theme) {

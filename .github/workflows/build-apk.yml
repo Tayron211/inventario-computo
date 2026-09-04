@@ -38,15 +38,17 @@ jobs:
       - name: Generar Keystore de Firma Release Oficial
         run: |
           cd android/app
+          rm -f release.jks
           keytool -genkeypair -v \
             -keystore release.jks \
             -alias sysinventory \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
+            -storetype PKCS12 \
             -storepass sysinventory2026 \
             -keypass sysinventory2026 \
-            -dname "CN=SysInventory Produccion, OU=Sistemas, O=Autonoma, L=Lima, ST=Lima, C=PE"
+            -dname "CN=SysInventory, OU=Sistemas, O=Autonoma, L=Lima, ST=Lima, C=PE"
 
       - name: Compilar APK Release Firmada
         run: |
@@ -79,8 +81,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: app-v1.5
-          name: "SysInventory Android App (v1.5 - Firma Limpia de Produccion)"
+          tag_name: app-v1.6
+          name: "SysInventory Android App (v1.6 - 120 FPS y Transicion Sedosa)"
           body: |
             ### 📱 Aplicación Móvil Oficial de SysInventory para Android
             Esta versión está compilada en modo Release y firmada oficialmente para evitar falsos positivos de Google Play Protect.
