@@ -1585,11 +1585,18 @@ const HARDWARE_MODELS_CATALOG = [
   { pattern: /arc\s*a770|arc\s*a750|arc\s*a580|arc\s*a380|arc\s*b580/i, brand: 'Intel Arc', type: 'Tarjeta de Video (GPU)', cpu: 'Intel Alchemist / Battlemage Xe-HPG Architecture (8-32 Xe Cores, Ray Tracing)', ram: '6 GB / 8 GB / 12 GB / 16 GB GDDR6 (96-bit a 256-bit)', storage: 'PCIe 4.0 x16 / x8 (75W-225W TDP)', motherboard: 'Tarjeta Gráfica Dedicada Intel (3x DP 2.0, 1x HDMI 2.1)' },
 
   // ==========================================
-  // MEMORIAS RAM INDEPENDIENTES (DDR5, DDR4, DDR3)
+  // MEMORIAS RAM INDEPENDIENTES (DDR5, DDR4, DDR3 - KINGSTON, CORSAIR, G.SKILL, CRUCIAL, ADATA, ETC.)
   // ==========================================
-  { pattern: /(fury|vengeance|trident\s*z|t-force|xpg|crucial|ballistix|kingston|corsair|g\.skill).*(ddr5|6000|5600|5200|4800|6400|7200)/i, brand: 'Memoria RAM', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB / 32 GB / 64 GB DDR5 (4800MHz - 7200MHz XMP 3.0 / AMD EXPO)', storage: 'On-Die ECC Integrado (1.1V - 1.4V)', motherboard: 'Formato DIMM 288-pin (Compatible Placas Intel LGA1700/1851 & AMD AM5)' },
-  { pattern: /(fury|vengeance|ripjaws|t-force|xpg|crucial|ballistix|hyperx|kingston|corsair).*(ddr4|3200|2666|2400|3000|3600|4000)/i, brand: 'Memoria RAM', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '8 GB / 16 GB / 32 GB DDR4 (2400MHz - 3600MHz CL16/CL18 XMP 2.0)', storage: 'Disipador Térmico de Aluminio (1.2V - 1.35V)', motherboard: 'Formato DIMM 288-pin (Compatible Placas Intel LGA1200/1151 & AMD AM4)' },
+  { pattern: /(hyperx|kingston\s*hyperx|fury\s*beast|hyperx\s*fury|valueram|renegade)/i, brand: 'Kingston', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB DDR4 (3200MHz) / 32 GB DDR5 (5600MHz) HyperX / Fury', storage: 'Disipador Térmico de Aluminio (Intel XMP / AMD EXPO)', motherboard: 'Formato DIMM 288-pin Desktop / SO-DIMM Laptop' },
+  { pattern: /(vengeance|dominator|corsair\s*ram)/i, brand: 'Corsair', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB / 32 GB DDR4 / DDR5 Dual Channel', storage: 'Disipador Térmico de Aluminio Anodizado', motherboard: 'DIMM 288-pin (Intel XMP Ready)' },
+  { pattern: /(trident\s*z|ripjaws|flare\s*x|g\.?skill)/i, brand: 'G.Skill', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB / 32 GB DDR4 (3600MHz) / DDR5 (6000MHz)', storage: 'Disipador Térmico Overclocking', motherboard: 'DIMM 288-pin' },
+  { pattern: /(crucial\s*ram|crucial\s*pro|crucial\s*ddr|ballistix)/i, brand: 'Crucial', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '8 GB / 16 GB / 32 GB DDR4 (3200MHz) / DDR5 (4800MHz)', storage: 'Micron ICs Estándar JEDEC', motherboard: 'DIMM Desktop / SO-DIMM Laptop' },
+  { pattern: /(xpg\s*spectrix|xpg\s*lancer|xpg\s*ram|adata\s*ram)/i, brand: 'Adata XPG', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB DDR4 / DDR5 RGB', storage: 'Disipador Térmico con Iluminación RGB', motherboard: 'DIMM 288-pin' },
+  { pattern: /(t-force|t\s*force|teamgroup\s*ram)/i, brand: 'TeamGroup', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB / 32 GB DDR4 / DDR5', storage: 'Disipador Térmico Vulcan / Delta', motherboard: 'DIMM 288-pin' },
+  { pattern: /(fury|vengeance|trident\s*z|t-force|xpg|crucial|ballistix|kingston|corsair|g\.skill).*(ddr5|6000|5600|5200|4800|6400|7200)/i, brand: 'Kingston', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '16 GB / 32 GB / 64 GB DDR5 (4800MHz - 7200MHz XMP 3.0 / AMD EXPO)', storage: 'On-Die ECC Integrado (1.1V - 1.4V)', motherboard: 'Formato DIMM 288-pin (Compatible Placas Intel LGA1700/1851 & AMD AM5)' },
+  { pattern: /(fury|vengeance|ripjaws|t-force|xpg|crucial|ballistix|hyperx|kingston|corsair).*(ddr4|3200|2666|2400|3000|3600|4000)/i, brand: 'Kingston', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '8 GB / 16 GB / 32 GB DDR4 (2400MHz - 3600MHz CL16/CL18 XMP 2.0)', storage: 'Disipador Térmico de Aluminio (1.2V - 1.35V)', motherboard: 'Formato DIMM 288-pin (Compatible Placas Intel LGA1200/1151 & AMD AM4)' },
   { pattern: /(ddr3|1600mhz|1333mhz|1866mhz)/i, brand: 'Memoria RAM', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria RAM)', ram: '4 GB / 8 GB DDR3 / DDR3L (1333MHz - 1600MHz)', storage: '1.5V / 1.35V Bajo Voltaje', motherboard: 'Formato DIMM 240-pin / SO-DIMM 204-pin' },
+  { pattern: /(memoria\s*ram|modulo\s*ram|\bram\b.*\bddr|\bddr.*\bram\b)/i, brand: 'Genérico', type: 'Memoria RAM', cpu: 'N/A (Módulo de Memoria)', ram: '16 GB DDR4 (3200MHz) / DDR5', storage: 'Disipador Térmico Estándar', motherboard: 'DIMM 288-pin' },
 
   // ==========================================
   // DISCOS Y ALMACENAMIENTO INDEPENDIENTE (SSD NVMe M.2, SSD SATA, HDD)
@@ -1609,9 +1616,9 @@ const HARDWARE_MODELS_CATALOG = [
   { pattern: /(i7[- ]?[67]700|i5[- ]?[67]400|i3[- ]?[67]100)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 6ta/7ma Gen Skylake / Kaby Lake (2 a 4 Núcleos, 4/8 Hilos)', ram: 'Soporte DDR4 / DDR3L', storage: 'Intel Smart Cache 3MB a 8MB', motherboard: 'Socket Intel LGA 1151 v1 (Chipsets H110, B150, B250, Z170, Z270)' },
   { pattern: /(i7[- ]?4790|i5[- ]?4590|i5[- ]?4460|i3[- ]?4160)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 4ta Gen Haswell Refresh (2 a 4 Núcleos, hasta 4.0GHz)', ram: 'Soporte Dual Channel DDR3-1600', storage: 'Intel Smart Cache 3MB a 8MB', motherboard: 'Socket Intel LGA 1150 (Chipsets H81, B85, H87, Z97)' },
   { pattern: /(i7[- ]?3770|i5[- ]?3470|i7[- ]?2600|i5[- ]?2400|core\s*2\s*quad)/i, brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core 2da/3ra Gen Sandy Bridge / Ivy Bridge (2 a 4 Núcleos @ 3.40GHz)', ram: 'Soporte DDR3-1333 / 1600', storage: 'Intel Smart Cache 6MB a 8MB', motherboard: 'Socket Intel LGA 1155 (Chipsets H61, B75, Z68, Z77)' },
-  { pattern: /(ryzen\s*9\s*9950x|ryzen\s*9\s*7950x|ryzen\s*7\s*9800x3d|ryzen\s*7\s*7800x3d|ryzen\s*7\s*7700|ryzen\s*5\s*7600)/i, brand: 'AMD Ryzen', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 7000/9000 Zen 4 / Zen 5 (6 a 16 Núcleos, 3D V-Cache hasta 5.7GHz)', ram: 'Soporte Dual Channel DDR5 (AMD EXPO)', storage: 'Cache L3 hasta 96MB (PCIe 5.0 x16)', motherboard: 'Socket AMD AM5 (Chipsets A620, B650, X670, B850, X870)' },
-  { pattern: /(ryzen\s*9\s*5900|ryzen\s*7\s*5800x3d|ryzen\s*7\s*5700x|ryzen\s*5\s*5600x|ryzen\s*5\s*5600g|ryzen\s*5\s*5500)/i, brand: 'AMD Ryzen', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 5000 Zen 3 Architecture (6 a 16 Núcleos, hasta 4.90GHz Turbo)', ram: 'Soporte Dual Channel DDR4-3200', storage: 'Cache L3 16MB a 96MB (PCIe 4.0)', motherboard: 'Socket AMD AM4 (Chipsets A520, B450, B550, X570)' },
-  { pattern: /(ryzen\s*5\s*3600|ryzen\s*5\s*2600|ryzen\s*5\s*1600|ryzen\s*3\s*3200g|ryzen\s*3\s*2200g)/i, brand: 'AMD Ryzen', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 1000/2000/3000 Zen / Zen 2 (4 a 8 Núcleos, hasta 4.2GHz)', ram: 'Soporte Dual Channel DDR4 (2666-3200MHz)', storage: 'Cache L3 4MB a 32MB', motherboard: 'Socket AMD AM4 (Chipsets A320, B350, B450, X470)' },
+  { pattern: /(ryzen\s*9\s*[789]\d{3}|ryzen\s*7\s*[789]\d{3}|ryzen\s*5\s*[789]\d{3})/i, brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 7000/8000/9000 Zen 4 / Zen 5 (6 a 16 Núcleos, 3D V-Cache hasta 5.7GHz)', ram: 'Soporte Dual Channel DDR5 (AMD EXPO)', storage: 'Cache L3 hasta 96MB (PCIe 5.0 x16)', motherboard: 'Socket AMD AM5 (Chipsets A620, B650, X670, B850, X870)' },
+  { pattern: /(ryzen\s*9\s*5\d{3}|ryzen\s*7\s*5\d{3}|ryzen\s*5\s*5\d{3})/i, brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 5000 Zen 3 Architecture (6 a 16 Núcleos, hasta 4.90GHz Turbo)', ram: 'Soporte Dual Channel DDR4-3200', storage: 'Cache L3 16MB a 96MB (PCIe 4.0)', motherboard: 'Socket AMD AM4 (Chipsets A520, B450, B550, X570)' },
+  { pattern: /(ryzen\s*[357]\s*[123]\d{3}|ryzen\s*3\s*4\d{3})/i, brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 1000/2000/3000/4000 Zen / Zen 2 (4 a 8 Núcleos, hasta 4.2GHz)', ram: 'Soporte Dual Channel DDR4 (2666-3200MHz)', storage: 'Cache L3 4MB a 32MB', motherboard: 'Socket AMD AM4 (Chipsets A320, B350, B450, X470)' },
 
   // ==========================================
   // PLACAS BASE / MOTHERBOARDS INDEPENDIENTES
@@ -1717,50 +1724,156 @@ const HARDWARE_MODELS_CATALOG = [
   { pattern: /macbook\s*air\s*m1/i, brand: 'Apple', type: 'Laptop', cpu: 'Apple M1 (8-Core CPU, 7-Core/8-Core GPU)', ram: '8 GB Memoria Unificada', storage: '256 GB SSD PCIe', motherboard: 'Apple M1 Logic Board' }
 ];
 
-// Consulta Asíncrona a Internet (Wikipedia / DuckDuckGo API)
-function fetchOnlineKnowledge(query) {
-  return new Promise((resolve) => {
-    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&utf8=1`;
-    const client = https.get(url, { headers: { 'User-Agent': 'SysInventoryBot/1.0' }, timeout: 2500 }, (resp) => {
+// Normalizador de búsquedas y corrección de errores ortográficos en hardware
+function normalizeHardwareQuery(text) {
+  if (!text || typeof text !== 'string') return '';
+  let str = text.toLowerCase().trim();
+  str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  
+  const typoMap = [
+    { regex: /\bkingstone\b/g, rep: 'kingston' },
+    { regex: /\b(hiperx|hyper-x|hiper-x)\b/g, rep: 'hyperx' },
+    { regex: /\b(rysen|rizen)\b/g, rep: 'ryzen' },
+    { regex: /\b(nvdia|nvida|envidia|geforse)\b/g, rep: 'nvidia' },
+    { regex: /\b(samgung|sansung|samsumg|samsug)\b/g, rep: 'samsung' },
+    { regex: /\b(logitec|logiteck)\b/g, rep: 'logitech' },
+    { regex: /\b(reddragon|red dragon)\b/g, rep: 'redragon' },
+    { regex: /\b(thinkpat|tinpad|tinkpad)\b/g, rep: 'thinkpad' },
+    { regex: /\b(cruxial|crusial)\b/g, rep: 'crucial' },
+    { regex: /\b(macbok|machook|mackbook)\b/g, rep: 'macbook' },
+    { regex: /\b(viewsonic|biewsonic)\b/g, rep: 'viewsonic' },
+    { regex: /\b(optiplexx|optiplexs)\b/g, rep: 'optiplex' },
+    { regex: /\b(probookk)\b/g, rep: 'probook' },
+    { regex: /\b(ecotankk)\b/g, rep: 'ecotank' },
+    { regex: /\b(laserjet|lazerjet)\b/g, rep: 'laserjet' },
+    { regex: /\b(gskill|g-skill)\b/g, rep: 'g.skill' },
+    { regex: /\b(westerndigital|western digital)\b/g, rep: 'wd' }
+  ];
+  for (const { regex, rep } of typoMap) {
+    str = str.replace(regex, rep);
+  }
+  return str.replace(/\s+/g, ' ').trim();
+}
+
+// Consulta Asíncrona Multi-Fuente a Internet (DuckDuckGo + Wikipedia ES & EN)
+async function fetchOnlineKnowledge(query) {
+  const norm = normalizeHardwareQuery(query);
+  const cleanQ = norm || query;
+
+  const fetchWiki = (lang) => new Promise((resolve) => {
+    const url = `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(cleanQ)}&format=json&utf8=1`;
+    const req = https.get(url, { headers: { 'User-Agent': 'SysInventoryBot/2.0' }, timeout: 2500 }, (resp) => {
       let data = '';
-      resp.on('data', (chunk) => { data += chunk; });
+      resp.on('data', c => data += c);
       resp.on('end', () => {
         try {
           const parsed = JSON.parse(data);
           if (parsed && parsed.query && parsed.query.search && parsed.query.search.length > 0) {
-            const snippet = parsed.query.search[0].snippet.replace(/<[^>]+>/g, ' ');
-            resolve(snippet);
-          } else {
-            resolve(null);
-          }
-        } catch (e) {
-          resolve(null);
-        }
+            resolve(parsed.query.search[0].snippet.replace(/<[^>]+>/g, ' '));
+          } else resolve(null);
+        } catch(e) { resolve(null); }
       });
     });
-
-    client.on('error', () => resolve(null));
-    client.on('timeout', () => {
-      client.destroy();
-      resolve(null);
-    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
   });
+
+  const fetchDDG = () => new Promise((resolve) => {
+    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(cleanQ)}&format=json&no_html=1&skip_disambig=1`;
+    const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }, timeout: 2500 }, (resp) => {
+      let data = '';
+      resp.on('data', c => data += c);
+      resp.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          const parts = [json.AbstractText, json.Heading, ...(json.RelatedTopics || []).map(r => r.Text || '')].filter(Boolean);
+          resolve(parts.join(' '));
+        } catch(e) { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+  });
+
+  try {
+    const results = await Promise.allSettled([fetchWiki('es'), fetchWiki('en'), fetchDDG()]);
+    const snippets = results.map(r => (r.status === 'fulfilled' && r.value) ? r.value : '').filter(Boolean);
+    return snippets.join(' ');
+  } catch(e) {
+    return null;
+  }
 }
 
-// Función Asíncrona de Búsqueda Inteligente de Especificaciones de Hardware (Catalog + Internet)
+// Detector Inteligente de Fabricante / Marca en texto libre
+function detectBrandFromText(text) {
+  if (!text) return null;
+  const t = text.toLowerCase();
+  if (/kingston|hyperx/i.test(t)) return 'Kingston';
+  if (/corsair/i.test(t)) return 'Corsair';
+  if (/samsung/i.test(t)) return 'Samsung';
+  if (/western\s*digital|\bwd\b/i.test(t)) return 'Western Digital';
+  if (/seagate/i.test(t)) return 'Seagate';
+  if (/g\.?skill/i.test(t)) return 'G.Skill';
+  if (/crucial|ballistix|micron/i.test(t)) return 'Crucial';
+  if (/adata|xpg/i.test(t)) return 'Adata';
+  if (/teamgroup|t-force/i.test(t)) return 'TeamGroup';
+  if (/gigabyte|aorus/i.test(t)) return 'Gigabyte';
+  if (/asus|rog|tuf|prime/i.test(t)) return 'ASUS';
+  if (/msi|tomahawk|mortar|ventus/i.test(t)) return 'MSI';
+  if (/asrock/i.test(t)) return 'ASRock';
+  if (/evga/i.test(t)) return 'EVGA';
+  if (/seasonic/i.test(t)) return 'Seasonic';
+  if (/cooler\s*master/i.test(t)) return 'Cooler Master';
+  if (/thermaltake/i.test(t)) return 'Thermaltake';
+  if (/redragon/i.test(t)) return 'Redragon';
+  if (/logitech/i.test(t)) return 'Logitech';
+  if (/intel/i.test(t)) return 'Intel';
+  if (/amd|radeon|ryzen/i.test(t)) return 'AMD';
+  if (/nvidia|geforce/i.test(t)) return 'NVIDIA';
+  if (/dell|optiplex|latitude|poweredge/i.test(t)) return 'Dell';
+  if (/hp|probook|elitebook|victus|omen|laserjet/i.test(t)) return 'HP';
+  if (/lenovo|thinkpad|thinkcentre|ideapad/i.test(t)) return 'Lenovo';
+  if (/apple|macbook|imac/i.test(t)) return 'Apple';
+  if (/epson|ecotank|powerlite/i.test(t)) return 'Epson';
+  if (/canon|pixma/i.test(t)) return 'Canon';
+  if (/brother/i.test(t)) return 'Brother';
+  if (/kyocera/i.test(t)) return 'Kyocera';
+  if (/cisco/i.test(t)) return 'Cisco';
+  if (/mikrotik/i.test(t)) return 'MikroTik';
+  if (/tp[- ]?link|omada|jetstream/i.test(t)) return 'TP-Link';
+  if (/ubiquiti|unifi/i.test(t)) return 'Ubiquiti';
+  return null;
+}
+
+// Función Asíncrona de Búsqueda Inteligente de Especificaciones de Hardware (Catalog + Multi-Internet)
 async function lookupHardwareSpecsOnline(modelText) {
   if (!modelText || typeof modelText !== 'string') return { found: false };
   const clean = modelText.trim();
   if (clean.length < 2) return { found: false };
+  const normalized = normalizeHardwareQuery(clean);
 
-  // 1. Buscar en catálogo exacto de modelos
+  // 1. Buscar en catálogo exacto de modelos (comprobando tanto clean como normalized)
   for (const item of HARDWARE_MODELS_CATALOG) {
-    if (item.pattern.test(clean)) {
+    if (item.pattern.test(clean) || item.pattern.test(normalized)) {
+      let finalBrand = item.brand;
+      const detected = detectBrandFromText(clean + ' ' + normalized);
+      if (detected) {
+        finalBrand = detected;
+      } else if (finalBrand === 'Almacenamiento' || finalBrand === 'Memoria RAM' || finalBrand === 'Placa Base' || finalBrand === 'Fuente de Poder') {
+        finalBrand = 'Genérico';
+      }
+
       return {
         success: true,
         found: true,
         source: 'Catálogo de Fábrica OEM',
-        fabricante: item.brand,
+        brand: finalBrand,
+        type: item.type,
+        cpu: item.cpu,
+        ram: item.ram,
+        storage: item.storage,
+        motherboard: item.motherboard,
+        fabricante: finalBrand,
         tipo_equipo: item.type,
         procesador: item.cpu,
         ram_total: item.ram,
@@ -1772,27 +1885,33 @@ async function lookupHardwareSpecsOnline(modelText) {
   }
 
   // 2. Comprobar si es Impresora
-  const printerConsumable = autoDetectPrinterConsumables(clean);
+  const printerConsumable = autoDetectPrinterConsumables(clean) || autoDetectPrinterConsumables(normalized);
   if (printerConsumable) {
     return {
       success: true,
       found: true,
       source: 'Base de Datos de Impresoras',
+      brand: printerConsumable.brand,
+      type: 'Impresora / Multifuncional',
+      cpu: 'Microcontrolador SoC Integrado',
+      ram: '128 MB Memoria de Buffer',
+      storage: 'Memoria Flash Firmware',
+      motherboard: `${printerConsumable.brand} Controller Board`,
+      consumible: printerConsumable.consumable,
       fabricante: printerConsumable.brand,
       tipo_equipo: 'Impresora / Multifuncional',
       procesador: 'Microcontrolador SoC Integrado',
       ram_total: '128 MB Memoria de Buffer',
       almacenamiento: 'Memoria Flash Firmware',
-      placa_base: `${printerConsumable.brand} Controller Board`,
-      consumible: printerConsumable.consumable
+      placa_base: `${printerConsumable.brand} Controller Board`
     };
   }
 
-  // 3. Consulta de Internet en tiempo real (Wikipedia / Web Knowledge)
+  // 3. Consulta de Internet en tiempo real (DuckDuckGo + Wikipedia Multi-idioma)
   const onlineSnippet = await fetchOnlineKnowledge(clean);
 
   // 4. Inferencia Heurística basada en marcas, tipo de dispositivo y snippets de Internet
-  const combinedText = (clean + ' ' + (onlineSnippet || '')).toLowerCase();
+  const combinedText = (clean + ' ' + normalized + ' ' + (onlineSnippet || '')).toLowerCase();
   
   let brand = 'Genérico';
   if (/nvidia/i.test(combinedText)) brand = 'NVIDIA';
@@ -1802,7 +1921,7 @@ async function lookupHardwareSpecsOnline(modelText) {
   else if (/corsair/i.test(combinedText)) brand = 'Corsair';
   else if (/samsung/i.test(combinedText)) brand = 'Samsung';
   else if (/crucial|ballistix|micron/i.test(combinedText)) brand = 'Crucial';
-  else if (/western\s*digital|wd/i.test(combinedText)) brand = 'Western Digital';
+  else if (/western\s*digital|\bwd\b/i.test(combinedText)) brand = 'Western Digital';
   else if (/seagate/i.test(combinedText)) brand = 'Seagate';
   else if (/g\.?skill/i.test(combinedText)) brand = 'G.Skill';
   else if (/adata|xpg/i.test(combinedText)) brand = 'Adata';
@@ -1817,6 +1936,8 @@ async function lookupHardwareSpecsOnline(modelText) {
   else if (/seasonic/i.test(combinedText)) brand = 'Seasonic';
   else if (/cooler\s*master/i.test(combinedText)) brand = 'Cooler Master';
   else if (/thermaltake/i.test(combinedText)) brand = 'Thermaltake';
+  else if (/redragon/i.test(combinedText)) brand = 'Redragon';
+  else if (/logitech/i.test(combinedText)) brand = 'Logitech';
   else if (/cisco/i.test(combinedText)) brand = 'Cisco';
   else if (/mikrotik/i.test(combinedText)) brand = 'MikroTik';
   else if (/tp[- ]?link|omada|jetstream/i.test(combinedText)) brand = 'TP-Link';
@@ -1837,22 +1958,39 @@ async function lookupHardwareSpecsOnline(modelText) {
   else if (/synology/i.test(combinedText)) brand = 'Synology';
 
   let type = 'Laptop';
-  if (/geforce|radeon|rtx|gtx|quadro|intel\s*arc|graphics|video\s*card|tarjeta\s*de\s*video|gpu/i.test(combinedText)) type = 'Tarjeta de Video (GPU)';
-  else if (/ddr5|ddr4|ddr3|ram|memoria\s*ram|dimm|so-dimm|vengeance|fury\s*beast/i.test(combinedText)) type = 'Memoria RAM';
-  else if (/ssd|nvme|m\.2|sata|hdd|disco\s*duro|almacenamiento|barracuda|ironwolf|990\s*pro|980\s*pro|a400|nv2|nv3|sn580|sn570|sn770|sn850/i.test(combinedText)) type = 'Disco / Almacenamiento';
-  else if (/intel\s*core|ryzen|core\s*i[3579]|threadripper|xeon|procesador|cpu/i.test(combinedText)) type = 'Procesador (CPU)';
-  else if (/motherboard|placa\s*madre|placa\s*base|mainboard|b760|b650|b550|z790|z690|h610|h510/i.test(combinedText)) type = 'Placa Base';
-  else if (/fuente\s*de\s*poder|psu|power\s*supply|80\s*plus|modular/i.test(combinedText)) type = 'Fuente de Poder (PSU)';
-  else if (/monitor|pantalla|display|ultragear|viewfinity/i.test(combinedText)) type = 'Monitor / Pantalla';
-  else if (/mouse|raton|teclado|keyboard|audifono|headset/i.test(combinedText)) type = 'Teclado / Mouse / Periférico';
-  else if (/switch|catalyst|managed|rackmount|ports|puertos\s*gigabit/i.test(combinedText)) type = 'Switch de Red';
-  else if (/access\s*point|ap|router|wi[- ]?fi|mesh|routerboard/i.test(combinedText)) type = 'Access Point Wi-Fi';
-  else if (/proyector|projector|3lcd|dlp|lumen/i.test(combinedText)) type = 'Proyector';
-  else if (/server|servidor|poweredge|proliant|thinksystem|xeon|nas|rack\s*server/i.test(combinedText)) type = 'Servidor';
-  else if (/impresora|printer|ecotank|smart\s*tank|laserjet|pixma|inkbenefit|toner|tinta/i.test(combinedText)) type = 'Impresora / Multifuncional';
-  else if (/optiplex|prodesk|elitedesk|thinkcentre|torre|desktop|pc\s*de\s*escritorio/i.test(combinedText)) type = 'PC de Escritorio';
-  else if (/all-in-one|aio|imac|pavilion\s*24/i.test(combinedText)) type = 'All-in-One';
-  else if (/mini\s*pc|nuc|tiny/i.test(combinedText)) type = 'Mini PC';
+  if (/hyperx|fury|valueram|vengeance|dominator|trident|ripjaws|ballistix|lancer|spectrix|t-force|ddr5|ddr4|ddr3|\bram\b|dimm|so-dimm|memoria\s*ram/i.test(combinedText)) {
+    type = 'Memoria RAM';
+  } else if (/ssd|nvme|m\.2|sata|hdd|disco\s*duro|almacenamiento|barracuda|ironwolf|firecuda|990\s*pro|980\s*pro|970\s*evo|a400|nv2|nv3|kc3000|sn580|sn570|sn770|sn850|p3\s*plus|p3|legend|su650/i.test(combinedText)) {
+    type = 'Disco / Almacenamiento';
+  } else if (/geforce|radeon|rtx|gtx|quadro|intel\s*arc|graphics|video\s*card|tarjeta\s*de\s*video|gpu|vram|rx\s*\d{3,4}/i.test(combinedText)) {
+    type = 'Tarjeta de Video (GPU)';
+  } else if (/intel\s*core|ryzen|core\s*i[3579]|threadripper|xeon|procesador|cpu|\bcore\s*ultra\b/i.test(combinedText)) {
+    type = 'Procesador (CPU)';
+  } else if (/motherboard|placa\s*madre|placa\s*base|mainboard|b760|b650|b550|b450|a520|a320|z790|z690|h610|h510|h410|h310|h110|h81/i.test(combinedText)) {
+    type = 'Placa Base';
+  } else if (/fuente\s*de\s*poder|psu|power\s*supply|80\s*plus|modular|rm\d{3}|cx\d{3}|cv\d{3}/i.test(combinedText)) {
+    type = 'Fuente de Poder (PSU)';
+  } else if (/monitor|pantalla|display|ultragear|viewfinity|p2422|se2422|e24\s*g4/i.test(combinedText)) {
+    type = 'Monitor / Pantalla';
+  } else if (/mouse|raton|teclado|keyboard|audifono|headset|auricular|periferico/i.test(combinedText)) {
+    type = 'Teclado / Mouse / Periférico';
+  } else if (/switch|catalyst|managed|rackmount|ports|puertos\s*gigabit|c2960|crs326/i.test(combinedText)) {
+    type = 'Switch de Red';
+  } else if (/access\s*point|ap|router|wi[- ]?fi|mesh|routerboard|unifi|u6|omada/i.test(combinedText)) {
+    type = 'Access Point Wi-Fi';
+  } else if (/proyector|projector|3lcd|dlp|lumen|powerlite|brightlink/i.test(combinedText)) {
+    type = 'Proyector';
+  } else if (/server|servidor|poweredge|proliant|thinksystem|xeon|nas|rack\s*server/i.test(combinedText)) {
+    type = 'Servidor';
+  } else if (/impresora|printer|ecotank|smart\s*tank|laserjet|pixma|inkbenefit|toner|tinta/i.test(combinedText)) {
+    type = 'Impresora / Multifuncional';
+  } else if (/optiplex|prodesk|elitedesk|thinkcentre|torre|desktop|pc\s*de\s*escritorio/i.test(combinedText)) {
+    type = 'PC de Escritorio';
+  } else if (/all-in-one|aio|imac|pavilion\s*24/i.test(combinedText)) {
+    type = 'All-in-One';
+  } else if (/mini\s*pc|nuc|tiny/i.test(combinedText)) {
+    type = 'Mini PC';
+  }
 
   // Configuración de especificaciones adaptadas por categoría
   let cpu = '';
@@ -1863,34 +2001,48 @@ async function lookupHardwareSpecsOnline(modelText) {
 
   if (type === 'Tarjeta de Video (GPU)') {
     cpu = `${brand} Graphics Processing Unit (GPU Dedicada)`;
-    ram = 'VRAM Dedicada (GDDR6 / GDDR6X / GDDR5)';
-    storage = 'Interfaz PCIe x16 (DirectX 12 Ultimate / Vulkan / Ray Tracing)';
-    motherboard = 'Tarjeta Gráfica Dedicada (Salidas DisplayPort / HDMI)';
+    ram = /16gb|16\s*gb/i.test(combinedText) ? '16 GB GDDR6' : (/12gb|12\s*gb/i.test(combinedText) ? '12 GB GDDR6' : '8 GB GDDR6');
+    storage = 'Interfaz PCIe 4.0 x16 (DirectX 12 Ultimate / Vulkan)';
+    motherboard = 'Tarjeta Gráfica Dedicada (Salidas 3x DisplayPort / 1x HDMI)';
   } else if (type === 'Memoria RAM') {
-    cpu = 'N/A (Módulo de Memoria)';
-    ram = `${brand} Memoria RAM (DDR4 / DDR5 High Speed)`;
-    storage = 'Disipador Térmico / Perfil XMP / EXPO';
-    motherboard = 'Formato DIMM / SO-DIMM Estándar JEDEC';
+    cpu = 'N/A (Módulo de Memoria RAM)';
+    let ramCap = '16 GB DDR4 (3200MHz)';
+    if (/ddr5|5600|6000|5200|4800|6400/i.test(combinedText)) {
+      ramCap = '16 GB / 32 GB DDR5 (5600MHz High Speed)';
+    } else if (/ddr3|1600|1333/i.test(combinedText)) {
+      ramCap = '8 GB DDR3 (1600MHz)';
+    } else if (/32gb|32\s*gb/i.test(combinedText)) {
+      ramCap = '32 GB DDR4 (3200MHz)';
+    } else if (/8gb|8\s*gb/i.test(combinedText)) {
+      ramCap = '8 GB DDR4 (3200MHz)';
+    }
+    ram = `${brand !== 'Genérico' ? brand + ' ' : ''}${ramCap}`;
+    storage = 'Disipador Térmico de Aluminio (Intel XMP & AMD EXPO)';
+    motherboard = /laptop|so-dimm|sodimm/i.test(combinedText) ? 'Formato SO-DIMM Laptop (260-pin)' : 'Formato DIMM Desktop (288-pin)';
   } else if (type === 'Disco / Almacenamiento') {
-    cpu = 'Controlador de Almacenamiento';
+    cpu = 'Controlador NVMe PCIe / SATA SSD';
     ram = 'Cache DRAM / SLC Buffer';
-    storage = `${brand} Unidad de Almacenamiento (SSD NVMe / SATA / HDD)`;
-    motherboard = 'Interfaz M.2 PCIe / SATA III 6.0Gb/s';
+    let cap = '1 TB SSD NVMe PCIe Gen4 M.2 2280';
+    if (/2tb|2\s*tb/i.test(combinedText)) cap = '2 TB SSD NVMe PCIe Gen4 M.2';
+    else if (/500|512/i.test(combinedText)) cap = '500 GB / 512 GB SSD NVMe M.2';
+    else if (/240|250|256/i.test(combinedText)) cap = '240 GB / 256 GB SSD';
+    storage = `${brand !== 'Genérico' ? brand + ' ' : ''}${cap}`;
+    motherboard = /sata/i.test(combinedText) ? 'Interfaz SATA III 6Gb/s (2.5")' : 'Interfaz M.2 PCIe 4.0 x4 (2280)';
   } else if (type === 'Procesador (CPU)') {
     cpu = `${brand} Procesador Multi-Core (Arquitectura Alto Rendimiento)`;
-    ram = 'Controlador de Memoria Integrado Dual Channel';
-    storage = 'Memoria Cache L2 / L3 Integrada';
-    motherboard = `Socket Compatible ${brand}`;
+    ram = 'Controlador de Memoria Integrado Dual Channel DDR4/DDR5';
+    storage = 'Memoria Cache L2 / L3 Integrada (Smart Cache / 3D V-Cache)';
+    motherboard = /ryzen/i.test(combinedText) ? (/7\d{3}|9\d{3}|am5/i.test(combinedText) ? 'Socket AMD AM5 (Chipset B650)' : 'Socket AMD AM4 (Chipset B550)') : (/1[234]\d{3}|1700/i.test(combinedText) ? 'Socket Intel LGA 1700 (Chipset B760/H610)' : 'Socket Intel LGA Compatible');
   } else if (type === 'Placa Base') {
-    cpu = 'Socket de Procesador Multi-Generación';
-    ram = 'Ranuras de Memoria RAM Dual Channel';
-    storage = 'Puertos M.2 NVMe PCIe + SATA III';
-    motherboard = `${brand} Placa Base / Mainboard`;
+    cpu = /am4|b550|b450|a520/i.test(combinedText) ? 'Socket AMD AM4 (Ryzen Serie 1000 a 5000)' : (/am5|b650|x670/i.test(combinedText) ? 'Socket AMD AM5 (Ryzen 7000 a 9000)' : 'Socket Intel LGA 1700 (12va, 13va y 14va Gen)');
+    ram = 'Ranuras de Memoria RAM Dual Channel (Hasta 128GB)';
+    storage = 'Ranuras M.2 NVMe PCIe 4.0 + 4x Puertos SATA III';
+    motherboard = `${brand} Placa Base / Mainboard (Salidas HDMI/DP)`;
   } else if (type === 'Fuente de Poder (PSU)') {
     cpu = 'N/A (Suministro de Energía Eléctrica)';
     ram = 'Protecciones Eléctricas OVP / UVP / OCP / SCP';
     storage = 'Cableado ATX / EPS / PCIe / SATA';
-    motherboard = `${brand} Fuente de Poder ATX (Certificación 80 Plus)`;
+    motherboard = `${brand} Fuente de Poder ATX (Certificación 80 Plus Bronce / Gold)`;
   } else if (type === 'Switch de Red') {
     cpu = `${brand} Managed Gigabit Switch ASIC Engine`;
     ram = '256 MB / 512 MB DRAM';
@@ -1916,7 +2068,7 @@ async function lookupHardwareSpecsOnline(modelText) {
     ram = '128 MB Buffer';
     storage = 'Memoria Flash Firmware';
     motherboard = `${brand} Formatter Controller Board`;
-    consumible = autoDetectPrinterConsumables(clean)?.consumable || 'Tinta / Tóner Estándar';
+    consumible = (autoDetectPrinterConsumables(clean) || autoDetectPrinterConsumables(normalized))?.consumable || 'Tinta / Tóner Estándar';
   } else {
     // Computadoras / Laptops
     if (/i7[- ]?1[1234].../i.test(combinedText)) cpu = 'Intel Core i7 (11va a 14va Gen) @ 2.80GHz-5.00GHz (8+ Núcleos)';
@@ -1940,6 +2092,12 @@ async function lookupHardwareSpecsOnline(modelText) {
     success: true,
     found: true,
     source: onlineSnippet ? 'Internet & Base de Datos Global' : 'Inferencia Inteligente de Hardware',
+    brand: brand,
+    type: type,
+    cpu: cpu,
+    ram: ram,
+    storage: storage,
+    motherboard: motherboard,
     fabricante: brand,
     tipo_equipo: type,
     procesador: cpu,

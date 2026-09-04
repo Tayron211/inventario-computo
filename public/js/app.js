@@ -795,6 +795,88 @@ function initEventListeners() {
     equipmentForm.addEventListener('submit', handleFormSubmit);
   }
 
+  // Normalizador difuso y corrector de ortografía de modelos y marcas de hardware
+  function normalizeHardwareQuery(text) {
+    if (!text || typeof text !== 'string') return '';
+    let t = text.toLowerCase().trim();
+    const typoReplacements = [
+      [/\bkingstone\b/g, 'kingston'],
+      [/\bhiperx\b/g, 'hyperx'],
+      [/\bhyper-x\b/g, 'hyperx'],
+      [/\bhiper-x\b/g, 'hyperx'],
+      [/\brysen\b/g, 'ryzen'],
+      [/\bnvdia\b/g, 'nvidia'],
+      [/\bnvidea\b/g, 'nvidia'],
+      [/\bgeoforce\b/g, 'geforce'],
+      [/\brtx40(\d0)\b/g, 'rtx 40$1'],
+      [/\brtx30(\d0)\b/g, 'rtx 30$1'],
+      [/\bgtx16(\d0)\b/g, 'gtx 16$1'],
+      [/\bsamgung\b/g, 'samsung'],
+      [/\bsansung\b/g, 'samsung'],
+      [/\blogitec\b/g, 'logitech'],
+      [/\bcruxial\b/g, 'crucial'],
+      [/\bg\.?skill\b/g, 'g.skill'],
+      [/\bthinkpat\b/g, 'thinkpad'],
+      [/\bprodesck\b/g, 'prodesk'],
+      [/\belitedesck\b/g, 'elitedesk'],
+      [/\boptiplexx\b/g, 'optiplex'],
+      [/\bviewsonic\b/g, 'viewsonic'],
+      [/\bvewsonic\b/g, 'viewsonic'],
+      [/\bmicrotik\b/g, 'mikrotik']
+    ];
+    for (const [pattern, replacement] of typoReplacements) {
+      t = t.replace(pattern, replacement);
+    }
+    return t;
+  }
+
+  function detectBrandFromText(text) {
+    if (!text) return null;
+    const lower = text.toLowerCase();
+    const brands = [
+      { key: 'kingston', name: 'Kingston' },
+      { key: 'corsair', name: 'Corsair' },
+      { key: 'samsung', name: 'Samsung' },
+      { key: 'western digital', name: 'Western Digital' },
+      { key: 'wd', name: 'Western Digital' },
+      { key: 'seagate', name: 'Seagate' },
+      { key: 'g.skill', name: 'G.Skill' },
+      { key: 'crucial', name: 'Crucial' },
+      { key: 'adata', name: 'Adata' },
+      { key: 'xpg', name: 'Adata XPG' },
+      { key: 'teamgroup', name: 'TeamGroup' },
+      { key: 'gigabyte', name: 'Gigabyte' },
+      { key: 'aorus', name: 'Gigabyte AORUS' },
+      { key: 'asus', name: 'ASUS' },
+      { key: 'msi', name: 'MSI' },
+      { key: 'asrock', name: 'ASRock' },
+      { key: 'evga', name: 'EVGA' },
+      { key: 'intel', name: 'Intel' },
+      { key: 'amd', name: 'AMD' },
+      { key: 'nvidia', name: 'NVIDIA' },
+      { key: 'hp', name: 'HP' },
+      { key: 'dell', name: 'Dell' },
+      { key: 'lenovo', name: 'Lenovo' },
+      { key: 'acer', name: 'Acer' },
+      { key: 'apple', name: 'Apple' },
+      { key: 'epson', name: 'Epson' },
+      { key: 'canon', name: 'Canon' },
+      { key: 'brother', name: 'Brother' },
+      { key: 'kyocera', name: 'Kyocera' },
+      { key: 'cisco', name: 'Cisco' },
+      { key: 'mikrotik', name: 'MikroTik' },
+      { key: 'ubiquiti', name: 'Ubiquiti' },
+      { key: 'tp-link', name: 'TP-Link' },
+      { key: 'logitech', name: 'Logitech' },
+      { key: 'redragon', name: 'Redragon' },
+      { key: 'hyperx', name: 'Kingston' }
+    ];
+    for (const b of brands) {
+      if (lower.includes(b.key)) return b.name;
+    }
+    return null;
+  }
+
   // Auto-detección en tiempo real de Especificaciones de Fábrica (CPU, RAM, Almacenamiento, Placa, Marca, Consumible)
   // Base de datos cliente de Auto-Llenado Rápido con Coincidencia Difusa Ultra-Flexible (0ms)
   const CLIENT_SPECS_CATALOG = [
@@ -839,7 +921,7 @@ function initEventListeners() {
     { keywords: ['air m3', 'm3', 'macbook pro'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M3 / M3 Pro (8/12-Core CPU, 10/18-Core GPU)', ram: '16 GB / 36 GB Memoria Unificada', storage: '512 GB SSD PCIe', motherboard: 'Apple M3 Logic Board' },
     { keywords: ['imac', 'imac 24'], brand: 'Apple', type: 'All-in-One', cpu: 'Apple M1 / M3 (8-Core CPU, 8-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD', motherboard: 'Apple iMac Logic Board' },
 
-    // IMPRESORAS & MULTIFUNCIONALES (EPSON, HP, CANON, BROTHER, KYOCERA, RICOH)
+    // IMPRESORAS & MULTIFUNCIONALES
     { keywords: ['l575', 'l555', 'l565', 'l355', 'l365', 'l375', 'l380', 'l395', 'l455', 'l475', 'l495', 'l210', 'l220', 'l110', 'l120', 'l1300'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R (4 Colores)', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L500/L300 Series Controller Board', consumible: 'Tinta Epson T664' },
     { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l1250', 'l1210', 'l5190', 'l5290', 'l5590', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
     { keywords: ['l4260', 'l4160', 'l4150', 'l6161', 'l6171', 'l6191', 'l6270', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Dual Engine (Duplex Automático)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Board', consumible: 'Tinta Epson T504' },
@@ -870,9 +952,10 @@ function initEventListeners() {
     { keywords: ['thinksystem', 'sr650', 'sr530'], brand: 'Lenovo', type: 'Servidor', cpu: 'Intel Xeon Silver 4214 @ 2.20GHz (12 Núcleos, 24 Hilos)', ram: '32 GB DDR4 ECC', storage: '2x 480 GB SSD NVMe + RAID', motherboard: 'Lenovo ThinkSystem Server Motherboard' },
     { keywords: ['synology', 'ds920', 'ds220', 'ds423', 'rs1221'], brand: 'Synology', type: 'Servidor', cpu: 'Intel Celeron Quad-Core / AMD Ryzen V1500B', ram: '4 GB / 8 GB DDR4', storage: '4x Bahías SATA 3.5" (Synology Hybrid RAID)', motherboard: 'Synology DiskStation NAS Motherboard' },
 
-    // PROYECTORES (PROJECTORS)
+    // PROYECTORES
     { keywords: ['brightlink', '735', '725', '1485', 'eb-735', 'eb-725'], brand: 'Epson', type: 'Proyector', cpu: 'Epson 3LCD Interactive Laser Display Engine (4000 Lúmenes)', ram: '4 GB Interactive Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson BrightLink Interactive Ultra-Short Throw Board (HDMI/Touch/Pen)' },
-    // DISCOS SSD / HDD & ALMACENAMIENTO (KINGSTON, SAMSUNG, WD, CRUCIAL, ADATA, SEAGATE)
+
+    // DISCOS SSD / HDD & ALMACENAMIENTO
     { keywords: ['nv2', 'snv2s', 'kingston nv2'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB SSD NVMe PCIe Gen4 M.2 2280', motherboard: 'M.2 NVMe PCIe 4.0 x4 (2280)' },
     { keywords: ['nv3', 'snv3s'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB SSD NVMe PCIe Gen4 x4', motherboard: 'M.2 NVMe PCIe 4.0 (2280)' },
     { keywords: ['a400', 'sa400'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '480 GB / 960 GB SSD SATA III 2.5"', motherboard: 'SATA III 6Gb/s (2.5 Pulgadas)' },
@@ -886,22 +969,32 @@ function initEventListeners() {
     { keywords: ['legend 710', 'legend 850', 'gammix', 'su650', 'su800', 'adata ssd'], brand: 'Adata', type: 'Disco / Almacenamiento', storage: '512 GB / 1 TB SSD NVMe PCIe / SATA', motherboard: 'M.2 NVMe PCIe Gen3/Gen4 o SATA 2.5"' },
     { keywords: ['barracuda', 'ironwolf', 'firecuda', 'seagate hdd'], brand: 'Seagate', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB / 4 TB HDD 7200 RPM 3.5"', motherboard: 'SATA III 6Gb/s (3.5 Pulgadas)' },
 
-    // MEMORIAS RAM (KINGSTON FURY, CORSAIR, CRUCIAL, G.SKILL, ADATA XPG)
-    { keywords: ['fury beast', 'kingston fury', 'hyperx fury', 'valueram'], brand: 'Kingston', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / 32 GB DDR5 (5600MHz)', motherboard: 'DIMM Desktop (288-pin) / Perfil Intel XMP & AMD EXPO' },
-    { keywords: ['vengeance', 'corsair vengeance', 'dominator'], brand: 'Corsair', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4/DDR5 Dual Channel', motherboard: 'DIMM 288-pin High Performance' },
-    { keywords: ['crucial ram', 'crucial ddr4', 'crucial ddr5'], brand: 'Crucial', type: 'Memoria RAM', ram: '8 GB / 16 GB DDR4 (3200MHz) / DDR5 (4800MHz)', motherboard: 'DIMM Desktop / SO-DIMM Laptop JEDEC' },
-    { keywords: ['ripjaws', 'trident z', 'g.skill'], brand: 'G.Skill', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4 (3600MHz) / DDR5 (6000MHz)', motherboard: 'DIMM 288-pin Overclocking' },
-    { keywords: ['spectrix', 'xpg lancer', 'xpg ram'], brand: 'Adata XPG', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / DDR5 (6000MHz) RGB', motherboard: 'DIMM 288-pin XMP Ready' },
+    // MEMORIAS RAM (KINGSTON FURY, HYPERX, CORSAIR, CRUCIAL, G.SKILL, ADATA XPG, TEAMGROUP)
+    { keywords: ['hyperx', 'kingston hyperx', 'fury beast', 'kingston fury', 'hyperx fury', 'valueram', 'fury renegade', 'fury'], brand: 'Kingston', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / 32 GB DDR5 (5600MHz)', motherboard: 'DIMM Desktop (288-pin) / Perfil Intel XMP & AMD EXPO' },
+    { keywords: ['vengeance', 'corsair vengeance', 'dominator', 'vengeance lpx', 'vengeance rgb'], brand: 'Corsair', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4/DDR5 Dual Channel', motherboard: 'DIMM 288-pin High Performance' },
+    { keywords: ['crucial ram', 'crucial ddr4', 'crucial ddr5', 'crucial pro'], brand: 'Crucial', type: 'Memoria RAM', ram: '8 GB / 16 GB DDR4 (3200MHz) / DDR5 (4800MHz)', motherboard: 'DIMM Desktop / SO-DIMM Laptop JEDEC' },
+    { keywords: ['ripjaws', 'trident z', 'g.skill', 'gskill', 'flare x'], brand: 'G.Skill', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4 (3600MHz) / DDR5 (6000MHz)', motherboard: 'DIMM 288-pin Overclocking' },
+    { keywords: ['spectrix', 'xpg lancer', 'xpg ram', 'adata ram'], brand: 'Adata XPG', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / DDR5 (6000MHz) RGB', motherboard: 'DIMM 288-pin XMP Ready' },
+    { keywords: ['t-force', 'teamgroup', 'vulcan', 'delta rgb'], brand: 'TeamGroup', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4/DDR5 Gaming RAM', motherboard: 'DIMM 288-pin Desktop' },
+
+    // PLACAS BASE / MOTHERBOARDS
+    { keywords: ['b550', 'b550m', 'b450', 'b450m', 'a320', 'a520'], brand: 'Gigabyte / ASUS / MSI', type: 'Placa Base / Motherboard', cpu: 'Socket AMD AM4 (Soporta Ryzen 3000 / 5000 Series)', ram: '4x DDR4 DIMM Dual Channel (Hasta 128GB)', storage: '2x Ranuras M.2 NVMe PCIe 4.0/3.0 + SATA 6Gb/s', motherboard: 'Factor de Forma Micro-ATX / ATX' },
+    { keywords: ['b650', 'b650m', 'x670', 'a620'], brand: 'ASUS / Gigabyte / MSI', type: 'Placa Base / Motherboard', cpu: 'Socket AMD AM5 (Soporta Ryzen 7000 / 8000 / 9000)', ram: '4x DDR5 DIMM Dual Channel con AMD EXPO', storage: 'PCIe 5.0 / 4.0 M.2 NVMe Slots', motherboard: 'Micro-ATX / ATX Gaming Mainboard' },
+    { keywords: ['b760', 'b760m', 'h610', 'h610m', 'b660', 'z790', 'z690'], brand: 'ASUS / MSI / Gigabyte', type: 'Placa Base / Motherboard', cpu: 'Socket Intel LGA 1700 (Core 12va, 13va y 14va Gen)', ram: 'DDR4 / DDR5 Dual Channel', storage: 'Ranuras M.2 NVMe PCIe 4.0 x4', motherboard: 'Micro-ATX / ATX Form Factor' },
+
+    // FUENTES DE PODER / PSU
+    { keywords: ['rm750', 'rm850', 'cv650', 'cv550', 'cx650', 'cx750'], brand: 'Corsair', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus Bronze / Gold', ram: 'Protección OVP / UVP / SCP / OTP', storage: 'Cables Mallados Full Modular / Semi-Modular', motherboard: 'Conector ATX 24 Pines, 2x EPS 8 Pines, 4x PCIe' },
+    { keywords: ['smart 600w', 'smart 500w', 'smart 700w', 'toughpower'], brand: 'Thermaltake', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus White / Gold', ram: 'Ventilador Ultra Silencioso 120mm', storage: 'Potencia Continua Real', motherboard: 'Conectores ATX, PCIe y SATA' },
 
     // TARJETAS DE VIDEO / GPU (NVIDIA & AMD)
-    { keywords: ['rtx 4090', 'rtx 4080', 'rtx 4070', 'rtx 4060', 'rtx 3060', 'rtx 3050', 'gtx 1650'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX / GTX Dedicated GPU', ram: '8 GB / 12 GB / 16 GB GDDR6', storage: 'PCIe 4.0 x16 (DirectX 12 Ultimate)', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1' },
+    { keywords: ['rtx 4090', 'rtx 4080', 'rtx 4070', 'rtx 4060', 'rtx 3060', 'rtx 3050', 'gtx 1650', 'rtx4060', 'rtx3060'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX / GTX Dedicated GPU', ram: '8 GB / 12 GB / 16 GB GDDR6', storage: 'PCIe 4.0 x16 (DirectX 12 Ultimate)', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1' },
     { keywords: ['rx 7900', 'rx 7800', 'rx 7700', 'rx 7600', 'rx 6600', 'radeon rx'], brand: 'AMD', type: 'Tarjeta de Video (GPU)', cpu: 'AMD Radeon RX Series RDNA 3 / RDNA 2 GPU', ram: '8 GB / 12 GB / 16 GB GDDR6', storage: 'PCIe 4.0 x16 (AMD Infinity Cache)', motherboard: '3x DisplayPort 2.1 / HDMI' },
 
     // PROCESADORES / CPU (INTEL & AMD)
     { keywords: ['i5-12400', 'i5-13400', 'i5-14400', 'i7-12700', 'i7-13700', 'i7-14700', 'i5 12400', 'i5 13400', 'i7 13700'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5 / i7 (Multi-Core @ 4.40GHz - 5.40GHz Turbo)', ram: 'Controlador Dual Channel DDR4/DDR5 Integrado', storage: 'Cache Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipsets H610, B760, Z790)' },
-    { keywords: ['ryzen 5 5600', 'ryzen 7 5700', 'ryzen 5 7600', 'ryzen 7 7800x3d', 'ryzen 5600', 'ryzen 5700'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 5 / Ryzen 7 (6 a 8 Núcleos, 12 a 16 Hilos)', ram: 'Controlador DDR4 / DDR5 Dual Channel', storage: 'Cache AMD 3D V-Cache / L3', motherboard: 'Socket AMD AM4 / AM5 (Chipsets B550, B650)' },
+    { keywords: ['ryzen 5 5600', 'ryzen 7 5700', 'ryzen 5 7600', 'ryzen 7 7800x3d', 'ryzen 5600', 'ryzen 5700', '5600x', '5700x'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 5 / Ryzen 7 (6 a 8 Núcleos, 12 a 16 Hilos)', ram: 'Controlador DDR4 / DDR5 Dual Channel', storage: 'Cache AMD 3D V-Cache / L3', motherboard: 'Socket AMD AM4 / AM5 (Chipsets B550, B650)' },
 
-    // MONITORES (DELL, HP, LG, SAMSUNG, ASUS, BENQ)
+    // MONITORES
     { keywords: ['p2422h', 'se2422h', 'e2420h', 's2721hn', 'dell monitor'], brand: 'Dell', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) @ 60Hz-75Hz', ram: 'Tiempo de respuesta 5ms', storage: 'Puertos HDMI / DisplayPort / VGA', motherboard: 'Ajuste de Altura, Inclinación y Giro Pivot' },
     { keywords: ['e24 g4', 'p24v', 'v24i', 'm24f', 'hp monitor'], brand: 'HP', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) Micro-Edge', ram: 'Frecuencia 75Hz con HP Eye Ease', storage: 'Entradas HDMI / DisplayPort / VGA', motherboard: 'Soporte VESA 100x100mm' },
     { keywords: ['ultragear', '24mp400', '24gn600', 'lg monitor'], brand: 'LG', type: 'Monitor / Pantalla', cpu: 'Panel IPS Gaming Full HD (144Hz / 75Hz)', ram: 'AMD FreeSync / 1ms MBR', storage: 'Dual HDMI, DisplayPort', motherboard: 'Base Regulable' },
@@ -914,20 +1007,40 @@ function initEventListeners() {
 
   function findClientSpecsMatch(query) {
     if (!query || typeof query !== 'string') return null;
-    const lower = query.toLowerCase().trim();
-    if (lower.length < 2) return null;
+    const rawClean = query.trim();
+    const normalized = normalizeHardwareQuery(rawClean);
+    if (normalized.length < 2) return null;
 
-    // 1. Buscar en catálogo cliente exacto
+    const detectedBrand = detectBrandFromText(normalized) || detectBrandFromText(rawClean);
+
+    // 1. Buscar en catálogo cliente exacto / inclusivo
     for (const item of CLIENT_SPECS_CATALOG) {
       for (const kw of item.keywords) {
-        if (lower.includes(kw)) {
-          return item;
+        if (normalized.includes(kw) || rawClean.toLowerCase().includes(kw)) {
+          const res = { ...item };
+          if (detectedBrand && res.brand.includes('/')) {
+            res.brand = detectedBrand;
+          }
+          return res;
+        }
+      }
+    }
+
+    // Coincidencia por tokens si hay varias palabras (ej. "hyperx kingstone")
+    const tokens = normalized.split(/\s+/).filter(w => w.length >= 3);
+    if (tokens.length >= 2) {
+      for (const item of CLIENT_SPECS_CATALOG) {
+        const matchesAll = tokens.every(t => item.keywords.some(k => k.includes(t) || t.includes(k)));
+        if (matchesAll) {
+          const res = { ...item };
+          if (detectedBrand) res.brand = detectedBrand;
+          return res;
         }
       }
     }
 
     // 2. Detección Inteligente de Impresoras por Modelo o Consumible
-    const printerConsumable = autoDetectPrinterConsumables(lower);
+    const printerConsumable = autoDetectPrinterConsumables(normalized) || autoDetectPrinterConsumables(rawClean);
     if (printerConsumable) {
       return {
         brand: printerConsumable.brand,
@@ -940,55 +1053,68 @@ function initEventListeners() {
       };
     }
 
-    // 3. Inferencia de Componentes y Almacenamiento (SSD / HDD / NVMe)
-    if (/nvme|ssd|m\.2|sata|hdd|disco|almacenamiento/i.test(lower)) {
-      let brand = 'Genérico';
-      if (/kingston/i.test(lower)) brand = 'Kingston';
-      else if (/samsung/i.test(lower)) brand = 'Samsung';
-      else if (/western\s*digital|wd/i.test(lower)) brand = 'Western Digital';
-      else if (/crucial/i.test(lower)) brand = 'Crucial';
-      else if (/adata|xpg/i.test(lower)) brand = 'Adata';
-      else if (/seagate/i.test(lower)) brand = 'Seagate';
-
-      let cap = '1 TB SSD NVMe PCIe Gen4';
-      if (/2tb|2\s*tb/i.test(lower)) cap = '2 TB SSD NVMe M.2 PCIe Gen4';
-      else if (/1tb|1\s*tb/i.test(lower)) cap = '1 TB SSD NVMe M.2 PCIe Gen4';
-      else if (/512|500/i.test(lower)) cap = '512 GB SSD NVMe M.2 PCIe Gen4';
-      else if (/480|240|256/i.test(lower)) cap = '480 GB / 256 GB SSD SATA 2.5" / NVMe';
-
-      return {
-        brand,
-        type: 'Disco / Almacenamiento',
-        storage: cap,
-        motherboard: /sata/i.test(lower) ? 'SATA III 6Gb/s (2.5")' : 'M.2 NVMe PCIe Gen4 x4 (2280)'
-      };
-    }
-
-    // 4. Inferencia de Memoria RAM
-    if (/ram|ddr4|ddr5|ddr3|dimm|fury|vengeance/i.test(lower)) {
-      let brand = 'Kingston';
-      if (/corsair/i.test(lower)) brand = 'Corsair';
-      else if (/crucial/i.test(lower)) brand = 'Crucial';
-      else if (/g\.?skill/i.test(lower)) brand = 'G.Skill';
-      else if (/adata|xpg/i.test(lower)) brand = 'Adata';
-
+    // 3. Inferencia Heurística de Memoria RAM
+    if (/hyperx|fury|renegade|valueram|vengeance|ripjaws|trident|ram|ddr3|ddr4|ddr5|dimm|sodimm/i.test(normalized)) {
+      let brand = detectedBrand || 'Kingston';
       let ramSpec = '16 GB DDR4 (3200MHz)';
-      if (/ddr5/i.test(lower)) ramSpec = '16 GB / 32 GB DDR5 (5600MHz)';
-      else if (/32gb|32\s*gb/i.test(lower)) ramSpec = '32 GB DDR4 (3200MHz)';
-      else if (/8gb|8\s*gb/i.test(lower)) ramSpec = '8 GB DDR4 (3200MHz)';
+      if (/ddr5/i.test(normalized)) ramSpec = '16 GB / 32 GB DDR5 (5600MHz)';
+      else if (/32gb|32\s*gb/i.test(normalized)) ramSpec = '32 GB DDR4 (3200MHz)';
+      else if (/8gb|8\s*gb/i.test(normalized)) ramSpec = '8 GB DDR4 (3200MHz)';
+      else if (/64gb|64\s*gb/i.test(normalized)) ramSpec = '64 GB DDR4/DDR5 Dual Channel';
 
       return {
         brand,
         type: 'Memoria RAM',
         ram: ramSpec,
-        motherboard: /laptop|so-dimm|sodimm/i.test(lower) ? 'SO-DIMM Laptop (260-pin)' : 'DIMM Desktop (288-pin) XMP'
+        motherboard: /laptop|so-dimm|sodimm/i.test(normalized) ? 'SO-DIMM Laptop (260-pin)' : 'DIMM Desktop (288-pin) XMP'
       };
     }
 
-    // 5. Inferencia de GPU
-    if (/rtx|gtx|radeon|rx\s*\d|geforce|gpu|tarjeta\s*de\s*video/i.test(lower)) {
+    // 4. Inferencia de Discos SSD / Almacenamiento
+    if (/nvme|ssd|m\.2|sata|hdd|disco|almacenamiento/i.test(normalized)) {
+      let brand = detectedBrand || 'Kingston';
+      let cap = '1 TB SSD NVMe PCIe Gen4';
+      if (/2tb|2\s*tb/i.test(normalized)) cap = '2 TB SSD NVMe M.2 PCIe Gen4';
+      else if (/1tb|1\s*tb/i.test(normalized)) cap = '1 TB SSD NVMe M.2 PCIe Gen4';
+      else if (/512|500/i.test(normalized)) cap = '512 GB SSD NVMe M.2 PCIe Gen4';
+      else if (/480|240|256/i.test(normalized)) cap = '480 GB / 256 GB SSD SATA 2.5" / NVMe';
+
       return {
-        brand: /radeon|rx/i.test(lower) ? 'AMD' : 'NVIDIA',
+        brand,
+        type: 'Disco / Almacenamiento',
+        storage: cap,
+        motherboard: /sata/i.test(normalized) ? 'SATA III 6Gb/s (2.5")' : 'M.2 NVMe PCIe Gen4 x4 (2280)'
+      };
+    }
+
+    // 5. Inferencia de Placas Base
+    if (/b550|b450|a320|b650|x670|b760|h610|z790|h510|b660|placa\s*base|motherboard/i.test(normalized)) {
+      return {
+        brand: detectedBrand || 'Gigabyte',
+        type: 'Placa Base / Motherboard',
+        cpu: /b550|b450|a320|b650|x670/i.test(normalized) ? 'Socket AMD AM4 / AM5' : 'Socket Intel LGA 1700 / LGA 1200',
+        ram: /ddr5|b650|z790/i.test(normalized) ? 'Ranuras DDR5 Dual Channel' : 'Ranuras DDR4 Dual Channel (Hasta 128GB)',
+        storage: 'Ranuras M.2 NVMe PCIe + Puertos SATA 6Gb/s',
+        motherboard: 'Factor de Forma Micro-ATX / ATX'
+      };
+    }
+
+    // 6. Inferencia de Fuentes de Poder
+    if (/fuente|psu|power\s*supply|80\s*plus|bronze|gold|rm\d{3}|cv\d{3}|toughpower/i.test(normalized)) {
+      return {
+        brand: detectedBrand || 'Corsair',
+        type: 'Fuente de Poder (PSU)',
+        cpu: 'Certificación 80 Plus Bronze / Gold',
+        ram: 'Protecciones OVP / UVP / SCP / OTP',
+        storage: 'Potencia 650W / 750W Watts Reales',
+        motherboard: 'Conector ATX 24 pines, EPS 8 pines, PCIe'
+      };
+    }
+
+    // 7. Inferencia de GPU
+    if (/rtx|gtx|radeon|rx\s*\d|geforce|gpu|tarjeta\s*de\s*video/i.test(normalized)) {
+      return {
+        brand: detectedBrand || (/radeon|rx/i.test(normalized) ? 'AMD' : 'NVIDIA'),
         type: 'Tarjeta de Video (GPU)',
         cpu: 'GPU Dedicada Alto Rendimiento',
         ram: '8 GB / 12 GB GDDR6 VRAM',
@@ -997,17 +1123,22 @@ function initEventListeners() {
       };
     }
 
-    // 6. Inferencia de Monitores
-    if (/monitor|pantalla|display/i.test(lower)) {
-      let brand = 'Dell';
-      if (/hp/i.test(lower)) brand = 'HP';
-      else if (/samsung/i.test(lower)) brand = 'Samsung';
-      else if (/lg/i.test(lower)) brand = 'LG';
-      else if (/asus/i.test(lower)) brand = 'ASUS';
-      else if (/viewsonic/i.test(lower)) brand = 'ViewSonic';
-
+    // 8. Inferencia de Procesadores (CPU)
+    if (/ryzen|core\s*i\d|intel\s*core|amd\s*ryzen|xeon|celeron|pentium|athlon/i.test(normalized)) {
       return {
-        brand,
+        brand: /ryzen|athlon|amd/i.test(normalized) ? 'AMD' : 'Intel',
+        type: 'Procesador (CPU)',
+        cpu: rawClean.toUpperCase(),
+        ram: 'Controlador de Memoria Dual Channel DDR4/DDR5 Integrado',
+        storage: 'Memoria Caché L3 de Alta Velocidad',
+        motherboard: /ryzen|athlon/i.test(normalized) ? 'Socket AMD AM4 / AM5' : 'Socket Intel LGA 1700'
+      };
+    }
+
+    // 9. Inferencia de Monitores
+    if (/monitor|pantalla|display/i.test(normalized)) {
+      return {
+        brand: detectedBrand || 'Dell',
         type: 'Monitor / Pantalla',
         cpu: 'Panel IPS Full HD (1920x1080)',
         ram: 'Frecuencia 75Hz / Tiempo 5ms',
@@ -1016,8 +1147,8 @@ function initEventListeners() {
       };
     }
 
-    // 7. Inferencia Heurística General de Marcas de PC
-    if (/epson/i.test(lower)) {
+    // 10. Inferencia Heurística General de Marcas de PC
+    if (/epson/i.test(normalized)) {
       return {
         brand: 'Epson',
         type: 'Impresora / Multifuncional',
@@ -1237,6 +1368,39 @@ function initEventListeners() {
 
   // Catálogo completo de sugerencias de modelos para autocompletado táctil
   const POPULAR_SUGGESTION_MODELS = [
+    // COMPONENTES Y HARDWARE POPULAR
+    { model: 'Memoria RAM Kingston FURY Beast 16GB DDR4', type: 'Memoria RAM', icon: '🧠' },
+    { model: 'Memoria RAM Kingston HyperX Fury 16GB', type: 'Memoria RAM', icon: '🧠' },
+    { model: 'Memoria RAM Corsair Vengeance LPX 16GB DDR4', type: 'Memoria RAM', icon: '🧠' },
+    { model: 'Memoria RAM Crucial Pro 16GB DDR5 5600MHz', type: 'Memoria RAM', icon: '🧠' },
+    { model: 'Memoria RAM G.Skill Trident Z RGB 32GB DDR4', type: 'Memoria RAM', icon: '🧠' },
+    { model: 'SSD Kingston NV2 1TB NVMe PCIe 4.0', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'SSD Kingston NV3 1TB NVMe PCIe 4.0', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'SSD Kingston A400 480GB SATA 2.5"', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'SSD Samsung 980 PRO 1TB PCIe NVMe', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'SSD Samsung 990 PRO 2TB PCIe NVMe', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'SSD WD Blue SN580 1TB NVMe M.2', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'SSD Crucial P3 Plus 1TB NVMe M.2', type: 'Disco / Almacenamiento', icon: '💾' },
+    { model: 'Tarjeta Gráfica NVIDIA GeForce RTX 4060 8GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
+    { model: 'Tarjeta Gráfica NVIDIA GeForce RTX 3060 12GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
+    { model: 'Tarjeta Gráfica AMD Radeon RX 6600 8GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
+    { model: 'Tarjeta Gráfica AMD Radeon RX 7600 8GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
+    { model: 'Procesador AMD Ryzen 5 5600 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 7 5700X 8 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 5 7600 AM5', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i5-12400F 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i5-13400 10 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i7-13700 16 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Placa Base Gigabyte B550M AORUS ELITE', type: 'Placa Base / Motherboard', icon: '🧩' },
+    { model: 'Placa Base ASUS TUF Gaming B550-PLUS', type: 'Placa Base / Motherboard', icon: '🧩' },
+    { model: 'Placa Base ASUS TUF Gaming B760M-PLUS', type: 'Placa Base / Motherboard', icon: '🧩' },
+    { model: 'Placa Base MSI PRO B650M-A WiFi', type: 'Placa Base / Motherboard', icon: '🧩' },
+    { model: 'Placa Base ASUS Prime H610M-K', type: 'Placa Base / Motherboard', icon: '🧩' },
+    { model: 'Fuente Corsair RM750e 750W 80 Plus Gold', type: 'Fuente de Poder (PSU)', icon: '🔌' },
+    { model: 'Fuente Corsair CV650 650W 80 Plus Bronze', type: 'Fuente de Poder (PSU)', icon: '🔌' },
+    { model: 'Fuente Thermaltake Smart 600W 80 Plus', type: 'Fuente de Poder (PSU)', icon: '🔌' },
+
+    // EQUIPOS Y LAPTOPS
     { model: 'Laptop Gamer Victus by HP 15', type: 'Laptop Gamer', icon: '⚡' },
     { model: 'HP ProBook 450 G8', type: 'Laptop Empresarial', icon: '💻' },
     { model: 'HP EliteBook 840 G8', type: 'Laptop Ejecutiva', icon: '💻' },
@@ -1298,21 +1462,39 @@ function initEventListeners() {
   ];
 
   function getCombinedModelSuggestions(query = '') {
-    const q = (query || '').trim().toLowerCase();
+    const rawClean = (query || '').trim();
+    const q = rawClean.toLowerCase();
+    const qNorm = normalizeHardwareQuery(rawClean);
+    const tokens = qNorm.split(/\s+/).filter(w => w.length >= 2);
     const suggestions = [];
     const seen = new Set();
+
+    function matchQuery(text) {
+      if (!q) return true;
+      const lower = text.toLowerCase();
+      const norm = normalizeHardwareQuery(text);
+      if (lower.includes(q) || norm.includes(qNorm)) return true;
+      if (tokens.length > 0 && tokens.every(t => norm.includes(t) || lower.includes(t))) return true;
+      return false;
+    }
 
     // 1. Modelos registrados previamente en el inventario real del usuario (prioridad)
     if (inventoryData && inventoryData.length > 0) {
       inventoryData.forEach(item => {
         const m = (item.modelo || '').trim();
         if (m && m.length > 2 && !seen.has(m.toLowerCase())) {
-          if (!q || m.toLowerCase().includes(q)) {
+          if (matchQuery(m)) {
             seen.add(m.toLowerCase());
             const tipo = (item.tipo_equipo || 'En inventario').trim();
             let icon = '💻';
             const tLower = tipo.toLowerCase();
             if (tLower.includes('escritorio') || tLower.includes('desktop') || tLower.includes('optiplex')) icon = '🖥️';
+            else if (tLower.includes('ram') || tLower.includes('memoria')) icon = '🧠';
+            else if (tLower.includes('disco') || tLower.includes('ssd') || tLower.includes('almacenamiento')) icon = '💾';
+            else if (tLower.includes('gpu') || tLower.includes('video')) icon = '🎮';
+            else if (tLower.includes('procesador') || tLower.includes('cpu')) icon = '⚡';
+            else if (tLower.includes('placa') || tLower.includes('motherboard')) icon = '🧩';
+            else if (tLower.includes('fuente') || tLower.includes('psu')) icon = '🔌';
             else if (tLower.includes('proyector')) icon = '📽️';
             else if (tLower.includes('impresora')) icon = '🖨️';
             else if (tLower.includes('switch') || tLower.includes('red')) icon = '🌐';
@@ -1327,14 +1509,27 @@ function initEventListeners() {
     // 2. Modelos populares predefinidos
     POPULAR_SUGGESTION_MODELS.forEach(item => {
       if (!seen.has(item.model.toLowerCase())) {
-        if (!q || item.model.toLowerCase().includes(q) || item.type.toLowerCase().includes(q)) {
+        if (matchQuery(item.model) || matchQuery(item.type)) {
           seen.add(item.model.toLowerCase());
           suggestions.push({ ...item, source: 'system' });
         }
       }
     });
 
-    return suggestions.slice(0, 20);
+    const finalSuggestions = suggestions.slice(0, 18);
+
+    // 3. Opción de búsqueda directa en Internet si hay texto
+    if (rawClean.length >= 2) {
+      finalSuggestions.push({
+        isAction: true,
+        action: 'search-internet',
+        model: rawClean,
+        type: 'Internet / Base Global',
+        icon: '🌐'
+      });
+    }
+
+    return finalSuggestions;
   }
 
   function renderModelDropdown(query = '') {
@@ -1345,25 +1540,48 @@ function initEventListeners() {
     if (list.length === 0) {
       dropdownEl.innerHTML = `
         <div style="padding: 12px 14px; color: var(--gray-400); font-size: 0.8rem; text-align: center;">
-          <i class="fa-solid fa-magnifying-glass"></i> No se encontraron coincidencias exactas. Puedes escribirlo libremente.
+          <i class="fa-solid fa-magnifying-glass"></i> No se encontraron coincidencias. Puedes escribirlo libremente.
         </div>
       `;
       dropdownEl.style.display = 'block';
       return;
     }
 
-    dropdownEl.innerHTML = list.map(item => `
-      <div class="custom-model-item" data-model="${escapeHTML(item.model)}">
-        <div class="custom-model-info">
-          <span class="custom-model-icon">${item.icon}</span>
-          <span class="custom-model-name">${escapeHTML(item.model)}</span>
+    dropdownEl.innerHTML = list.map(item => {
+      if (item.isAction) {
+        return `
+          <div class="custom-model-item custom-model-action" data-action="search-internet" data-model="${escapeHTML(item.model)}" style="background: rgba(14, 165, 233, 0.12); border-top: 1px solid rgba(14, 165, 233, 0.3); cursor: pointer;">
+            <div class="custom-model-info">
+              <span class="custom-model-icon">🌐</span>
+              <span class="custom-model-name" style="color: #38bdf8; font-weight: 600;">Buscar "${escapeHTML(item.model)}" en Internet</span>
+            </div>
+            <span class="custom-model-tag" style="background: rgba(14, 165, 233, 0.25); color: #38bdf8;">Auto-Ficha Técnica</span>
+          </div>
+        `;
+      }
+      return `
+        <div class="custom-model-item" data-model="${escapeHTML(item.model)}">
+          <div class="custom-model-info">
+            <span class="custom-model-icon">${item.icon}</span>
+            <span class="custom-model-name">${escapeHTML(item.model)}</span>
+          </div>
+          <span class="custom-model-tag">${escapeHTML(item.type)}</span>
         </div>
-        <span class="custom-model-tag">${escapeHTML(item.type)}</span>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     // Asignar listeners táctiles y click que permiten SWIPE y SCROLL libremente
     let isTouchInteraction = false;
+
+    function handleSelection(el) {
+      const isAction = el.getAttribute('data-action') === 'search-internet';
+      const selected = el.getAttribute('data-model');
+      if (selected && formModelo) {
+        if (!isAction) formModelo.value = selected;
+        dropdownEl.style.display = 'none';
+        triggerModelSpecsAutofill(selected, true);
+      }
+    }
 
     dropdownEl.querySelectorAll('.custom-model-item').forEach(el => {
       let touchStartY = 0;
@@ -1394,12 +1612,7 @@ function initEventListeners() {
       // touchend: Si NO hubo desplazamiento (tap directo), selecciona el modelo
       el.addEventListener('touchend', (e) => {
         if (!hasSwiped) {
-          const selected = el.getAttribute('data-model');
-          if (selected && formModelo) {
-            formModelo.value = selected;
-            dropdownEl.style.display = 'none';
-            triggerModelSpecsAutofill(selected, true);
-          }
+          handleSelection(el);
         }
         setTimeout(() => { isTouchInteraction = false; }, 400);
       });
@@ -1407,12 +1620,7 @@ function initEventListeners() {
       // Clic normal con mouse para PC / Laptop
       el.addEventListener('click', (e) => {
         if (isTouchInteraction) return; // Evitar doble ejecución en táctil
-        const selected = el.getAttribute('data-model');
-        if (selected && formModelo) {
-          formModelo.value = selected;
-          dropdownEl.style.display = 'none';
-          triggerModelSpecsAutofill(selected, true);
-        }
+        handleSelection(el);
       });
     });
 
