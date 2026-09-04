@@ -281,23 +281,22 @@ public class MainActivity extends AppCompatActivity {
      */
     public void triggerDownload(String url) {
         try {
-            final String version = "2.1.3";
-            final String officialUrl = "https://github.com/Tayron211/inventario-computo/releases/download/app-v2.1.3/SysInventory.apk";
-            final String downloadUrl = (url != null && url.startsWith("http") && !url.contains("download-apk")) ? url : officialUrl;
+            final String officialLatestUrl = "https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk";
+            final String downloadUrl = (url != null && url.startsWith("http") && !url.contains("download-apk")) ? url : officialLatestUrl;
 
             // 1. Descarga nativa en segundo plano con notificación del sistema
             try {
                 DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 if (downloadManager != null) {
                     DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-                    request.setTitle("SysInventory v" + version);
-                    request.setDescription("Descargando actualización oficial APK...");
+                    request.setTitle("SysInventory Actualización");
+                    request.setDescription("Descargando la última versión de SysInventory APK...");
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "SysInventory-v" + version + ".apk");
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "SysInventory.apk");
                     request.setMimeType("application/vnd.android.package-archive");
                     downloadManager.enqueue(request);
 
-                    Toast.makeText(this, "Descargando SysInventory v" + version + ".apk en segundo plano. Mira tus notificaciones para instalarla.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Descargando la versión más reciente en segundo plano. Mira tus notificaciones para instalarla.", Toast.LENGTH_LONG).show();
                     return;
                 }
             } catch (Exception dmEx) {
@@ -308,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            Toast.makeText(this, "Iniciando descarga de SysInventory v" + version + "...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Iniciando descarga de la última versión...", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "No se pudo iniciar la descarga del APK", Toast.LENGTH_SHORT).show();
         }

@@ -52,18 +52,47 @@ function pingRenderService() {
 setInterval(pingRenderService, 5 * 60 * 1000);
 setTimeout(pingRenderService, 2000);
 
-// Endpoint prioritario para descargar la App Android (.APK) siempre fresca con no-cache y nombre de versión claro
-app.get(['/SysInventory.apk', '/sysinventory.apk', '/SysInventory-v2.1.3.apk', '/SysInventory-v2.1.2.apk', '/SysInventory-v2.1.1.apk', '/SysInventory-v2.1.0.apk', '/SysInventory-v2.0.0.apk', '/apk', '/app', '/download-apk', '/api/download-apk'], (req, res) => {
+// Sincronización dinámica de la versión más reciente del APK
+function getLatestApkVersion() {
+  try {
+    const gradlePath = path.join(__dirname, 'android', 'app', 'build.gradle');
+    if (fs.existsSync(gradlePath)) {
+      const gradleContent = fs.readFileSync(gradlePath, 'utf8');
+      const match = gradleContent.match(/versionName\s+["']([^"']+)["']/);
+      if (match && match[1]) return match[1];
+    }
+  } catch (e) {}
+  return '2.1.3';
+}
+
+const GITHUB_LATEST_RELEASE_APK = 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
+
+app.get(['/api/apk-info', '/api/apk-version'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  const version = getLatestApkVersion();
+  res.json({
+    version: version,
+    downloadUrl: GITHUB_LATEST_RELEASE_APK,
+    localDownloadUrl: '/download-apk',
+    filename: `SysInventory-v${version}.apk`
+  });
+});
+
+// Endpoint prioritario para descargar la App Android (.APK) siempre en su última versión
+app.get(['/SysInventory.apk', '/sysinventory.apk', '/apk', '/app', '/download-apk', '/api/download-apk', /^\/SysInventory-v.*\.apk$/], (req, res) => {
   res.setHeader('Content-Type', 'application/vnd.android.package-archive');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
+  const version = getLatestApkVersion();
+  const filename = `SysInventory-v${version}.apk`;
   const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
+
   if (fs.existsSync(localApk)) {
-    return res.download(localApk, 'SysInventory-v2.1.3.apk');
+    return res.download(localApk, filename);
   }
-  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v2.1.3/SysInventory.apk');
+  return res.redirect(GITHUB_LATEST_RELEASE_APK);
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {
