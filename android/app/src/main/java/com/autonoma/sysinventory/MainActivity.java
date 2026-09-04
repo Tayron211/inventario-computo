@@ -85,18 +85,24 @@ public class MainActivity extends AppCompatActivity {
             webView.reload();
         });
 
-        // Solo activar SwipeRefresh cuando el WebView esté en el tope superior
+        // Solo activar SwipeRefresh cuando el WebView esté en el tope superior y NO haya ventana/modal abierto
         webView.getViewTreeObserver().addOnScrollChangedListener(() -> {
-            if (webView.getScrollY() == 0) {
+            if (webView.getScrollY() == 0 && !isModalOpen) {
                 swipeRefreshLayout.setEnabled(true);
             } else {
                 swipeRefreshLayout.setEnabled(false);
             }
         });
 
+        swipeRefreshLayout.setOnChildScrollUpCallback((parent, child) -> {
+            return isModalOpen || webView.getScrollY() > 0;
+        });
+
         // Cargar la aplicación web en Render
         webView.loadUrl(TARGET_URL);
     }
+
+    private boolean isModalOpen = false;
 
     /**
      * Activa el modo de 120 Hz / alta tasa de refresco si el panel del teléfono lo soporta
@@ -128,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
      * Puente JavaScript para interactuar con la app nativa:
      * - Tema de la barra de estado
      * - Descarga directa del APK de actualización
+     * - Control de swipe en ventanas/modales
      */
     public class AndroidBridgeInterface {
         @JavascriptInterface
@@ -138,6 +145,16 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void downloadApk(final String downloadUrl) {
             runOnUiThread(() -> triggerDownload(downloadUrl));
+        }
+
+        @JavascriptInterface
+        public void setModalOpen(final boolean isOpen) {
+            runOnUiThread(() -> {
+                isModalOpen = isOpen;
+                if (swipeRefreshLayout != null) {
+                    swipeRefreshLayout.setEnabled(!isOpen);
+                }
+            });
         }
     }
 

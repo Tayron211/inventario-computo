@@ -490,6 +490,9 @@ function initEventListeners() {
   // Inicializar Navegación Multi-Página
   initMultiPageNav();
 
+  // Inicializar gestos táctiles Swipe en ventanas/modales
+  initModalSwipeGestures();
+
   // Soporte directo para descargar APK en celulares y app nativa
   const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory.apk"], a[href*="download-apk"]');
   apkDownloadBtns.forEach(btn => {
@@ -1287,6 +1290,11 @@ function openModal(modalId) {
   if (modal) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    // Desactivar el swipe-to-refresh nativo de Android mientras la ventana esté abierta
+    if (window.AndroidBridge && typeof window.AndroidBridge.setModalOpen === 'function') {
+      try { window.AndroidBridge.setModalOpen(true); } catch(e) {}
+    }
   }
 }
 
@@ -1295,7 +1303,56 @@ function closeModal(modalId) {
   if (modal) {
     modal.classList.remove('active');
     document.body.style.overflow = '';
+
+    // Restaurar el swipe-to-refresh nativo de Android
+    if (window.AndroidBridge && typeof window.AndroidBridge.setModalOpen === 'function') {
+      try { window.AndroidBridge.setModalOpen(false); } catch(e) {}
+    }
   }
+}
+
+// Gesto táctil Swipe para ventanas en modo celular:
+// Permite deslizar hacia abajo en la cabecera para cerrar la ventana suavemente
+function initModalSwipeGestures() {
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    const card = overlay.querySelector('.modal-card');
+    const header = overlay.querySelector('.modal-header-styled');
+    if (!card || !header) return;
+
+    let startY = 0;
+    let currentY = 0;
+    let isDraggingHeader = false;
+
+    header.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      isDraggingHeader = true;
+    }, { passive: true });
+
+    header.addEventListener('touchmove', (e) => {
+      if (!isDraggingHeader) return;
+      currentY = e.touches[0].clientY;
+      const diffY = currentY - startY;
+      if (diffY > 10) {
+        card.style.transform = `translateY(${Math.min(diffY, 160)}px)`;
+        card.style.transition = 'none';
+      }
+    }, { passive: true });
+
+    header.addEventListener('touchend', (e) => {
+      if (!isDraggingHeader) return;
+      isDraggingHeader = false;
+      const diffY = currentY - startY;
+      card.style.transition = 'transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1)';
+      if (diffY > 80) {
+        closeModal(overlay.id);
+        setTimeout(() => { card.style.transform = ''; }, 240);
+      } else {
+        card.style.transform = '';
+      }
+      startY = 0;
+      currentY = 0;
+    }, { passive: true });
+  });
 }
 
 // Limpiar 100% todos los campos del formulario de registro/edición de equipo
