@@ -106,7 +106,7 @@
             android:layout_marginBottom="32dp"
             android:fontFamily="sans-serif"
             android:letterSpacing="0.06"
-            android:text="v2.0.0 • Universidad Autónoma"
+            android:text="v2.1.4"
             android:textColor="#64748B"
             android:textSize="12sp" />
 

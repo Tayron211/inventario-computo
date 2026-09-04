@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         btnSplashRetry = findViewById(R.id.btnSplashRetry);
         TextView splashFooter = findViewById(R.id.splashFooter);
         if (splashFooter != null) {
-            splashFooter.setText("v" + getAppVersionName() + " • Universidad Autónoma");
+            splashFooter.setText("v" + getAppVersionName());
         }
 
         if (btnSplashRetry != null) {
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         } catch (Exception e) {
-            return "2.1.3";
+            return "2.1.4";
         }
     }
 
