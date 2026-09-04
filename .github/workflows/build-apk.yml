@@ -81,8 +81,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: app-v2.1.1
-          name: "SysInventory Android App (v2.1.1 - Inicio Instantáneo sin Esperas & Keep-Alive)"
+          tag_name: app-v2.1.2
+          name: "SysInventory Android App (v2.1.2 - Descarga Directa Nativa & Rendimiento)"
           body: |
             ### 📱 Aplicación Móvil Oficial de SysInventory para Android
             Esta versión está compilada en modo Release y firmada oficialmente para evitar falsos positivos de Google Play Protect.

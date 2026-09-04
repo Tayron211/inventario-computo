@@ -492,17 +492,17 @@ function initEventListeners() {
   // Inicializar gestos táctiles Swipe en ventanas/modales
   initModalSwipeGestures();
 
-  // Soporte directo para descargar APK en celulares y app nativa (v2.1.0)
-  const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory.apk"], a[href*="download-apk"]');
+  // Soporte directo para descargar APK en celulares y app nativa (v2.1.2)
+  const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory"], a[href*="download-apk"]');
   apkDownloadBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const targetUrl = window.location.origin + '/download-apk?v=2.1.0';
+      const targetUrl = 'https://github.com/Tayron211/inventario-computo/releases/download/app-v2.1.2/SysInventory.apk';
       if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
         e.preventDefault();
         window.AndroidBridge.downloadApk(targetUrl);
-        showToast('Iniciando descarga de SysInventory v2.1.0...', 'info');
+        showToast('Iniciando descarga nativa de SysInventory v2.1.2...', 'info');
       } else {
-        showToast('Descargando SysInventory-v2.1.0.apk...', 'success');
+        showToast('Descargando SysInventory-v2.1.2.apk...', 'success');
       }
     });
   });

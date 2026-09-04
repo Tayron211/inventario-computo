@@ -1,12 +1,15 @@
 package com.autonoma.sysinventory;
 
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -276,26 +279,44 @@ public class MainActivity extends AppCompatActivity {
         try {
             return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         } catch (Exception e) {
-            return "2.1.0";
+            return "2.1.2";
         }
     }
 
     /**
-     * Dispara la descarga del APK directamente a través del gestor del sistema / navegador
+     * Dispara la descarga del APK directamente a través del DownloadManager nativo de Android
+     * para que aparezca en la barra de notificaciones y permita instalación inmediata.
      */
     public void triggerDownload(String url) {
         try {
-            String version = getAppVersionName();
-            if (url == null || url.trim().isEmpty()) {
-                url = TARGET_URL + "download-apk?v=" + version;
+            final String version = "2.1.2";
+            final String officialUrl = "https://github.com/Tayron211/inventario-computo/releases/download/app-v2.1.2/SysInventory.apk";
+            final String downloadUrl = (url != null && url.startsWith("http") && !url.contains("download-apk")) ? url : officialUrl;
+
+            // 1. Descarga nativa en segundo plano con notificación del sistema
+            try {
+                DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                if (downloadManager != null) {
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
+                    request.setTitle("SysInventory v" + version);
+                    request.setDescription("Descargando actualización oficial APK...");
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "SysInventory-v" + version + ".apk");
+                    request.setMimeType("application/vnd.android.package-archive");
+                    downloadManager.enqueue(request);
+
+                    Toast.makeText(this, "Descargando SysInventory v" + version + ".apk en segundo plano. Mira tus notificaciones para instalarla.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            } catch (Exception dmEx) {
+                // Si DownloadManager tiene alguna restricción en el dispositivo, continuar con fallback
             }
-            if (url.startsWith("/")) {
-                url = TARGET_URL + url.substring(1);
-            }
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+
+            // 2. Fallback: Abrir en el navegador externo del sistema
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            Toast.makeText(this, "Descargando SysInventory v" + version + "...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Iniciando descarga de SysInventory v" + version + "...", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "No se pudo iniciar la descarga del APK", Toast.LENGTH_SHORT).show();
         }
