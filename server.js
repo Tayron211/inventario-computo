@@ -427,11 +427,30 @@ let lastCloudSyncStatus = {
   error: null
 };
 
+function deduplicateDeletedItems(list) {
+  const map = new Map();
+  for (const d of (list || [])) {
+    if (!d) continue;
+    const id = String(d.id || '').trim();
+    const serial = String(d.serial || '').trim().toLowerCase();
+    const key = `${id}::${serial}`;
+    if (!map.has(key)) {
+      map.set(key, d);
+    } else {
+      const existing = map.get(key);
+      if ((d.deleted_at || 0) > (existing.deleted_at || 0)) {
+        map.set(key, d);
+      }
+    }
+  }
+  return Array.from(map.values());
+}
+
 function loadDeletedItems() {
   try {
     if (fs.existsSync(DELETED_FILE)) {
       const parsed = JSON.parse(fs.readFileSync(DELETED_FILE, 'utf8'));
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return deduplicateDeletedItems(parsed);
     }
   } catch (err) {}
   return [];
@@ -439,41 +458,66 @@ function loadDeletedItems() {
 
 function saveDeletedItems(data) {
   try {
-    fs.writeFileSync(DELETED_FILE, JSON.stringify(data || [], null, 2), 'utf8');
+    const unique = deduplicateDeletedItems(data || []);
+    if (unique.length > 500) unique.splice(0, unique.length - 500);
+    fs.writeFileSync(DELETED_FILE, JSON.stringify(unique, null, 2), 'utf8');
   } catch (err) {}
 }
 
 function recordDeletedItem(item) {
   if (!item) return;
   const list = loadDeletedItems();
-  const id = String(item.id || '');
+  const id = String(item.id || '').trim();
   const serial = (item.numero_serie || '').trim().toLowerCase();
   const isGeneric = !serial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serial);
   
-  // Evitar duplicar la misma entrada en la lista de eliminados
-  if (!list.some(d => (id && d.id === id) || (!isGeneric && d.serial === serial))) {
-    list.push({
-      id: id,
-      serial: isGeneric ? '' : serial,
-      deleted_at: Date.now()
-    });
+  list.push({
+    id: id,
+    serial: isGeneric ? '' : serial,
+    deleted_at: Date.now()
+  });
+
+  saveDeletedItems(list);
+}
+
+function unrecordDeletedItem(id, serial) {
+  let list = loadDeletedItems();
+  const cleanId = String(id || '').trim();
+  const cleanSerial = String(serial || '').trim().toLowerCase();
+  const isGeneric = !cleanSerial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(cleanSerial);
+
+  const filtered = list.filter(d => {
+    if (cleanId && String(d.id || '').trim() === cleanId) return false;
+    if (!isGeneric && d.serial && String(d.serial).trim().toLowerCase() === cleanSerial) return false;
+    return true;
+  });
+
+  if (filtered.length !== list.length) {
+    saveDeletedItems(filtered);
   }
 
-  if (list.length > 500) list.splice(0, list.length - 500);
-  saveDeletedItems(list);
+  if (mongoDeletedColl) {
+    const conditions = [];
+    if (cleanId) conditions.push({ id: cleanId });
+    if (!isGeneric) conditions.push({ serial: cleanSerial });
+    if (conditions.length > 0) {
+      mongoDeletedColl.deleteMany({ $or: conditions }).catch(() => {});
+    }
+  }
 }
 
 function getItemDedupeKey(item) {
   if (!item) return '';
+  const id = String(item.id || '').trim();
+  if (id && !id.startsWith('item-temp')) {
+    return `id:${id}`;
+  }
+
   const serial = (item.numero_serie || '').trim().toLowerCase();
   const isGeneric = !serial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serial);
   
   if (!isGeneric) {
     return `serial:${serial}`;
-  }
-  
-  if (item.id && !String(item.id).startsWith('item-temp')) {
-    return `id:${item.id}`;
   }
   
   const host = (item.hostname || '').trim().toLowerCase();
@@ -483,16 +527,17 @@ function getItemDedupeKey(item) {
 }
 
 function mergeInventories(listA, listB, extraDeleted = []) {
-  const allDeleted = [...loadDeletedItems(), ...(extraDeleted || [])];
-  const deletedIds = new Set();
-  const deletedSerials = new Set();
+  const allDeleted = deduplicateDeletedItems([...loadDeletedItems(), ...(extraDeleted || [])]);
+  const deletedIdMap = new Map();
+  const deletedSerialMap = new Map();
 
   allDeleted.forEach(d => {
-    if (d.id) deletedIds.add(String(d.id));
+    const delTime = d.deleted_at || Date.now();
+    if (d.id) deletedIdMap.set(String(d.id).trim(), delTime);
     if (d.serial) {
       const s = String(d.serial).trim().toLowerCase();
       if (s && s.length > 2 && !/^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(s)) {
-        deletedSerials.add(s);
+        deletedSerialMap.set(s, delTime);
       }
     }
   });
@@ -502,12 +547,19 @@ function mergeInventories(listA, listB, extraDeleted = []) {
   function processItem(rawItem) {
     if (!rawItem) return;
     const item = normalizeItem(rawItem);
-    const id = String(item.id || '');
+    const id = String(item.id || '').trim();
     const serial = (item.numero_serie || '').trim().toLowerCase();
+    const itemTime = item.updated_at || new Date(item.fecha_modificacion || item.fecha_escaneo || 0).getTime() || 0;
 
-    // Si está en la lista de eliminados (tombstones), IGNORAR por completo para evitar resurrección
-    if (id && deletedIds.has(id)) return;
-    if (serial && deletedSerials.has(serial)) return;
+    // Comprobar si está marcado como eliminado
+    const idDelTime = id ? deletedIdMap.get(id) : null;
+    const serDelTime = serial ? deletedSerialMap.get(serial) : null;
+    const maxDelTime = Math.max(idDelTime || 0, serDelTime || 0);
+
+    // Si la eliminación fue más reciente que la creación/edición, descartar el registro
+    if (maxDelTime > 0 && maxDelTime > itemTime) {
+      return;
+    }
 
     const key = getItemDedupeKey(item);
     if (!key) return;
@@ -516,10 +568,10 @@ function mergeInventories(listA, listB, extraDeleted = []) {
       mergedMap.set(key, item);
     } else {
       const existing = mergedMap.get(key);
-      const dateExisting = new Date(existing.fecha_modificacion || existing.fecha_escaneo || 0).getTime();
-      const dateNew = new Date(item.fecha_modificacion || item.fecha_escaneo || 0).getTime();
+      const dateExisting = existing.updated_at || new Date(existing.fecha_modificacion || existing.fecha_escaneo || 0).getTime() || 0;
+      const dateNew = itemTime;
 
-      // Registro más reciente prevalece, pero preservando campos no vacíos del otro
+      // El registro más reciente prevalece
       if (dateNew >= dateExisting) {
         mergedMap.set(key, { ...existing, ...item });
       } else {
@@ -533,8 +585,8 @@ function mergeInventories(listA, listB, extraDeleted = []) {
 
   const result = Array.from(mergedMap.values());
   result.sort((a, b) => {
-    const da = new Date(a.fecha_escaneo || 0).getTime();
-    const db = new Date(b.fecha_escaneo || 0).getTime();
+    const da = a.updated_at || new Date(a.fecha_modificacion || a.fecha_escaneo || 0).getTime() || 0;
+    const db = b.updated_at || new Date(b.fecha_modificacion || b.fecha_escaneo || 0).getTime() || 0;
     return db - da;
   });
 
@@ -561,9 +613,6 @@ async function syncMongoDB(items, deletedList) {
     if (deletedIds.length > 0) {
       orClauses.push({ id: { $in: deletedIds } });
     }
-    if (deletedSerials.length > 0) {
-      orClauses.push({ numero_serie: { $in: deletedSerials } });
-    }
 
     if (orClauses.length > 0) {
       await mongoCollection.deleteMany({ $or: orClauses });
@@ -584,9 +633,10 @@ async function syncMongoDB(items, deletedList) {
       await mongoCollection.bulkWrite(bulkOps, { ordered: false });
     }
 
-    // 3. Persistir tombstones en colección 'eliminados' de MongoDB
+    // 3. Persistir tombstones en colección 'eliminados' de MongoDB de forma limpia y deduplicada
     if (mongoDeletedColl && deletedList && deletedList.length > 0) {
-      const delOps = deletedList.slice(-300).map(d => ({
+      const cleanDeleted = deduplicateDeletedItems(deletedList);
+      const delOps = cleanDeleted.slice(-200).map(d => ({
         replaceOne: {
           filter: { id: String(d.id) },
           replacement: { id: String(d.id), serial: d.serial || '', deleted_at: d.deleted_at || Date.now() },
@@ -634,13 +684,13 @@ async function initCloudDatabase() {
       mongoError = null;
       console.log('✅ Base de Datos en la Nube (MongoDB Atlas) conectada con éxito.');
 
-      // 1. Cargar eliminados guardados en MongoDB
+      // 1. Cargar eliminados guardados en MongoDB y deduplicar
       try {
         const cloudDeleted = await mongoDeletedColl.find({}).toArray();
         if (cloudDeleted && cloudDeleted.length > 0) {
           const localDel = loadDeletedItems();
-          const mergedDel = [...localDel, ...cloudDeleted.map(d => ({ id: String(d.id), serial: d.serial, deleted_at: d.deleted_at }))];
-          saveDeletedItems(mergedDel.slice(-500));
+          const mergedDel = deduplicateDeletedItems([...localDel, ...cloudDeleted.map(d => ({ id: String(d.id), serial: d.serial, deleted_at: d.deleted_at }))]);
+          saveDeletedItems(mergedDel);
         }
       } catch (e) {}
 
@@ -752,8 +802,7 @@ async function syncWithCloudDatabase() {
       await saveDB(merged);
       if (Array.isArray(syncResult.deleted) && syncResult.deleted.length > 0) {
         const currentDeleted = loadDeletedItems();
-        const mergedDeleted = [...currentDeleted, ...syncResult.deleted];
-        saveDeletedItems(mergedDeleted.slice(-500));
+        saveDeletedItems(deduplicateDeletedItems([...currentDeleted, ...syncResult.deleted]));
       }
       lastCloudSyncStatus = {
         lastSync: new Date().toISOString(),
@@ -1291,7 +1340,7 @@ app.post('/api/sync-bidirectional', async (req, res) => {
     
     if (incomingDeleted.length > 0) {
       const curDeleted = loadDeletedItems();
-      saveDeletedItems([...curDeleted, ...incomingDeleted].slice(-500));
+      saveDeletedItems(deduplicateDeletedItems([...curDeleted, ...incomingDeleted]));
     }
 
     const currentItems = loadDB();
@@ -1965,13 +2014,15 @@ app.post('/api/inventory', async (req, res) => {
     creado_por_badge: userInfo.badge || (userInfo.role === 'admin' ? 'platinum' : (userInfo.role === 'gold_admin' ? 'gold' : 'bronze')),
     creado_por_rol: userInfo.role || 'admin',
     creado_por_nombre: userInfo.displayName || userInfo.username || 'Admin',
-    fecha_escaneo: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    updated_at: Date.now(),
+    fecha_escaneo: new Date().toISOString(),
     origen: 'Manual'
   };
   
+  unrecordDeletedItem(newItem.id, newItem.numero_serie);
   items.unshift(newItem);
   await saveDB(items);
-  scheduleCloudPush();
+  scheduleCloudPush(50);
   
   res.status(201).json({ message: 'Equipo registrado exitosamente', item: newItem });
 });
@@ -2001,14 +2052,16 @@ app.put('/api/inventory/:id', async (req, res) => {
     ...items[index],
     ...req.body,
     id: items[index].id, // preservar ID
+    updated_at: Date.now(),
     modificado_por: userInfo.username || 'admin',
     modificado_por_badge: userInfo.badge || 'gold',
-    fecha_modificacion: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    fecha_modificacion: new Date().toISOString()
   };
   
+  unrecordDeletedItem(updated.id, updated.numero_serie);
   items[index] = updated;
   await saveDB(items);
-  scheduleCloudPush();
+  scheduleCloudPush(50);
   
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });

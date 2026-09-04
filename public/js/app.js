@@ -1673,18 +1673,8 @@ function deduplicateClientData(items) {
 
   for (const item of (items || [])) {
     if (!item) continue;
-    const cleanSerial = (item.numero_serie || '').trim().toLowerCase();
-    const isGeneric = !cleanSerial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(cleanSerial);
-
-    let key;
-    if (!isGeneric) {
-      key = `serial:${cleanSerial}`;
-    } else {
-      const host = (item.hostname || '').trim().toLowerCase();
-      const mb = (item.placa_base || '').trim().toLowerCase();
-      const cpu = (item.procesador || '').trim().toLowerCase().substring(0, 30);
-      key = `host:${host}|mb:${mb}|cpu:${cpu}`;
-    }
+    const id = String(item.id || '').trim();
+    const key = (id && !id.startsWith('item-temp')) ? `id:${id}` : `m:${item.modelo || ''}|sn:${item.numero_serie || ''}|h:${item.hostname || ''}`;
 
     if (!seen.has(key)) {
       seen.add(key);
@@ -1723,12 +1713,10 @@ async function fetchInventory(silent = false) {
   }
 }
 
-// Sincronización periódica automática en tiempo real (cada 2.5 segundos si la pestaña está activa)
+// Sincronización periódica automática en tiempo real garantizada (cada 2 segundos)
 setInterval(() => {
-  if (!document.hidden) {
-    fetchInventory(true);
-  }
-}, 2500);
+  fetchInventory(true);
+}, 2000);
 
 // Ejecutar escaneo de toda la red local
 async function runNetworkScan() {
@@ -3099,7 +3087,7 @@ async function deleteEquipment(id, modelo) {
     updateMetrics();
     renderDashboard();
 
-    closeModal('modalDetails');
+    closeModal('detailsModal');
     showToast('Registro eliminado con éxito', 'info');
     await fetchInventory();
   } catch (err) {
