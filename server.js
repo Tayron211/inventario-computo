@@ -35,6 +35,23 @@ app.use((req, res, next) => {
 });
 app.use(express.urlencoded({ extended: true }));
 
+// Endpoint de salud y keep-alive para evitar hibernación en Render
+app.get('/api/ping', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.status(200).send('pong');
+});
+
+// Anti-Hibernación 24/7 para Render (elimina el modo de espera)
+const RENDER_PING_URL = 'https://ivt.onrender.com/api/ping';
+function pingRenderService() {
+  try {
+    https.get(RENDER_PING_URL, (res) => {}).on('error', () => {});
+  } catch (e) {}
+}
+// Ping cada 5 minutos de forma continua
+setInterval(pingRenderService, 5 * 60 * 1000);
+setTimeout(pingRenderService, 2000);
+
 // Endpoint prioritario para descargar la App Android (.APK) siempre fresca con no-cache y nombre de versión claro
 app.get(['/SysInventory.apk', '/sysinventory.apk', '/SysInventory-v2.1.0.apk', '/SysInventory-v2.0.0.apk', '/apk', '/app', '/download-apk', '/api/download-apk'], (req, res) => {
   res.setHeader('Content-Type', 'application/vnd.android.package-archive');
@@ -44,9 +61,9 @@ app.get(['/SysInventory.apk', '/sysinventory.apk', '/SysInventory-v2.1.0.apk', '
 
   const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
   if (fs.existsSync(localApk)) {
-    return res.download(localApk, 'SysInventory-v2.1.0.apk');
+    return res.download(localApk, 'SysInventory.apk');
   }
-  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v2.1/SysInventory.apk');
+  return res.redirect('https://github.com/Tayron211/inventario-computo/releases/download/app-v2.1.1/SysInventory.apk');
 });
 
 app.use(express.static(path.join(__dirname, 'public'), {

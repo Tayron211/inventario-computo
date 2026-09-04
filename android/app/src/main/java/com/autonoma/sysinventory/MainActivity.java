@@ -19,10 +19,14 @@ import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,11 +51,14 @@ public class MainActivity extends AppCompatActivity {
 
     private android.widget.RelativeLayout splashOverlay;
     private android.widget.ImageView splashLogo;
+    private TextView splashSubtitle;
+    private ProgressBar splashLoading;
+    private Button btnSplashRetry;
     private boolean isSplashDismissed = false;
     private boolean isCurrentThemeLight = false;
     private long splashStartTime = 0;
     private static final long MIN_SPLASH_TIME = 850;
-    private static final long MAX_SPLASH_TIME = 3500;
+    private static final long MAX_SPLASH_TIME = 25000;
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     @Override
@@ -85,10 +92,23 @@ public class MainActivity extends AppCompatActivity {
 
         splashOverlay = findViewById(R.id.splashOverlay);
         splashLogo = findViewById(R.id.splashLogo);
-        android.widget.TextView splashFooter = findViewById(R.id.splashFooter);
+        splashSubtitle = findViewById(R.id.splashSubtitle);
+        splashLoading = findViewById(R.id.splashLoading);
+        btnSplashRetry = findViewById(R.id.btnSplashRetry);
+        TextView splashFooter = findViewById(R.id.splashFooter);
         if (splashFooter != null) {
             splashFooter.setText("v" + getAppVersionName() + " • Universidad Autónoma");
         }
+
+        if (btnSplashRetry != null) {
+            btnSplashRetry.setOnClickListener(v -> {
+                btnSplashRetry.setVisibility(View.GONE);
+                if (splashLoading != null) splashLoading.setVisibility(View.VISIBLE);
+                if (splashSubtitle != null) splashSubtitle.setText("Conectando con el servidor...");
+                if (webView != null) webView.loadUrl(TARGET_URL);
+            });
+        }
+
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         webView = findViewById(R.id.webView);
 
@@ -106,8 +126,14 @@ public class MainActivity extends AppCompatActivity {
                     .start();
         }
 
-        // Timer de seguridad: si la red demora, retirar splash tras MAX_SPLASH_TIME
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this::dismissSplashScreen, MAX_SPLASH_TIME);
+        // Timer de seguridad: si tarda demasiado, permitir reintentar manualmente
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (!isSplashDismissed && !isFinishing()) {
+                if (btnSplashRetry != null) btnSplashRetry.setVisibility(View.VISIBLE);
+                if (splashLoading != null) splashLoading.setVisibility(View.GONE);
+                if (splashSubtitle != null) splashSubtitle.setText("El servidor está tardando en responder.");
+            }
+        }, MAX_SPLASH_TIME);
 
         // Aceleración por hardware GPU dedicada para 120 FPS
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
@@ -291,9 +317,8 @@ public class MainActivity extends AppCompatActivity {
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         // Optimización de rendimiento para animaciones y transiciones ultra fluidas a 120 FPS
-        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
             settings.setOffscreenPreRaster(true);
         }
 
@@ -343,26 +368,68 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                if (request != null && request.isForMainFrame()) {
+                    if (splashSubtitle != null) {
+                        splashSubtitle.setText("Conectando con el servidor...");
+                    }
+                    // Si el servidor de Render está iniciando o la red tardó, reintentar automáticamente
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        if (webView != null && !isSplashDismissed && !isFinishing()) {
+                            webView.loadUrl(TARGET_URL);
+                        }
+                    }, 3000);
+                }
+            }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 swipeRefreshLayout.setRefreshing(false);
 
-                // Detectar automáticamente el tema del sistema cargado
+                // Detectar si la página cargada es la aplicación real o una pantalla de espera de Render
                 view.evaluateJavascript(
                         "(function() { " +
+                        "  var text = (document.body ? document.body.innerText : '') || ''; " +
+                        "  var title = document.title || ''; " +
+                        "  var isRenderWait = title.toLowerCase().includes('render') || text.includes('spinning up') || text.includes('Starting service') || text.includes('Not Found'); " +
+                        "  var hasApp = !isRenderWait && (!!document.getElementById('pageInventoryView') || !!document.getElementById('loginOverlay') || title.includes('SYS-INVENTORY')); " +
                         "  var theme = document.documentElement.getAttribute('data-theme') || 'dark'; " +
-                        "  return theme === 'light' ? 'light' : 'dark'; " +
+                        "  return JSON.stringify({ isReady: hasApp, isLight: theme === 'light' }); " +
                         "})()",
-                        value -> {
-                            boolean isLight = value != null && value.contains("light");
-                            updateStatusBarTheme(isLight);
+                        jsonResult -> {
+                            boolean isReady = false;
+                            boolean isLight = false;
+                            try {
+                                if (jsonResult != null && !jsonResult.equals("null")) {
+                                    isReady = jsonResult.contains("\"isReady\":true");
+                                    isLight = jsonResult.contains("\"isLight\":true");
+                                }
+                            } catch (Exception ignored) {}
+
+                            if (isLight) {
+                                updateStatusBarTheme(true);
+                            }
+
+                            if (isReady) {
+                                // La app ya está lista: despedir la splash screen de forma limpia
+                                long elapsed = System.currentTimeMillis() - splashStartTime;
+                                long delay = Math.max(0, MIN_SPLASH_TIME - elapsed);
+                                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(MainActivity.this::dismissSplashScreen, delay);
+                            } else {
+                                // Render sigue despertando: mantener splash screen elegante y reintentar
+                                if (splashSubtitle != null) {
+                                    splashSubtitle.setText("Iniciando servidor en la nube...");
+                                }
+                                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                    if (webView != null && !isSplashDismissed && !isFinishing()) {
+                                        webView.reload();
+                                    }
+                                }, 3000);
+                            }
                         }
                 );
-
-                // Despedir la Splash Screen con suavidad tras cumplir el tiempo mínimo de visualización
-                long elapsed = System.currentTimeMillis() - splashStartTime;
-                long delay = Math.max(0, MIN_SPLASH_TIME - elapsed);
-                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(MainActivity.this::dismissSplashScreen, delay);
             }
         });
 

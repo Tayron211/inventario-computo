@@ -72,7 +72,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner (Administrador)",
-    "fecha_escaneo": "2026-09-03 21:40:20",
+    "fecha_escaneo": "2026-09-04 00:27:31",
     "origen": "Escáner Batch/PowerShell"
   },
   {
@@ -338,7 +338,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner (Administrador)",
-    "fecha_escaneo": "2026-09-03 21:40:13",
+    "fecha_escaneo": "2026-09-04 00:27:24",
     "origen": "Escáner Batch/PowerShell"
   },
   {
@@ -485,7 +485,7 @@
     "ubicacion": "Red Local (192.168.95.0/24)",
     "estado": "Operativo",
     "notas": "Registrado por escáner automático",
-    "fecha_escaneo": "2026-09-03 21:40:06",
+    "fecha_escaneo": "2026-09-04 00:27:16",
     "origen": "Escáner Batch/PowerShell"
   },
   {
