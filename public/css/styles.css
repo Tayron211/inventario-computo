@@ -50,58 +50,34 @@
 }
 
 /* ==============================================================================
-   TRANSICIÓN DE TEMA ULTRA FLUIDA E IMPERCEPTIBLE (120 FPS / ZERO FLICKER)
+   TRANSICIÓN DE TEMA ULTRA FLUIDA E IMPERCEPTIBLE (120 FPS / ZERO DELAY)
    ============================================================================== */
-::view-transition-group(root) {
-  animation-duration: 0.16s;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.16s;
-  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  animation-name: theme-fade-out;
-}
-
-::view-transition-new(root) {
-  animation-name: theme-fade-in;
-}
-
-@keyframes theme-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes theme-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 html.theme-transitioning,
-html.theme-transitioning body,
-html.theme-transitioning .app-header,
-html.theme-transitioning .app-nav-tabs,
-html.theme-transitioning .stat-card,
-html.theme-transitioning .table-container,
-html.theme-transitioning .device-table,
-html.theme-transitioning .device-table th,
-html.theme-transitioning .device-table td,
-html.theme-transitioning .modal-card,
-html.theme-transitioning .modal-header-styled,
-html.theme-transitioning .modal-body,
-html.theme-transitioning .btn,
-html.theme-transitioning .search-box-input,
-html.theme-transitioning .filter-select,
-html.theme-transitioning .network-badge,
-html.theme-transitioning .btn-theme-toggle {
-  transition: background-color 0.16s cubic-bezier(0.25, 1, 0.5, 1),
-              border-color 0.16s cubic-bezier(0.25, 1, 0.5, 1),
-              color 0.16s cubic-bezier(0.25, 1, 0.5, 1),
-              box-shadow 0.16s cubic-bezier(0.25, 1, 0.5, 1) !important;
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition-delay: 0s !important;
+}
+
+/* Eliminación total de retraso táctil (tap delay) en móviles */
+button,
+.btn,
+.nav-tab-btn,
+.modal-close-btn,
+.device-row,
+.metric-card,
+.stat-card,
+.btn-theme-toggle {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.modal-open {
+  overflow: hidden !important;
 }
 
 /* ==============================================================================
@@ -3093,9 +3069,7 @@ body {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: rgba(4, 4, 8, 0.65);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(4, 4, 8, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3103,20 +3077,20 @@ body {
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.16s ease, visibility 0.16s ease;
-  will-change: opacity, visibility;
+  pointer-events: none;
+  transition: opacity 0.12s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.12s;
+  will-change: opacity;
 }
 
 .modal-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-card {
-  background: rgba(16, 16, 26, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-surface-elevated, #161622);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 540px;
@@ -3125,9 +3099,10 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 20px rgba(220, 20, 60, 0.2);
-  transform: scale(0.96) translateY(8px);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75), 0 0 20px rgba(220, 20, 60, 0.2);
+  transform: translate3d(0, 14px, 0) scale(0.98);
+  opacity: 0;
+  transition: transform 0.13s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.11s ease;
   will-change: transform, opacity;
   overflow: hidden;
 }
@@ -3141,7 +3116,8 @@ body {
 }
 
 .modal-overlay.active .modal-card {
-  transform: scale(1) translateY(0);
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
 }
 
 .modal-card.modal-lg {
@@ -4501,17 +4477,25 @@ body {
     gap: 8px;
   }
 
-  /* MODALES PERFECTOS EN CELULARES */
+  /* MODALES PERFECTOS EN CELULARES (0ms Delay, 120 FPS GPU Composited) */
   .modal-overlay {
-    padding: 6px;
+    padding: 0;
     align-items: flex-end;
   }
 
   .modal-card {
-    max-height: calc(100dvh - 12px);
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    max-height: 92dvh;
+    border-radius: 18px 18px 0 0;
     width: 100%;
     margin: 0;
+    transform: translate3d(0, 24px, 0) scale(0.99);
+    opacity: 0;
+    transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.11s ease;
+  }
+
+  .modal-overlay.active .modal-card {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
   }
 
   .modal-header-styled {
