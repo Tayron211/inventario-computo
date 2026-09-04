@@ -493,6 +493,286 @@ async function saveDB(data) {
   }
 }
 
+// =============================================================
+// SISTEMA DE SINCRONIZACIÓN NUBE-LOCAL BIDIRECCIONAL (APK / PC)
+// =============================================================
+const DELETED_FILE = path.join(DATA_DIR, 'deleted_items.json');
+const RENDER_CLOUD_URL = 'https://ivt.onrender.com';
+const IS_RENDER_SERVER = Boolean(process.env.RENDER || process.env.IS_RENDER);
+
+let isCloudSyncing = false;
+let cloudSyncScheduledTimer = null;
+let lastCloudSyncStatus = {
+  lastSync: null,
+  success: true,
+  itemsCount: 0,
+  error: null
+};
+
+function loadDeletedItems() {
+  try {
+    if (fs.existsSync(DELETED_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(DELETED_FILE, 'utf8'));
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (err) {}
+  return [];
+}
+
+function saveDeletedItems(data) {
+  try {
+    fs.writeFileSync(DELETED_FILE, JSON.stringify(data || [], null, 2), 'utf8');
+  } catch (err) {}
+}
+
+function recordDeletedItem(item) {
+  if (!item) return;
+  const list = loadDeletedItems();
+  const id = item.id || '';
+  const serial = (item.numero_serie || '').trim().toLowerCase();
+  const isGeneric = !serial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serial);
+  
+  list.push({
+    id: id,
+    serial: isGeneric ? '' : serial,
+    deleted_at: Date.now()
+  });
+
+  if (list.length > 500) list.splice(0, list.length - 500);
+  saveDeletedItems(list);
+}
+
+function getItemDedupeKey(item) {
+  if (!item) return '';
+  const serial = (item.numero_serie || '').trim().toLowerCase();
+  const isGeneric = !serial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serial);
+  
+  if (!isGeneric) {
+    return `serial:${serial}`;
+  }
+  
+  if (item.id && !String(item.id).startsWith('item-temp')) {
+    return `id:${item.id}`;
+  }
+  
+  const host = (item.hostname || '').trim().toLowerCase();
+  const mb = (item.placa_base || '').trim().toLowerCase();
+  const mod = (item.modelo || '').trim().toLowerCase();
+  return `host:${host}|mb:${mb}|mod:${mod}`;
+}
+
+function mergeInventories(listA, listB, extraDeleted = []) {
+  const allDeleted = [...loadDeletedItems(), ...(extraDeleted || [])];
+  const deletedIds = new Set();
+  const deletedSerials = new Set();
+
+  allDeleted.forEach(d => {
+    if (d.id) deletedIds.add(String(d.id));
+    if (d.serial) deletedSerials.add(String(d.serial).toLowerCase());
+  });
+
+  const mergedMap = new Map();
+
+  function processItem(rawItem) {
+    if (!rawItem) return;
+    const item = normalizeItem(rawItem);
+    const id = String(item.id || '');
+    const serial = (item.numero_serie || '').trim().toLowerCase();
+
+    // Si está en la lista de eliminados, ignorar
+    if (deletedIds.has(id)) return;
+    if (serial && deletedSerials.has(serial)) return;
+
+    const key = getItemDedupeKey(item);
+    if (!key) return;
+
+    if (!mergedMap.has(key)) {
+      mergedMap.set(key, item);
+    } else {
+      const existing = mergedMap.get(key);
+      const dateExisting = new Date(existing.fecha_modificacion || existing.fecha_escaneo || 0).getTime();
+      const dateNew = new Date(item.fecha_modificacion || item.fecha_escaneo || 0).getTime();
+
+      // Registro más reciente prevalece, pero preservando campos no vacíos del otro
+      if (dateNew >= dateExisting) {
+        mergedMap.set(key, { ...existing, ...item });
+      } else {
+        mergedMap.set(key, { ...item, ...existing });
+      }
+    }
+  }
+
+  (listA || []).forEach(processItem);
+  (listB || []).forEach(processItem);
+
+  const result = Array.from(mergedMap.values());
+  result.sort((a, b) => {
+    const da = new Date(a.fecha_escaneo || 0).getTime();
+    const db = new Date(b.fecha_escaneo || 0).getTime();
+    return db - da;
+  });
+
+  return result;
+}
+
+function pushItemToRender(item) {
+  return new Promise((resolve) => {
+    const payload = JSON.stringify(item);
+    const adminToken = Buffer.from('admin:admin:platinum:Platinum:' + Date.now()).toString('base64');
+    const req = https.request(`${RENDER_CLOUD_URL}/api/inventory`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Length': Buffer.byteLength(payload)
+      },
+      timeout: 8000
+    }, (res) => {
+      res.on('data', () => {});
+      res.on('end', () => resolve(true));
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.write(payload);
+    req.end();
+  });
+}
+
+async function syncWithCloudDatabase() {
+  if (isCloudSyncing || IS_RENDER_SERVER) return;
+  isCloudSyncing = true;
+
+  try {
+    const localItems = loadDB();
+    const deletedItems = loadDeletedItems();
+
+    // 1. Intentar sincronización bidireccional vía POST /api/sync-bidirectional
+    const payload = JSON.stringify({ items: localItems, deleted: deletedItems });
+    const adminToken = Buffer.from('admin:admin:platinum:Platinum:' + Date.now()).toString('base64');
+    const postOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Length': Buffer.byteLength(payload)
+      },
+      timeout: 12000
+    };
+
+    let syncResult = await new Promise((resolve) => {
+      const req = https.request(`${RENDER_CLOUD_URL}/api/sync-bidirectional`, postOptions, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              resolve(JSON.parse(body));
+            } catch (e) {
+              resolve({ fallback: true });
+            }
+          } else {
+            resolve({ fallback: true, statusCode: res.statusCode });
+          }
+        });
+      });
+      req.on('error', (err) => resolve({ error: err.message }));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve({ error: 'Timeout' });
+      });
+      req.write(payload);
+      req.end();
+    });
+
+    // 2. Si el endpoint bidireccional respondió con éxito
+    if (syncResult && syncResult.success && Array.isArray(syncResult.items)) {
+      const merged = mergeInventories(loadDB(), syncResult.items, syncResult.deleted || []);
+      await saveDB(merged);
+      if (Array.isArray(syncResult.deleted) && syncResult.deleted.length > 0) {
+        const currentDeleted = loadDeletedItems();
+        const mergedDeleted = [...currentDeleted, ...syncResult.deleted];
+        saveDeletedItems(mergedDeleted.slice(-500));
+      }
+      lastCloudSyncStatus = {
+        lastSync: new Date().toISOString(),
+        success: true,
+        itemsCount: merged.length,
+        error: null
+      };
+      console.log(`[☁️ SYNC NUBE] Sincronización exitosa con Render: ${merged.length} equipos sincronizados.`);
+      return;
+    }
+
+    // 3. Fallback: Si Render aún no tiene /api/sync-bidirectional
+    const cloudInventory = await new Promise((resolve) => {
+      const req = https.get(`${RENDER_CLOUD_URL}/api/inventory`, { timeout: 10000 }, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(body));
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve(null);
+      });
+    });
+
+    if (cloudInventory && Array.isArray(cloudInventory.items)) {
+      const merged = mergeInventories(loadDB(), cloudInventory.items);
+      await saveDB(merged);
+
+      // Si tenemos equipos locales que no están en Render, subirlos a Render
+      const cloudKeys = new Set(cloudInventory.items.map(getItemDedupeKey));
+      const missingInCloud = localItems.filter(i => !cloudKeys.has(getItemDedupeKey(i)));
+
+      for (const itemToPush of missingInCloud) {
+        try {
+          await pushItemToRender(itemToPush);
+        } catch (e) {}
+      }
+
+      lastCloudSyncStatus = {
+        lastSync: new Date().toISOString(),
+        success: true,
+        itemsCount: merged.length,
+        error: null
+      };
+      console.log(`[☁️ SYNC NUBE] Sincronizados ${merged.length} equipos desde la nube vía fallback.`);
+    }
+  } catch (err) {
+    lastCloudSyncStatus = {
+      lastSync: new Date().toISOString(),
+      success: false,
+      itemsCount: loadDB().length,
+      error: err.message
+    };
+  } finally {
+    isCloudSyncing = false;
+  }
+}
+
+function scheduleCloudPush(delayMs = 400) {
+  if (IS_RENDER_SERVER) return;
+  clearTimeout(cloudSyncScheduledTimer);
+  cloudSyncScheduledTimer = setTimeout(() => {
+    syncWithCloudDatabase();
+  }, delayMs);
+}
+
+// Iniciar sincronización continua si estamos corriendo en local (PC)
+if (!IS_RENDER_SERVER) {
+  // Sincronizar inmediatamente al iniciar el servidor
+  setTimeout(syncWithCloudDatabase, 1500);
+  // Sincronizar automáticamente cada 10 segundos
+  setInterval(syncWithCloudDatabase, 10000);
+}
+
 function getLocalIPs() {
   const interfaces = os.networkInterfaces();
   const validIPs = [];
@@ -933,6 +1213,69 @@ app.get('/api/inventory/:id', (req, res) => {
   const item = items.find(i => i.id === req.params.id);
   if (!item) return res.status(404).json({ error: 'Equipo no encontrado' });
   res.json(item);
+});
+
+// =============================================================
+// ENDPOINTS DE SINCRONIZACIÓN NUBE-LOCAL BIDIRECCIONAL
+// =============================================================
+app.post('/api/sync-bidirectional', async (req, res) => {
+  try {
+    const incomingItems = Array.isArray(req.body) ? req.body : (req.body?.items || []);
+    const incomingDeleted = Array.isArray(req.body?.deleted) ? req.body.deleted : [];
+    
+    if (incomingDeleted.length > 0) {
+      const curDeleted = loadDeletedItems();
+      saveDeletedItems([...curDeleted, ...incomingDeleted].slice(-500));
+    }
+
+    const currentItems = loadDB();
+    const merged = mergeInventories(currentItems, incomingItems, incomingDeleted);
+    await saveDB(merged);
+
+    res.json({
+      success: true,
+      count: merged.length,
+      items: merged,
+      deleted: loadDeletedItems()
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/sync-bidirectional', (req, res) => {
+  const items = loadDB();
+  res.json({
+    success: true,
+    count: items.length,
+    items: items,
+    deleted: loadDeletedItems()
+  });
+});
+
+app.post(['/api/sync-now', '/api/sync'], async (req, res) => {
+  try {
+    await syncWithCloudDatabase();
+    const items = loadDB();
+    res.json({
+      success: true,
+      message: 'Sincronización completada exitosamente',
+      count: items.length,
+      status: lastCloudSyncStatus,
+      items: items
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/sync-status', (req, res) => {
+  res.json({
+    ...lastCloudSyncStatus,
+    itemsCount: loadDB().length,
+    isLocal: !IS_RENDER_SERVER,
+    cloudUrl: RENDER_CLOUD_URL
+  });
 });
 
 // =============================================================
@@ -1562,6 +1905,7 @@ app.post('/api/inventory', async (req, res) => {
   
   items.unshift(newItem);
   await saveDB(items);
+  scheduleCloudPush();
   
   res.status(201).json({ message: 'Equipo registrado exitosamente', item: newItem });
 });
@@ -1598,6 +1942,7 @@ app.put('/api/inventory/:id', async (req, res) => {
   
   items[index] = updated;
   await saveDB(items);
+  scheduleCloudPush();
   
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
@@ -1616,6 +1961,11 @@ app.delete('/api/inventory/:id', async (req, res) => {
   const decodedId = decodeURIComponent(rawId);
   const initialLen = items.length;
   
+  const itemToDelete = items.find(i => i.id === rawId || i.id === decodedId);
+  if (itemToDelete) {
+    recordDeletedItem(itemToDelete);
+  }
+
   items = items.filter(i => i.id !== rawId && i.id !== decodedId);
   
   if (items.length === initialLen) {
@@ -1623,6 +1973,7 @@ app.delete('/api/inventory/:id', async (req, res) => {
   }
   
   await saveDB(items);
+  scheduleCloudPush();
   res.json({ message: 'Equipo eliminado exitosamente' });
 });
 
@@ -1779,6 +2130,7 @@ app.post('/api/agent/report', async (req, res) => {
     }
     
     await saveDB(items);
+    scheduleCloudPush();
     console.log(`[✓] Equipo procesado: "${record.hostname}" (S/N: ${record.numero_serie}) - Acción: ${existingIndex >= 0 ? 'Actualizado' : 'Nuevo Registro Creado'}`);
     res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
   } catch (err) {
@@ -1866,6 +2218,7 @@ app.post('/api/restore-json', async (req, res) => {
 
     const merged = Array.from(map.values());
     await saveDB(merged);
+    scheduleCloudPush();
 
     res.json({
       success: true,

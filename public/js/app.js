@@ -1656,16 +1656,23 @@ function deduplicateClientData(items) {
 // Obtener Inventario
 async function fetchInventory(silent = false) {
   try {
-    const res = await fetch('/api/inventory');
+    const res = await fetch('/api/inventory?_t=' + Date.now());
     if (!res.ok) throw new Error('Error al cargar inventario');
     const data = await res.json();
     const prevCount = inventoryData.length;
+    const prevIds = new Set(inventoryData.map(i => i.id || i.numero_serie));
+    
     inventoryData = deduplicateClientData(data.items || []);
     updateMetrics();
     renderData();
     renderDashboard();
-    if (!silent && prevCount > 0 && inventoryData.length > prevCount) {
-      showToast(`¡Nuevo equipo detectado en la red! Total: ${inventoryData.length}`, 'success');
+
+    // Notificar si hay nuevos equipos sincronizados tanto en modo silencioso como manual
+    if (prevCount > 0 && inventoryData.length > prevCount) {
+      const newItems = inventoryData.filter(i => !prevIds.has(i.id || i.numero_serie));
+      const firstNew = newItems[0];
+      const modelLabel = firstNew ? (firstNew.modelo || 'Equipo') : 'Nuevo equipo';
+      showToast(`¡Sincronizado desde el celular / nube: ${modelLabel}! Total: ${inventoryData.length}`, 'success');
     }
   } catch (err) {
     if (!silent) {
@@ -1675,10 +1682,38 @@ async function fetchInventory(silent = false) {
   }
 }
 
-// Sincronización periódica automática (cada 8 segundos)
+// Sincronización periódica automática (cada 6 segundos si la pestaña está activa)
 setInterval(() => {
-  fetchInventory(true);
-}, 8000);
+  if (!document.hidden) {
+    fetchInventory(true);
+  }
+}, 6000);
+
+// Conexión del Botón de Sincronización Manual en Tiempo Real
+const btnCloudSync = document.getElementById('btnCloudSync');
+if (btnCloudSync) {
+  btnCloudSync.addEventListener('click', async () => {
+    const icon = document.getElementById('iconCloudSync');
+    const txt = document.getElementById('txtCloudSync');
+    if (icon) icon.classList.add('fa-spin');
+    if (txt) txt.textContent = 'Sincronizando...';
+    btnCloudSync.disabled = true;
+
+    try {
+      const res = await fetch('/api/sync-now', { method: 'POST' });
+      const data = await res.json();
+      await fetchInventory(true);
+      showToast(`¡Sincronización completada! Base de datos unificada: ${data.count || inventoryData.length} equipos`, 'success');
+    } catch (e) {
+      await fetchInventory(true);
+      showToast('Sincronización actualizada localmente', 'info');
+    } finally {
+      if (icon) icon.classList.remove('fa-spin');
+      if (txt) txt.textContent = 'Sincronizar';
+      btnCloudSync.disabled = false;
+    }
+  });
+}
 
 // Ejecutar escaneo de toda la red local
 async function runNetworkScan() {
