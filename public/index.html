@@ -60,7 +60,7 @@
   <script src="js/html5-qrcode.min.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=90.0">
+  <link rel="stylesheet" href="css/styles.css?v=95.0">
 </head>
 <body>
   <script>
@@ -99,6 +99,8 @@
             try { el.removeAttribute('value'); } catch(e) {}
           }
         }
+        var drop = document.getElementById('modelCustomDropdown');
+        if (drop) drop.style.display = 'none';
         var tipo = document.getElementById('formTipoEquipo');
         if (tipo) { tipo.value = 'PC de Escritorio'; }
         var estado = document.getElementById('formEstado');
@@ -786,77 +788,19 @@
           </div>
           
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
               <label for="formModelo" style="display: flex; align-items: center; justify-content: space-between;">
                 <span>MODELO DE EQUIPO *</span>
                 <span class="auto-badge" id="badgeSpecAuto" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Completado</span>
               </label>
               <div class="input-with-action">
-                <input type="text" id="formModelo" list="modelSuggestionsList" required placeholder="Ej: Victus, OptiPlex, ProBook, ThinkPad, L3250..." class="form-control" autocomplete="off">
+                <input type="text" id="formModelo" required placeholder="Ej: Victus, OptiPlex, ProBook, ThinkPad, L3250..." class="form-control" autocomplete="off">
                 <button type="button" class="btn-input-action" id="btnLookupSpecs" title="Buscar ficha técnica en Internet">
                   <i class="fa-solid fa-bolt"></i> <span>Auto-Llenar</span>
                 </button>
               </div>
-              <datalist id="modelSuggestionsList">
-                <option value="Laptop Gamer Victus by HP 15">
-                <option value="HP ProBook 450 G8">
-                <option value="HP EliteBook 840 G8">
-                <option value="HP Pavilion 15">
-                <option value="HP 240 G8">
-                <option value="HP OMEN 16 Gaming">
-                <option value="Dell OptiPlex 7080">
-                <option value="Dell OptiPlex 3080">
-                <option value="Dell Latitude 5420">
-                <option value="Dell Latitude 3420">
-                <option value="Dell Inspiron 15">
-                <option value="Dell Vostro 3400">
-                <option value="Dell XPS 13">
-                <option value="Lenovo ThinkPad T14">
-                <option value="Lenovo ThinkPad T490">
-                <option value="Lenovo ThinkPad E14">
-                <option value="Lenovo ThinkCentre M70q">
-                <option value="Lenovo IdeaPad 3">
-                <option value="Lenovo Legion 5">
-                <option value="ASUS TUF Gaming F15">
-                <option value="ASUS ROG Strix G15">
-                <option value="ASUS VivoBook 15">
-                <option value="Acer Nitro 5">
-                <option value="Acer Aspire 5">
-                <option value="Apple MacBook Air M1">
-                <option value="Apple MacBook Air M2">
-                <option value="Apple MacBook Pro 14">
-                <option value="Apple iMac 24 M1">
-                <option value="Epson EcoTank L3250">
-                <option value="Epson EcoTank L3150">
-                <option value="Epson EcoTank L4260">
-                <option value="Epson EcoTank L6270">
-                <option value="Epson EcoTank L805">
-                <option value="HP LaserJet Pro M404">
-                <option value="HP LaserJet Pro MFP M428">
-                <option value="HP LaserJet P1102">
-                <option value="HP Smart Tank 580">
-                <option value="HP Laser 107a">
-                <option value="Canon PIXMA G2110">
-                <option value="Canon PIXMA G3110">
-                <option value="Canon imageCLASS MF3010">
-                <option value="Brother DCP-T520W">
-                <option value="Brother DCP-T720DW">
-                <option value="Brother HL-1212W">
-                <option value="Kyocera ECOSYS M2040dn">
-                <option value="Switch Cisco Catalyst 2960-X">
-                <option value="Switch Cisco Catalyst 9200">
-                <option value="MikroTik CRS326 Gigabit Switch">
-                <option value="MikroTik RouterBOARD RB750Gr3">
-                <option value="Ubiquiti UniFi Switch 24 PoE">
-                <option value="Ubiquiti UniFi AP U6 Pro">
-                <option value="TP-Link JetStream SG1024">
-                <option value="TP-Link Omada EAP650">
-                <option value="Servidor Dell PowerEdge R740">
-                <option value="Servidor Dell PowerEdge R640">
-                <option value="Servidor HPE ProLiant DL380 Gen10">
-                <option value="Proyector Epson PowerLite E20">
-                <option value="Proyector BenQ MW560">
-              </datalist>
+              <!-- Dropdown personalizado de modelos compatible 100% con APK Móvil y Web -->
+              <div id="modelCustomDropdown" class="custom-model-dropdown" style="display: none;"></div>
             </div>
 
             <div class="form-group">
@@ -1155,7 +1099,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=90.0"></script>
+  <script src="js/app.js?v=95.0"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {

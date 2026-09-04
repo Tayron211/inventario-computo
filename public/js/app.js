@@ -1227,27 +1227,208 @@ function initEventListeners() {
         const modelName = chip.getAttribute('data-model');
         if (formModelo && modelName) {
           formModelo.value = modelName;
+          const drop = document.getElementById('modelCustomDropdown');
+          if (drop) drop.style.display = 'none';
           triggerModelSpecsAutofill(modelName, true);
         }
       });
     });
   }
 
-  if (formModelo) {
-    formModelo.addEventListener('input', (e) => {
-      clearTimeout(specLookupTimeout);
-      const val = e.target.value;
-      if (val && val.trim().length >= 2) {
-        specLookupTimeout = setTimeout(() => {
-          triggerModelSpecsAutofill(val, false);
-        }, 300);
+  // Catálogo completo de sugerencias de modelos para autocompletado táctil
+  const POPULAR_SUGGESTION_MODELS = [
+    { model: 'Laptop Gamer Victus by HP 15', type: 'Laptop Gamer', icon: '⚡' },
+    { model: 'HP ProBook 450 G8', type: 'Laptop Empresarial', icon: '💻' },
+    { model: 'HP EliteBook 840 G8', type: 'Laptop Ejecutiva', icon: '💻' },
+    { model: 'HP Pavilion 15', type: 'Laptop Personal', icon: '💻' },
+    { model: 'HP 240 G8', type: 'Laptop Básica', icon: '💻' },
+    { model: 'HP OMEN 16 Gaming', type: 'Laptop Gamer', icon: '⚡' },
+    { model: 'Dell OptiPlex 7080', type: 'Escritorio PC', icon: '🖥️' },
+    { model: 'Dell OptiPlex 3080', type: 'Escritorio PC', icon: '🖥️' },
+    { model: 'Dell Latitude 5420', type: 'Laptop Corporativa', icon: '💻' },
+    { model: 'Dell Latitude 3420', type: 'Laptop Corporativa', icon: '💻' },
+    { model: 'Dell Inspiron 15', type: 'Laptop Personal', icon: '💻' },
+    { model: 'Dell Vostro 3400', type: 'Laptop Oficina', icon: '💻' },
+    { model: 'Dell XPS 13', type: 'Ultrabook Premium', icon: '💻' },
+    { model: 'Lenovo ThinkPad T14', type: 'Laptop Corporativa', icon: '💻' },
+    { model: 'Lenovo ThinkPad T490', type: 'Laptop Corporativa', icon: '💻' },
+    { model: 'Lenovo ThinkPad E14', type: 'Laptop Oficina', icon: '💻' },
+    { model: 'Lenovo ThinkCentre M70q', type: 'Mini PC Escritorio', icon: '🖥️' },
+    { model: 'Lenovo IdeaPad 3', type: 'Laptop Personal', icon: '💻' },
+    { model: 'Lenovo Legion 5', type: 'Laptop Gamer', icon: '⚡' },
+    { model: 'ASUS TUF Gaming F15', type: 'Laptop Gamer', icon: '⚡' },
+    { model: 'ASUS ROG Strix G15', type: 'Laptop Gamer', icon: '⚡' },
+    { model: 'ASUS VivoBook 15', type: 'Laptop Personal', icon: '💻' },
+    { model: 'Acer Nitro 5', type: 'Laptop Gamer', icon: '⚡' },
+    { model: 'Acer Aspire 5', type: 'Laptop Personal', icon: '💻' },
+    { model: 'Apple MacBook Air M1', type: 'Laptop Apple', icon: '🍎' },
+    { model: 'Apple MacBook Air M2', type: 'Laptop Apple', icon: '🍎' },
+    { model: 'Apple MacBook Pro 14', type: 'Laptop Apple', icon: '🍎' },
+    { model: 'Apple iMac 24 M1', type: 'All-in-One Apple', icon: '🍎' },
+    { model: 'Epson EcoTank L3250', type: 'Impresora Multifuncional', icon: '🖨️' },
+    { model: 'Epson EcoTank L3150', type: 'Impresora Multifuncional', icon: '🖨️' },
+    { model: 'Epson EcoTank L4260', type: 'Impresora WiFi Dúplex', icon: '🖨️' },
+    { model: 'Epson EcoTank L6270', type: 'Impresora Red Dúplex', icon: '🖨️' },
+    { model: 'Epson EcoTank L805', type: 'Impresora Fotográfica', icon: '🖨️' },
+    { model: 'HP LaserJet Pro M404', type: 'Impresora Láser', icon: '🖨️' },
+    { model: 'HP LaserJet Pro MFP M428', type: 'Multifuncional Láser', icon: '🖨️' },
+    { model: 'HP LaserJet P1102', type: 'Impresora Láser', icon: '🖨️' },
+    { model: 'HP Smart Tank 580', type: 'Impresora Multifuncional', icon: '🖨️' },
+    { model: 'HP Laser 107a', type: 'Impresora Láser', icon: '🖨️' },
+    { model: 'Canon PIXMA G2110', type: 'Impresora Tinta', icon: '🖨️' },
+    { model: 'Canon PIXMA G3110', type: 'Impresora WiFi', icon: '🖨️' },
+    { model: 'Canon imageCLASS MF3010', type: 'Multifuncional Láser', icon: '🖨️' },
+    { model: 'Brother DCP-T520W', type: 'Impresora WiFi', icon: '🖨️' },
+    { model: 'Brother DCP-T720DW', type: 'Impresora ADF WiFi', icon: '🖨️' },
+    { model: 'Brother HL-1212W', type: 'Impresora Láser WiFi', icon: '🖨️' },
+    { model: 'Kyocera ECOSYS M2040dn', type: 'Copiadora Red', icon: '🖨️' },
+    { model: 'Switch Cisco Catalyst 2960-X', type: 'Switch Administrable', icon: '🌐' },
+    { model: 'Switch Cisco Catalyst 9200', type: 'Switch Capa 3', icon: '🌐' },
+    { model: 'MikroTik CRS326 Gigabit Switch', type: 'Switch Gestión', icon: '🌐' },
+    { model: 'MikroTik RouterBOARD RB750Gr3', type: 'Router Balanceador', icon: '🌐' },
+    { model: 'Ubiquiti UniFi Switch 24 PoE', type: 'Switch PoE Red', icon: '🌐' },
+    { model: 'Ubiquiti UniFi AP U6 Pro', type: 'Access Point WiFi 6', icon: '📡' },
+    { model: 'TP-Link JetStream SG1024', type: 'Switch Rack 24P', icon: '🌐' },
+    { model: 'TP-Link Omada EAP650', type: 'Access Point Techo', icon: '📡' },
+    { model: 'Servidor Dell PowerEdge R740', type: 'Servidor Rack 2U', icon: '🗄️' },
+    { model: 'Servidor Dell PowerEdge R640', type: 'Servidor Rack 1U', icon: '🗄️' },
+    { model: 'Servidor HPE ProLiant DL380 Gen10', type: 'Servidor Rack', icon: '🗄️' },
+    { model: 'Proyector Epson PowerLite E20', type: 'Proyector Aula', icon: '📽️' },
+    { model: 'Proyector BenQ MW560', type: 'Proyector WXGA', icon: '📽️' }
+  ];
+
+  function getCombinedModelSuggestions(query = '') {
+    const q = (query || '').trim().toLowerCase();
+    const suggestions = [];
+    const seen = new Set();
+
+    // 1. Modelos registrados previamente en el inventario real del usuario (prioridad)
+    if (inventoryData && inventoryData.length > 0) {
+      inventoryData.forEach(item => {
+        const m = (item.modelo || '').trim();
+        if (m && m.length > 2 && !seen.has(m.toLowerCase())) {
+          if (!q || m.toLowerCase().includes(q)) {
+            seen.add(m.toLowerCase());
+            const tipo = (item.tipo_equipo || 'En inventario').trim();
+            let icon = '💻';
+            const tLower = tipo.toLowerCase();
+            if (tLower.includes('escritorio') || tLower.includes('desktop') || tLower.includes('optiplex')) icon = '🖥️';
+            else if (tLower.includes('proyector')) icon = '📽️';
+            else if (tLower.includes('impresora')) icon = '🖨️';
+            else if (tLower.includes('switch') || tLower.includes('red')) icon = '🌐';
+            else if (tLower.includes('servidor')) icon = '🗄️';
+            else if (tLower.includes('apple') || (item.fabricante || '').toLowerCase() === 'apple') icon = '🍎';
+            suggestions.push({ model: m, type: tipo, icon: icon, source: 'user' });
+          }
+        }
+      });
+    }
+
+    // 2. Modelos populares predefinidos
+    POPULAR_SUGGESTION_MODELS.forEach(item => {
+      if (!seen.has(item.model.toLowerCase())) {
+        if (!q || item.model.toLowerCase().includes(q) || item.type.toLowerCase().includes(q)) {
+          seen.add(item.model.toLowerCase());
+          suggestions.push({ ...item, source: 'system' });
+        }
       }
     });
 
-    formModelo.addEventListener('change', (e) => {
-      triggerModelSpecsAutofill(e.target.value, false);
+    return suggestions.slice(0, 20);
+  }
+
+  function renderModelDropdown(query = '') {
+    const dropdownEl = document.getElementById('modelCustomDropdown');
+    if (!dropdownEl || !formModelo) return;
+
+    const list = getCombinedModelSuggestions(query);
+    if (list.length === 0) {
+      dropdownEl.innerHTML = `
+        <div style="padding: 12px 14px; color: var(--gray-400); font-size: 0.8rem; text-align: center;">
+          <i class="fa-solid fa-magnifying-glass"></i> No se encontraron coincidencias exactas. Puedes escribirlo libremente.
+        </div>
+      `;
+      dropdownEl.style.display = 'block';
+      return;
+    }
+
+    dropdownEl.innerHTML = list.map(item => `
+      <div class="custom-model-item" data-model="${escapeHTML(item.model)}">
+        <div class="custom-model-info">
+          <span class="custom-model-icon">${item.icon}</span>
+          <span class="custom-model-name">${escapeHTML(item.model)}</span>
+        </div>
+        <span class="custom-model-tag">${escapeHTML(item.type)}</span>
+      </div>
+    `).join('');
+
+    // Asignar listeners táctiles y click seguros que NUNCA se cierran solos antes de seleccionar
+    dropdownEl.querySelectorAll('.custom-model-item').forEach(el => {
+      const choose = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        const selected = el.getAttribute('data-model');
+        if (selected && formModelo) {
+          formModelo.value = selected;
+          dropdownEl.style.display = 'none';
+          triggerModelSpecsAutofill(selected, true);
+        }
+      };
+
+      // pointerdown y touchstart garantizan la selección inmediata en APK Android antes de cualquier blur
+      el.addEventListener('pointerdown', choose);
+      el.addEventListener('mousedown', choose);
+      el.addEventListener('click', choose);
+    });
+
+    dropdownEl.style.display = 'block';
+  }
+
+  function hideModelDropdown() {
+    const dropdownEl = document.getElementById('modelCustomDropdown');
+    if (dropdownEl) dropdownEl.style.display = 'none';
+  }
+
+  if (formModelo) {
+    // Abrir lista al tocar o enfocar el input en APK o Web
+    formModelo.addEventListener('focus', () => {
+      renderModelDropdown(formModelo.value);
+    });
+
+    formModelo.addEventListener('click', () => {
+      renderModelDropdown(formModelo.value);
+    });
+
+    formModelo.addEventListener('input', (e) => {
+      renderModelDropdown(e.target.value);
+      clearTimeout(specLookupTimeout);
+      const val = e.target.value;
+      if (val && val.trim().length >= 3) {
+        specLookupTimeout = setTimeout(() => {
+          triggerModelSpecsAutofill(val, false);
+        }, 700);
+      }
+    });
+
+    // Cerrar al presionar Escape
+    formModelo.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideModelDropdown();
+      }
     });
   }
+
+  // Cerrar al tocar fuera del campo y del dropdown
+  document.addEventListener('pointerdown', (e) => {
+    const dropdownEl = document.getElementById('modelCustomDropdown');
+    if (!dropdownEl || dropdownEl.style.display === 'none') return;
+    if (formModelo && (formModelo.contains(e.target) || dropdownEl.contains(e.target))) {
+      return; // Clic o toque dentro
+    }
+    hideModelDropdown();
+  });
 
   if (btnLookupSpecs) {
     btnLookupSpecs.addEventListener('click', () => {
@@ -1257,6 +1438,7 @@ function initEventListeners() {
         if (formModelo) formModelo.focus();
         return;
       }
+      hideModelDropdown();
       triggerModelSpecsAutofill(val, true);
     });
   }
@@ -1400,6 +1582,11 @@ function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
 
+  if (modalId === 'manualModal') {
+    const drop = document.getElementById('modelCustomDropdown');
+    if (drop) drop.style.display = 'none';
+  }
+
   modal.classList.remove('active');
   
   if (!document.querySelector('.modal-overlay.active')) {
@@ -1536,6 +1723,9 @@ function clearEquipmentForm() {
   if (modalFormTitle) {
     modalFormTitle.innerHTML = `<i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Equipo`;
   }
+
+  const drop = document.getElementById('modelCustomDropdown');
+  if (drop) drop.style.display = 'none';
 
   const btnSaveEquipment = document.getElementById('btnSaveEquipment');
   if (btnSaveEquipment) {
@@ -1715,6 +1905,10 @@ async function fetchInventory(silent = false) {
 
 // Sincronización periódica automática en tiempo real garantizada (cada 2 segundos)
 setInterval(() => {
+  const isModalOpen = document.querySelector('.modal-overlay.active');
+  if (isModalOpen && (isModalOpen.id === 'manualModal' || isModalOpen.id === 'agentModal')) {
+    return; // No interrumpir al usuario ni causar reflows mientras escribe o interactúa en modales
+  }
   fetchInventory(true);
 }, 2000);
 
