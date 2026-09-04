@@ -62,7 +62,7 @@ function getLatestApkVersion() {
       if (match && match[1]) return match[1];
     }
   } catch (e) {}
-  return '2.1.3';
+  return '2.1.4';
 }
 
 const GITHUB_LATEST_RELEASE_APK = 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';

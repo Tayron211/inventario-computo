@@ -494,7 +494,7 @@ function initEventListeners() {
 
   // Sincronización dinámica de la última versión del APK (Web y Móvil)
   let currentApkInfo = {
-    version: '2.1.3',
+    version: '2.1.4',
     downloadUrl: 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk',
     localDownloadUrl: '/download-apk'
   };
@@ -503,18 +503,18 @@ function initEventListeners() {
     if (!version) return;
     const btnNavbar = document.getElementById('btnDownloadApk');
     if (btnNavbar) {
-      const span = btnNavbar.querySelector('span');
+      const span = document.getElementById('txtBtnDownloadApk') || btnNavbar.querySelector('span');
       if (span) span.textContent = `App APK (v${version})`;
-      btnNavbar.setAttribute('href', '/download-apk');
+      btnNavbar.setAttribute('href', `/download-apk?v=${version}`);
       btnNavbar.setAttribute('download', `SysInventory-v${version}.apk`);
       btnNavbar.setAttribute('title', `Descargar APK oficial v${version} para celular Android`);
     }
 
     const btnModal = document.getElementById('btnDownloadApkModal');
     if (btnModal) {
-      const span = btnModal.querySelector('span');
+      const span = document.getElementById('txtBtnDownloadApkModal') || btnModal.querySelector('span');
       if (span) span.textContent = `Descargar App v${version} (.APK)`;
-      btnModal.setAttribute('href', '/download-apk');
+      btnModal.setAttribute('href', `/download-apk?v=${version}`);
       btnModal.setAttribute('download', `SysInventory-v${version}.apk`);
     }
   }
@@ -532,18 +532,21 @@ function initEventListeners() {
     } catch (e) {}
   }
 
-  // Soporte universal para descargar la última APK en celulares y app nativa
+  // Soporte universal para descargar siempre la última APK en celulares y app nativa en tiempo real
   const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory"], a[href*="download-apk"]');
   apkDownloadBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const ver = currentApkInfo.version || '2.1.4';
       const dlUrl = currentApkInfo.downloadUrl || 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
-      const ver = currentApkInfo.version || '2.1.3';
+
       if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
-        e.preventDefault();
         window.AndroidBridge.downloadApk(dlUrl);
         showToast(`Iniciando descarga nativa de SysInventory v${ver}...`, 'info');
       } else {
-        showToast(`Descargando SysInventory-v${ver}.apk...`, 'success');
+        showToast(`Descargando SysInventory v${ver}...`, 'success');
+        // Descarga directa siempre fresca evitando cualquier caché del navegador
+        window.location.href = `/download-apk?v=${ver}&t=${Date.now()}`;
       }
     });
   });

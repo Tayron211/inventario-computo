@@ -289,14 +289,15 @@ public class MainActivity extends AppCompatActivity {
                 DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 if (downloadManager != null) {
                     DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-                    request.setTitle("SysInventory Actualización");
-                    request.setDescription("Descargando la última versión de SysInventory APK...");
+                    String apkName = "SysInventory-v" + getAppVersionName() + ".apk";
+                    request.setTitle("SysInventory v" + getAppVersionName());
+                    request.setDescription("Descargando " + apkName + "...");
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "SysInventory.apk");
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, apkName);
                     request.setMimeType("application/vnd.android.package-archive");
                     downloadManager.enqueue(request);
 
-                    Toast.makeText(this, "Descargando la versión más reciente en segundo plano. Mira tus notificaciones para instalarla.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Descargando " + apkName + " en segundo plano. Mira tus notificaciones para instalarla.", Toast.LENGTH_LONG).show();
                     return;
                 }
             } catch (Exception dmEx) {
