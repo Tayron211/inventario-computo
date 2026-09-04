@@ -222,67 +222,6 @@ function deduplicateInventory(items) {
   return uniqueList;
 }
 
-// Conexión e inicialización automática de Base de Datos en la Nube
-let mongoConnecting = false;
-let mongoError = null;
-
-async function initCloudDatabase() {
-  if (MONGODB_URI && !mongoCollection && !mongoConnecting) {
-    mongoConnecting = true;
-    try {
-      console.log('🔄 Conectando a Base de Datos en la Nube (MongoDB Atlas)...');
-      mongoClient = new MongoClient(MONGODB_URI, {
-        serverSelectionTimeoutMS: 8000,
-        connectTimeoutMS: 10000
-      });
-      await mongoClient.connect();
-      const db = mongoClient.db('sys_inventory');
-      mongoCollection = db.collection('equipos');
-      mongoError = null;
-      console.log('✅ Base de Datos en la Nube (MongoDB Atlas) conectada con éxito.');
-
-      // Cargar todos los equipos existentes en MongoDB
-      const cloudItems = await mongoCollection.find({}).toArray();
-      if (cloudItems.length > 0) {
-        const cleaned = deduplicateInventory(cloudItems.map(item => {
-          const { _id, ...clean } = item;
-          return normalizeItem(clean);
-        }));
-        memoryCache = cleaned;
-        saveLocalFile(cleaned);
-        // Persistir la base de datos limpia y sin duplicados en MongoDB
-        await mongoCollection.deleteMany({});
-        await mongoCollection.insertMany(cleaned);
-        console.log(`📦 Sincronizados y deduplicados ${cleaned.length} equipos en MongoDB Atlas.`);
-      } else {
-        // Si MongoDB está vacío, subir los datos locales iniciales
-        const local = deduplicateInventory(loadLocalFile().map(normalizeItem));
-        if (local.length > 0) {
-          await mongoCollection.insertMany(local);
-          memoryCache = local;
-          console.log(`📤 Subidos ${local.length} equipos iniciales a MongoDB Atlas.`);
-        }
-      }
-    } catch (err) {
-      mongoError = err.message;
-      console.error('⚠️ Error conectando a MongoDB Atlas:', err.message);
-      mongoCollection = null;
-    } finally {
-      mongoConnecting = false;
-    }
-  }
-}
-initCloudDatabase();
-
-// Reintento periódico de conexión a MongoDB si falló al inicio
-if (MONGODB_URI) {
-  setInterval(() => {
-    if (!mongoCollection) {
-      initCloudDatabase();
-    }
-  }, 30000);
-}
-
 // Datos iniciales de demostración basados en el modelo del usuario
 const DEFAULT_INVENTORY = [
   {
@@ -472,29 +411,8 @@ function loadDB() {
   return data;
 }
 
-async function saveDB(data) {
-  const normalized = (data || []).map(normalizeItem);
-  memoryCache = normalized;
-  saveLocalFile(normalized);
-  
-  if (mongoCollection) {
-    try {
-      await mongoCollection.deleteMany({});
-      if (normalized.length > 0) {
-        const toInsert = normalized.map(i => {
-          const { _id, ...clean } = i;
-          return clean;
-        });
-        await mongoCollection.insertMany(toInsert);
-      }
-    } catch (err) {
-      console.error('⚠️ Error sincronizando en MongoDB Atlas:', err.message);
-    }
-  }
-}
-
 // =============================================================
-// SISTEMA DE SINCRONIZACIÓN NUBE-LOCAL BIDIRECCIONAL (APK / PC)
+// SISTEMA DE SINCRONIZACIÓN NUBE-LOCAL BIDIRECCIONAL & TOMBSTONES
 // =============================================================
 const DELETED_FILE = path.join(DATA_DIR, 'deleted_items.json');
 const RENDER_CLOUD_URL = 'https://ivt.onrender.com';
@@ -528,15 +446,18 @@ function saveDeletedItems(data) {
 function recordDeletedItem(item) {
   if (!item) return;
   const list = loadDeletedItems();
-  const id = item.id || '';
+  const id = String(item.id || '');
   const serial = (item.numero_serie || '').trim().toLowerCase();
   const isGeneric = !serial || /^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(serial);
   
-  list.push({
-    id: id,
-    serial: isGeneric ? '' : serial,
-    deleted_at: Date.now()
-  });
+  // Evitar duplicar la misma entrada en la lista de eliminados
+  if (!list.some(d => (id && d.id === id) || (!isGeneric && d.serial === serial))) {
+    list.push({
+      id: id,
+      serial: isGeneric ? '' : serial,
+      deleted_at: Date.now()
+    });
+  }
 
   if (list.length > 500) list.splice(0, list.length - 500);
   saveDeletedItems(list);
@@ -568,7 +489,12 @@ function mergeInventories(listA, listB, extraDeleted = []) {
 
   allDeleted.forEach(d => {
     if (d.id) deletedIds.add(String(d.id));
-    if (d.serial) deletedSerials.add(String(d.serial).toLowerCase());
+    if (d.serial) {
+      const s = String(d.serial).trim().toLowerCase();
+      if (s && s.length > 2 && !/^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(s)) {
+        deletedSerials.add(s);
+      }
+    }
   });
 
   const mergedMap = new Map();
@@ -579,8 +505,8 @@ function mergeInventories(listA, listB, extraDeleted = []) {
     const id = String(item.id || '');
     const serial = (item.numero_serie || '').trim().toLowerCase();
 
-    // Si está en la lista de eliminados, ignorar
-    if (deletedIds.has(id)) return;
+    // Si está en la lista de eliminados (tombstones), IGNORAR por completo para evitar resurrección
+    if (id && deletedIds.has(id)) return;
     if (serial && deletedSerials.has(serial)) return;
 
     const key = getItemDedupeKey(item);
@@ -613,6 +539,142 @@ function mergeInventories(listA, listB, extraDeleted = []) {
   });
 
   return result;
+}
+
+// Sincronización atómica y persistente con MongoDB Atlas
+let mongoDeletedColl = null;
+
+async function syncMongoDB(items, deletedList) {
+  if (!mongoCollection) return;
+  try {
+    const currentIds = (items || []).map(i => String(i.id)).filter(Boolean);
+    const deletedIds = (deletedList || []).map(d => String(d.id)).filter(Boolean);
+    const deletedSerials = (deletedList || [])
+      .map(d => String(d.serial || '').trim().toLowerCase())
+      .filter(s => s && s.length > 2 && !/^(s\/n no disponible|default string|to be filled by o\.e\.m\.|system serial number|none|n\/a|0|0123456789|1234567890|invalid|not specified|oem|all series)$/i.test(s));
+
+    // 1. Eliminar de MongoDB cualquier equipo que esté marcado como eliminado o que no esté en currentIds
+    const orClauses = [];
+    if (currentIds.length > 0) {
+      orClauses.push({ id: { $nin: currentIds } });
+    }
+    if (deletedIds.length > 0) {
+      orClauses.push({ id: { $in: deletedIds } });
+    }
+    if (deletedSerials.length > 0) {
+      orClauses.push({ numero_serie: { $in: deletedSerials } });
+    }
+
+    if (orClauses.length > 0) {
+      await mongoCollection.deleteMany({ $or: orClauses });
+    }
+
+    // 2. Guardar / Actualizar atómicamente cada equipo con bulkWrite upsert (sin borrar la colección)
+    if (items && items.length > 0) {
+      const bulkOps = items.map(item => {
+        const { _id, ...clean } = item;
+        return {
+          replaceOne: {
+            filter: { id: clean.id },
+            replacement: clean,
+            upsert: true
+          }
+        };
+      });
+      await mongoCollection.bulkWrite(bulkOps, { ordered: false });
+    }
+
+    // 3. Persistir tombstones en colección 'eliminados' de MongoDB
+    if (mongoDeletedColl && deletedList && deletedList.length > 0) {
+      const delOps = deletedList.slice(-300).map(d => ({
+        replaceOne: {
+          filter: { id: String(d.id) },
+          replacement: { id: String(d.id), serial: d.serial || '', deleted_at: d.deleted_at || Date.now() },
+          upsert: true
+        }
+      }));
+      await mongoDeletedColl.bulkWrite(delOps, { ordered: false });
+    }
+  } catch (err) {
+    console.error('⚠️ Error en sincronización con MongoDB Atlas:', err.message);
+  }
+}
+
+async function saveDB(data) {
+  const normalized = (data || []).map(normalizeItem);
+  memoryCache = normalized;
+  saveLocalFile(normalized);
+  
+  if (mongoCollection) {
+    try {
+      await syncMongoDB(normalized, loadDeletedItems());
+    } catch (err) {
+      console.error('⚠️ Error sincronizando en MongoDB Atlas:', err.message);
+    }
+  }
+}
+
+// Inicialización de conexión a MongoDB Atlas
+let mongoConnecting = false;
+let mongoError = null;
+
+async function initCloudDatabase() {
+  if (MONGODB_URI && !mongoCollection && !mongoConnecting) {
+    mongoConnecting = true;
+    try {
+      console.log('🔄 Conectando a Base de Datos en la Nube (MongoDB Atlas)...');
+      mongoClient = new MongoClient(MONGODB_URI, {
+        serverSelectionTimeoutMS: 8000,
+        connectTimeoutMS: 10000
+      });
+      await mongoClient.connect();
+      const db = mongoClient.db('sys_inventory');
+      mongoCollection = db.collection('equipos');
+      mongoDeletedColl = db.collection('eliminados');
+      mongoError = null;
+      console.log('✅ Base de Datos en la Nube (MongoDB Atlas) conectada con éxito.');
+
+      // 1. Cargar eliminados guardados en MongoDB
+      try {
+        const cloudDeleted = await mongoDeletedColl.find({}).toArray();
+        if (cloudDeleted && cloudDeleted.length > 0) {
+          const localDel = loadDeletedItems();
+          const mergedDel = [...localDel, ...cloudDeleted.map(d => ({ id: String(d.id), serial: d.serial, deleted_at: d.deleted_at }))];
+          saveDeletedItems(mergedDel.slice(-500));
+        }
+      } catch (e) {}
+
+      // 2. Cargar equipos desde MongoDB y fusionar con almacenamiento local aplicando eliminados
+      const cloudItems = await mongoCollection.find({}).toArray();
+      const localItems = loadLocalFile();
+
+      const merged = mergeInventories(localItems, cloudItems.map(item => {
+        const { _id, ...clean } = item;
+        return clean;
+      }));
+
+      memoryCache = merged;
+      saveLocalFile(merged);
+      await syncMongoDB(merged, loadDeletedItems());
+      console.log(`📦 Sincronizados ${merged.length} equipos con MongoDB Atlas de forma segura.`);
+    } catch (err) {
+      mongoError = err.message;
+      console.error('⚠️ Error conectando a MongoDB Atlas:', err.message);
+      mongoCollection = null;
+      mongoDeletedColl = null;
+    } finally {
+      mongoConnecting = false;
+    }
+  }
+}
+initCloudDatabase();
+
+if (MONGODB_URI) {
+  setInterval(() => {
+    if (!mongoCollection) {
+      initCloudDatabase();
+    }
+  }, 25000);
 }
 
 function pushItemToRender(item) {
@@ -761,7 +823,7 @@ async function syncWithCloudDatabase() {
   }
 }
 
-function scheduleCloudPush(delayMs = 400) {
+function scheduleCloudPush(delayMs = 150) {
   if (IS_RENDER_SERVER) return;
   clearTimeout(cloudSyncScheduledTimer);
   cloudSyncScheduledTimer = setTimeout(() => {
@@ -769,12 +831,12 @@ function scheduleCloudPush(delayMs = 400) {
   }, delayMs);
 }
 
-// Iniciar sincronización continua si estamos corriendo en local (PC)
+// Iniciar sincronización continua en tiempo real si estamos corriendo en local (PC)
 if (!IS_RENDER_SERVER) {
   // Sincronizar inmediatamente al iniciar el servidor
-  setTimeout(syncWithCloudDatabase, 1500);
-  // Sincronizar automáticamente cada 10 segundos
-  setInterval(syncWithCloudDatabase, 10000);
+  setTimeout(syncWithCloudDatabase, 1000);
+  // Sincronizar automáticamente cada 3 segundos para tiempo real fluido
+  setInterval(syncWithCloudDatabase, 3000);
 }
 
 function getLocalIPs() {
@@ -823,6 +885,8 @@ function getServerUrl(req) {
 // =============================================================
 // SISTEMA DE CATEGORÍAS Y PRIVILEGIOS DE USUARIOS
 // =============================================================
+// SISTEMA DE CATEGORÍAS Y PRIVILEGIOS DE USUARIOS
+// =============================================================
 const USER_CATEGORIES = {
   // 1. PLATINUM: Acceso Total a todo el sistema y todos los privilegios
   Platinum: {
@@ -835,7 +899,7 @@ const USER_CATEGORIES = {
     canDelete: true,
     canExport: true
   },
-  // 2. GOLDEN: Todos los privilegios EXCEPTO eliminar registros
+  // 2. GOLDEN: Administradores con permisos completos de Crear, Escanear, Editar, Eliminar y Exportar
   Golden: {
     categoria: 'Golden',
     role: 'gold_admin',
@@ -843,7 +907,7 @@ const USER_CATEGORIES = {
     canCreate: true,
     canScan: true,
     canEdit: true,
-    canDelete: false,
+    canDelete: true,
     canExport: true
   },
   // 3. BRONCE: Solo lectura, sin edición, sin Excel, sin registro ni eliminación
@@ -869,15 +933,15 @@ const USERS = [
     displayName: 'Administrador',
     ...USER_CATEGORIES.Platinum 
   },
-
-  // --- CATEGORÍA GOLDEN (Todos los privilegios EXCEPTO Eliminar) ---
   { 
     username: 'Tayron', 
     passwords: ['210391', 'tayron'], 
-    categoria: 'Golden',
+    categoria: 'Platinum',
     displayName: 'Tayron',
-    ...USER_CATEGORIES.Golden 
+    ...USER_CATEGORIES.Platinum 
   },
+
+  // --- CATEGORÍA GOLDEN (Crear, Escanear, Editar, Eliminar, Exportar) ---
   { 
     username: 'Cristian', 
     passwords: ['Joel0209', 'joel0209', 'cristian'], 
@@ -1951,12 +2015,12 @@ app.put('/api/inventory/:id', async (req, res) => {
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
 
-// Eliminar equipo (SOLO permitido para Administrador Platinum / Super Admin)
+// Eliminar equipo (Permitido para Administradores Platinum y Golden; Bloqueado para Observador)
 app.delete('/api/inventory/:id', async (req, res) => {
   const userInfo = getUserInfo(req);
-  if (!userInfo.canDelete || userInfo.role !== 'admin') {
+  if (userInfo.role === 'observador' || userInfo.canDelete === false) {
     return res.status(403).json({ 
-      error: 'Acceso denegado: Solo el Administrador Platinum tiene permisos para eliminar registros. Los Administradores Gold y Observadores no pueden borrar registros.' 
+      error: 'Acceso denegado: El usuario Observador no tiene permisos para eliminar registros.' 
     });
   }
 
@@ -1965,20 +2029,28 @@ app.delete('/api/inventory/:id', async (req, res) => {
   const decodedId = decodeURIComponent(rawId);
   const initialLen = items.length;
   
-  const itemToDelete = items.find(i => i.id === rawId || i.id === decodedId);
-  if (itemToDelete) {
-    recordDeletedItem(itemToDelete);
-  }
+  const itemToDelete = items.find(i => 
+    i.id === rawId || 
+    i.id === decodedId || 
+    (rawId && i.numero_serie && i.numero_serie.toLowerCase() === rawId.toLowerCase())
+  );
 
-  items = items.filter(i => i.id !== rawId && i.id !== decodedId);
+  const idToDelete = itemToDelete ? itemToDelete.id : rawId;
+  recordDeletedItem(itemToDelete || { id: rawId });
+
+  items = items.filter(i => 
+    i.id !== rawId && 
+    i.id !== decodedId && 
+    i.id !== idToDelete
+  );
   
-  if (items.length === initialLen) {
+  if (items.length === initialLen && !itemToDelete) {
     return res.status(404).json({ error: 'Equipo no encontrado' });
   }
   
   await saveDB(items);
-  scheduleCloudPush();
-  res.json({ message: 'Equipo eliminado exitosamente' });
+  scheduleCloudPush(100);
+  res.json({ message: 'Equipo eliminado exitosamente', id: idToDelete });
 });
 
 // Endpoint receptor para el Agente Escaneador de Hardware (.bat / PowerShell)
