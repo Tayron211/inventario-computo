@@ -1357,11 +1357,10 @@ function initModalSwipeGestures() {
     header.addEventListener('touchend', (e) => {
       if (!isDraggingHeader) return;
       isDraggingHeader = false;
-      const diffY = currentY - startY;
-      card.style.transition = 'transform 0.16s cubic-bezier(0.16, 1, 0.3, 1)';
+      card.style.transition = 'transform 0.24s cubic-bezier(0.22, 1, 0.36, 1)';
       if (diffY > 70) {
         closeModal(overlay.id);
-        setTimeout(() => { card.style.transform = ''; }, 160);
+        setTimeout(() => { card.style.transform = ''; }, 260);
       } else {
         card.style.transform = '';
       }
