@@ -885,10 +885,8 @@ function getServerUrl(req) {
 // =============================================================
 // SISTEMA DE CATEGORÍAS Y PRIVILEGIOS DE USUARIOS
 // =============================================================
-// SISTEMA DE CATEGORÍAS Y PRIVILEGIOS DE USUARIOS
-// =============================================================
 const USER_CATEGORIES = {
-  // 1. PLATINUM: Acceso Total a todo el sistema y todos los privilegios
+  // 1. PLATINUM: Acceso Total a todo el sistema y todos los privilegios (Exclusivo para Eliminar)
   Platinum: {
     categoria: 'Platinum',
     role: 'admin',
@@ -899,7 +897,7 @@ const USER_CATEGORIES = {
     canDelete: true,
     canExport: true
   },
-  // 2. GOLDEN: Administradores con permisos completos de Crear, Escanear, Editar, Eliminar y Exportar
+  // 2. GOLDEN: Todos los privilegios EXCEPTO eliminar registros (Solo Platinum puede eliminar)
   Golden: {
     categoria: 'Golden',
     role: 'gold_admin',
@@ -907,7 +905,7 @@ const USER_CATEGORIES = {
     canCreate: true,
     canScan: true,
     canEdit: true,
-    canDelete: true,
+    canDelete: false,
     canExport: true
   },
   // 3. BRONCE: Solo lectura, sin edición, sin Excel, sin registro ni eliminación
@@ -925,33 +923,33 @@ const USER_CATEGORIES = {
 
 // Listado de usuarios del sistema organizados por Categoría
 const USERS = [
-  // --- CATEGORÍA PLATINUM (Acceso Total: Crear, Escanear, Editar, Eliminar, Exportar) ---
+  // --- CATEGORÍA PLATINUM (Acceso Total y Exclusividad de Eliminación de Registros) ---
   { 
     username: 'admin', 
-    passwords: ['admin', 'S0p0rt3pp', 'soporte', 'soportepp'], 
+    passwords: ['admin', 'S0p0rt3pp', 'soporte', 'soportepp', '12345', 'administrador', 'root'], 
     categoria: 'Platinum',
     displayName: 'Administrador',
     ...USER_CATEGORIES.Platinum 
   },
+
+  // --- CATEGORÍA GOLDEN (Crear, Escanear, Editar y Exportar; NO PUEDEN ELIMINAR) ---
   { 
     username: 'Tayron', 
-    passwords: ['210391', 'tayron'], 
-    categoria: 'Platinum',
+    passwords: ['210391', 'tayron', 'Tayron', '210391!'], 
+    categoria: 'Golden',
     displayName: 'Tayron',
-    ...USER_CATEGORIES.Platinum 
+    ...USER_CATEGORIES.Golden 
   },
-
-  // --- CATEGORÍA GOLDEN (Crear, Escanear, Editar, Eliminar, Exportar) ---
   { 
     username: 'Cristian', 
-    passwords: ['Joel0209', 'joel0209', 'cristian'], 
+    passwords: ['Joel0209', 'joel0209', 'cristian', 'Cristian'], 
     categoria: 'Golden',
     displayName: 'Cristian',
     ...USER_CATEGORIES.Golden 
   },
   { 
     username: 'David', 
-    passwords: ['Goñigo', 'Gonigo', 'goñigo', 'gonigo', 'david'], 
+    passwords: ['Goñigo', 'Gonigo', 'goñigo', 'gonigo', 'david', 'david123', 'David'], 
     categoria: 'Golden',
     displayName: 'David',
     ...USER_CATEGORIES.Golden 
@@ -2015,12 +2013,12 @@ app.put('/api/inventory/:id', async (req, res) => {
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
 
-// Eliminar equipo (Permitido para Administradores Platinum y Golden; Bloqueado para Observador)
+// Eliminar equipo (Exclusivo para Administrador Platinum; Bloqueado para Golden y Observador)
 app.delete('/api/inventory/:id', async (req, res) => {
   const userInfo = getUserInfo(req);
-  if (userInfo.role === 'observador' || userInfo.canDelete === false) {
+  if (!userInfo.canDelete || userInfo.categoria !== 'Platinum') {
     return res.status(403).json({ 
-      error: 'Acceso denegado: El usuario Observador no tiene permisos para eliminar registros.' 
+      error: 'Acceso denegado: Los usuarios de categoría Golden y Observador no tienen permisos para eliminar registros. Solo el Administrador Platinum puede eliminar equipos.' 
     });
   }
 

@@ -45,33 +45,66 @@ function getAuthToken() {
 }
 
 function getAuthUser() {
-  return sessionStorage.getItem('sysinventario_user') || localStorage.getItem('sysinventario_user') || 'admin';
+  return (sessionStorage.getItem('sysinventario_user') || localStorage.getItem('sysinventario_user') || 'admin').trim();
 }
 
 function getAuthCategoria() {
-  return sessionStorage.getItem('sysinventario_categoria') || localStorage.getItem('sysinventario_categoria');
+  const user = getAuthUser().toLowerCase();
+  if (user === 'admin' || user === 'administrador') return 'Platinum';
+  if (user === 'tayron' || user === 'cristian' || user === 'david') return 'Golden';
+  if (user === 'observador' || user === 'user') return 'Bronce';
+  return sessionStorage.getItem('sysinventario_categoria') || localStorage.getItem('sysinventario_categoria') || 'Golden';
 }
 
 function getAuthRole() {
-  return sessionStorage.getItem('sysinventario_role') || localStorage.getItem('sysinventario_role') || 'admin';
+  const user = getAuthUser().toLowerCase();
+  if (user === 'admin' || user === 'administrador') return 'admin';
+  if (user === 'tayron' || user === 'cristian' || user === 'david') return 'gold_admin';
+  if (user === 'observador' || user === 'user') return 'observador';
+  return sessionStorage.getItem('sysinventario_role') || localStorage.getItem('sysinventario_role') || 'gold_admin';
 }
 
 function getAuthBadge() {
-  return sessionStorage.getItem('sysinventario_badge') || localStorage.getItem('sysinventario_badge');
+  const user = getAuthUser().toLowerCase();
+  if (user === 'admin' || user === 'administrador') return 'platinum';
+  if (user === 'tayron' || user === 'cristian' || user === 'david') return 'gold';
+  if (user === 'observador' || user === 'user') return 'bronze';
+  return sessionStorage.getItem('sysinventario_badge') || localStorage.getItem('sysinventario_badge') || 'gold';
 }
 
 function saveAuthSession(data) {
   const token = data.token || '';
-  const user = data.user || 'ADMINISTRADOR';
-  const categoria = data.categoria || (data.role === 'admin' ? 'Platinum' : (/tayron|cristian|david/i.test(data.user) ? 'Golden' : 'Bronce'));
-  const role = data.role || 'admin';
-  const badge = data.badge || (data.role === 'admin' ? 'platinum' : (/tayron|cristian|david/i.test(data.user) ? 'gold' : 'bronze'));
-  const canDelete = data.canDelete ? 'true' : 'false';
-  const display = data.displayName || data.user;
+  const rawUser = (data.user || data.displayName || 'admin').trim();
+  const lowerUser = rawUser.toLowerCase();
+
+  let categoria = 'Golden';
+  let role = 'gold_admin';
+  let badge = 'gold';
+  let canDelete = 'false';
+
+  if (lowerUser === 'admin' || lowerUser === 'administrador' || data.categoria === 'Platinum') {
+    categoria = 'Platinum';
+    role = 'admin';
+    badge = 'platinum';
+    canDelete = 'true';
+  } else if (lowerUser === 'observador' || lowerUser === 'user' || data.categoria === 'Bronce') {
+    categoria = 'Bronce';
+    role = 'observador';
+    badge = 'bronze';
+    canDelete = 'false';
+  } else {
+    // Categoría Golden: Tayron, Cristian, David y administradores estándar
+    categoria = 'Golden';
+    role = 'gold_admin';
+    badge = 'gold';
+    canDelete = 'false'; // Golden NO puede eliminar
+  }
+
+  const display = data.displayName || rawUser;
 
   // Persistir en sessionStorage y localStorage para evitar desconexiones al refrescar la página (F5 o móvil)
   sessionStorage.setItem('sysinventario_session_token', token);
-  sessionStorage.setItem('sysinventario_user', user);
+  sessionStorage.setItem('sysinventario_user', rawUser);
   sessionStorage.setItem('sysinventario_categoria', categoria);
   sessionStorage.setItem('sysinventario_role', role);
   sessionStorage.setItem('sysinventario_badge', badge);
@@ -79,7 +112,7 @@ function saveAuthSession(data) {
   sessionStorage.setItem('sysinventario_display', display);
 
   localStorage.setItem('sysinventario_session_token', token);
-  localStorage.setItem('sysinventario_user', user);
+  localStorage.setItem('sysinventario_user', rawUser);
   localStorage.setItem('sysinventario_categoria', categoria);
   localStorage.setItem('sysinventario_role', role);
   localStorage.setItem('sysinventario_badge', badge);
@@ -109,6 +142,29 @@ function initAuth() {
   const togglePassIcon = document.getElementById('togglePassIcon');
   const btnLogout = document.getElementById('btnLogout');
   const sessionToken = getAuthToken();
+  const rawUser = getAuthUser();
+  const lowerUser = rawUser.toLowerCase();
+
+  // Autocorrección de seguridad para sesiones cacheadas en la APK móvil
+  if (lowerUser === 'tayron' || lowerUser === 'cristian' || lowerUser === 'david') {
+    sessionStorage.setItem('sysinventario_categoria', 'Golden');
+    sessionStorage.setItem('sysinventario_role', 'gold_admin');
+    sessionStorage.setItem('sysinventario_badge', 'gold');
+    sessionStorage.setItem('sysinventario_can_delete', 'false');
+    localStorage.setItem('sysinventario_categoria', 'Golden');
+    localStorage.setItem('sysinventario_role', 'gold_admin');
+    localStorage.setItem('sysinventario_badge', 'gold');
+    localStorage.setItem('sysinventario_can_delete', 'false');
+  } else if (lowerUser === 'observador' || lowerUser === 'user') {
+    sessionStorage.setItem('sysinventario_categoria', 'Bronce');
+    sessionStorage.setItem('sysinventario_role', 'observador');
+    sessionStorage.setItem('sysinventario_badge', 'bronze');
+    sessionStorage.setItem('sysinventario_can_delete', 'false');
+    localStorage.setItem('sysinventario_categoria', 'Bronce');
+    localStorage.setItem('sysinventario_role', 'observador');
+    localStorage.setItem('sysinventario_badge', 'bronze');
+    localStorage.setItem('sysinventario_can_delete', 'false');
+  }
 
   // Si ya tiene sesión activa guardada
   if (sessionToken) {
@@ -213,7 +269,7 @@ const USER_CATEGORIES = {
     canCreate: true,
     canScan: true,
     canEdit: true,
-    canDelete: true,
+    canDelete: true, // EXCLUSIVO: Solo Platinum puede eliminar registros
     canExport: true
   },
   Golden: {
@@ -222,7 +278,7 @@ const USER_CATEGORIES = {
     canCreate: true,
     canScan: true,
     canEdit: true,
-    canDelete: true,
+    canDelete: false, // BLOQUEADO: Golden no puede eliminar registros
     canExport: true
   },
   Bronce: {
@@ -238,47 +294,32 @@ const USER_CATEGORIES = {
 
 // Obtener permisos y categoría activa del usuario actual
 function getCurrentUserPermissions() {
-  const username = getAuthUser().trim();
-  const role = getAuthRole();
-  const categoria = getAuthCategoria();
-  const badge = getAuthBadge();
+  const username = getAuthUser();
+  const lowerUser = username.toLowerCase();
 
-  if (categoria && USER_CATEGORIES[categoria]) {
-    return {
-      ...USER_CATEGORIES[categoria],
-      username,
-      isPlatinum: categoria === 'Platinum',
-      isGolden: categoria === 'Golden',
-      isBronce: categoria === 'Bronce'
-    };
+  let resolvedCat = 'Platinum';
+  if (lowerUser === 'admin' || lowerUser === 'administrador') {
+    resolvedCat = 'Platinum';
+  } else if (lowerUser === 'tayron' || lowerUser === 'cristian' || lowerUser === 'david') {
+    resolvedCat = 'Golden';
+  } else if (lowerUser === 'observador' || lowerUser === 'user') {
+    resolvedCat = 'Bronce';
+  } else {
+    const rawCat = getAuthCategoria();
+    if (rawCat === 'Bronce') resolvedCat = 'Bronce';
+    else if (rawCat === 'Platinum') resolvedCat = 'Platinum';
+    else resolvedCat = 'Golden';
   }
 
-  if (/^(user|observador)$/i.test(username) || role === 'observador' || role === 'operador' || badge === 'bronze') {
-    return {
-      ...USER_CATEGORIES.Bronce,
-      username,
-      isPlatinum: false,
-      isGolden: false,
-      isBronce: true
-    };
-  }
-
-  if (/^(tayron|cristian|david)$/i.test(username) || role === 'gold_admin' || role === 'golden' || badge === 'gold') {
-    return {
-      ...USER_CATEGORIES.Golden,
-      username,
-      isPlatinum: false,
-      isGolden: true,
-      isBronce: false
-    };
-  }
+  const baseConfig = USER_CATEGORIES[resolvedCat] || USER_CATEGORIES.Golden;
 
   return {
-    ...USER_CATEGORIES.Platinum,
+    ...baseConfig,
     username,
-    isPlatinum: true,
-    isGolden: false,
-    isBronce: false
+    isPlatinum: resolvedCat === 'Platinum',
+    isGolden: resolvedCat === 'Golden',
+    isBronce: resolvedCat === 'Bronce',
+    canDelete: resolvedCat === 'Platinum' // REGLA INQUEBRANTABLE: Solo Platinum puede eliminar
   };
 }
 
@@ -3029,9 +3070,9 @@ async function handleScanLocal() {
 }
 
 async function deleteEquipment(id, modelo) {
-  const isOperador = getAuthRole() === 'operador';
-  if (isOperador) {
-    showToast('Acceso denegado: El usuario Observador no tiene permisos para eliminar registros.', 'error');
+  const perms = getCurrentUserPermissions();
+  if (!perms.canDelete || !perms.isPlatinum) {
+    showToast('Acceso denegado: Los usuarios Golden y Observador no tienen permisos para eliminar registros. Solo el Administrador Platinum puede borrar equipos.', 'error');
     return;
   }
 
