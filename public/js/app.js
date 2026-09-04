@@ -471,7 +471,7 @@ function setTheme(theme) {
 
   window.__themeTransTimer = setTimeout(() => {
     document.documentElement.classList.remove('theme-transitioning');
-  }, 140);
+  }, 220);
 }
 
 function updateQrForTheme(theme) {
@@ -492,17 +492,17 @@ function initEventListeners() {
   // Inicializar gestos táctiles Swipe en ventanas/modales
   initModalSwipeGestures();
 
-  // Soporte directo para descargar APK en celulares y app nativa (v2.0.0)
+  // Soporte directo para descargar APK en celulares y app nativa (v2.1.0)
   const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory.apk"], a[href*="download-apk"]');
   apkDownloadBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const targetUrl = window.location.origin + '/download-apk?v=2.0.0';
+      const targetUrl = window.location.origin + '/download-apk?v=2.1.0';
       if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
         e.preventDefault();
         window.AndroidBridge.downloadApk(targetUrl);
-        showToast('Iniciando descarga de SysInventory v2.0.0...', 'info');
+        showToast('Iniciando descarga de SysInventory v2.1.0...', 'info');
       } else {
-        showToast('Descargando SysInventory-v2.0.0.apk...', 'success');
+        showToast('Descargando SysInventory-v2.1.0.apk...', 'success');
       }
     });
   });
@@ -521,6 +521,14 @@ function initEventListeners() {
     searchInput.focus();
     renderData();
   });
+
+  // Botón de escaneo rápido en la barra de búsqueda
+  const btnScanSearch = document.getElementById('btnScanSearch');
+  if (btnScanSearch) {
+    btnScanSearch.addEventListener('click', () => {
+      startCameraScanner('searchInput');
+    });
+  }
 
   // Filtros por pestañas (Pills)
   document.querySelectorAll('.filter-pills-group .pill').forEach(pill => {
@@ -3373,8 +3381,9 @@ function escapeHTML(str) {
 // -------------------------------------------------------------
 let html5QrScanner = null;
 let currentCameraFacing = "environment";
+let currentCameraId = null;
 
-function startCameraScanner(targetInputId = 'formNumeroSerie') {
+async function startCameraScanner(targetInputId = 'formNumeroSerie') {
   const camModal = document.getElementById('cameraModal');
   if (camModal) {
     camModal.classList.add('active');
@@ -3384,48 +3393,83 @@ function startCameraScanner(targetInputId = 'formNumeroSerie') {
 
   const cameraContainer = document.getElementById('cameraPreview');
   if (cameraContainer) {
-    cameraContainer.innerHTML = '<div class="camera-loading-hint"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><span>Encendiendo cámara y visor...</span></div>';
+    cameraContainer.innerHTML = '<div class="camera-loading-hint"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><span>Iniciando sensor de cámara...</span></div>';
+  }
+
+  // Notificar al puente de Android para asegurar permisos nativos si están pendientes
+  if (window.AndroidBridge && typeof window.AndroidBridge.requestCameraPermission === 'function') {
+    try {
+      window.AndroidBridge.requestCameraPermission();
+    } catch (e) {
+      console.warn('Error solicitando permiso nativo a Android:', e);
+    }
   }
 
   if (typeof Html5Qrcode === 'undefined') {
-    showToast('Iniciando lector de cámara...', 'info');
-    setTimeout(() => startCameraScanner(targetInputId), 350);
+    showToast('Cargando motor de escaneo...', 'info');
+    setTimeout(() => startCameraScanner(targetInputId), 300);
     return;
   }
 
   if (html5QrScanner) {
     try {
-      html5QrScanner.stop().catch(() => {}).finally(() => {
-        try { html5QrScanner.clear(); } catch(e) {}
-      });
+      await html5QrScanner.stop().catch(() => {});
+      try { html5QrScanner.clear(); } catch(e) {}
     } catch (e) {}
+    html5QrScanner = null;
   }
 
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
       html5QrScanner = new Html5Qrcode("cameraPreview");
 
+      // Detección de cámaras de hardware del celular
+      let cameraConfig = { facingMode: currentCameraFacing };
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          if (currentCameraFacing === 'environment') {
+            // Buscar cámara trasera por etiquetas estándar o usar la última cámara encontrada
+            const rearCam = devices.find(d => /back|rear|traser|environment/i.test(d.label)) || devices[devices.length - 1];
+            currentCameraId = rearCam.id;
+          } else {
+            const frontCam = devices.find(d => /front|user|delanter/i.test(d.label)) || devices[0];
+            currentCameraId = frontCam.id;
+          }
+          cameraConfig = currentCameraId;
+        }
+      } catch (camErr) {
+        console.warn('No se pudieron listar cámaras con getCameras(), usando facingMode:', camErr);
+        cameraConfig = { facingMode: currentCameraFacing };
+      }
+
       const config = {
-        fps: 20,
+        fps: 25,
         qrbox: (viewfinderWidth, viewfinderHeight) => {
-          const width = Math.min(viewfinderWidth * 0.9, 320);
-          const height = Math.min(viewfinderHeight * 0.7, 200);
+          const width = Math.min(viewfinderWidth * 0.92, 340);
+          const height = Math.min(viewfinderHeight * 0.65, 220);
           return { width: Math.floor(width), height: Math.floor(height) };
         },
-        aspectRatio: 1.333334
+        aspectRatio: 1.333334,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
+        }
       };
 
-      html5QrScanner.start(
-        { facingMode: currentCameraFacing },
+      await html5QrScanner.start(
+        cameraConfig,
         config,
         (decodedText) => {
-          const cleanText = (decodedText || '').trim().toUpperCase();
+          const cleanText = (decodedText || '').trim();
           if (cleanText) {
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            if (navigator.vibrate) {
+              try { navigator.vibrate([80, 40, 80]); } catch(e) {}
+            }
             const input = document.getElementById(targetInputId);
             if (input) {
               input.value = cleanText;
               input.focus();
+              input.dispatchEvent(new Event('input', { bubbles: true }));
               input.style.borderColor = 'var(--accent-emerald)';
               input.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.5)';
               setTimeout(() => {
@@ -3433,22 +3477,34 @@ function startCameraScanner(targetInputId = 'formNumeroSerie') {
                 input.style.boxShadow = '';
               }, 2500);
             }
+            if (targetInputId === 'searchInput') {
+              currentSearchQuery = cleanText.toLowerCase();
+              const btnClear = document.getElementById('btnClearSearch');
+              if (btnClear) btnClear.style.display = 'block';
+              renderData();
+            }
             showToast(`¡Código escaneado: ${cleanText}!`, 'success');
             stopCameraScanner();
           }
         },
         () => {}
-      ).catch(err => {
-        console.warn('Error accediendo a la cámara:', err);
-        if (cameraContainer) {
-          cameraContainer.innerHTML = '<div class="camera-error-hint"><i class="fa-solid fa-triangle-exclamation text-crimson fa-2x"></i><p>Permite el acceso a la cámara en los permisos de tu navegador</p></div>';
-        }
-        showToast('Permite el acceso a la cámara en tu navegador', 'error');
-      });
+      );
     } catch (err) {
-      console.error('Error inicializando escáner:', err);
+      console.warn('Error accediendo a la cámara:', err);
+      if (cameraContainer) {
+        cameraContainer.innerHTML = `
+          <div class="camera-error-hint" style="padding: 20px; text-align: center;">
+            <i class="fa-solid fa-camera-slash text-crimson fa-2x" style="margin-bottom: 10px;"></i>
+            <p style="font-size: 0.9rem; color: #fff; margin-bottom: 12px;">Se requiere permiso para usar la cámara en SysInventory.</p>
+            <button class="btn btn-outline-crimson btn-sm" onclick="startCameraScanner('${escapeHTML(targetInputId)}')">
+              <i class="fa-solid fa-rotate-right"></i> Reintentar Permiso
+            </button>
+          </div>
+        `;
+      }
+      showToast('Otorga permiso de cámara cuando la aplicación lo solicite', 'warning');
     }
-  }, 100);
+  }, 120);
 }
 
 function stopCameraScanner() {
@@ -3456,10 +3512,14 @@ function stopCameraScanner() {
     try {
       html5QrScanner.stop().then(() => {
         try { html5QrScanner.clear(); } catch(e) {}
+        html5QrScanner = null;
       }).catch(() => {
         try { html5QrScanner.clear(); } catch(e) {}
+        html5QrScanner = null;
       });
-    } catch (e) {}
+    } catch (e) {
+      html5QrScanner = null;
+    }
   }
   closeModal('cameraModal');
   const camModal = document.getElementById('cameraModal');

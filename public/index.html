@@ -56,11 +56,11 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <!-- HTML5 QR & Barcode Scanner Library -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- HTML5 QR & Barcode Scanner Library (Local Offline Bundle) -->
+  <script src="js/html5-qrcode.min.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=74.0">
+  <link rel="stylesheet" href="css/styles.css?v=75.0">
 </head>
 <body>
   <script>
@@ -249,9 +249,9 @@
               <span>Excel</span>
             </a>
 
-            <a href="/download-apk?v=2.0.0" download="SysInventory-v2.0.0.apk" class="btn btn-outline-crimson" id="btnDownloadApk" title="Descargar APK v2.0.0 para celular Android" target="_blank" rel="noopener">
+            <a href="/download-apk?v=2.1.0" download="SysInventory-v2.1.0.apk" class="btn btn-outline-crimson" id="btnDownloadApk" title="Descargar APK v2.1.0 para celular Android" target="_blank" rel="noopener">
               <i class="fa-brands fa-android"></i>
-              <span>App APK (v2.0.0)</span>
+              <span>App APK (v2.1.0)</span>
             </a>
           </div>
         </div>
@@ -328,6 +328,9 @@
           <div class="search-bar-wrapper">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input type="text" id="searchInput" placeholder="Buscar por modelo, serie, ambiente, usuario, hardware..." autocomplete="off">
+            <button class="btn-scan-search" id="btnScanSearch" type="button" title="Escanear código de barras o QR para buscar">
+              <i class="fa-solid fa-barcode"></i>
+            </button>
             <button class="clear-search-btn" id="btnClearSearch" title="Limpiar búsqueda" style="display: none;">
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -739,9 +742,9 @@
             <button class="btn-copy-ip" id="btnCopyUrl" title="Copiar URL"><i class="fa-regular fa-copy"></i> Copiar</button>
           </div>
           <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <a href="/download-apk?v=2.0.0" download="SysInventory-v2.0.0.apk" id="btnDownloadApkModal" class="btn btn-crimson w-100" style="display: flex; align-items: center; justify-content: center; gap: 8px;" target="_blank" rel="noopener">
+            <a href="/download-apk?v=2.1.0" download="SysInventory-v2.1.0.apk" id="btnDownloadApkModal" class="btn btn-crimson w-100" style="display: flex; align-items: center; justify-content: center; gap: 8px;" target="_blank" rel="noopener">
               <i class="fa-brands fa-android fa-lg"></i>
-              <span>Descargar App v2.0.0 (.APK)</span>
+              <span>Descargar App v2.1.0 (.APK)</span>
             </a>
           </div>
         </div>
@@ -1152,7 +1155,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=75.0"></script>
+  <script src="js/app.js?v=76.0"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {

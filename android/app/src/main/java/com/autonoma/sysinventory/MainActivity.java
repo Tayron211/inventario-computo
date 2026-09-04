@@ -12,6 +12,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
@@ -23,7 +25,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -33,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TARGET_URL = "https://ivt.onrender.com/";
     private static final int FILE_CHOOSER_REQUEST_CODE = 1002;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 2001;
+    private PermissionRequest pendingPermissionRequest;
 
     private WebView webView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -189,6 +195,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        @JavascriptInterface
+        public void requestCameraPermission() {
+            runOnUiThread(() -> {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public boolean hasCameraPermission() {
+            return ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        }
     }
 
     private void dismissSplashScreen() {
@@ -230,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         } catch (Exception e) {
-            return "2.0.0";
+            return "2.1.0";
         }
     }
 
@@ -351,13 +371,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 MainActivity.this.runOnUiThread(() -> {
+                    boolean needsCamera = false;
                     for (String resource : request.getResources()) {
                         if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
-                            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
-                            return;
+                            needsCamera = true;
+                            break;
                         }
                     }
-                    request.grant(request.getResources());
+                    if (needsCamera) {
+                        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                            request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                        } else {
+                            pendingPermissionRequest = request;
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+                        }
+                    } else {
+                        request.grant(request.getResources());
+                    }
                 });
             }
 
@@ -380,6 +410,34 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (pendingPermissionRequest != null) {
+                    runOnUiThread(() -> {
+                        try {
+                            pendingPermissionRequest.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                        } catch (Exception ignored) {}
+                        pendingPermissionRequest = null;
+                    });
+                }
+                Toast.makeText(this, "Permiso de cámara concedido", Toast.LENGTH_SHORT).show();
+            } else {
+                if (pendingPermissionRequest != null) {
+                    runOnUiThread(() -> {
+                        try {
+                            pendingPermissionRequest.deny();
+                        } catch (Exception ignored) {}
+                        pendingPermissionRequest = null;
+                    });
+                }
+                Toast.makeText(this, "Se requiere permiso de cámara para escanear", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override

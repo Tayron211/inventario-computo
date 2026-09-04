@@ -53,13 +53,26 @@
    TRANSICIÓN DE TEMA ULTRA FLUIDA E IMPERCEPTIBLE (120 FPS / ZERO DELAY)
    ============================================================================== */
 html.theme-transitioning,
-html.theme-transitioning *,
-html.theme-transitioning *::before,
-html.theme-transitioning *::after {
-  transition: background-color 0.12s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.12s cubic-bezier(0.16, 1, 0.3, 1),
-              color 0.12s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1) !important;
+html.theme-transitioning body,
+html.theme-transitioning .app-wrapper,
+html.theme-transitioning .app-header,
+html.theme-transitioning .metric-card,
+html.theme-transitioning .inventory-table-card,
+html.theme-transitioning .custom-excel-table,
+html.theme-transitioning .custom-excel-table th,
+html.theme-transitioning .custom-excel-table td,
+html.theme-transitioning .modal-card,
+html.theme-transitioning .login-card,
+html.theme-transitioning .btn,
+html.theme-transitioning .pill,
+html.theme-transitioning .dash-card-panel,
+html.theme-transitioning .ambiente-card,
+html.theme-transitioning .form-control,
+html.theme-transitioning .user-session-badge,
+html.theme-transitioning .search-bar-wrapper {
+  transition: background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
   transition-delay: 0s !important;
 }
 
@@ -5540,5 +5553,86 @@ tr.row-highlight-pulse {
     margin-bottom: 8px !important;
   }
 }
+
+/* ==============================================================================
+   BOTÓN DE ESCÁNER EN LA BARRA DE BÚSQUEDA & CONTENEDOR DE CÁMARA
+   ============================================================================== */
+.btn-scan-search {
+  position: absolute;
+  right: 42px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--crimson-glow);
+  font-size: 1.15rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  z-index: 2;
+}
+
+.btn-scan-search:hover {
+  color: #ffffff;
+  background: rgba(220, 20, 60, 0.22);
+  transform: translateY(-50%) scale(1.08);
+}
+
+[data-theme="light"] .btn-scan-search {
+  color: var(--crimson-primary);
+}
+
+[data-theme="light"] .btn-scan-search:hover {
+  background: rgba(220, 20, 60, 0.12);
+  color: var(--crimson-dark);
+}
+
+/* Visor de Cámara y Lector QR/Barras */
+.camera-preview-container {
+  width: 100%;
+  min-height: 240px;
+  background: #000000;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--crimson-border);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-preview-container video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.camera-loading-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--gray-300);
+  font-size: 0.9rem;
+}
+
+.camera-scanner-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.camera-scan-tip {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
 
 
