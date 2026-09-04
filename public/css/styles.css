@@ -2127,9 +2127,11 @@ body {
 /* Tabla Estilizada - 100% Adaptativa a Pantallas Pequeñas Sin Scroll Horizontal */
 .custom-excel-table {
   width: 100%;
-  border-collapse: collapse;
+  min-width: 1220px;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
-  font-size: 0.78rem;
+  font-size: 0.77rem;
 }
 
 /* ==============================================================================
@@ -2268,21 +2270,107 @@ body {
   font-size: 0.85rem;
 }
 
+/* ==============================================================================
+   ANCHO Y PROPORCIONES EXACTAS POR COLUMNA (EVITA COLISIONES Y DESBORDES)
+   ============================================================================== */
+.col-modelo, .cell-modelo {
+  width: 170px;
+  min-width: 155px;
+  max-width: 230px;
+}
+
+.col-serie, .cell-serie {
+  width: 125px;
+  min-width: 115px;
+  max-width: 140px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.col-ambiente, .cell-ambiente {
+  width: 120px;
+  min-width: 110px;
+  max-width: 145px;
+  text-align: center;
+}
+
+.col-placa, .cell-placa {
+  width: 130px;
+  min-width: 115px;
+  max-width: 160px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.col-tipo, .cell-tipo {
+  width: 115px;
+  min-width: 105px;
+  max-width: 135px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.col-hardware, .cell-specs {
+  width: 200px;
+  min-width: 175px;
+  max-width: 250px;
+}
+
+.col-perifericos, .cell-perifericos {
+  width: 180px;
+  min-width: 160px;
+  max-width: 230px;
+}
+
+.col-usuario, .cell-usuario {
+  width: 135px;
+  min-width: 120px;
+  max-width: 150px;
+  text-align: center;
+}
+
+.col-fecha, .cell-fecha {
+  width: 120px;
+  min-width: 110px;
+  max-width: 135px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.col-estado, .cell-estado {
+  width: 100px;
+  min-width: 95px;
+  max-width: 115px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.col-acciones, .cell-acciones {
+  width: 100px;
+  min-width: 95px;
+  max-width: 115px;
+  white-space: nowrap;
+  text-align: center;
+}
+
 /* Columna Fecha y Hora */
 .cell-fecha {
   white-space: nowrap;
-  max-width: 115px;
   text-align: center;
 }
 
 .date-badge-cell {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   font-size: 0.71rem;
   font-family: var(--font-mono);
   color: var(--gray-300);
+  white-space: nowrap;
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
 .date-badge-cell .date-part {
@@ -2290,7 +2378,8 @@ body {
   color: #f1f5f9;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  font-size: 0.72rem;
 }
 
 .date-badge-cell .time-part {
@@ -2302,11 +2391,6 @@ body {
 }
 
 /* Celdas específicas adaptativas y fluidas */
-.cell-modelo {
-  max-width: 145px;
-  min-width: 95px;
-}
-
 .col-modelo-val {
   display: flex;
   flex-direction: column;
@@ -2669,7 +2753,6 @@ body {
 
 /* Usuario / Red */
 .cell-usuario {
-  max-width: 115px;
   text-align: center;
 }
 
@@ -2679,14 +2762,16 @@ body {
   gap: 1px;
   font-size: 0.74rem;
   align-items: center;
+  justify-content: center;
+  max-width: 100%;
 }
 
 .user-name {
   font-weight: 700;
   color: #fff;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
@@ -2778,7 +2863,7 @@ body {
 }
 
 /* ==============================================================================
-   RESPONSIVIDAD AVANZADA PARA PANTALLAS PEQUEÑAS (LAPTOPS 1366px, TABLETS)
+   RESPONSIVIDAD AVANZADA PARA PANTALLAS PEQUEÑAS (LAPTOPS 1366px, TABLETS Y TELÉFONOS)
    ============================================================================== */
 @media (max-width: 1440px) {
   .main-content {
@@ -2786,22 +2871,26 @@ body {
     padding: 14px 16px;
   }
 
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    display: block;
+  }
+
   .custom-excel-table {
+    min-width: 1220px !important;
     font-size: 0.75rem;
   }
 
   .custom-excel-table thead th {
-    padding: 8px 4px;
+    padding: 8px 5px;
     font-size: 0.69rem;
   }
 
   .custom-excel-table tbody td {
-    padding: 5px 4px;
+    padding: 6px 5px;
   }
-
-  .cell-modelo { max-width: 125px; }
-  .cell-specs { max-width: 175px; }
-  .cell-perifericos { max-width: 150px; }
 }
 
 @media (max-width: 1200px) {
@@ -2809,18 +2898,26 @@ body {
     padding: 10px 10px;
   }
 
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    display: block;
+  }
+
   .custom-excel-table {
-    font-size: 0.72rem;
+    min-width: 1200px !important;
+    font-size: 0.73rem;
   }
 
   .custom-excel-table thead th {
-    padding: 7px 3px;
-    font-size: 0.66rem;
+    padding: 7px 4px;
+    font-size: 0.67rem;
     letter-spacing: 0;
   }
 
   .custom-excel-table tbody td {
-    padding: 4px 3px;
+    padding: 5px 4px;
   }
 
   .serial-badge, .placa-badge {
@@ -2858,7 +2955,7 @@ body {
   }
 
   .custom-excel-table {
-    min-width: 820px !important;
+    min-width: 1180px !important;
     font-size: 0.72rem;
   }
 
@@ -2877,8 +2974,15 @@ body {
     padding: 8px 6px;
   }
 
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    display: block;
+  }
+
   .custom-excel-table {
-    min-width: 780px !important;
+    min-width: 1160px !important;
   }
 }
 

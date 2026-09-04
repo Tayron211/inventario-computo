@@ -2213,6 +2213,7 @@ function renderTable(items) {
     const primaryName = item.hostname || cleanModel || 'Equipo';
     const subName = item.hostname ? (cleanModel || '') : '';
     const isRowHighlighted = queryActive ? 'row-highlight-pulse' : '';
+    const dt = formatDateTimeDisplay(item.fecha_escaneo || item.fecha_modificacion);
 
     return `
       <tr class="${isRowHighlighted}">
@@ -2258,9 +2259,9 @@ function renderTable(items) {
           </div>
         </td>
         <td class="cell-fecha">
-          <div class="date-badge-cell" title="Fecha y hora de escaneo / auditoría">
-            <span class="date-part"><i class="fa-regular fa-calendar text-crimson"></i> ${(item.fecha_escaneo || item.fecha_modificacion || 'N/A').split(' ')[0]}</span>
-            ${(item.fecha_escaneo || item.fecha_modificacion || '').split(' ')[1] ? `<span class="time-part"><i class="fa-regular fa-clock"></i> ${(item.fecha_escaneo || item.fecha_modificacion).split(' ')[1]}</span>` : ''}
+          <div class="date-badge-cell" title="Fecha y hora de escaneo / auditoría: ${dt.full}">
+            <span class="date-part"><i class="fa-regular fa-calendar text-crimson"></i> ${dt.date}</span>
+            ${dt.time ? `<span class="time-part"><i class="fa-regular fa-clock"></i> ${dt.time}</span>` : ''}
           </div>
         </td>
         <td class="cell-estado">
@@ -3335,7 +3336,7 @@ function viewDetails(id) {
             ${getUserBadgeHtml(item.creado_por || item.usuario_actual || 'admin', item.creado_por_badge, item.creado_por_rol)}
           </div>
           <div style="font-size: 0.78rem; color: var(--gray-300); font-family: var(--font-mono); display: flex; align-items: center; gap: 6px;">
-            <i class="fa-regular fa-clock text-crimson"></i> ${escapeHTML(item.fecha_escaneo || item.fecha_modificacion || 'N/A')}
+            <i class="fa-regular fa-clock text-crimson"></i> ${escapeHTML(formatDateTimeDisplay(item.fecha_escaneo || item.fecha_modificacion).full)}
             <span style="background: rgba(255, 255, 255, 0.08); padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; color: #38bdf8;">${escapeHTML(item.origen || 'Manual')}</span>
           </div>
         </div>
@@ -3448,6 +3449,44 @@ function showToast(message, type = 'info') {
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
   }, 4000);
+}
+
+function formatDateTimeDisplay(dateInput) {
+  if (!dateInput) return { date: 'N/A', time: '', full: 'N/A' };
+  try {
+    let d;
+    if (typeof dateInput === 'number') {
+      d = new Date(dateInput);
+    } else {
+      const str = String(dateInput).trim();
+      if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(str)) {
+        d = new Date(str.includes('Z') || str.includes('+') ? str : str.replace(' ', 'T'));
+      } else {
+        d = new Date(str);
+      }
+    }
+    if (isNaN(d.getTime())) {
+      const s = String(dateInput).replace('T', ' ').trim();
+      const p = s.split(' ');
+      return { 
+        date: p[0] || 'N/A', 
+        time: (p[1] || '').substring(0, 5), 
+        full: s.substring(0, 16) 
+      };
+    }
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return {
+      date: `${day}/${month}/${year}`,
+      time: `${hours}:${minutes}`,
+      full: `${day}/${month}/${year} ${hours}:${minutes}`
+    };
+  } catch (e) {
+    return { date: 'N/A', time: '', full: 'N/A' };
+  }
 }
 
 function escapeHTML(str) {
