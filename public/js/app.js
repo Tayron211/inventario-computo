@@ -1362,25 +1362,58 @@ function initEventListeners() {
       </div>
     `).join('');
 
-    // Asignar listeners táctiles y click seguros que NUNCA se cierran solos antes de seleccionar
+    // Asignar listeners táctiles y click que permiten SWIPE y SCROLL libremente
+    let isTouchInteraction = false;
+
     dropdownEl.querySelectorAll('.custom-model-item').forEach(el => {
-      const choose = (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
+      let touchStartY = 0;
+      let touchStartX = 0;
+      let hasSwiped = false;
+
+      // touchstart: Registra la posición inicial SIN bloquear el scroll nativo (passive: true)
+      el.addEventListener('touchstart', (e) => {
+        isTouchInteraction = true;
+        hasSwiped = false;
+        if (e.touches && e.touches[0]) {
+          touchStartY = e.touches[0].clientY;
+          touchStartX = e.touches[0].clientX;
         }
+      }, { passive: true });
+
+      // touchmove: Si el dedo se desplaza más de 8px, es un swipe/scroll (no seleccionar)
+      el.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches[0]) {
+          const diffY = Math.abs(e.touches[0].clientY - touchStartY);
+          const diffX = Math.abs(e.touches[0].clientX - touchStartX);
+          if (diffY > 8 || diffX > 8) {
+            hasSwiped = true;
+          }
+        }
+      }, { passive: true });
+
+      // touchend: Si NO hubo desplazamiento (tap directo), selecciona el modelo
+      el.addEventListener('touchend', (e) => {
+        if (!hasSwiped) {
+          const selected = el.getAttribute('data-model');
+          if (selected && formModelo) {
+            formModelo.value = selected;
+            dropdownEl.style.display = 'none';
+            triggerModelSpecsAutofill(selected, true);
+          }
+        }
+        setTimeout(() => { isTouchInteraction = false; }, 400);
+      });
+
+      // Clic normal con mouse para PC / Laptop
+      el.addEventListener('click', (e) => {
+        if (isTouchInteraction) return; // Evitar doble ejecución en táctil
         const selected = el.getAttribute('data-model');
         if (selected && formModelo) {
           formModelo.value = selected;
           dropdownEl.style.display = 'none';
           triggerModelSpecsAutofill(selected, true);
         }
-      };
-
-      // pointerdown y touchstart garantizan la selección inmediata en APK Android antes de cualquier blur
-      el.addEventListener('pointerdown', choose);
-      el.addEventListener('mousedown', choose);
-      el.addEventListener('click', choose);
+      });
     });
 
     dropdownEl.style.display = 'block';
@@ -1424,8 +1457,8 @@ function initEventListeners() {
   document.addEventListener('pointerdown', (e) => {
     const dropdownEl = document.getElementById('modelCustomDropdown');
     if (!dropdownEl || dropdownEl.style.display === 'none') return;
-    if (formModelo && (formModelo.contains(e.target) || dropdownEl.contains(e.target))) {
-      return; // Clic o toque dentro
+    if (e.target.closest('#modelCustomDropdown') || e.target.closest('#formModelo')) {
+      return; // Clic o toque dentro del dropdown o del input
     }
     hideModelDropdown();
   });

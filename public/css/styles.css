@@ -1738,9 +1738,11 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   max-height: 250px;
-  overflow-y: auto;
+  overflow-y: auto !important;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  overscroll-behavior: contain !important;
   scrollbar-width: thin;
   scrollbar-color: var(--crimson-primary) rgba(0, 0, 0, 0.3);
 }
@@ -1772,6 +1774,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y !important;
 }
 
 .custom-model-item:last-child {
