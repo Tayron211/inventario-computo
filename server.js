@@ -699,7 +699,9 @@ async function syncWithCloudDatabase() {
         itemsCount: merged.length,
         error: null
       };
-      console.log(`[☁️ SYNC NUBE] Sincronización exitosa con Render: ${merged.length} equipos sincronizados.`);
+      if (merged.length !== localItems.length) {
+        console.log(`[☁️ SYNC NUBE] Sincronización exitosa con Render: ${merged.length} equipos sincronizados.`);
+      }
       return;
     }
 
@@ -743,7 +745,9 @@ async function syncWithCloudDatabase() {
         itemsCount: merged.length,
         error: null
       };
-      console.log(`[☁️ SYNC NUBE] Sincronizados ${merged.length} equipos desde la nube vía fallback.`);
+      if (merged.length !== localItems.length) {
+        console.log(`[☁️ SYNC NUBE] Sincronizados ${merged.length} equipos desde la nube (nuevos registros incorporados).`);
+      }
     }
   } catch (err) {
     lastCloudSyncStatus = {
