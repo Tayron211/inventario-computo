@@ -2008,56 +2008,6 @@ function setView(view) {
 }
 
 // -------------------------------------------------------------
-// AUTO-DETECCIÓN DE SUBRED LOCAL DEL DISPOSITIVO
-// -------------------------------------------------------------
-async function detectClientLocalSubnet() {
-  return new Promise((resolve) => {
-    try {
-      const RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-      if (!RTCPeerConnection) {
-        return resolve(fallbackSubnet());
-      }
-      
-      const rtc = new RTCPeerConnection({ iceServers: [] });
-      rtc.createDataChannel('subnet-detect');
-      rtc.createOffer().then(offer => rtc.setLocalDescription(offer)).catch(() => resolve(fallbackSubnet()));
-      
-      let detected = false;
-      rtc.onicecandidate = (evt) => {
-        if (!evt || !evt.candidate || !evt.candidate.candidate) return;
-        const cand = evt.candidate.candidate;
-        const ipMatch = cand.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
-        if (ipMatch) {
-          const ip = ipMatch[1];
-          if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
-            detected = true;
-            const parts = ip.split('.');
-            resolve(`${parts[0]}.${parts[1]}.${parts[2]}`);
-          }
-        }
-      };
-      
-      setTimeout(() => {
-        if (!detected) resolve(fallbackSubnet());
-      }, 1000);
-    } catch (e) {
-      resolve(fallbackSubnet());
-    }
-  });
-}
-
-function fallbackSubnet() {
-  // Buscar la subred de los equipos activos en el inventario
-  for (const item of inventoryData) {
-    if (item.ip_red) {
-      const match = item.ip_red.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\.[0-9]{1,3}/);
-      if (match) return match[1];
-    }
-  }
-  return (serverInfo && serverInfo.subnetBase) ? serverInfo.subnetBase : '192.168.89';
-}
-
-// -------------------------------------------------------------
 // COMUNICACIÓN CON API
 // -------------------------------------------------------------
 
@@ -2079,14 +2029,6 @@ async function fetchServerInfo() {
     if (modalServerUrl) {
       modalServerUrl.textContent = serverInfo.serverUrl || window.location.origin;
     }
-
-    // Auto-detectar y pre-rellenar la subred local del cliente
-    detectClientLocalSubnet().then(subnet => {
-      const inputSubnet = document.getElementById('inputSubnet');
-      if (inputSubnet && subnet) {
-        inputSubnet.value = subnet;
-      }
-    });
   } catch (err) {
     console.error(err);
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
@@ -2152,56 +2094,6 @@ setInterval(() => {
   }
   fetchInventory(true);
 }, 2000);
-
-// Ejecutar escaneo de toda la red local
-async function runNetworkScan() {
-  const btn = document.getElementById('btnStartSubnetScan');
-  const subnetInput = document.getElementById('inputSubnet');
-  const consoleBox = document.getElementById('scanConsoleBox');
-  const consoleLog = document.getElementById('scanConsoleLog');
-  const consoleSpinner = document.getElementById('consoleSpinner');
-
-  let subnet = (subnetInput.value || '').trim();
-  if (!subnet) {
-    subnet = await detectClientLocalSubnet();
-    subnetInput.value = subnet;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Escaneando ${subnet}.0/24...`;
-  consoleBox.style.display = 'block';
-  consoleSpinner.style.display = 'inline-block';
-  consoleLog.textContent = `[*] Iniciando barrido multi-hilo en la subred ${subnet}.1 - ${subnet}.254...\n[*] Analizando hosts activos, IPs, MACs y nombres de host...`;
-
-  showToast(`Iniciando escaneo de la red ${subnet}.0/24...`, 'info');
-
-  try {
-    const res = await fetch('/api/scan-network', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subnet })
-    });
-
-    const data = await res.json();
-    consoleSpinner.style.display = 'none';
-
-    if (res.ok) {
-      consoleLog.textContent = data.output || `[✓] Barrido de red ${subnet}.0/24 completado con éxito.`;
-      showToast(`¡Escaneo de red finalizado! Equipos sincronizados en inventario.`, 'success');
-      await fetchInventory();
-    } else {
-      consoleLog.textContent = `[!] Error durante el escaneo:\n${data.error}\n${data.details || ''}`;
-      showToast(data.error || 'Error durante el barrido de red', 'error');
-    }
-  } catch (err) {
-    consoleSpinner.style.display = 'none';
-    consoleLog.textContent = `[!] Error de comunicación:\n${err.message}`;
-    showToast('Error al comunicar con el escáner de red', 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-play"></i> Iniciar Escaneo de Red`;
-  }
-}
 
 // -------------------------------------------------------------
 // HELPER: DETECCIÓN DE TIPO DE EQUIPO Y CATEGORÍA
@@ -2671,8 +2563,8 @@ function renderTable(items) {
         <td class="cell-ambiente">
           <div class="user-loc" title="Ambiente / Ubicación"><i class="fa-solid fa-location-dot text-crimson"></i> <b>${highlightMatch(item.ubicacion || 'Sin Asignar', currentSearchQuery)}</b></div>
         </td>
-        <td class="cell-placa">
-          <span class="placa-badge" onclick="copyText('${escapeHTML(item.placa_base || '')}', 'Placa Base')" title="Clic para copiar">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
+        <td class="cell-placa" style="min-width: 175px !important; width: 195px !important; max-width: 290px !important; white-space: normal !important; text-align: center !important;">
+          <span class="placa-badge" style="display: inline-block !important; width: auto !important; max-width: 100% !important; white-space: normal !important; word-break: break-word !important; overflow: visible !important; text-overflow: unset !important; line-height: 1.35 !important; text-align: center !important;" onclick="copyText('${escapeHTML(item.placa_base || '')}', 'Placa Base')" title="Clic para copiar">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
         </td>
         <td class="cell-tipo">
           <span class="tipo-badge ${tipoClass}">

@@ -1188,10 +1188,6 @@ app.get('/api/server-info', async (req, res) => {
   const primaryIP = ips[0];
   const url = getServerUrl(req);
   
-  // Calcular la subred base
-  const parts = primaryIP.split('.');
-  const subnetBase = parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '192.168.1';
-  
   try {
     const qrDataUrlDark = await QRCode.toDataURL(url, {
       margin: 2,
@@ -1215,7 +1211,6 @@ app.get('/api/server-info', async (req, res) => {
       port: PORT,
       ips,
       primaryIP,
-      subnetBase,
       serverUrl: url,
       oneLinerCommand: `irm ${url}/scan | iex`,
       qrCode: qrDataUrlDark,
@@ -1227,53 +1222,6 @@ app.get('/api/server-info', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Error generando código QR', details: err.message });
   }
-});
-
-// Disparar escaneo de toda la red local
-app.post('/api/scan-network', (req, res) => {
-  const serverUrl = getServerUrl(req);
-
-  // Si el servidor está en la nube (Render / Linux):
-  if (process.platform !== 'win32') {
-    const items = loadDB();
-    return res.json({
-      message: 'Servidor alojado en la Nube',
-      output: `[✓] SERVIDOR ACTIVO EN LA NUBE (${serverUrl})\n\n[*] Como este servidor está en internet, para auditar cualquier PC o laptop de tu red local y que aparezca en este panel en vivo, abre PowerShell en esa máquina y pega:\n\n    irm ${serverUrl}/scan | iex\n\n[OK] El equipo se registrará automáticamente en tu inventario al instante.`,
-      totalEquipos: items.length,
-      items: items
-    });
-  }
-
-  const { subnet } = req.body;
-  const ips = getLocalIPs();
-  const primaryIP = ips[0];
-  const parts = primaryIP.split('.');
-  const defaultSubnet = parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}` : '192.168.1';
-  const targetSubnet = subnet || defaultSubnet;
-  
-  const scriptPath = path.join(__dirname, 'scripts', 'scan_network.ps1');
-  const cmd = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" "${serverUrl}" "${targetSubnet}"`;
-  
-  console.log(`[*] Iniciando escaneo de red local en subred: ${targetSubnet}.0/24...`);
-
-  exec(cmd, { windowsHide: true, timeout: 60000 }, (error, stdout, stderr) => {
-    const items = loadDB();
-    if (error) {
-      console.error('Error durante escaneo de red:', error, stderr);
-      return res.status(500).json({
-        error: 'Error durante el barrido de red',
-        details: stderr || error.message,
-        items
-      });
-    }
-
-    res.json({
-      message: `Escaneo de red completado en ${targetSubnet}.0/24`,
-      output: stdout,
-      totalEquipos: items.length,
-      items: items
-    });
-  });
 });
 
 // Obtener inventario con filtros opcionales
@@ -3395,58 +3343,15 @@ app.get('/api/export-excel', async (req, res) => {
   }
 });
 
-// Estado del Auto-Escaneo de Red al iniciar
-let isAutoScanning = false;
-let autoScanStatus = {
+// Estado del Auto-Escaneo de Red (Desactivado)
+const autoScanStatus = {
   active: false,
+  disabled: true,
   subnet: '',
   startedAt: null,
   completedAt: null,
-  message: 'En espera'
+  message: 'Escaneo de red desactivado'
 };
-
-function autoScanNetworkOnStartup() {
-  if (isAutoScanning) return;
-  const ips = getLocalIPs();
-  const primaryIP = ips[0];
-  const parts = primaryIP.split('.');
-  if (parts.length !== 4) return;
-  const targetSubnet = `${parts[0]}.${parts[1]}.${parts[2]}`;
-
-  isAutoScanning = true;
-  autoScanStatus = {
-    active: true,
-    subnet: `${targetSubnet}.0/24`,
-    startedAt: new Date().toISOString(),
-    completedAt: null,
-    message: `Escaneando automáticamente la red ${targetSubnet}.0/24...`
-  };
-
-  console.log(`\n===========================================================`);
-  console.log(`🔍 [AUTO-DESCUBRIMIENTO DE RED INICIADO]`);
-  console.log(`📡 Red detectada automáticamente: ${targetSubnet}.0/24 (IP: ${primaryIP})`);
-  console.log(`🚀 Escaneando todos los equipos de la red en segundo plano...`);
-  console.log(`===========================================================\n`);
-
-  const scriptPath = path.join(__dirname, 'scripts', 'scan_network.ps1');
-  const serverUrl = `http://${primaryIP}:${PORT}`;
-  const cmd = `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}" "${serverUrl}" "${targetSubnet}"`;
-
-  exec(cmd, { windowsHide: true, timeout: 120000 }, (error, stdout, stderr) => {
-    isAutoScanning = false;
-    const db = loadDB();
-    autoScanStatus.active = false;
-    autoScanStatus.completedAt = new Date().toISOString();
-    
-    if (error) {
-      autoScanStatus.message = `Auto-escaneo completado.`;
-      console.log(`[!] [AUTO-DESCUBRIMIENTO] Escaneo de red finalizado. Total equipos registrados: ${db.length}`);
-    } else {
-      autoScanStatus.message = `Auto-escaneo completado con éxito.`;
-      console.log(`✅ [AUTO-DESCUBRIMIENTO] Red ${targetSubnet}.0/24 escaneada con éxito. Total equipos en inventario: ${db.length}`);
-    }
-  });
-}
 
 // Endpoint para consultar estado del auto-escaneo
 app.get('/api/auto-scan-status', (req, res) => {
@@ -3461,11 +3366,6 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`  - Red Local / Móvil:   http://${ips[0]}:${PORT}`);
   console.log('===========================================================');
   console.log('  [OK] Servidor listo. Presiona Ctrl+C para detenerlo.\n');
-
-  // Disparar auto-descubrimiento silencioso de la red local al iniciar
-  setTimeout(() => {
-    autoScanNetworkOnStartup();
-  }, 2500);
 });
 
 server.on('error', (err) => {

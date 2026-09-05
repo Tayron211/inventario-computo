@@ -2399,9 +2399,9 @@ body {
 }
 
 .col-serie, .cell-serie {
-  width: 125px;
-  min-width: 115px;
-  max-width: 140px;
+  width: 145px;
+  min-width: 125px;
+  max-width: 175px;
   white-space: nowrap;
   text-align: center;
 }
@@ -2414,10 +2414,9 @@ body {
 }
 
 .col-placa, .cell-placa {
-  width: 130px;
-  min-width: 115px;
-  max-width: 160px;
-  white-space: nowrap;
+  width: 195px;
+  min-width: 165px;
+  max-width: 280px;
   text-align: center;
 }
 
@@ -2589,24 +2588,26 @@ body {
 }
 
 .cell-placa {
-  white-space: nowrap;
-  max-width: 100px;
   text-align: center;
+  box-sizing: border-box;
+  padding: 6px 8px !important;
 }
 
 .placa-badge {
   font-family: var(--font-mono);
-  font-size: 0.71rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #f1f5f9;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--gray-600);
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 4px;
   display: inline-block;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
+  text-align: center;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -3152,8 +3153,13 @@ body {
 
 .cell-placa .placa-badge {
   margin: 0 auto !important;
-  display: inline-flex !important;
-  justify-content: center !important;
+  display: inline-block !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
+  overflow: visible !important;
+  text-align: center !important;
 }
 
 .cell-tipo {
