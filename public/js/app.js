@@ -600,8 +600,8 @@ function initEventListeners() {
       const dlUrl = currentApkInfo.downloadUrl || 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
 
       if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
-        window.AndroidBridge.downloadApk(dlUrl);
-        showToast(`Iniciando descarga nativa de SysInventory v${ver}...`, 'info');
+        window.AndroidBridge.downloadApk(dlUrl, ver);
+        showToast(`Descargando SysInventory v${ver}... Se abrirá el instalador en breve.`, 'info');
       } else {
         showToast(`Descargando SysInventory v${ver}...`, 'success');
         // Descarga directa siempre fresca evitando cualquier caché del navegador

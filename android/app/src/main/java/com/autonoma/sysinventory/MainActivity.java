@@ -2,8 +2,10 @@ package com.autonoma.sysinventory;
 
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.Uri;
@@ -204,7 +206,12 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void downloadApk(final String downloadUrl) {
-            runOnUiThread(() -> triggerDownload(downloadUrl));
+            downloadApk(downloadUrl, null);
+        }
+
+        @JavascriptInterface
+        public void downloadApk(final String downloadUrl, final String targetVersion) {
+            runOnUiThread(() -> triggerDownload(downloadUrl, targetVersion));
         }
 
         @JavascriptInterface
@@ -313,25 +320,35 @@ public class MainActivity extends AppCompatActivity {
      * Dispara la descarga del APK directamente a través del DownloadManager nativo de Android
      * para que aparezca en la barra de notificaciones y permita instalación inmediata.
      */
+    private long activeDownloadId = -1;
+    private BroadcastReceiver downloadReceiver = null;
+
     public void triggerDownload(String url) {
+        triggerDownload(url, null);
+    }
+
+    public void triggerDownload(String url, String targetVersion) {
         try {
             final String officialLatestUrl = "https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk";
             final String downloadUrl = (url != null && url.startsWith("http") && !url.contains("download-apk")) ? url : officialLatestUrl;
+            final String versionLabel = (targetVersion != null && !targetVersion.trim().isEmpty()) ? targetVersion.trim() : getAppVersionName();
+            final String apkName = "SysInventory-v" + versionLabel + ".apk";
 
-            // 1. Descarga nativa en segundo plano con notificación del sistema
+            // 1. Descarga nativa en segundo plano con notificación del sistema y apertura automática
             try {
                 DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                 if (downloadManager != null) {
                     DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-                    String apkName = "SysInventory-v" + getAppVersionName() + ".apk";
-                    request.setTitle("SysInventory v" + getAppVersionName());
-                    request.setDescription("Descargando " + apkName + "...");
+                    request.setTitle("SysInventory v" + versionLabel);
+                    request.setDescription("Descargando actualización " + apkName + "...");
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                     request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, apkName);
                     request.setMimeType("application/vnd.android.package-archive");
-                    downloadManager.enqueue(request);
 
-                    Toast.makeText(this, "Descargando " + apkName + " en segundo plano. Mira tus notificaciones para instalarla.", Toast.LENGTH_LONG).show();
+                    registerDownloadCompleteReceiver(downloadManager);
+                    activeDownloadId = downloadManager.enqueue(request);
+
+                    Toast.makeText(this, "Descargando SysInventory v" + versionLabel + ". Se abrirá el instalador al finalizar.", Toast.LENGTH_LONG).show();
                     return;
                 }
             } catch (Exception dmEx) {
@@ -342,9 +359,58 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            Toast.makeText(this, "Iniciando descarga de la última versión...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Iniciando descarga de SysInventory v" + versionLabel + "...", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "No se pudo iniciar la descarga del APK", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void registerDownloadCompleteReceiver(DownloadManager downloadManager) {
+        if (downloadReceiver != null) {
+            try { unregisterReceiver(downloadReceiver); } catch (Exception ignored) {}
+        }
+
+        downloadReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (id == activeDownloadId && id != -1) {
+                    openDownloadedApkInstaller(downloadManager, id);
+                }
+            }
+        };
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(downloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_EXPORTED);
+            } else {
+                registerReceiver(downloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void openDownloadedApkInstaller(DownloadManager downloadManager, long downloadId) {
+        try {
+            Uri downloadUri = downloadManager.getUriForDownloadedFile(downloadId);
+            if (downloadUri != null) {
+                Intent installIntent = new Intent(Intent.ACTION_VIEW);
+                installIntent.setDataAndType(downloadUri, "application/vnd.android.package-archive");
+                installIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(installIntent);
+                Toast.makeText(this, "Abriendo instalador de la nueva versión...", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Descarga completada. Toca la notificación para instalar la actualización.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (downloadReceiver != null) {
+            try { unregisterReceiver(downloadReceiver); } catch (Exception ignored) {}
+            downloadReceiver = null;
         }
     }
 

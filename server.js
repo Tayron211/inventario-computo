@@ -97,8 +97,13 @@ function pingRenderService() {
 setInterval(pingRenderService, 4 * 60 * 1000);
 setTimeout(pingRenderService, 2000);
 
-// Sincronización dinámica de la versión más reciente del APK
-function getLatestApkVersion() {
+// Sincronización dinámica de la versión más reciente del APK desde GitHub Releases
+let cachedLatestRelease = {
+  version: '2.1.5',
+  lastFetched: 0
+};
+
+function getLocalGradleVersion() {
   try {
     const gradlePath = path.join(__dirname, 'android', 'app', 'build.gradle');
     if (fs.existsSync(gradlePath)) {
@@ -110,11 +115,44 @@ function getLatestApkVersion() {
   return '2.1.5';
 }
 
+async function fetchLatestGitHubReleaseVersion() {
+  // Caché de 45 segundos para evitar límites de tasa de GitHub API
+  if (Date.now() - cachedLatestRelease.lastFetched < 45000) {
+    return cachedLatestRelease.version;
+  }
+  return new Promise((resolve) => {
+    const req = https.get({
+      hostname: 'api.github.com',
+      path: '/repos/Tayron211/inventario-computo/releases/latest',
+      headers: { 'User-Agent': 'SysInventory-AutoUpdate-Bot' },
+      timeout: 5000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json && json.tag_name) {
+            const v = json.tag_name.replace(/^app-v|^v/i, '').trim();
+            if (v && /^\d+(\.\d+)+$/.test(v)) {
+              cachedLatestRelease = { version: v, lastFetched: Date.now() };
+              return resolve(v);
+            }
+          }
+        } catch (e) {}
+        resolve(cachedLatestRelease.version || getLocalGradleVersion());
+      });
+    });
+    req.on('error', () => resolve(cachedLatestRelease.version || getLocalGradleVersion()));
+    req.on('timeout', () => { req.destroy(); resolve(cachedLatestRelease.version || getLocalGradleVersion()); });
+  });
+}
+
 const GITHUB_LATEST_RELEASE_APK = 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
 
-app.get(['/api/apk-info', '/api/apk-version'], (req, res) => {
+app.get(['/api/apk-info', '/api/apk-version'], async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  const version = getLatestApkVersion();
+  const version = await fetchLatestGitHubReleaseVersion();
   res.json({
     version: version,
     downloadUrl: GITHUB_LATEST_RELEASE_APK,
@@ -123,20 +161,12 @@ app.get(['/api/apk-info', '/api/apk-version'], (req, res) => {
   });
 });
 
-// Endpoint prioritario para descargar la App Android (.APK) siempre en su última versión
+// Endpoint prioritario para descargar la App Android (.APK) siempre en su última versión compilada
 app.get(['/SysInventory.apk', '/sysinventory.apk', '/apk', '/app', '/download-apk', '/api/download-apk', /^\/SysInventory-v.*\.apk$/], (req, res) => {
-  res.setHeader('Content-Type', 'application/vnd.android.package-archive');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
-
-  const version = getLatestApkVersion();
-  const filename = `SysInventory-v${version}.apk`;
-  const localApk = path.join(__dirname, 'public', 'SysInventory.apk');
-
-  if (fs.existsSync(localApk)) {
-    return res.download(localApk, filename);
-  }
+  // Redirección inmediata a la última versión oficial compilada y firmada en GitHub Releases
   return res.redirect(GITHUB_LATEST_RELEASE_APK);
 });
 
