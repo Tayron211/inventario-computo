@@ -592,22 +592,60 @@ function initEventListeners() {
   }
 
   // Soporte universal para descargar siempre la última APK en celulares y app nativa en tiempo real
+  function handleDownloadApkClick(e) {
+    if (e) {
+      try {
+        e.preventDefault();
+        e.stopPropagation();
+      } catch (ignored) {}
+    }
+
+    const ver = currentApkInfo.version || '2.1.5';
+    const dlUrl = currentApkInfo.downloadUrl || 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
+    const serverUrl = `/download-apk?v=${ver}&t=${Date.now()}`;
+
+    let bridgeSuccess = false;
+
+    // Si estamos dentro de la app Android (WebView nativo)
+    if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
+      // 1. Intentar llamar con firma de 2 argumentos (nueva versión con targetVersion)
+      try {
+        window.AndroidBridge.downloadApk(dlUrl, ver);
+        bridgeSuccess = true;
+        showToast(`Descargando SysInventory v${ver}... Se abrirá el instalador al finalizar.`, 'info');
+      } catch (err2) {
+        // 2. Si falla (versión actualmente instalada que solo admite 1 argumento)
+        try {
+          window.AndroidBridge.downloadApk(dlUrl);
+          bridgeSuccess = true;
+          showToast(`Descargando SysInventory v${ver}... Revisa tus notificaciones para instalar.`, 'info');
+        } catch (err1) {
+          console.warn('Fallo al invocar AndroidBridge.downloadApk:', err1);
+        }
+      }
+    }
+
+    // Si no está en WebView de Android o si falló el puente nativo:
+    if (!bridgeSuccess) {
+      showToast(`Descargando SysInventory v${ver}...`, 'success');
+      try {
+        const tempLink = document.createElement('a');
+        tempLink.href = serverUrl;
+        tempLink.setAttribute('download', `SysInventory-v${ver}.apk`);
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        setTimeout(() => {
+          try { tempLink.remove(); } catch(e) {}
+        }, 1500);
+      } catch (linkErr) {
+        window.location.href = serverUrl;
+      }
+    }
+  }
+
   const apkDownloadBtns = document.querySelectorAll('#btnDownloadApk, #btnDownloadApkModal, a[href*="SysInventory"], a[href*="download-apk"]');
   apkDownloadBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const ver = currentApkInfo.version || '2.1.5';
-      const dlUrl = currentApkInfo.downloadUrl || 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
-
-      if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
-        window.AndroidBridge.downloadApk(dlUrl, ver);
-        showToast(`Descargando SysInventory v${ver}... Se abrirá el instalador en breve.`, 'info');
-      } else {
-        showToast(`Descargando SysInventory v${ver}...`, 'success');
-        // Descarga directa siempre fresca evitando cualquier caché del navegador
-        window.location.href = `/download-apk?v=${ver}&t=${Date.now()}`;
-      }
-    });
+    btn.addEventListener('click', handleDownloadApkClick);
   });
 
   // Ejecutar sincronización al cargar la aplicación

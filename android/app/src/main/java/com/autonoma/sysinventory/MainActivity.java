@@ -342,7 +342,20 @@ public class MainActivity extends AppCompatActivity {
                     request.setTitle("SysInventory v" + versionLabel);
                     request.setDescription("Descargando actualización " + apkName + "...");
                     request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, apkName);
+                    String finalApkName = apkName;
+                    try {
+                        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                        if (downloadsDir != null) {
+                            File existing = new File(downloadsDir, apkName);
+                            if (existing.exists()) {
+                                boolean deleted = existing.delete();
+                                if (!deleted) {
+                                    finalApkName = "SysInventory-v" + versionLabel + "_" + (System.currentTimeMillis() % 10000) + ".apk";
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, finalApkName);
                     request.setMimeType("application/vnd.android.package-archive");
 
                     registerDownloadCompleteReceiver(downloadManager);
