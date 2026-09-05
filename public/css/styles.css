@@ -1469,27 +1469,33 @@ body {
   transform: translateY(1px) scale(0.97) !important;
 }
 
-/* Indicador de Estado de Sincronización en Tiempo Real */
+/* Indicador de Estado de Sincronización en Tiempo Real (Solo Punto) */
 .realtime-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.35);
-  border-radius: 9999px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #10B981;
-  letter-spacing: 0.02em;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.18);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
+  cursor: pointer;
+}
+
+.realtime-status-pill:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 
 .realtime-status-pill .pulse-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   background-color: #10B981;
   border-radius: 50%;
   box-shadow: 0 0 8px #10B981;
@@ -1499,8 +1505,7 @@ body {
 .realtime-status-pill.reconnecting {
   background: rgba(245, 158, 11, 0.14) !important;
   border-color: rgba(245, 158, 11, 0.4) !important;
-  color: #F59E0B !important;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15) !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.2) !important;
 }
 
 .realtime-status-pill.reconnecting .pulse-dot {
@@ -1512,7 +1517,7 @@ body {
 .realtime-status-pill.offline {
   background: rgba(239, 68, 68, 0.14) !important;
   border-color: rgba(239, 68, 68, 0.4) !important;
-  color: #EF4444 !important;
+  box-shadow: none !important;
 }
 
 .realtime-status-pill.offline .pulse-dot {
@@ -1524,13 +1529,12 @@ body {
 [data-theme="light"] .realtime-status-pill {
   background: rgba(16, 185, 129, 0.14);
   border-color: rgba(16, 185, 129, 0.4);
-  color: #059669;
 }
 
 @keyframes pulseLive {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #10B981; }
-  100% { transform: scale(0.9); opacity: 0.8; }
+  0% { transform: scale(0.9); opacity: 0.85; }
+  50% { transform: scale(1.25); opacity: 1; box-shadow: 0 0 10px #10B981; }
+  100% { transform: scale(0.9); opacity: 0.85; }
 }
 
 @keyframes pulseReconnecting {

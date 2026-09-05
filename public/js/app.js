@@ -648,6 +648,19 @@ function initEventListeners() {
     btn.addEventListener('click', handleDownloadApkClick);
   });
 
+  const realtimeBadgeEl = document.getElementById('realtimeStatusBadge');
+  if (realtimeBadgeEl) {
+    realtimeBadgeEl.addEventListener('click', () => {
+      const isOnline = !realtimeBadgeEl.classList.contains('offline') && !realtimeBadgeEl.classList.contains('reconnecting');
+      if (isOnline) {
+        showToast('🟢 Conectado en tiempo real con el servidor (SSE)', 'success');
+      } else {
+        showToast('🟠 Reconectando canal en vivo...', 'info');
+        if (typeof initRealtimeSSE === 'function') initRealtimeSSE();
+      }
+    });
+  }
+
   // Ejecutar sincronización al cargar la aplicación
   syncLatestApkVersion();
 
@@ -2156,21 +2169,17 @@ let sseWatchdogInterval = null;
 
 function updateRealtimeBadge(status) {
   const badge = document.getElementById('realtimeStatusBadge');
-  const text = document.getElementById('realtimeStatusText');
-  if (!badge || !text) return;
+  if (!badge) return;
 
   if (status === 'connected') {
     badge.className = 'realtime-status-pill';
-    badge.title = 'Comunicación en tiempo real activa (SSE)';
-    text.textContent = 'En vivo';
+    badge.title = 'Comunicación en tiempo real activa (En vivo)';
   } else if (status === 'reconnecting') {
     badge.className = 'realtime-status-pill reconnecting';
     badge.title = 'Reconectando con el canal en vivo...';
-    text.textContent = 'Reconectando...';
   } else {
     badge.className = 'realtime-status-pill offline';
     badge.title = 'Sin conexión con el canal en vivo';
-    text.textContent = 'Desconectado';
   }
 }
 
