@@ -1,5 +1,5 @@
 // Service Worker para soporte de instalación nativa PWA (Android / iOS / PC)
-const CACHE_NAME = 'sysinventory-cache-v99';
+const CACHE_NAME = 'sysinventory-cache-v100';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

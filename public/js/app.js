@@ -35,6 +35,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initEventListeners();
   fetchServerInfo();
   fetchInventory();
+  initRealtimeSSE();
+
+  // Escuchar cuando el usuario regrese a la app tras bloquear la pantalla o cambiar de ventana
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      fetchInventory(true);
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    fetchInventory(true);
+  });
+
+  window.addEventListener('online', () => {
+    showToast('Conexión con el servidor restablecida', 'success');
+    fetchInventory(true);
+    initRealtimeSSE();
+  });
 });
 
 // -------------------------------------------------------------
@@ -535,7 +553,7 @@ function initEventListeners() {
 
   // Sincronización dinámica de la última versión del APK (Web y Móvil)
   let currentApkInfo = {
-    version: '2.1.4',
+    version: '2.1.5',
     downloadUrl: 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk',
     localDownloadUrl: '/download-apk'
   };
@@ -578,7 +596,7 @@ function initEventListeners() {
   apkDownloadBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const ver = currentApkInfo.version || '2.1.4';
+      const ver = currentApkInfo.version || '2.1.5';
       const dlUrl = currentApkInfo.downloadUrl || 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
 
       if (window.AndroidBridge && typeof window.AndroidBridge.downloadApk === 'function') {
@@ -2077,6 +2095,11 @@ async function fetchInventory(silent = false) {
       const firstNew = newItems[0];
       const modelLabel = firstNew ? (firstNew.modelo || 'Equipo') : 'Nuevo equipo';
       showToast(`¡Sincronizado desde el celular / nube: ${modelLabel}! Total: ${inventoryData.length}`, 'success');
+    } else if (prevCount > 0 && inventoryData.length < prevCount) {
+      // Detección inmediata de borrado desde otro dispositivo
+      const currentIds = new Set(inventoryData.map(i => i.id || i.numero_serie));
+      const removedCount = prevCount - inventoryData.length;
+      console.log(`[Sincronización] Se detectaron ${removedCount} registros eliminados en el servidor.`);
     }
   } catch (err) {
     if (!silent) {
@@ -2086,14 +2109,94 @@ async function fetchInventory(silent = false) {
   }
 }
 
-// Sincronización periódica automática en tiempo real garantizada (cada 2 segundos)
+// =============================================================
+// CANAL DE TIEMPO REAL ULTRA RÁPIDO VÍA SERVER-SENT EVENTS (SSE)
+// =============================================================
+let sseSource = null;
+let sseReconnectTimer = null;
+
+function initRealtimeSSE() {
+  if (typeof window.EventSource === 'undefined') return;
+  if (sseSource) {
+    try { sseSource.close(); } catch (e) {}
+    sseSource = null;
+  }
+
+  try {
+    sseSource = new EventSource('/api/realtime/events');
+
+    sseSource.addEventListener('connected', () => {
+      console.log('[SSE] Conectado al canal en tiempo real del servidor');
+    });
+
+    sseSource.addEventListener('inventory:deleted', (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        const deletedId = payload.id;
+        const deletedSerial = (payload.serial || '').toLowerCase();
+
+        const prevLen = inventoryData.length;
+        inventoryData = inventoryData.filter(i => {
+          if (deletedId && i.id === deletedId) return false;
+          if (deletedId && i.parentId === deletedId) return false;
+          if (deletedSerial && i.numero_serie && i.numero_serie.toLowerCase() === deletedSerial) return false;
+          return true;
+        });
+
+        if (inventoryData.length !== prevLen) {
+          renderData();
+          updateMetrics();
+          renderDashboard();
+
+          // Cerrar modal de detalles si el equipo visualizado fue eliminado
+          const detailsModal = document.getElementById('detailsModal');
+          if (detailsModal && detailsModal.classList.contains('active')) {
+            const detailsSub = document.getElementById('detailsSubtitle');
+            if (detailsSub && deletedSerial && detailsSub.textContent.toLowerCase().includes(deletedSerial)) {
+              closeModal('detailsModal');
+              showToast('El equipo que estabas consultando fue eliminado desde otro dispositivo', 'info');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error procesando evento SSE inventory:deleted:', err);
+      }
+    });
+
+    sseSource.addEventListener('inventory:created', () => {
+      fetchInventory(true);
+    });
+
+    sseSource.addEventListener('inventory:updated', () => {
+      fetchInventory(true);
+    });
+
+    sseSource.addEventListener('inventory:sync', () => {
+      fetchInventory(true);
+    });
+
+    sseSource.onerror = () => {
+      if (sseSource) {
+        try { sseSource.close(); } catch (e) {}
+        sseSource = null;
+      }
+      clearTimeout(sseReconnectTimer);
+      sseReconnectTimer = setTimeout(initRealtimeSSE, 3500);
+    };
+  } catch (err) {
+    clearTimeout(sseReconnectTimer);
+    sseReconnectTimer = setTimeout(initRealtimeSSE, 5000);
+  }
+}
+
+// Sincronización periódica automática de respaldo (cada 2.5 segundos)
 setInterval(() => {
   const isModalOpen = document.querySelector('.modal-overlay.active');
   if (isModalOpen && (isModalOpen.id === 'manualModal' || isModalOpen.id === 'agentModal')) {
     return; // No interrumpir al usuario ni causar reflows mientras escribe o interactúa en modales
   }
   fetchInventory(true);
-}, 2000);
+}, 2500);
 
 // -------------------------------------------------------------
 // HELPER: DETECCIÓN DE TIPO DE EQUIPO Y CATEGORÍA

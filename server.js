@@ -37,9 +37,54 @@ app.use(express.urlencoded({ extended: true }));
 
 // Endpoint de salud y keep-alive para evitar hibernación en Render
 app.get('/api/ping', (req, res) => {
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.status(200).send('pong');
 });
+
+// =============================================================
+// CANAL DE TIEMPO REAL ULTRA FLUIDO (SERVER-SENT EVENTS - SSE)
+// =============================================================
+const sseClients = new Set();
+
+function broadcastRealtimeEvent(eventType, payload = {}) {
+  const dataStr = JSON.stringify(payload);
+  const message = `event: ${eventType}\ndata: ${dataStr}\n\n`;
+  for (const client of sseClients) {
+    try {
+      client.res.write(message);
+    } catch (err) {
+      sseClients.delete(client);
+    }
+  }
+}
+
+app.get('/api/realtime/events', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*'
+  });
+  res.write(`event: connected\ndata: ${JSON.stringify({ time: Date.now(), total: loadDB().length })}\n\n`);
+
+  const client = { id: Date.now() + Math.random().toString(36).substring(2), res };
+  sseClients.add(client);
+
+  req.on('close', () => {
+    sseClients.delete(client);
+  });
+});
+
+// Heartbeat cada 25 segundos para mantener vivas las conexiones móviles y proxys
+setInterval(() => {
+  for (const client of sseClients) {
+    try {
+      client.res.write(': heartbeat\n\n');
+    } catch (e) {
+      sseClients.delete(client);
+    }
+  }
+}, 25000);
 
 // Anti-Hibernación 24/7 para Render (elimina el modo de espera)
 const RENDER_PING_URL = 'https://ivt.onrender.com/api/ping';
@@ -48,8 +93,8 @@ function pingRenderService() {
     https.get(RENDER_PING_URL, (res) => {}).on('error', () => {});
   } catch (e) {}
 }
-// Ping cada 5 minutos de forma continua
-setInterval(pingRenderService, 5 * 60 * 1000);
+// Ping cada 4 minutos de forma continua
+setInterval(pingRenderService, 4 * 60 * 1000);
 setTimeout(pingRenderService, 2000);
 
 // Sincronización dinámica de la versión más reciente del APK
@@ -62,7 +107,7 @@ function getLatestApkVersion() {
       if (match && match[1]) return match[1];
     }
   } catch (e) {}
-  return '2.1.4';
+  return '2.1.5';
 }
 
 const GITHUB_LATEST_RELEASE_APK = 'https://github.com/Tayron211/inventario-computo/releases/latest/download/SysInventory.apk';
@@ -532,7 +577,7 @@ function mergeInventories(listA, listB, extraDeleted = []) {
   const deletedSerialMap = new Map();
 
   allDeleted.forEach(d => {
-    const delTime = d.deleted_at || Date.now();
+    const delTime = typeof d.deleted_at === 'number' ? d.deleted_at : Date.now();
     if (d.id) deletedIdMap.set(String(d.id).trim(), delTime);
     if (d.serial) {
       const s = String(d.serial).trim().toLowerCase();
@@ -549,26 +594,36 @@ function mergeInventories(listA, listB, extraDeleted = []) {
     const item = normalizeItem(rawItem);
     const id = String(item.id || '').trim();
     const serial = (item.numero_serie || '').trim().toLowerCase();
-    const itemTime = item.updated_at || new Date(item.fecha_modificacion || item.fecha_escaneo || 0).getTime() || 0;
 
     // Comprobar si está marcado como eliminado
-    const idDelTime = id ? deletedIdMap.get(id) : null;
-    const serDelTime = serial ? deletedSerialMap.get(serial) : null;
-    const maxDelTime = Math.max(idDelTime || 0, serDelTime || 0);
+    // 1. Si el ID del equipo está en la lista de eliminados, se descarta categóricamente
+    if (id && deletedIdMap.has(id)) {
+      const delTime = deletedIdMap.get(id);
+      const isExplicitlyRestored = typeof item.updated_at === 'number' && item.updated_at > (delTime + 1000) && Boolean(item.restored);
+      if (!isExplicitlyRestored) {
+        return; // Descartar equipo eliminado definitivamente
+      }
+    }
 
-    // Si la eliminación fue más reciente que la creación/edición, descartar el registro
-    if (maxDelTime > 0 && maxDelTime > itemTime) {
-      return;
+    // 2. Si el número de serie físico válido está marcado como eliminado
+    if (serial && deletedSerialMap.has(serial)) {
+      const delTime = deletedSerialMap.get(serial);
+      const isExplicitlyRestored = typeof item.updated_at === 'number' && item.updated_at > (delTime + 1000) && Boolean(item.restored);
+      if (!isExplicitlyRestored) {
+        return; // Descartar equipo con serial eliminado
+      }
     }
 
     const key = getItemDedupeKey(item);
     if (!key) return;
 
+    const itemTime = typeof item.updated_at === 'number' ? item.updated_at : (new Date(item.fecha_modificacion || item.fecha_escaneo || 0).getTime() || 0);
+
     if (!mergedMap.has(key)) {
       mergedMap.set(key, item);
     } else {
       const existing = mergedMap.get(key);
-      const dateExisting = existing.updated_at || new Date(existing.fecha_modificacion || existing.fecha_escaneo || 0).getTime() || 0;
+      const dateExisting = typeof existing.updated_at === 'number' ? existing.updated_at : (new Date(existing.fecha_modificacion || existing.fecha_escaneo || 0).getTime() || 0);
       const dateNew = itemTime;
 
       // El registro más reciente prevalece
@@ -585,8 +640,8 @@ function mergeInventories(listA, listB, extraDeleted = []) {
 
   const result = Array.from(mergedMap.values());
   result.sort((a, b) => {
-    const da = a.updated_at || new Date(a.fecha_modificacion || a.fecha_escaneo || 0).getTime() || 0;
-    const db = b.updated_at || new Date(b.fecha_modificacion || b.fecha_escaneo || 0).getTime() || 0;
+    const da = typeof a.updated_at === 'number' ? a.updated_at : (new Date(a.fecha_modificacion || a.fecha_escaneo || 0).getTime() || 0);
+    const db = typeof b.updated_at === 'number' ? b.updated_at : (new Date(b.fecha_modificacion || b.fecha_escaneo || 0).getTime() || 0);
     return db - da;
   });
 
@@ -694,18 +749,34 @@ async function initCloudDatabase() {
         }
       } catch (e) {}
 
-      // 2. Cargar equipos desde MongoDB y fusionar con almacenamiento local aplicando eliminados
-      const cloudItems = await mongoCollection.find({}).toArray();
-      const localItems = loadLocalFile();
-
-      const merged = mergeInventories(localItems, cloudItems.map(item => {
+      // 2. Cargar equipos desde MongoDB aplicando eliminados de forma segura
+      const cloudRaw = await mongoCollection.find({}).toArray();
+      const cloudItems = cloudRaw.map(item => {
         const { _id, ...clean } = item;
         return clean;
-      }));
+      });
+
+      let merged;
+      if (IS_RENDER_SERVER) {
+        // En Render, MongoDB Atlas es la ÚNICA fuente autoritativa.
+        // NUNCA resucitar archivos estáticos de Git si MongoDB ya contiene datos.
+        if (cloudItems.length > 0) {
+          merged = mergeInventories(cloudItems, []);
+        } else {
+          // Primera inicialización si MongoDB está completamente vacío
+          const localItems = loadLocalFile();
+          merged = mergeInventories(localItems, []);
+          await syncMongoDB(merged, loadDeletedItems());
+        }
+      } else {
+        // En máquina Local (PC), fusionar lo local con la nube
+        const localItems = loadLocalFile();
+        merged = mergeInventories(localItems, cloudItems);
+        await syncMongoDB(merged, loadDeletedItems());
+      }
 
       memoryCache = merged;
       saveLocalFile(merged);
-      await syncMongoDB(merged, loadDeletedItems());
       console.log(`📦 Sincronizados ${merged.length} equipos con MongoDB Atlas de forma segura.`);
     } catch (err) {
       mongoError = err.message;
@@ -768,7 +839,7 @@ async function syncWithCloudDatabase() {
         'Authorization': `Bearer ${adminToken}`,
         'Content-Length': Buffer.byteLength(payload)
       },
-      timeout: 12000
+      timeout: 60000
     };
 
     let syncResult = await new Promise((resolve) => {
@@ -804,6 +875,7 @@ async function syncWithCloudDatabase() {
         const currentDeleted = loadDeletedItems();
         saveDeletedItems(deduplicateDeletedItems([...currentDeleted, ...syncResult.deleted]));
       }
+      broadcastRealtimeEvent('inventory:sync', { count: merged.length });
       lastCloudSyncStatus = {
         lastSync: new Date().toISOString(),
         success: true,
@@ -818,7 +890,7 @@ async function syncWithCloudDatabase() {
 
     // 3. Fallback: Si Render aún no tiene /api/sync-bidirectional
     const cloudInventory = await new Promise((resolve) => {
-      const req = https.get(`${RENDER_CLOUD_URL}/api/inventory`, { timeout: 10000 }, (res) => {
+      const req = https.get(`${RENDER_CLOUD_URL}/api/inventory`, { timeout: 60000 }, (res) => {
         let body = '';
         res.on('data', chunk => body += chunk);
         res.on('end', () => {
@@ -839,6 +911,7 @@ async function syncWithCloudDatabase() {
     if (cloudInventory && Array.isArray(cloudInventory.items)) {
       const merged = mergeInventories(loadDB(), cloudInventory.items);
       await saveDB(merged);
+      broadcastRealtimeEvent('inventory:sync', { count: merged.length });
 
       // Si tenemos equipos locales que no están en Render, subirlos a Render
       const cloudKeys = new Set(cloudInventory.items.map(getItemDedupeKey));
@@ -1294,6 +1367,7 @@ app.post('/api/sync-bidirectional', async (req, res) => {
     const currentItems = loadDB();
     const merged = mergeInventories(currentItems, incomingItems, incomingDeleted);
     await saveDB(merged);
+    broadcastRealtimeEvent('inventory:sync', { count: merged.length });
 
     res.json({
       success: true,
@@ -2129,6 +2203,7 @@ app.post('/api/inventory', async (req, res) => {
   items.unshift(newItem);
   await saveDB(items);
   scheduleCloudPush(50);
+  broadcastRealtimeEvent('inventory:created', { item: newItem });
   
   res.status(201).json({ message: 'Equipo registrado exitosamente', item: newItem });
 });
@@ -2168,6 +2243,7 @@ app.put('/api/inventory/:id', async (req, res) => {
   items[index] = updated;
   await saveDB(items);
   scheduleCloudPush(50);
+  broadcastRealtimeEvent('inventory:updated', { item: updated });
   
   res.json({ message: 'Equipo actualizado exitosamente', item: updated });
 });
@@ -2207,6 +2283,7 @@ app.delete('/api/inventory/:id', async (req, res) => {
   
   await saveDB(items);
   scheduleCloudPush(100);
+  broadcastRealtimeEvent('inventory:deleted', { id: idToDelete, serial: itemToDelete ? itemToDelete.numero_serie : '' });
   res.json({ message: 'Equipo eliminado exitosamente', id: idToDelete });
 });
 
@@ -2364,6 +2441,7 @@ app.post('/api/agent/report', async (req, res) => {
     
     await saveDB(items);
     scheduleCloudPush();
+    broadcastRealtimeEvent('inventory:updated', { item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
     console.log(`[✓] Equipo procesado: "${record.hostname}" (S/N: ${record.numero_serie}) - Acción: ${existingIndex >= 0 ? 'Actualizado' : 'Nuevo Registro Creado'}`);
     res.json({ message: 'Equipo procesado con éxito', item: record, action: existingIndex >= 0 ? 'actualizado' : 'creado' });
   } catch (err) {

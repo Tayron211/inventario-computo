@@ -230,6 +230,40 @@ public class MainActivity extends AppCompatActivity {
         public boolean hasCameraPermission() {
             return ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         }
+
+        @JavascriptInterface
+        public void syncNow() {
+            runOnUiThread(() -> {
+                if (webView != null) {
+                    webView.evaluateJavascript("if (typeof fetchInventory === 'function') fetchInventory(true);", null);
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) {
+            try {
+                webView.resumeTimers();
+                // Al desbloquear el teléfono o volver a la app, forzar actualización y revivir SSE
+                webView.evaluateJavascript(
+                    "if (typeof fetchInventory === 'function') { fetchInventory(true); } if (typeof initRealtimeSSE === 'function') { initRealtimeSSE(); }",
+                    null
+                );
+            } catch (Exception ignored) {}
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (webView != null) {
+            try {
+                webView.pauseTimers();
+            } catch (Exception ignored) {}
+        }
     }
 
     private void dismissSplashScreen() {
@@ -271,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
         } catch (Exception e) {
-            return "2.1.4";
+            return "2.1.5";
         }
     }
 
