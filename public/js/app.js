@@ -2114,6 +2114,27 @@ async function fetchInventory(silent = false) {
 // =============================================================
 let sseSource = null;
 let sseReconnectTimer = null;
+let sseWatchdogInterval = null;
+
+function updateRealtimeBadge(status) {
+  const badge = document.getElementById('realtimeStatusBadge');
+  const text = document.getElementById('realtimeStatusText');
+  if (!badge || !text) return;
+
+  if (status === 'connected') {
+    badge.className = 'realtime-status-pill';
+    badge.title = 'Comunicación en tiempo real activa (SSE)';
+    text.textContent = 'En vivo';
+  } else if (status === 'reconnecting') {
+    badge.className = 'realtime-status-pill reconnecting';
+    badge.title = 'Reconectando con el canal en vivo...';
+    text.textContent = 'Reconectando...';
+  } else {
+    badge.className = 'realtime-status-pill offline';
+    badge.title = 'Sin conexión con el canal en vivo';
+    text.textContent = 'Desconectado';
+  }
+}
 
 function initRealtimeSSE() {
   if (typeof window.EventSource === 'undefined') return;
@@ -2122,12 +2143,19 @@ function initRealtimeSSE() {
     sseSource = null;
   }
 
+  updateRealtimeBadge('reconnecting');
+
   try {
     sseSource = new EventSource('/api/realtime/events');
 
     sseSource.addEventListener('connected', () => {
       console.log('[SSE] Conectado al canal en tiempo real del servidor');
+      updateRealtimeBadge('connected');
     });
+
+    sseSource.onopen = () => {
+      updateRealtimeBadge('connected');
+    };
 
     sseSource.addEventListener('inventory:deleted', (e) => {
       try {
@@ -2176,17 +2204,28 @@ function initRealtimeSSE() {
     });
 
     sseSource.onerror = () => {
+      updateRealtimeBadge('reconnecting');
       if (sseSource) {
         try { sseSource.close(); } catch (e) {}
         sseSource = null;
       }
       clearTimeout(sseReconnectTimer);
-      sseReconnectTimer = setTimeout(initRealtimeSSE, 3500);
+      sseReconnectTimer = setTimeout(initRealtimeSSE, 2000);
     };
   } catch (err) {
+    updateRealtimeBadge('offline');
     clearTimeout(sseReconnectTimer);
-    sseReconnectTimer = setTimeout(initRealtimeSSE, 5000);
+    sseReconnectTimer = setTimeout(initRealtimeSSE, 4000);
   }
+}
+
+// Watchdog persistente: verifica cada 8 segundos que el canal de tiempo real esté 100% activo
+if (!sseWatchdogInterval) {
+  sseWatchdogInterval = setInterval(() => {
+    if (!sseSource || sseSource.readyState === EventSource.CLOSED) {
+      initRealtimeSSE();
+    }
+  }, 8000);
 }
 
 // Sincronización periódica automática de respaldo (cada 2.5 segundos)

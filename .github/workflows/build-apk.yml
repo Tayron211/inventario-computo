@@ -81,15 +81,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: app-v2.1.4
-          name: "SysInventory Android App (v2.1.4 - Splash Minimalista & Descarga Universal)"
+          tag_name: app-v2.1.5
+          name: "SysInventory Android App (v2.1.5 - Sincronización Tiempo Real & Anti-Hibernación)"
           body: |
-            ### 📱 Aplicación Móvil Oficial de SysInventory para Android
-            Esta versión está compilada en modo Release y firmada oficialmente para evitar falsos positivos de Google Play Protect.
+            ### 📱 Aplicación Móvil Oficial de SysInventory para Android (v2.1.5)
+            Esta versión incluye sincronización instantánea en tiempo real (Server-Sent Events), persistencia continua, reconexión automática tras desbloqueo del teléfono y eliminación atómica sincronizada.
             
             #### 📥 Instalación:
             1. Descarga el archivo adjunto **`SysInventory.apk`** en tu teléfono Android.
             2. Toca el archivo descargado para iniciar la instalación.
-            3. ¡Listo! Se instalará limpiamente en tu teléfono.
+            3. ¡Listo! Se actualizará automáticamente en tu teléfono.
           files: |
             dist-apk/SysInventory.apk

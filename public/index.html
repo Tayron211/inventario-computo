@@ -60,7 +60,7 @@
   <script src="js/html5-qrcode.min.js"></script>
 
   <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=99.0">
+  <link rel="stylesheet" href="css/styles.css?v=2.1.5">
 </head>
 <body>
   <script>
@@ -215,8 +215,13 @@
 
         <!-- Derecha: Acciones y Usuario -->
         <div class="header-right-column">
-          <!-- Fila Superior Derecha: Usuario y Modo Claro/Oscuro -->
+          <!-- Fila Superior Derecha: Usuario, Estado Tiempo Real y Modo Claro/Oscuro -->
           <div class="top-right-user-tools">
+            <div class="realtime-status-pill" id="realtimeStatusBadge" title="Comunicación push en tiempo real activa">
+              <span class="pulse-dot"></span>
+              <span id="realtimeStatusText">En vivo</span>
+            </div>
+
             <div class="user-session-badge badge-role-admin" id="userSessionBox">
               <span class="user-pill" id="userPill">
                 <span id="sessionUserIcon"><i class="fa-solid fa-crown gold-crown-icon"></i></span>
@@ -1099,7 +1104,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- App Script -->
-  <script src="js/app.js?v=99.0"></script>
+  <script src="js/app.js?v=2.1.5"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
