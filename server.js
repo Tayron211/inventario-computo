@@ -2009,39 +2009,71 @@ async function lookupHardwareSpecsOnline(modelText) {
   else if (/aruba/i.test(combinedText)) brand = 'Aruba';
   else if (/synology/i.test(combinedText)) brand = 'Synology';
 
-  let type = 'Laptop';
-  if (/hyperx|fury|valueram|vengeance|dominator|trident|ripjaws|ballistix|lancer|spectrix|t-force|ddr5|ddr4|ddr3|\bram\b|dimm|so-dimm|memoria\s*ram/i.test(combinedText)) {
-    type = 'Memoria RAM';
-  } else if (/ssd|nvme|m\.2|sata|hdd|disco\s*duro|almacenamiento|barracuda|ironwolf|firecuda|990\s*pro|980\s*pro|970\s*evo|a400|nv2|nv3|kc3000|sn580|sn570|sn770|sn850|p3\s*plus|p3|legend|su650/i.test(combinedText)) {
-    type = 'Disco / Almacenamiento';
-  } else if (/geforce|radeon|rtx|gtx|quadro|intel\s*arc|graphics|video\s*card|tarjeta\s*de\s*video|gpu|vram|rx\s*\d{3,4}/i.test(combinedText)) {
-    type = 'Tarjeta de Video (GPU)';
-  } else if (/intel\s*core|ryzen|core\s*i[3579]|threadripper|xeon|procesador|cpu|\bcore\s*ultra\b/i.test(combinedText)) {
+  // Clasificación Inteligente de Tipo: 
+  // Nivel 1: Evaluar directamente lo escrito por el usuario (Prioridad Absoluta)
+  const cleanLower = clean.toLowerCase();
+  let type = 'PC de Escritorio';
+
+  if (/\b(?:procesador|cpu|intel\s*core|core\s*i[3579]|core\s*ultra|i[3579][ -]?\d{4,5}[a-z]?|ryzen\s*[3579]|ryzen\s*\d{4}[a-z]?|threadripper|xeon|celeron|pentium|athlon)\b/i.test(cleanLower) &&
+      !/\b(?:tarjeta|grafica|gráfica|gpu|rtx|gtx|geforce|radeon\s*rx)\b/i.test(cleanLower)) {
     type = 'Procesador (CPU)';
-  } else if (/motherboard|placa\s*madre|placa\s*base|mainboard|b760|b650|b550|b450|a520|a320|z790|z690|h610|h510|h410|h310|h110|h81/i.test(combinedText)) {
+  } else if (/\b(?:tarjeta\s*de\s*video|tarjeta\s*gr[aá]fica|gpu\s*dedicada|discrete\s*gpu|geforce|rtx\s*\d{3,4}|gtx\s*\d{3,4}|radeon\s*rx|rx\s*\d{3,4}|quadro|intel\s*arc\s*a\d)\b/i.test(cleanLower)) {
+    type = 'Tarjeta de Video (GPU)';
+  } else if (/\b(?:disco|almacenamiento|ssd|nvme|m\.2|sata\s*ssd|hdd|disco\s*duro|barracuda|ironwolf|kc3000|nv[23]|sn[578]\d0|9[789]0\s*pro|a400|bx500|mx500|p3\s*plus)\b/i.test(cleanLower)) {
+    type = 'Disco / Almacenamiento';
+  } else if (/\b(?:memoria\s*ram|ram|ddr[345]|fury\s*beast|hyperx|vengeance|ripjaws|trident\s*z|valueram|dimm|so-dimm)\b/i.test(cleanLower)) {
+    type = 'Memoria RAM';
+  } else if (/\b(?:placa\s*base|placa\s*madre|motherboard|mainboard|b550|b450|b650|b760|h610|h510|a520|a320|z790|z690|x670)\b/i.test(cleanLower)) {
     type = 'Placa Base';
-  } else if (/fuente\s*de\s*poder|psu|power\s*supply|80\s*plus|modular|rm\d{3}|cx\d{3}|cv\d{3}/i.test(combinedText)) {
+  } else if (/\b(?:fuente\s*de\s*poder|psu|power\s*supply|80\s*plus|modular|rm\d{3}|cv\d{3}|cx\d{3}|smart\s*\d{3}w)\b/i.test(cleanLower)) {
     type = 'Fuente de Poder (PSU)';
-  } else if (/monitor|pantalla|display|ultragear|viewfinity|p2422|se2422|e24\s*g4/i.test(combinedText)) {
-    type = 'Monitor / Pantalla';
-  } else if (/mouse|raton|teclado|keyboard|audifono|headset|auricular|periferico/i.test(combinedText)) {
-    type = 'Teclado / Mouse / Periférico';
-  } else if (/switch|catalyst|managed|rackmount|ports|puertos\s*gigabit|c2960|crs326/i.test(combinedText)) {
-    type = 'Switch de Red';
-  } else if (/access\s*point|ap|router|wi[- ]?fi|mesh|routerboard|unifi|u6|omada/i.test(combinedText)) {
-    type = 'Access Point Wi-Fi';
-  } else if (/proyector|projector|3lcd|dlp|lumen|powerlite|brightlink/i.test(combinedText)) {
-    type = 'Proyector';
-  } else if (/server|servidor|poweredge|proliant|thinksystem|xeon|nas|rack\s*server/i.test(combinedText)) {
-    type = 'Servidor';
-  } else if (/impresora|printer|ecotank|smart\s*tank|laserjet|pixma|inkbenefit|toner|tinta/i.test(combinedText)) {
-    type = 'Impresora / Multifuncional';
-  } else if (/optiplex|prodesk|elitedesk|thinkcentre|torre|desktop|pc\s*de\s*escritorio/i.test(combinedText)) {
-    type = 'PC de Escritorio';
-  } else if (/all-in-one|aio|imac|pavilion\s*24/i.test(combinedText)) {
+  } else if (/\b(?:cooler|disipador|refrigeraci[oó]n|ak400|ak620|peerless\s*assassin|hyper\s*212|water\s*cooling)\b/i.test(cleanLower)) {
+    type = 'Refrigeración / Cooler';
+  } else if (/\b(?:laptop|notebook|port[aá]til|thinkpad|latitude|probook|elitebook|victus|legion|macbook|aspire|ideapad|zenbook|vivobook|tuf\s*gaming|omen)\b/i.test(cleanLower)) {
+    type = 'Laptop';
+  } else if (/\b(?:all-in-one|aio|todo\s*en\s*uno|imac)\b/i.test(cleanLower)) {
     type = 'All-in-One';
-  } else if (/mini\s*pc|nuc|tiny/i.test(combinedText)) {
+  } else if (/\b(?:mini\s*pc|nuc|tiny|optiplex\s*micro|thinkcentre\s*tiny|elitedesk\s*mini)\b/i.test(cleanLower)) {
     type = 'Mini PC';
+  } else if (/\b(?:servidor|server|poweredge|proliant|thinksystem)\b/i.test(cleanLower)) {
+    type = 'Servidor';
+  } else if (/\b(?:impresora|multifuncional|printer|ecotank|smart\s*tank|laserjet|pixma|inkbenefit|toner|tinta)\b/i.test(cleanLower)) {
+    type = 'Impresora / Multifuncional';
+  } else if (/\b(?:switch|catalyst|managed\s*switch)\b/i.test(cleanLower)) {
+    type = 'Switch de Red';
+  } else if (/\b(?:access\s*point|ap\s*wifi|router|unifi|omada)\b/i.test(cleanLower)) {
+    type = 'Access Point Wi-Fi';
+  } else if (/\b(?:proyector|projector|powerlite)\b/i.test(cleanLower)) {
+    type = 'Proyector';
+  } else if (/\b(?:monitor|pantalla|display|ultragear|viewfinity|p2422|se2422|e24\s*g4)\b/i.test(cleanLower)) {
+    type = 'Monitor / Pantalla';
+  } else if (/\b(?:teclado|keyboard|mouse|rat[oó]n|aud[ií]fono|headset)\b/i.test(cleanLower)) {
+    type = 'Teclado / Mouse / Periférico';
+  } else if (/\b(?:optiplex|prodesk|elitedesk|thinkcentre|torre|desktop|pc\s*de\s*escritorio)\b/i.test(cleanLower)) {
+    type = 'PC de Escritorio';
+  } else {
+    // Nivel 2: Inferencia basada en contexto web enriquecido (CPU SIEMPRE antes que GPU)
+    if (/\b(?:procesador|cpu|intel\s*core|core\s*i[3579]|core\s*ultra|ryzen|threadripper|xeon)\b/i.test(combinedText)) {
+      type = 'Procesador (CPU)';
+    } else if (/\b(?:tarjeta\s*de\s*video|tarjeta\s*gr[aá]fica|gpu\s*dedicada|discrete\s*gpu|geforce|rtx\s*\d{3,4}|gtx\s*\d{3,4}|radeon\s*rx|rx\s*\d{3,4}|quadro)\b/i.test(combinedText)) {
+      type = 'Tarjeta de Video (GPU)';
+    } else if (/\b(?:memoria\s*ram|ram|ddr[345]|dimm|so-dimm)\b/i.test(combinedText)) {
+      type = 'Memoria RAM';
+    } else if (/\b(?:disco|almacenamiento|ssd|nvme|m\.2|sata\s*ssd|hdd|disco\s*duro)\b/i.test(combinedText)) {
+      type = 'Disco / Almacenamiento';
+    } else if (/\b(?:placa\s*base|placa\s*madre|motherboard|mainboard)\b/i.test(combinedText)) {
+      type = 'Placa Base';
+    } else if (/\b(?:fuente\s*de\s*poder|psu|power\s*supply)\b/i.test(combinedText)) {
+      type = 'Fuente de Poder (PSU)';
+    } else if (/\b(?:laptop|notebook|port[aá]til)\b/i.test(combinedText)) {
+      type = 'Laptop';
+    } else if (/\b(?:impresora|printer|ecotank|laserjet)\b/i.test(combinedText)) {
+      type = 'Impresora / Multifuncional';
+    } else if (/\b(?:monitor|pantalla)\b/i.test(combinedText)) {
+      type = 'Monitor / Pantalla';
+    } else {
+      type = 'PC de Escritorio';
+    }
   }
 
   // Configuración de especificaciones adaptadas por categoría

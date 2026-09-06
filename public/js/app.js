@@ -946,132 +946,280 @@ function initEventListeners() {
     return null;
   }
 
+  // Normalizador de tipos para sincronizar valores con el <select id="formTipoEquipo">
+  function getStandardTipoEquipo(raw) {
+    if (!raw) return 'PC de Escritorio';
+    const s = String(raw).trim().toLowerCase();
+    if (s.includes('cpu') || s.includes('procesador') || s.includes('microprocesador')) return 'Procesador (CPU)';
+    if (s.includes('gpu') || s.includes('tarjeta de video') || s.includes('tarjeta gráfica') || s.includes('tarjeta grafica') || s.includes('grafica') || s.includes('gráfica') || s.includes('video')) return 'Tarjeta de Video (GPU)';
+    if (s.includes('ram') || s.includes('memoria')) return 'Memoria RAM';
+    if (s.includes('disco') || s.includes('ssd') || s.includes('hdd') || s.includes('almacenamiento') || s.includes('nvme') || s.includes('m.2')) return 'Disco / Almacenamiento';
+    if (s.includes('placa base') || s.includes('motherboard') || s.includes('placa madre') || s.includes('mainboard') || s === 'placa') return 'Placa Base';
+    if (s.includes('fuente') || s.includes('psu') || s.includes('power supply')) return 'Fuente de Poder (PSU)';
+    if (s.includes('refrigeración') || s.includes('refrigeracion') || s.includes('cooler') || s.includes('disipador')) return 'Refrigeración / Cooler';
+    if (s.includes('impresora') || s.includes('multifuncional') || s.includes('copiadora') || s.includes('plotter')) return 'Impresora / Multifuncional';
+    if (s.includes('proyector')) return 'Proyector';
+    if (s.includes('switch')) return 'Switch de Red';
+    if (s.includes('access point') || s.includes('router') || s.includes('ap wi-fi') || s.includes('wifi')) return 'Access Point Wi-Fi';
+    if (s.includes('teclado') || s.includes('keyboard')) return 'Teclado';
+    if (s.includes('mouse') || s.includes('raton') || s.includes('ratón') || s.includes('puntero')) return 'Mouse / Puntero';
+    if (s.includes('audífono') || s.includes('audifono') || s.includes('headset') || s.includes('diadema')) return 'Audífonos / Diadema';
+    if (s.includes('monitor') || s.includes('pantalla') || s.includes('display')) return 'Monitor / Pantalla';
+    if (s.includes('laptop') || s.includes('portatil') || s.includes('portátil') || s.includes('notebook') || s.includes('ultrabook')) return 'Laptop';
+    if (s.includes('all-in-one') || s.includes('all in one') || s.includes('aio') || s.includes('todo en uno')) return 'All-in-One';
+    if (s.includes('mini pc') || s.includes('nuc') || s.includes('tiny')) return 'Mini PC';
+    if (s.includes('servidor') || s.includes('server')) return 'Servidor';
+    if (s.includes('escritorio') || s.includes('desktop') || s.includes('pc')) return 'PC de Escritorio';
+    return raw;
+  }
+
+  // Inferencia Ultra-Rápida e Intuitiva de Tipo de Hardware (0ms mientras el usuario escribe)
+  function quickInferTipoEquipo(text) {
+    if (!text || typeof text !== 'string') return null;
+    const t = text.trim().toLowerCase();
+    if (t.length < 2) return null;
+
+    // 1. PROCESADOR / CPU (MÁXIMA PRIORIDAD para que nunca se confunda con GPU o PC)
+    if (/\b(?:procesador|cpu|microprocesador)\b/i.test(t) ||
+        /\b(?:intel\s*core|core\s*i[3579]|core\s*ultra|i[3579][ -]?\d{4,5}[a-z]?|xeon|celeron|pentium)\b/i.test(t) ||
+        /\b(?:amd\s*ryzen|ryzen\s*[3579]|ryzen\s*\d{4}[a-z]?|threadripper|athlon)\b/i.test(t) ||
+        /\b(?:12400f|13400f|14400f|12600k|13600k|14600k|12700k|13700k|14700k|13900k|14900k|5600x|5600g|5700x|5700x3d|5800x|5800x3d|7600x|7700x|7800x3d|7900x|7950x|9600x|9700x)\b/i.test(t)) {
+      if (!/\b(?:tarjeta\s*de\s*video|tarjeta\s*gr[aá]fica|rtx\s*\d{3,4}|gtx\s*\d{3,4}|radeon\s*rx)\b/i.test(t)) {
+        return 'Procesador (CPU)';
+      }
+    }
+
+    // 2. TARJETA DE VIDEO (GPU)
+    if (/\b(?:tarjeta\s*de\s*video|tarjeta\s*gr[aá]fica|tarjeta\s*grafica|placa\s*de\s*video|gpu\s*dedicada|gpu|vram)\b/i.test(t) ||
+        /\b(?:rtx\s*\d{3,4}|gtx\s*\d{3,4}|geforce\s*rtx|geforce\s*gtx|geforce|radeon\s*rx|rx\s*[567]\d{2,3}|quadro|rtx\s*a\d{3,4}|intel\s*arc\s*a\d)\b/i.test(t)) {
+      return 'Tarjeta de Video (GPU)';
+    }
+
+    // 3. MEMORIA RAM
+    if (/\b(?:memoria\s*ram|ram|ddr[345]|sodimm|so-dimm|dimm|fury\s*beast|hyperx|valueram|vengeance|ripjaws|trident\s*z|flare\s*x)\b/i.test(t)) {
+      return 'Memoria RAM';
+    }
+
+    // 4. DISCO / ALMACENAMIENTO (SSD, NVMe, HDD)
+    if (/\b(?:disco\s*duro|disco\s*s[oó]lido|disco\s*externo|ssd|nvme|m\.2|sata\s*ssd|hdd|almacenamiento|kingston\s*a400|kingston\s*nv[23]|sn[578]\d0|9[789]0\s*pro|bx500|mx500|p3\s*plus|t500|kc3000|barracuda|ironwolf)\b/i.test(t)) {
+      return 'Disco / Almacenamiento';
+    }
+
+    // 5. PLACA BASE / MOTHERBOARD
+    if (/\b(?:placa\s*base|placa\s*madre|tarjeta\s*madre|motherboard|mainboard|b550m?|b450m?|b650m?|b760m?|h610m?|a320m?|a520m?|z790|z690|x670e?|x570)\b/i.test(t)) {
+      return 'Placa Base';
+    }
+
+    // 6. FUENTE DE PODER (PSU)
+    if (/\b(?:fuente|psu|power\s*supply|80\s*plus|rm\d{3}[a-z]?|cv\d{3}|cx\d{3}|toughpower|smart\s*\d{3}w)\b/i.test(t)) {
+      return 'Fuente de Poder (PSU)';
+    }
+
+    // 7. REFRIGERACIÓN / COOLER
+    if (/\b(?:cooler|disipador|refrigeraci[oó]n|water\s*cooling|enfriamiento|aio|deepcool|ak\d{3}|ag\d{3}|peerless\s*assassin|hyper\s*212|kraken|masterliquid|liquid\s*freezer)\b/i.test(t)) {
+      return 'Refrigeración / Cooler';
+    }
+
+    // 8. IMPRESORAS & CONSUMIBLES
+    if (/\b(?:impresora|multifuncional|fotocopiadora|ecotank|smart\s*tank|laserjet|pixma|inkbenefit|toner|t[oó]ner|cartucho|tinta)\b/i.test(t)) {
+      return 'Impresora / Multifuncional';
+    }
+
+    // 9. MONITORES & PANTALLAS
+    if (/\b(?:monitor|pantalla|display|ultragear|viewfinity|odyssey)\b/i.test(t)) {
+      return 'Monitor / Pantalla';
+    }
+
+    // 10. PERIFÉRICOS
+    if (/\b(?:teclado|keyboard)\b/i.test(t)) return 'Teclado';
+    if (/\b(?:mouse|rat[oó]n|puntero)\b/i.test(t)) return 'Mouse / Puntero';
+    if (/\b(?:aud[ií]fono|headset|auricular|diadema|headphone)\b/i.test(t)) return 'Audífonos / Diadema';
+
+    // 11. REDES & PROYECTORES
+    if (/\b(?:switch|catalyst|crs\d{3}|sg\d{3,4})\b/i.test(t)) return 'Switch de Red';
+    if (/\b(?:access\s*point|ap\s*wi-?fi|router|unifi|omada)\b/i.test(t)) return 'Access Point Wi-Fi';
+    if (/\b(?:proyector|projector|powerlite|brightlink)\b/i.test(t)) return 'Proyector';
+
+    // 12. COMPUTADORAS COMPLETAS
+    if (/\b(?:laptop|notebook|port[aá]til|thinkpad|latitude|probook|elitebook|pavilion|macbook|ideapad|vostro|vivobook|zenbook|tuf\s*gaming|omen|legion|nitro\s*5|aspire)\b/i.test(t)) return 'Laptop';
+    if (/\b(?:all-in-one|all\s*in\s*one|aio|todo\s*en\s*uno|imac)\b/i.test(t)) return 'All-in-One';
+    if (/\b(?:mini\s*pc|nuc|thinkcentre\s*tiny|elitedesk\s*mini)\b/i.test(t)) return 'Mini PC';
+    if (/\b(?:servidor|server|poweredge|proliant|thinksystem)\b/i.test(t)) return 'Servidor';
+    if (/\b(?:optiplex|prodesk|elitedesk|thinkcentre|pc\s*de\s*escritorio|torre|desktop|computadora)\b/i.test(t)) return 'PC de Escritorio';
+
+    return null;
+  }
+
+  // Verificador seguro de palabras clave (evita que números como '400' hagan match dentro de '12400')
+  function keywordMatchesText(kw, text) {
+    if (!kw || !text) return false;
+    const cleanKw = kw.toLowerCase().trim();
+    const cleanText = text.toLowerCase().trim();
+    if (!cleanKw || !cleanText) return false;
+    if (/^\d+$/.test(cleanKw) || cleanKw.length <= 3) {
+      const escaped = cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const reg = new RegExp(`(?:^|[^a-z0-9])${escaped}(?:[^a-z0-9]|$)`, 'i');
+      return reg.test(cleanText);
+    }
+    return cleanText.includes(cleanKw);
+  }
+
   // Auto-detección en tiempo real de Especificaciones de Fábrica (CPU, RAM, Almacenamiento, Placa, Marca, Consumible)
   // Base de datos cliente de Auto-Llenado Rápido con Coincidencia Difusa Ultra-Flexible (0ms)
   const CLIENT_SPECS_CATALOG = [
-    // GAMING & HIGH-PERFORMANCE LAPTOPS
-    { keywords: ['victus', '15-fb', 'gaming 15', 'fb3021la'], brand: 'HP', type: 'Laptop', cpu: 'AMD Ryzen 5 8645HS @ 4.30GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050 (6GB)', ram: '16 GB DDR5 (5600MHz)', storage: '512 GB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP 8B9D (AMD Promontory/Bixby Chipset)' },
-    { keywords: ['omen'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-13700HX / AMD Ryzen 7 (NVIDIA GeForce RTX 4060/4070)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP OMEN Gaming Motherboard' },
-    { keywords: ['tuf', 'fx506', 'fa506', 'tuf gaming'], brand: 'ASUS', type: 'Laptop', cpu: 'Intel Core i5-11400H @ 2.70GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'ASUS TUF GAMING F15 FX506' },
-    { keywords: ['rog', 'strix', 'zephyrus'], brand: 'ASUS', type: 'Laptop', cpu: 'AMD Ryzen 7 7735HS / Intel Core i7 (NVIDIA GeForce RTX 4060)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2', motherboard: 'ASUS ROG Gaming Motherboard' },
-    { keywords: ['nitro', 'an515', 'nitro 5'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i5-10300H @ 2.50GHz / AMD Ryzen 5 4600H (NVIDIA GeForce RTX)', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'Acer Nitro AN515' },
-    { keywords: ['predator', 'helios'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i7-12700H @ 2.30GHz (14 Núcleos, 20 Hilos) / NVIDIA GeForce RTX 3070', ram: '16 GB DDR5', storage: '1 TB SSD NVMe', motherboard: 'Acer Predator Helios Board' },
-    { keywords: ['legion', 'legion 5'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 7 5800H / Intel Core i7 (NVIDIA GeForce RTX 3060)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe', motherboard: 'Lenovo Legion Gaming Board' },
+    // ==========================================
+    // 1. PROCESADORES / CPU (INTEL & AMD) - PRIORIDAD 1
+    // ==========================================
+    // INTEL 12va, 13va y 14va GEN
+    { keywords: ['12400f', 'i5-12400f', 'i5 12400f', '12400', 'i5-12400', 'i5 12400'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5-12400F (6 Núcleos, 12 Hilos @ 4.40GHz Turbo)', ram: 'Controlador Dual Channel DDR4-3200 / DDR5-4800 Integrado', storage: '18 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipsets H610, B760, B660, Z790)' },
+    { keywords: ['13400f', 'i5-13400f', 'i5 13400f', '13400', 'i5-13400', 'i5 13400'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5-13400 (10 Núcleos [6P+4E], 16 Hilos @ 4.60GHz Turbo)', ram: 'Controlador Dual Channel DDR4 / DDR5 Integrado', storage: '20 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipsets H610, B760, Z790)' },
+    { keywords: ['14400f', 'i5-14400f', '14400', 'i5-14400', 'i5 14400'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5-14400 (10 Núcleos [6P+4E], 16 Hilos @ 4.70GHz Turbo)', ram: 'Controlador Dual Channel DDR4/DDR5 Integrado', storage: '20 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipsets B760, H610, Z790)' },
+    { keywords: ['12600k', 'i5-12600k', '13600k', 'i5-13600k', '14600k', 'i5-14600k'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5 Desbloqueado K (Hasta 14 Núcleos @ 5.30GHz Turbo)', ram: 'DDR4-3200 / DDR5-5600 Dual Channel XMP', storage: 'Intel Smart Cache L3 de Alta Velocidad', motherboard: 'Socket Intel LGA 1700 (Chipsets Z790, Z690, B760)' },
+    { keywords: ['12700', 'i7-12700', '12700k', 'i7-12700k', '13700', 'i7-13700', '13700k', 'i7-13700k', '14700', 'i7-14700', '14700k', 'i7-14700k'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i7 High-End (Hasta 20 Núcleos, 28 Hilos @ 5.60GHz Turbo)', ram: 'DDR4 / DDR5 Dual Channel', storage: 'Intel Smart Cache L3 (33MB+)', motherboard: 'Socket Intel LGA 1700 (Chipsets B760, Z790)' },
+    { keywords: ['13900k', 'i9-13900k', '14900k', 'i9-14900k', 'i9-13900', 'i9-14900'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i9 Flagship (24 Núcleos [8P+16E], 32 Hilos @ 6.00GHz Turbo)', ram: 'DDR5-5600 Dual Channel con Intel XMP 3.0', storage: '36 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipset Z790)' },
+    { keywords: ['12100', 'i3-12100', '12100f', 'i3-12100f', '13100', 'i3-13100'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i3 (4 Núcleos, 8 Hilos @ 4.30GHz Turbo)', ram: 'DDR4 / DDR5 Dual Channel', storage: '12 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipsets H610, B760)' },
+    { keywords: ['10400', 'i5-10400', '10400f', '11400', 'i5-11400', '11400f'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5 (6 Núcleos, 12 Hilos @ 4.30GHz - 4.40GHz Turbo)', ram: 'Controlador DDR4-2666 / DDR4-3200 Integrado', storage: '12 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1200 (Chipsets H410, H510, B460, B560)' },
+    { keywords: ['10700', 'i7-10700', '11700', 'i7-11700'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i7 (8 Núcleos, 16 Hilos @ 4.80GHz - 4.90GHz Turbo)', ram: 'DDR4-2933 / DDR4-3200 Dual Channel', storage: '16 MB Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1200 (Chipsets B460, B560, Z490, Z590)' },
+    { keywords: ['core ultra 5', 'core ultra 7', 'core ultra 9', 'ultra 7', 'ultra 5'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core Ultra con NPU Intel AI Boost Integrada (Meteor Lake)', ram: 'LPDDR5x / DDR5 Dual Channel', storage: 'Intel Smart Cache L3', motherboard: 'Socket BGA / LGA Intel Meteor Lake Architecture' },
 
-    // HP CORPORATIVO
-    { keywords: ['probook', '450'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2 PCIe', motherboard: 'HP 880D' },
-    { keywords: ['probook', '440'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe', motherboard: 'HP 880C' },
-    { keywords: ['elitebook', '840'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-1165G7 @ 2.80GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP 8809' },
-    { keywords: ['elitebook', '850'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-10510U @ 1.80GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'HP 8723' },
-    { keywords: ['hp 240', '240 g8', '240 g7', '245 g8', '245 g7'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i3-1115G4 @ 3.00GHz / AMD Ryzen 3 5300U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'HP 881D' },
-    { keywords: ['pavilion', 'hp 15'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB / 16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'HP Pavilion Motherboard' },
-    { keywords: ['prodesk', '400', '600'], brand: 'HP', type: 'PC de Escritorio', cpu: 'Intel Core i5-10500 @ 3.10GHz (6 Núcleos, 12 Hilos)', ram: '8 GB / 16 GB DDR4', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'HP ProDesk System Board' },
-    { keywords: ['elitedesk', '800'], brand: 'HP', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP EliteDesk System Board' },
+    // AMD RYZEN SERIES
+    { keywords: ['5600x', 'ryzen 5 5600x', 'ryzen 5600x', '5600', 'ryzen 5 5600', 'ryzen 5600', '5600g', 'ryzen 5 5600g'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 5 5600 (6 Núcleos, 12 Hilos @ 4.40GHz - 4.60GHz Boost)', ram: 'Controlador DDR4-3200 Dual Channel Integrado', storage: '32 MB AMD GameCache L3', motherboard: 'Socket AMD AM4 (Chipsets B550, B450, A520, X570)' },
+    { keywords: ['5700x', 'ryzen 7 5700x', '5700x3d', 'ryzen 7 5700x3d', '5800x', 'ryzen 7 5800x', '5800x3d', 'ryzen 7 5800x3d'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 7 (8 Núcleos, 16 Hilos con Tecnología 3D V-Cache / Boost)', ram: 'DDR4-3200 Dual Channel', storage: 'Hasta 96 MB 3D V-Cache L3', motherboard: 'Socket AMD AM4 (Chipsets B550, X570)' },
+    { keywords: ['5500', 'ryzen 5 5500', '3600', 'ryzen 5 3600', '4500', 'ryzen 5 4500'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 5 (6 Núcleos, 12 Hilos @ 4.20GHz Boost)', ram: 'Controlador DDR4-3200 Dual Channel', storage: '16 MB / 32 MB Cache L3', motherboard: 'Socket AMD AM4 (Chipsets A320, B450, B550, A520)' },
+    { keywords: ['7600', 'ryzen 5 7600', '7600x', 'ryzen 5 7600x'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 5 7600X (6 Núcleos, 12 Hilos Zen 4 @ 5.30GHz Boost)', ram: 'Controlador DDR5-5200 Dual Channel con AMD EXPO', storage: '32 MB Cache L3', motherboard: 'Socket AMD AM5 (Chipsets B650, A620, X670)' },
+    { keywords: ['7800x3d', 'ryzen 7 7800x3d', '7700x', 'ryzen 7 7700x', '7700', 'ryzen 7 7700'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 7 7800X3D (8 Núcleos, 16 Hilos con 3D V-Cache @ 5.00GHz Boost)', ram: 'DDR5 Dual Channel con AMD EXPO', storage: '96 MB AMD 3D V-Cache L3', motherboard: 'Socket AMD AM5 (Chipsets B650, X670, B650E)' },
+    { keywords: ['7900x', 'ryzen 9 7900x', '7950x', 'ryzen 9 7950x', '7950x3d'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 9 High-End (Hasta 16 Núcleos, 32 Hilos @ 5.70GHz Boost)', ram: 'DDR5 Dual Channel Alta Velocidad', storage: '64 MB / 128 MB Cache L3', motherboard: 'Socket AMD AM5 (Chipset X670 / B650)' },
+    { keywords: ['8600g', 'ryzen 5 8600g', '8700g', 'ryzen 7 8700g'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 8000G con Gráficos Radeon 760M/780M y NPU Ryzen AI', ram: 'DDR5 Dual Channel con AMD EXPO', storage: '16 MB / 24 MB Cache L3', motherboard: 'Socket AMD AM5 (Chipsets B650, A620)' },
+    { keywords: ['9600x', 'ryzen 5 9600x', '9700x', 'ryzen 7 9700x', '9900x', '9950x'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen Serie 9000 Zen 5 (Alto Rendimiento y Eficiencia Energética)', ram: 'DDR5-5600 Dual Channel con AMD EXPO', storage: 'AMD Zen 5 High-Speed Cache L3', motherboard: 'Socket AMD AM5 (Chipsets B650, X670, X870)' },
+    { keywords: ['3200g', 'ryzen 3 3200g', '3400g', 'ryzen 5 3400g'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen APU con Gráficos Radeon Vega Integrados', ram: 'DDR4 Dual Channel', storage: 'Cache L3', motherboard: 'Socket AMD AM4 (Chipsets A320, B450)' },
 
-    // DELL CORPORATIVO & CONSUMO
-    { keywords: ['optiplex', '7080', '7070', '7090', '7060', '7050'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell OptiPlex 7080 (Intel Q470)' },
-    { keywords: ['optiplex', '3080', '3070', '3060', '3050', '3020'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i5-10500 / i5-7500 @ 3.10GHz (4/6 Núcleos)', ram: '8 GB DDR4', storage: '256 GB SSD / 500GB HDD', motherboard: 'Dell OptiPlex System Board' },
-    { keywords: ['latitude', '5430', '5420', '5410', '5400'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / i5-1235U @ 2.40GHz (4/10 Núcleos)', ram: '16 GB DDR4 (3200MHz)', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Dell Latitude 5420 System Board' },
-    { keywords: ['latitude', '3420', '3410'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Latitude 3420 System Board' },
-    { keywords: ['latitude', '7420', '7430'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i7-1185G7 @ 3.00GHz (4 Núcleos, 8 Hilos)', ram: '16 GB LPDDR4x', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell Latitude 7420 System Board' },
-    { keywords: ['inspiron', '3501', '3511', 'inspiron 15'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Inspiron Mainboard' },
-    { keywords: ['vostro', '3400', '3500'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz', ram: '8 GB DDR4', storage: '256 GB SSD NVMe', motherboard: 'Dell Vostro System Board' },
-    { keywords: ['xps', 'xps 13', 'xps 15'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i7-12700H / i7-1185G7 (14 Núcleos)', ram: '16 GB / 32 GB LPDDR5', storage: '512 GB / 1 TB SSD NVMe', motherboard: 'Dell XPS Motherboard' },
+    // ==========================================
+    // 2. TARJETAS DE VIDEO / GPU DEDICADAS
+    // ==========================================
+    { keywords: ['rtx 4090', 'rtx4090'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 4090 (16384 CUDA Cores, DLSS 3, Ray Tracing Gen 3)', ram: '24 GB GDDR6X (384-bit)', storage: 'PCIe 4.0 x16', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1a' },
+    { keywords: ['rtx 4080', 'rtx 4080 super', 'rtx4080'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 4080 Super (10240 CUDA Cores, DLSS 3.5)', ram: '16 GB GDDR6X (256-bit)', storage: 'PCIe 4.0 x16', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1a' },
+    { keywords: ['rtx 4070', 'rtx 4070 super', 'rtx 4070 ti', 'rtx4070'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 4070 / Super (7168 CUDA Cores, DLSS 3)', ram: '12 GB GDDR6X (192-bit)', storage: 'PCIe 4.0 x16', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1a' },
+    { keywords: ['rtx 4060 ti', 'rtx4060ti'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 4060 Ti (4352 CUDA Cores, DLSS 3)', ram: '8 GB / 16 GB GDDR6 (128-bit)', storage: 'PCIe 4.0 x8', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1a' },
+    { keywords: ['rtx 4060', 'rtx4060'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 4060 (3072 CUDA Cores, DLSS 3, Reflex)', ram: '8 GB GDDR6 (128-bit)', storage: 'PCIe 4.0 x8', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1a' },
+    { keywords: ['rtx 3060', 'rtx3060'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 3060 (3584 CUDA Cores, Ampere)', ram: '12 GB GDDR6 (192-bit)', storage: 'PCIe 4.0 x16', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1' },
+    { keywords: ['rtx 3050', 'rtx3050'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX 3050 (2560 CUDA Cores, Ray Tracing)', ram: '6 GB / 8 GB GDDR6 (128-bit)', storage: 'PCIe 4.0 x8', motherboard: '3x DisplayPort, 1x HDMI' },
+    { keywords: ['gtx 1650', 'gtx1650', 'gtx 1660', 'gtx 1660 super'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce GTX Turing Architecture', ram: '4 GB / 6 GB GDDR5/GDDR6', storage: 'PCIe 3.0 x16', motherboard: 'DisplayPort, HDMI, DVI' },
+    { keywords: ['rx 7900 xt', 'rx 7900 xtx', 'rx 7800 xt', 'rx 7700 xt'], brand: 'AMD', type: 'Tarjeta de Video (GPU)', cpu: 'AMD Radeon RX Serie 7000 (Arquitectura RDNA 3 con FSR 3)', ram: '16 GB / 20 GB / 24 GB GDDR6', storage: 'PCIe 4.0 x16 (AMD Infinity Cache)', motherboard: 'DisplayPort 2.1, HDMI 2.1' },
+    { keywords: ['rx 7600', 'rx 7600 xt', 'rx 6600', 'rx 6650 xt', 'rx 6700 xt'], brand: 'AMD', type: 'Tarjeta de Video (GPU)', cpu: 'AMD Radeon RX RDNA 2 / RDNA 3 GPU', ram: '8 GB / 12 GB GDDR6', storage: 'PCIe 4.0 x8/x16', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1' },
+    { keywords: ['arc a770', 'arc a750', 'arc a580'], brand: 'Intel', type: 'Tarjeta de Video (GPU)', cpu: 'Intel Arc Dedicated Graphics (Xe HPG Architecture con Intel XeSS)', ram: '8 GB / 16 GB GDDR6 (256-bit)', storage: 'PCIe 4.0 x16', motherboard: '3x DisplayPort 2.0, 1x HDMI 2.1' },
 
-    // LENOVO CORPORATIVO
-    { keywords: ['thinkpad', 't14', 't490', 't480'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkPad T14 Gen 2' },
-    { keywords: ['thinkpad', 'e14', 'e15', 'l14'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB / 16 GB DDR4', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Lenovo ThinkPad System Board' },
-    { keywords: ['thinkcentre', 'm70q', 'm720q', 'm920q', 'tiny'], brand: 'Lenovo', type: 'Mini PC', cpu: 'Intel Core i5-10400T @ 2.00GHz (6 Núcleos, 12 Hilos)', ram: '8 GB / 16 GB DDR4', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkCentre M70q' },
-    { keywords: ['ideapad', 'ideapad 3', 'ideapad 5'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 5 5500U @ 2.10GHz / Intel Core i5', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Lenovo IdeaPad 3 System Board' },
+    // ==========================================
+    // 3. MEMORIAS RAM
+    // ==========================================
+    { keywords: ['fury beast', 'kingston fury', 'hyperx fury', 'valueram', 'fury renegade'], brand: 'Kingston', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / 32 GB DDR5 (5600MHz)', motherboard: 'DIMM Desktop (288-pin) / Perfil Intel XMP & AMD EXPO' },
+    { keywords: ['vengeance lpx', 'corsair vengeance', 'dominator', 'vengeance rgb'], brand: 'Corsair', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4 (3200MHz/3600MHz) / DDR5 (6000MHz)', motherboard: 'DIMM 288-pin High Performance' },
+    { keywords: ['crucial pro', 'crucial ddr5', 'crucial ddr4', 'crucial ram'], brand: 'Crucial', type: 'Memoria RAM', ram: '8 GB / 16 GB / 32 GB DDR4 / DDR5 (4800-5600MHz)', motherboard: 'DIMM Desktop / SO-DIMM Laptop JEDEC' },
+    { keywords: ['ripjaws v', 'trident z', 'g.skill flare x', 'g.skill'], brand: 'G.Skill', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4 (3600MHz) / DDR5 (6000MHz CL30)', motherboard: 'DIMM 288-pin Overclocking' },
+    { keywords: ['xpg lancer', 'spectrix d50', 'xpg ram', 'adata ram'], brand: 'Adata XPG', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / DDR5 (6000MHz) RGB', motherboard: 'DIMM 288-pin XMP Ready' },
+    { keywords: ['t-force delta', 't-force vulcan', 'teamgroup ram'], brand: 'TeamGroup', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4/DDR5 Gaming RAM', motherboard: 'DIMM 288-pin Desktop' },
 
-    // APPLE
-    { keywords: ['macbook', 'air m1', 'm1'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M1 (8-Core CPU, 7-Core/8-Core GPU)', ram: '8 GB Memoria Unificada', storage: '256 GB SSD PCIe', motherboard: 'Apple M1 Logic Board' },
-    { keywords: ['air m2', 'm2'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M2 (8-Core CPU, 8-Core/10-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD PCIe', motherboard: 'Apple M2 Logic Board' },
-    { keywords: ['air m3', 'm3', 'macbook pro'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M3 / M3 Pro (8/12-Core CPU, 10/18-Core GPU)', ram: '16 GB / 36 GB Memoria Unificada', storage: '512 GB SSD PCIe', motherboard: 'Apple M3 Logic Board' },
-    { keywords: ['imac', 'imac 24'], brand: 'Apple', type: 'All-in-One', cpu: 'Apple M1 / M3 (8-Core CPU, 8-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD', motherboard: 'Apple iMac Logic Board' },
+    // ==========================================
+    // 4. DISCOS SSD / HDD & ALMACENAMIENTO
+    // ==========================================
+    { keywords: ['kingston nv2', 'snv2s', 'nv2 nvme'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB SSD NVMe PCIe Gen4 M.2 2280 (3500MB/s)', motherboard: 'M.2 NVMe PCIe 4.0 x4 (2280)' },
+    { keywords: ['kingston nv3', 'snv3s', 'nv3 nvme'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB SSD NVMe PCIe Gen4 x4 (5000MB/s)', motherboard: 'M.2 NVMe PCIe 4.0 (2280)' },
+    { keywords: ['kingston a400', 'sa400', 'a400 ssd'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '480 GB / 960 GB SSD SATA III 2.5"', motherboard: 'SATA III 6Gb/s (2.5 Pulgadas)' },
+    { keywords: ['kc3000', 'kingston kc3000', 'fury renegade ssd'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB SSD NVMe PCIe 4.0 High-Speed (7000MB/s)', motherboard: 'M.2 NVMe PCIe Gen4 x4 con Disipador' },
+    { keywords: ['990 pro', 'samsung 990', '980 pro', 'samsung 980', '970 evo'], brand: 'Samsung', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB SSD NVMe PCIe Gen4 M.2 (7450MB/s)', motherboard: 'M.2 NVMe PCIe 4.0 x4 V-NAND' },
+    { keywords: ['870 evo', '870 qvo', 'samsung 870'], brand: 'Samsung', type: 'Disco / Almacenamiento', storage: '500 GB / 1 TB SSD SATA III 2.5"', motherboard: 'SATA III 6Gb/s 2.5"' },
+    { keywords: ['sn580', 'wd blue sn580', 'sn570', 'sn770', 'sn850x', 'wd black'], brand: 'Western Digital', type: 'Disco / Almacenamiento', storage: '1 TB / 500 GB SSD NVMe PCIe Gen4 M.2', motherboard: 'M.2 NVMe PCIe 4.0 x4 (Western Digital)' },
+    { keywords: ['wd green ssd', 'green sn350'], brand: 'Western Digital', type: 'Disco / Almacenamiento', storage: '480 GB / 240 GB SSD SATA / NVMe M.2', motherboard: 'SATA III 6Gb/s / M.2 PCIe' },
+    { keywords: ['crucial p3 plus', 'p3 plus', 'crucial p3', 'crucial t500'], brand: 'Crucial', type: 'Disco / Almacenamiento', storage: '1 TB / 500 GB SSD NVMe PCIe Gen4 M.2', motherboard: 'M.2 NVMe PCIe 4.0 x4 (2280)' },
+    { keywords: ['crucial mx500', 'crucial bx500'], brand: 'Crucial', type: 'Disco / Almacenamiento', storage: '500 GB / 1 TB SSD SATA 2.5" 3D NAND', motherboard: 'SATA III 6Gb/s 2.5"' },
+    { keywords: ['legend 710', 'legend 850', 'xpg gammix'], brand: 'Adata', type: 'Disco / Almacenamiento', storage: '512 GB / 1 TB SSD NVMe PCIe Gen4 M.2', motherboard: 'M.2 NVMe PCIe 4.0 x4' },
+    { keywords: ['barracuda hdd', 'seagate barracuda', 'ironwolf', 'firecuda'], brand: 'Seagate', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB / 4 TB HDD 7200 RPM 3.5"', motherboard: 'SATA III 6Gb/s (3.5 Pulgadas)' },
 
-    // IMPRESORAS & MULTIFUNCIONALES
+    // ==========================================
+    // 5. PLACAS BASE / MOTHERBOARDS
+    // ==========================================
+    { keywords: ['b550m aorus', 'b550 aorus', 'tuf gaming b550', 'b550m ds3h', 'b550-plus', 'b550'], brand: 'Gigabyte / ASUS / MSI', type: 'Placa Base', cpu: 'Socket AMD AM4 (Soporta Ryzen Serie 3000 / 4000 / 5000)', ram: '4x DDR4 DIMM Dual Channel (Hasta 128GB @ 4400MHz OC)', storage: '2x Ranuras M.2 NVMe PCIe 4.0/3.0 + 4x SATA 6Gb/s', motherboard: 'Factor de Forma Micro-ATX / ATX' },
+    { keywords: ['b450m', 'b450', 'a320m', 'a320', 'a520m', 'a520'], brand: 'ASUS / Gigabyte / MSI', type: 'Placa Base', cpu: 'Socket AMD AM4 (Soporta Ryzen Serie 1000 a 5000)', ram: '2x / 4x DDR4 DIMM Dual Channel', storage: '1x Ranura M.2 NVMe + 4x SATA 6Gb/s', motherboard: 'Factor de Forma Micro-ATX' },
+    { keywords: ['b650m', 'b650', 'tuf b650', 'x670', 'x670e', 'a620m'], brand: 'ASUS / MSI / Gigabyte', type: 'Placa Base', cpu: 'Socket AMD AM5 (Soporta Ryzen 7000 / 8000 / 9000 Series)', ram: '4x DDR5 DIMM Dual Channel con AMD EXPO', storage: 'PCIe 5.0 / 4.0 M.2 NVMe Slots + USB Type-C', motherboard: 'Micro-ATX / ATX Gaming Mainboard' },
+    { keywords: ['b760m', 'b760', 'tuf b760', 'h610m', 'h610', 'b660', 'z790', 'z690'], brand: 'ASUS / MSI / Gigabyte', type: 'Placa Base', cpu: 'Socket Intel LGA 1700 (Core 12va, 13va y 14va Gen)', ram: 'DDR4 / DDR5 Dual Channel', storage: 'Ranuras M.2 NVMe PCIe 4.0 x4', motherboard: 'Micro-ATX / ATX Form Factor' },
+
+    // ==========================================
+    // 6. FUENTES DE PODER / PSU
+    // ==========================================
+    { keywords: ['rm750e', 'rm750', 'rm850e', 'rm850', 'corsair rm'], brand: 'Corsair', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus Gold (Eficiencia > 90%)', ram: 'Protecciones OVP, UVP, SCP, OTP, OPP', storage: 'Cables Mallados Full Modular (ATX 3.0 / PCIe 5.0 Ready)', motherboard: 'Conector ATX 24 Pines, 2x EPS 8 Pines, PCIe' },
+    { keywords: ['cv650', 'cv550', 'cx650', 'cx750', 'corsair cv'], brand: 'Corsair', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus Bronze', ram: 'Ventilador Silencioso 120mm Termo-Controlado', storage: 'Potencia Continua Real Garantizada', motherboard: 'Conectores ATX 24 Pines, EPS 8 Pines, 2x PCIe' },
+    { keywords: ['smart 600w', 'smart 500w', 'smart 700w', 'toughpower'], brand: 'Thermaltake', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus White / Bronze / Gold', ram: 'Ventilador Ultra Silencioso 120mm', storage: 'Potencia Continua Real', motherboard: 'Conectores ATX, PCIe y SATA' },
+    { keywords: ['mag a650bn', 'mag a750gl', 'msi mag psu'], brand: 'MSI', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus Bronze / Gold', ram: 'Protección OVP / OCP / SCP / OPP', storage: 'Cables Planos Negros', motherboard: 'ATX 24 Pines, EPS 8 Pines, PCIe' },
+
+    // ==========================================
+    // 7. REFRIGERACIÓN / COOLERS
+    // ==========================================
+    { keywords: ['deepcool ak400', 'ak400', 'ak620', 'ag400'], brand: 'DeepCool', type: 'Refrigeración / Cooler', cpu: 'Disipador por Aire Alto Rendimiento con 4 a 6 Heatpipes', ram: 'Ventilador FDB PWM 120mm Silencioso', storage: 'TDP Soportado hasta 220W - 260W', motherboard: 'Socket Multiplataforma Intel LGA 1700 / AMD AM5 / AM4' },
+    { keywords: ['peerless assassin', 'thermalright', 'phantom spirit'], brand: 'Thermalright', type: 'Refrigeración / Cooler', cpu: 'Doble Torre y Doble Ventilador 120mm PWM (6 Heatpipes Cobre)', ram: 'Ventiladores PWM TL-C12B V2', storage: 'TDP Soportado hasta 245W', motherboard: 'Compatible con Socket LGA 1700 / AM5 / AM4' },
+    { keywords: ['hyper 212', 'masterliquid ml240', 'cooler master'], brand: 'Cooler Master', type: 'Refrigeración / Cooler', cpu: 'Refrigeración por Aire / Líquida AIO 240mm', ram: 'Ventilador SickleFlow 120 ARGB', storage: 'Bomba de Doble Cámara de Alta Eficiencia', motherboard: 'Soportes Universales Intel y AMD' },
+
+    // ==========================================
+    // 8. LAPTOPS & COMPUTADORAS CORPORATIVAS
+    // ==========================================
+    { keywords: ['victus', 'hp victus', '15-fb', 'fb3021la'], brand: 'HP', type: 'Laptop', cpu: 'AMD Ryzen 5 8645HS @ 4.30GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050 (6GB)', ram: '16 GB DDR5 (5600MHz)', storage: '512 GB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP 8B9D (AMD Promontory/Bixby Chipset)' },
+    { keywords: ['omen', 'hp omen'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-13700HX / AMD Ryzen 7 (NVIDIA GeForce RTX 4060/4070)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2 PCIe Gen4', motherboard: 'HP OMEN Gaming Motherboard' },
+    { keywords: ['tuf gaming', 'asus tuf', 'fx506', 'fa506'], brand: 'ASUS', type: 'Laptop', cpu: 'Intel Core i5-11400H @ 2.70GHz (6 Núcleos, 12 Hilos) / NVIDIA GeForce RTX 3050', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'ASUS TUF GAMING F15 FX506' },
+    { keywords: ['rog strix', 'zephyrus', 'asus rog'], brand: 'ASUS', type: 'Laptop', cpu: 'AMD Ryzen 7 7735HS / Intel Core i7 (NVIDIA GeForce RTX 4060)', ram: '16 GB DDR5', storage: '1 TB SSD NVMe M.2', motherboard: 'ASUS ROG Gaming Motherboard' },
+    { keywords: ['nitro 5', 'acer nitro', 'an515'], brand: 'Acer', type: 'Laptop', cpu: 'Intel Core i5-10300H @ 2.50GHz / AMD Ryzen 5 4600H (NVIDIA GeForce RTX)', ram: '16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'Acer Nitro AN515' },
+    { keywords: ['legion 5', 'lenovo legion'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 7 5800H / Intel Core i7 (NVIDIA GeForce RTX 3060)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe', motherboard: 'Lenovo Legion Gaming Board' },
+    { keywords: ['probook 450', 'probook 440', 'hp probook'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2 PCIe', motherboard: 'HP ProBook System Board' },
+    { keywords: ['elitebook 840', 'elitebook 850', 'hp elitebook'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i7-1165G7 @ 2.80GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP EliteBook System Board' },
+    { keywords: ['hp 240', 'hp 245', '240 g8', '240 g7', '245 g8'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i3-1115G4 @ 3.00GHz / AMD Ryzen 3 5300U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'HP 240 G8 Motherboard' },
+    { keywords: ['pavilion 15', 'hp pavilion'], brand: 'HP', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB / 16 GB DDR4', storage: '512 GB SSD NVMe M.2', motherboard: 'HP Pavilion Motherboard' },
+    { keywords: ['prodesk 400', 'prodesk 600', 'hp prodesk'], brand: 'HP', type: 'PC de Escritorio', cpu: 'Intel Core i5-10500 @ 3.10GHz (6 Núcleos, 12 Hilos)', ram: '8 GB / 16 GB DDR4', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'HP ProDesk System Board' },
+    { keywords: ['elitedesk 800', 'hp elitedesk'], brand: 'HP', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'HP EliteDesk System Board' },
+    { keywords: ['optiplex 7080', 'optiplex 7070', 'optiplex 7090', 'optiplex 7060', 'dell optiplex 70'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i7-10700 @ 2.90GHz (8 Núcleos, 16 Hilos)', ram: '16 GB DDR4 (2933MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell OptiPlex 7080 (Intel Q470)' },
+    { keywords: ['optiplex 3080', 'optiplex 3070', 'optiplex 3060', 'optiplex 3050', 'dell optiplex 30'], brand: 'Dell', type: 'PC de Escritorio', cpu: 'Intel Core i5-10500 / i5-7500 @ 3.10GHz (4/6 Núcleos)', ram: '8 GB DDR4', storage: '256 GB SSD / 500GB HDD', motherboard: 'Dell OptiPlex System Board' },
+    { keywords: ['latitude 5430', 'latitude 5420', 'latitude 5410', 'latitude 5400', 'dell latitude 54'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / i5-1235U @ 2.40GHz (4/10 Núcleos)', ram: '16 GB DDR4 (3200MHz)', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Dell Latitude 5420 System Board' },
+    { keywords: ['latitude 3420', 'latitude 3410', 'dell latitude 34'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Latitude 3420 System Board' },
+    { keywords: ['latitude 7420', 'latitude 7430', 'dell latitude 74'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i7-1185G7 @ 3.00GHz (4 Núcleos, 8 Hilos)', ram: '16 GB LPDDR4x', storage: '512 GB SSD NVMe M.2', motherboard: 'Dell Latitude 7420 System Board' },
+    { keywords: ['inspiron 15', 'dell inspiron', 'inspiron 3501'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB SSD NVMe M.2', motherboard: 'Dell Inspiron Mainboard' },
+    { keywords: ['vostro 3400', 'vostro 3500', 'dell vostro'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz', ram: '8 GB DDR4', storage: '256 GB SSD NVMe', motherboard: 'Dell Vostro System Board' },
+    { keywords: ['xps 13', 'xps 15', 'dell xps'], brand: 'Dell', type: 'Laptop', cpu: 'Intel Core i7-12700H / i7-1185G7 (14 Núcleos)', ram: '16 GB / 32 GB LPDDR5', storage: '512 GB / 1 TB SSD NVMe', motherboard: 'Dell XPS Motherboard' },
+    { keywords: ['thinkpad t14', 'thinkpad t490', 'thinkpad t480', 'lenovo thinkpad t'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 @ 2.40GHz (4 Núcleos, 8 Hilos)', ram: '16 GB DDR4 (3200MHz)', storage: '512 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkPad T14 Gen 2' },
+    { keywords: ['thinkpad e14', 'thinkpad e15', 'thinkpad l14', 'lenovo thinkpad e'], brand: 'Lenovo', type: 'Laptop', cpu: 'Intel Core i5-1135G7 / AMD Ryzen 5 5500U', ram: '8 GB / 16 GB DDR4', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Lenovo ThinkPad System Board' },
+    { keywords: ['thinkcentre m70q', 'thinkcentre m720q', 'thinkcentre tiny', 'lenovo tiny'], brand: 'Lenovo', type: 'Mini PC', cpu: 'Intel Core i5-10400T @ 2.00GHz (6 Núcleos, 12 Hilos)', ram: '8 GB / 16 GB DDR4', storage: '256 GB SSD NVMe M.2', motherboard: 'Lenovo ThinkCentre M70q' },
+    { keywords: ['ideapad 3', 'ideapad 5', 'lenovo ideapad'], brand: 'Lenovo', type: 'Laptop', cpu: 'AMD Ryzen 5 5500U @ 2.10GHz / Intel Core i5', ram: '8 GB DDR4 (3200MHz)', storage: '256 GB / 512 GB SSD NVMe', motherboard: 'Lenovo IdeaPad 3 System Board' },
+    { keywords: ['macbook air m1', 'air m1'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M1 (8-Core CPU, 7-Core/8-Core GPU)', ram: '8 GB Memoria Unificada', storage: '256 GB SSD PCIe', motherboard: 'Apple M1 Logic Board' },
+    { keywords: ['macbook air m2', 'air m2'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M2 (8-Core CPU, 8-Core/10-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD PCIe', motherboard: 'Apple M2 Logic Board' },
+    { keywords: ['macbook pro 14', 'macbook air m3', 'air m3'], brand: 'Apple', type: 'Laptop', cpu: 'Apple M3 / M3 Pro (8/12-Core CPU, 10/18-Core GPU)', ram: '16 GB / 36 GB Memoria Unificada', storage: '512 GB SSD PCIe', motherboard: 'Apple M3 Logic Board' },
+    { keywords: ['imac 24', 'imac m1', 'imac m3'], brand: 'Apple', type: 'All-in-One', cpu: 'Apple M1 / M3 (8-Core CPU, 8-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD', motherboard: 'Apple iMac Logic Board' },
+
+    // ==========================================
+    // 9. IMPRESORAS & MULTIFUNCIONALES
+    // ==========================================
     { keywords: ['l575', 'l555', 'l565', 'l355', 'l365', 'l375', 'l380', 'l395', 'l455', 'l475', 'l495', 'l210', 'l220', 'l110', 'l120', 'l1300'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R (4 Colores)', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L500/L300 Series Controller Board', consumible: 'Tinta Epson T664' },
-    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l1250', 'l1210', 'l5190', 'l5290', 'l5590', 'ecotank'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
+    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l1250', 'l1210', 'l5190', 'l5290', 'l5590'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
     { keywords: ['l4260', 'l4160', 'l4150', 'l6161', 'l6171', 'l6191', 'l6270', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Dual Engine (Duplex Automático)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Board', consumible: 'Tinta Epson T504' },
     { keywords: ['l805', 'l1800', 'l800', 'l810', 'l850'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
     { keywords: ['l8050', 'l18050'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson High-Speed 6-Color Photo Print Engine', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo EcoTank Controller Board', consumible: 'Tinta Epson 108' },
-    { keywords: ['m1100', 'm1120', 'm2140', 'm2170', 'm3170', 'm3180'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Monocromático de Alta Velocidad', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank Mono Controller Board', consumible: 'Tinta Epson T534' },
-    { keywords: ['wf-c5790', 'wf-c5290', 'wf-c5710', 'wf-c5890', 'workforce'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'PrecisionCore 4-Color WorkForce Enterprise Engine', ram: '512 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson WorkForce Pro Controller Board', consumible: 'Tinta Epson T941 / T942' },
-    { keywords: ['laserjet', 'm404', 'm402'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
-    { keywords: ['m428', 'laserjet pro mfp'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Dual Core 1200MHz Formatter Engine', ram: '512 MB DDR3', storage: '512 MB Flash', motherboard: 'HP MFP Formatter Board', consumible: 'Tóner HP 58A' },
-    { keywords: ['p1102', 'm1132', 'm1212'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP RISC 266MHz Processor', ram: '8 MB / 64 MB Buffer', storage: 'Flash ROM', motherboard: 'HP LaserJet P1100 Formatter Board', consumible: 'Tóner HP 85A' },
-    { keywords: ['smart tank', '580', '530', '515', '720', '750'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
-    { keywords: ['107a', '107w', '135a', '135w', '137fnw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP ARM 600MHz Processor', ram: '128 MB Memory', storage: '128 MB Flash', motherboard: 'HP Laser 100 Formatter Board', consumible: 'Tóner HP 105A' },
-    { keywords: ['g2110', 'g3110', 'g3160', 'g4110', 'pixma'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon FINE Print Engine Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon PIXMA MegaTank Mainboard', consumible: 'Tinta Canon GI-190' },
-    { keywords: ['mf3010', 'lbp6030', 'imageclass'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon On-Demand SURF Laser Processor', ram: '64 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon imageCLASS Laser Formatter Board', consumible: 'Tóner Canon 125' },
-    { keywords: ['t520w', 't510w', 't720dw', 't710w', 't310', 't300', 'brother'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
-    { keywords: ['hl-1212w', 'dcp-1617nw', 'hl-1112'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother 200MHz Laser Controller', ram: '32 MB Buffer', storage: 'Flash ROM', motherboard: 'Brother Laser Engine Board', consumible: 'Tóner Brother TN-1060' },
-    { keywords: ['m2040dn', 'm2135dn', 'ecosys', 'kyocera'], brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: 'Cortex-A9 800MHz Processor', ram: '512 MB RAM', storage: 'Flash Memory', motherboard: 'Kyocera ECOSYS System Controller Board', consumible: 'Tóner Kyocera TK-1175' },
+    { keywords: ['laserjet m404', 'laserjet m402', 'm404dw', 'm404n'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
+    { keywords: ['laserjet m428', 'm428fdw', 'm428dw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Dual Core 1200MHz Formatter Engine', ram: '512 MB DDR3', storage: '512 MB Flash', motherboard: 'HP MFP Formatter Board', consumible: 'Tóner HP 58A' },
+    { keywords: ['laserjet p1102', 'p1102w', 'm1132', 'm1212'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP RISC 266MHz Processor', ram: '8 MB / 64 MB Buffer', storage: 'Flash ROM', motherboard: 'HP LaserJet P1100 Formatter Board', consumible: 'Tóner HP 85A' },
+    { keywords: ['smart tank 580', 'smart tank 530', 'smart tank 515', 'smart tank 720'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
+    { keywords: ['laser 107a', 'laser 107w', 'laser 135a', 'laser 135w', 'laser 137fnw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP ARM 600MHz Processor', ram: '128 MB Memory', storage: '128 MB Flash', motherboard: 'HP Laser 100 Formatter Board', consumible: 'Tóner HP 105A' },
+    { keywords: ['pixma g2110', 'pixma g3110', 'pixma g3160', 'pixma g4110'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon FINE Print Engine Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon PIXMA MegaTank Mainboard', consumible: 'Tinta Canon GI-190' },
+    { keywords: ['imageclass mf3010', 'mf3010', 'lbp6030'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon On-Demand SURF Laser Processor', ram: '64 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon imageCLASS Laser Formatter Board', consumible: 'Tóner Canon 125' },
+    { keywords: ['dcp-t520w', 'dcp-t510w', 'dcp-t720dw', 'hl-1212w', 'dcp-1617nw'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
+    { keywords: ['ecosys m2040dn', 'm2040dn', 'm2135dn'], brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: 'Cortex-A9 800MHz Processor', ram: '512 MB RAM', storage: 'Flash Memory', motherboard: 'Kyocera ECOSYS System Controller Board', consumible: 'Tóner Kyocera TK-1175' },
 
-    // SWITCHES, ROUTERS & ACCESS POINTS
-    { keywords: ['catalyst', '2960', '9200', '3560', '3750', '3850', 'cisco'], brand: 'Cisco', type: 'Switch de Red', cpu: 'Cisco Enterprise MIPS/ARM Switch Engine', ram: '512 MB DRAM', storage: '128 MB Flash Memory', motherboard: 'Cisco Catalyst 24/48 Puertos Gigabit PoE+ / SFP+' },
-    { keywords: ['crs', 'crs326', 'crs328', 'mikrotik', 'rb750', 'rb3011', 'rb4011', 'hex'], brand: 'MikroTik', type: 'Switch de Red', cpu: 'Marvell Dual Core 800MHz (RouterOS / SwOS)', ram: '512 MB RAM', storage: '16 MB Flash', motherboard: 'MikroTik Cloud Gigabit Switch / Router Board' },
-    { keywords: ['unifi', 'usw', 'u6', 'u6-pro', 'udm', 'ubiquiti'], brand: 'Ubiquiti', type: 'Switch de Red', cpu: 'Ubiquiti UniFi ARM Processor', ram: '512 MB DDR3', storage: '256 MB Flash', motherboard: 'Ubiquiti UniFi Managed Gigabit Board (PoE+)' },
-    { keywords: ['sg1024', 'sg1016', 'sg2428p', 'jetstream', 'tp-link'], brand: 'TP-Link', type: 'Switch de Red', cpu: 'Realtek Gigabit Switch Engine', ram: '256 MB RAM', storage: '32 MB Flash', motherboard: 'TP-Link JetStream Rackmount Switch Board' },
-
-    // SERVIDORES
-    { keywords: ['poweredge', 'r740', 'r730', 'r640', 'r440', 't440'], brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge Server Motherboard (iDRAC9)' },
-    { keywords: ['proliant', 'dl380', 'dl360', 'ml350', 'gen10'], brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array RAID)', motherboard: 'HPE ProLiant Server Board (iLO 5)' },
-    { keywords: ['thinksystem', 'sr650', 'sr530'], brand: 'Lenovo', type: 'Servidor', cpu: 'Intel Xeon Silver 4214 @ 2.20GHz (12 Núcleos, 24 Hilos)', ram: '32 GB DDR4 ECC', storage: '2x 480 GB SSD NVMe + RAID', motherboard: 'Lenovo ThinkSystem Server Motherboard' },
-    { keywords: ['synology', 'ds920', 'ds220', 'ds423', 'rs1221'], brand: 'Synology', type: 'Servidor', cpu: 'Intel Celeron Quad-Core / AMD Ryzen V1500B', ram: '4 GB / 8 GB DDR4', storage: '4x Bahías SATA 3.5" (Synology Hybrid RAID)', motherboard: 'Synology DiskStation NAS Motherboard' },
-
-    // PROYECTORES
-    { keywords: ['brightlink', '735', '725', '1485', 'eb-735', 'eb-725'], brand: 'Epson', type: 'Proyector', cpu: 'Epson 3LCD Interactive Laser Display Engine (4000 Lúmenes)', ram: '4 GB Interactive Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson BrightLink Interactive Ultra-Short Throw Board (HDMI/Touch/Pen)' },
-
-    // DISCOS SSD / HDD & ALMACENAMIENTO
-    { keywords: ['nv2', 'snv2s', 'kingston nv2'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB SSD NVMe PCIe Gen4 M.2 2280', motherboard: 'M.2 NVMe PCIe 4.0 x4 (2280)' },
-    { keywords: ['nv3', 'snv3s'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB SSD NVMe PCIe Gen4 x4', motherboard: 'M.2 NVMe PCIe 4.0 (2280)' },
-    { keywords: ['a400', 'sa400'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '480 GB / 960 GB SSD SATA III 2.5"', motherboard: 'SATA III 6Gb/s (2.5 Pulgadas)' },
-    { keywords: ['kc3000', 'fury renegade'], brand: 'Kingston', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB SSD NVMe PCIe 4.0 High-Speed (7000MB/s)', motherboard: 'M.2 NVMe PCIe Gen4 x4' },
-    { keywords: ['990 pro', '980 pro', '970 evo'], brand: 'Samsung', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB SSD NVMe PCIe Gen4 M.2', motherboard: 'M.2 NVMe PCIe 4.0 x4 V-NAND' },
-    { keywords: ['870 evo', '870 qvo', '860 evo'], brand: 'Samsung', type: 'Disco / Almacenamiento', storage: '500 GB / 1 TB SSD SATA III 2.5"', motherboard: 'SATA III 6Gb/s 2.5"' },
-    { keywords: ['sn580', 'sn570', 'sn770', 'sn850', 'sn850x', 'wd blue', 'wd black'], brand: 'Western Digital', type: 'Disco / Almacenamiento', storage: '1 TB / 500 GB SSD NVMe PCIe Gen4 M.2', motherboard: 'M.2 NVMe PCIe 4.0 x4' },
-    { keywords: ['wd green', 'green ssd'], brand: 'Western Digital', type: 'Disco / Almacenamiento', storage: '480 GB / 240 GB SSD SATA 2.5" / M.2', motherboard: 'SATA III 6Gb/s' },
-    { keywords: ['p3 plus', 'p3 nvme', 'p5 plus', 'crucial p3'], brand: 'Crucial', type: 'Disco / Almacenamiento', storage: '1 TB / 500 GB SSD NVMe PCIe Gen4 M.2', motherboard: 'M.2 NVMe PCIe 4.0 x4 (2280)' },
-    { keywords: ['mx500', 'bx500'], brand: 'Crucial', type: 'Disco / Almacenamiento', storage: '500 GB / 1 TB SSD SATA 2.5" 3D NAND', motherboard: 'SATA III 6Gb/s 2.5"' },
-    { keywords: ['legend 710', 'legend 850', 'gammix', 'su650', 'su800', 'adata ssd'], brand: 'Adata', type: 'Disco / Almacenamiento', storage: '512 GB / 1 TB SSD NVMe PCIe / SATA', motherboard: 'M.2 NVMe PCIe Gen3/Gen4 o SATA 2.5"' },
-    { keywords: ['barracuda', 'ironwolf', 'firecuda', 'seagate hdd'], brand: 'Seagate', type: 'Disco / Almacenamiento', storage: '1 TB / 2 TB / 4 TB HDD 7200 RPM 3.5"', motherboard: 'SATA III 6Gb/s (3.5 Pulgadas)' },
-
-    // MEMORIAS RAM (KINGSTON FURY, HYPERX, CORSAIR, CRUCIAL, G.SKILL, ADATA XPG, TEAMGROUP)
-    { keywords: ['hyperx', 'kingston hyperx', 'fury beast', 'kingston fury', 'hyperx fury', 'valueram', 'fury renegade', 'fury'], brand: 'Kingston', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / 32 GB DDR5 (5600MHz)', motherboard: 'DIMM Desktop (288-pin) / Perfil Intel XMP & AMD EXPO' },
-    { keywords: ['vengeance', 'corsair vengeance', 'dominator', 'vengeance lpx', 'vengeance rgb'], brand: 'Corsair', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4/DDR5 Dual Channel', motherboard: 'DIMM 288-pin High Performance' },
-    { keywords: ['crucial ram', 'crucial ddr4', 'crucial ddr5', 'crucial pro'], brand: 'Crucial', type: 'Memoria RAM', ram: '8 GB / 16 GB DDR4 (3200MHz) / DDR5 (4800MHz)', motherboard: 'DIMM Desktop / SO-DIMM Laptop JEDEC' },
-    { keywords: ['ripjaws', 'trident z', 'g.skill', 'gskill', 'flare x'], brand: 'G.Skill', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4 (3600MHz) / DDR5 (6000MHz)', motherboard: 'DIMM 288-pin Overclocking' },
-    { keywords: ['spectrix', 'xpg lancer', 'xpg ram', 'adata ram'], brand: 'Adata XPG', type: 'Memoria RAM', ram: '16 GB DDR4 (3200MHz) / DDR5 (6000MHz) RGB', motherboard: 'DIMM 288-pin XMP Ready' },
-    { keywords: ['t-force', 'teamgroup', 'vulcan', 'delta rgb'], brand: 'TeamGroup', type: 'Memoria RAM', ram: '16 GB / 32 GB DDR4/DDR5 Gaming RAM', motherboard: 'DIMM 288-pin Desktop' },
-
-    // PLACAS BASE / MOTHERBOARDS
-    { keywords: ['b550', 'b550m', 'b450', 'b450m', 'a320', 'a520'], brand: 'Gigabyte / ASUS / MSI', type: 'Placa Base / Motherboard', cpu: 'Socket AMD AM4 (Soporta Ryzen 3000 / 5000 Series)', ram: '4x DDR4 DIMM Dual Channel (Hasta 128GB)', storage: '2x Ranuras M.2 NVMe PCIe 4.0/3.0 + SATA 6Gb/s', motherboard: 'Factor de Forma Micro-ATX / ATX' },
-    { keywords: ['b650', 'b650m', 'x670', 'a620'], brand: 'ASUS / Gigabyte / MSI', type: 'Placa Base / Motherboard', cpu: 'Socket AMD AM5 (Soporta Ryzen 7000 / 8000 / 9000)', ram: '4x DDR5 DIMM Dual Channel con AMD EXPO', storage: 'PCIe 5.0 / 4.0 M.2 NVMe Slots', motherboard: 'Micro-ATX / ATX Gaming Mainboard' },
-    { keywords: ['b760', 'b760m', 'h610', 'h610m', 'b660', 'z790', 'z690'], brand: 'ASUS / MSI / Gigabyte', type: 'Placa Base / Motherboard', cpu: 'Socket Intel LGA 1700 (Core 12va, 13va y 14va Gen)', ram: 'DDR4 / DDR5 Dual Channel', storage: 'Ranuras M.2 NVMe PCIe 4.0 x4', motherboard: 'Micro-ATX / ATX Form Factor' },
-
-    // FUENTES DE PODER / PSU
-    { keywords: ['rm750', 'rm850', 'cv650', 'cv550', 'cx650', 'cx750'], brand: 'Corsair', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus Bronze / Gold', ram: 'Protección OVP / UVP / SCP / OTP', storage: 'Cables Mallados Full Modular / Semi-Modular', motherboard: 'Conector ATX 24 Pines, 2x EPS 8 Pines, 4x PCIe' },
-    { keywords: ['smart 600w', 'smart 500w', 'smart 700w', 'toughpower'], brand: 'Thermaltake', type: 'Fuente de Poder (PSU)', cpu: 'Certificación 80 Plus White / Gold', ram: 'Ventilador Ultra Silencioso 120mm', storage: 'Potencia Continua Real', motherboard: 'Conectores ATX, PCIe y SATA' },
-
-    // TARJETAS DE VIDEO / GPU (NVIDIA & AMD)
-    { keywords: ['rtx 4090', 'rtx 4080', 'rtx 4070', 'rtx 4060', 'rtx 3060', 'rtx 3050', 'gtx 1650', 'rtx4060', 'rtx3060'], brand: 'NVIDIA', type: 'Tarjeta de Video (GPU)', cpu: 'NVIDIA GeForce RTX / GTX Dedicated GPU', ram: '8 GB / 12 GB / 16 GB GDDR6', storage: 'PCIe 4.0 x16 (DirectX 12 Ultimate)', motherboard: '3x DisplayPort 1.4a, 1x HDMI 2.1' },
-    { keywords: ['rx 7900', 'rx 7800', 'rx 7700', 'rx 7600', 'rx 6600', 'radeon rx'], brand: 'AMD', type: 'Tarjeta de Video (GPU)', cpu: 'AMD Radeon RX Series RDNA 3 / RDNA 2 GPU', ram: '8 GB / 12 GB / 16 GB GDDR6', storage: 'PCIe 4.0 x16 (AMD Infinity Cache)', motherboard: '3x DisplayPort 2.1 / HDMI' },
-
-    // PROCESADORES / CPU (INTEL & AMD)
-    { keywords: ['i5-12400', 'i5-13400', 'i5-14400', 'i7-12700', 'i7-13700', 'i7-14700', 'i5 12400', 'i5 13400', 'i7 13700'], brand: 'Intel', type: 'Procesador (CPU)', cpu: 'Intel Core i5 / i7 (Multi-Core @ 4.40GHz - 5.40GHz Turbo)', ram: 'Controlador Dual Channel DDR4/DDR5 Integrado', storage: 'Cache Intel Smart Cache L3', motherboard: 'Socket Intel LGA 1700 (Chipsets H610, B760, Z790)' },
-    { keywords: ['ryzen 5 5600', 'ryzen 7 5700', 'ryzen 5 7600', 'ryzen 7 7800x3d', 'ryzen 5600', 'ryzen 5700', '5600x', '5700x'], brand: 'AMD', type: 'Procesador (CPU)', cpu: 'AMD Ryzen 5 / Ryzen 7 (6 a 8 Núcleos, 12 a 16 Hilos)', ram: 'Controlador DDR4 / DDR5 Dual Channel', storage: 'Cache AMD 3D V-Cache / L3', motherboard: 'Socket AMD AM4 / AM5 (Chipsets B550, B650)' },
-
-    // MONITORES
-    { keywords: ['p2422h', 'se2422h', 'e2420h', 's2721hn', 'dell monitor'], brand: 'Dell', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) @ 60Hz-75Hz', ram: 'Tiempo de respuesta 5ms', storage: 'Puertos HDMI / DisplayPort / VGA', motherboard: 'Ajuste de Altura, Inclinación y Giro Pivot' },
-    { keywords: ['e24 g4', 'p24v', 'v24i', 'm24f', 'hp monitor'], brand: 'HP', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) Micro-Edge', ram: 'Frecuencia 75Hz con HP Eye Ease', storage: 'Entradas HDMI / DisplayPort / VGA', motherboard: 'Soporte VESA 100x100mm' },
-    { keywords: ['ultragear', '24mp400', '24gn600', 'lg monitor'], brand: 'LG', type: 'Monitor / Pantalla', cpu: 'Panel IPS Gaming Full HD (144Hz / 75Hz)', ram: 'AMD FreeSync / 1ms MBR', storage: 'Dual HDMI, DisplayPort', motherboard: 'Base Regulable' },
-    { keywords: ['odyssey', 't350', 'viewfinity', 'samsung monitor'], brand: 'Samsung', type: 'Monitor / Pantalla', cpu: 'Panel IPS / VA Full HD / QHD Curve', ram: 'Frecuencia 75Hz / 144Hz', storage: 'HDMI / DisplayPort', motherboard: 'Soporte Ergonómico' },
-
-    // TECLADOS, MOUSE Y PERIFÉRICOS
-    { keywords: ['g203', 'g502', 'g305', 'mx master', 'k120', 'mk270', 'logitech'], brand: 'Logitech', type: 'Teclado / Mouse / Periférico', cpu: 'Sensor Óptico HERO / Conexión USB o Lightspeed', ram: '8000 DPI / Plug & Play', storage: 'Cable USB Blindado o Receptor USB Unifying', motherboard: 'Compatible con Windows / macOS / Linux' },
-    { keywords: ['kumara', 'griffin', 'draconic', 'redragon'], brand: 'Redragon', type: 'Teclado / Mouse / Periférico', cpu: 'Switches Mecánicos Outemu / Sensor Óptico Pixart', ram: 'RGB Chroma / Anti-Ghosting', storage: 'Cable USB Mallado Tipo C', motherboard: 'Estructura Reforzada en Aluminio y ABS' }
+    // ==========================================
+    // 10. REDES, SERVIDORES & PERIFÉRICOS
+    // ==========================================
+    { keywords: ['catalyst 2960', 'catalyst 9200', 'cisco 2960', 'cisco switch'], brand: 'Cisco', type: 'Switch de Red', cpu: 'Cisco Enterprise MIPS/ARM Switch Engine', ram: '512 MB DRAM', storage: '128 MB Flash Memory', motherboard: 'Cisco Catalyst 24/48 Puertos Gigabit PoE+ / SFP+' },
+    { keywords: ['crs326', 'crs328', 'rb750gr3', 'rb3011', 'mikrotik router'], brand: 'MikroTik', type: 'Switch de Red', cpu: 'Marvell Dual Core 800MHz (RouterOS / SwOS)', ram: '512 MB RAM', storage: '16 MB Flash', motherboard: 'MikroTik Cloud Gigabit Switch / Router Board' },
+    { keywords: ['unifi switch', 'unifi ap', 'u6 pro', 'u6-pro', 'ubiquiti'], brand: 'Ubiquiti', type: 'Switch de Red', cpu: 'Ubiquiti UniFi ARM Processor', ram: '512 MB DDR3', storage: '256 MB Flash', motherboard: 'Ubiquiti UniFi Managed Gigabit Board (PoE+)' },
+    { keywords: ['poweredge r740', 'poweredge r730', 'poweredge r640', 'dell server'], brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge Server Motherboard (iDRAC9)' },
+    { keywords: ['proliant dl380', 'proliant dl360', 'hpe proliant'], brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array RAID)', motherboard: 'HPE ProLiant Server Board (iLO 5)' },
+    { keywords: ['p2422h', 'se2422h', 'dell monitor p24'], brand: 'Dell', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) @ 60Hz-75Hz', ram: 'Tiempo de respuesta 5ms', storage: 'Puertos HDMI / DisplayPort / VGA', motherboard: 'Ajuste de Altura, Inclinación y Giro Pivot' },
+    { keywords: ['e24 g4', 'p24v g4', 'hp monitor e24'], brand: 'HP', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) Micro-Edge', ram: 'Frecuencia 75Hz con HP Eye Ease', storage: 'Entradas HDMI / DisplayPort / VGA', motherboard: 'Soporte VESA 100x100mm' },
+    { keywords: ['ultragear 24', 'ultragear 27', 'lg ultragear'], brand: 'LG', type: 'Monitor / Pantalla', cpu: 'Panel IPS Gaming Full HD (144Hz / 165Hz)', ram: 'AMD FreeSync Premium / 1ms MBR', storage: 'Dual HDMI, DisplayPort', motherboard: 'Base Regulable Gaming' },
+    { keywords: ['g203', 'g502', 'g305', 'mx master', 'logitech mouse'], brand: 'Logitech', type: 'Mouse / Puntero', cpu: 'Sensor Óptico HERO / Conexión USB o Lightspeed', ram: '8000 DPI / Plug & Play', storage: 'Cable USB Blindado o Receptor USB Unifying', motherboard: 'Compatible con Windows / macOS / Linux' },
+    { keywords: ['redragon kumara', 'redragon keyboard', 'teclado mecanico'], brand: 'Redragon', type: 'Teclado', cpu: 'Switches Mecánicos Outemu / Anti-Ghosting', ram: 'RGB Chroma Configurable', storage: 'Cable USB Mallado Tipo C', motherboard: 'Estructura Reforzada en Aluminio y ABS' }
   ];
 
   function findClientSpecsMatch(query) {
@@ -1081,11 +1229,66 @@ function initEventListeners() {
     if (normalized.length < 2) return null;
 
     const detectedBrand = detectBrandFromText(normalized) || detectBrandFromText(rawClean);
+    const inferredType = quickInferTipoEquipo(rawClean) || quickInferTipoEquipo(normalized);
 
-    // 1. Buscar en catálogo cliente exacto / inclusivo
+    // 1. Si es EXPLÍCITAMENTE un procesador / CPU, priorizar únicamente matches de CPU
+    if (inferredType === 'Procesador (CPU)') {
+      for (const item of CLIENT_SPECS_CATALOG) {
+        if (item.type !== 'Procesador (CPU)') continue;
+        for (const kw of item.keywords) {
+          if (keywordMatchesText(kw, normalized) || keywordMatchesText(kw, rawClean)) {
+            const res = { ...item };
+            if (detectedBrand) res.brand = detectedBrand;
+            return res;
+          }
+        }
+      }
+
+      // Si no hubo match exacto en catálogo pero es un CPU, generar ficha técnica inteligente de CPU
+      const isAmd = /ryzen|amd|athlon|threadripper/i.test(normalized);
+      const brand = isAmd ? 'AMD' : (detectedBrand || 'Intel');
+      const isAm5 = /7\d{3}|8\d{3}|9\d{3}|am5/i.test(normalized);
+      const isLga1700 = /1[234]\d{3}|1700/i.test(normalized);
+      const isLga1200 = /1[01]\d{3}|1200/i.test(normalized);
+
+      let socket = isAmd ? (isAm5 ? 'Socket AMD AM5 (Chipset B650 / A620)' : 'Socket AMD AM4 (Chipset B550 / A520)') : (isLga1700 ? 'Socket Intel LGA 1700 (Chipset B760 / H610)' : (isLga1200 ? 'Socket Intel LGA 1200 (Chipset B560 / H510)' : 'Socket Intel LGA Compatible'));
+
+      return {
+        brand: brand,
+        type: 'Procesador (CPU)',
+        cpu: rawClean.toUpperCase(),
+        ram: isAm5 || isLga1700 ? 'Controlador Dual Channel DDR4 / DDR5 Integrado' : 'Controlador Dual Channel DDR4 Integrado',
+        storage: 'Memoria Caché L2 / L3 de Alta Velocidad (Smart Cache / 3D V-Cache)',
+        motherboard: socket
+      };
+    }
+
+    // 2. Si es EXPLÍCITAMENTE una GPU / Tarjeta de Video
+    if (inferredType === 'Tarjeta de Video (GPU)') {
+      for (const item of CLIENT_SPECS_CATALOG) {
+        if (item.type !== 'Tarjeta de Video (GPU)') continue;
+        for (const kw of item.keywords) {
+          if (keywordMatchesText(kw, normalized) || keywordMatchesText(kw, rawClean)) {
+            const res = { ...item };
+            if (detectedBrand) res.brand = detectedBrand;
+            return res;
+          }
+        }
+      }
+      return {
+        brand: detectedBrand || (/radeon|rx/i.test(normalized) ? 'AMD' : 'NVIDIA'),
+        type: 'Tarjeta de Video (GPU)',
+        cpu: `${rawClean.toUpperCase()} GPU Dedicada`,
+        ram: /16gb|16\s*gb/i.test(normalized) ? '16 GB GDDR6' : (/12gb|12\s*gb/i.test(normalized) ? '12 GB GDDR6' : '8 GB GDDR6'),
+        storage: 'Interfaz PCIe 4.0 x16 (DirectX 12 Ultimate)',
+        motherboard: 'Salidas 3x DisplayPort 1.4a, 1x HDMI 2.1'
+      };
+    }
+
+    // 3. Buscar en el catálogo cliente con coincidencia segura por palabras clave
     for (const item of CLIENT_SPECS_CATALOG) {
       for (const kw of item.keywords) {
-        if (normalized.includes(kw) || rawClean.toLowerCase().includes(kw)) {
+        if (keywordMatchesText(kw, normalized) || keywordMatchesText(kw, rawClean)) {
           const res = { ...item };
           if (detectedBrand && res.brand.includes('/')) {
             res.brand = detectedBrand;
@@ -1095,11 +1298,11 @@ function initEventListeners() {
       }
     }
 
-    // Coincidencia por tokens si hay varias palabras (ej. "hyperx kingstone")
+    // Coincidencia por tokens si hay varias palabras (ej. "hyperx fury 16gb")
     const tokens = normalized.split(/\s+/).filter(w => w.length >= 3);
     if (tokens.length >= 2) {
       for (const item of CLIENT_SPECS_CATALOG) {
-        const matchesAll = tokens.every(t => item.keywords.some(k => k.includes(t) || t.includes(k)));
+        const matchesAll = tokens.every(t => item.keywords.some(k => keywordMatchesText(k, t) || keywordMatchesText(t, k)));
         if (matchesAll) {
           const res = { ...item };
           if (detectedBrand) res.brand = detectedBrand;
@@ -1108,7 +1311,7 @@ function initEventListeners() {
       }
     }
 
-    // 2. Detección Inteligente de Impresoras por Modelo o Consumible
+    // 4. Detección Inteligente de Impresoras por Modelo o Consumible
     const printerConsumable = autoDetectPrinterConsumables(normalized) || autoDetectPrinterConsumables(rawClean);
     if (printerConsumable) {
       return {
@@ -1122,7 +1325,7 @@ function initEventListeners() {
       };
     }
 
-    // 3. Inferencia Heurística de Memoria RAM
+    // 5. Inferencia Heurística de Memoria RAM
     if (/hyperx|fury|renegade|valueram|vengeance|ripjaws|trident|ram|ddr3|ddr4|ddr5|dimm|sodimm/i.test(normalized)) {
       let brand = detectedBrand || 'Kingston';
       let ramSpec = '16 GB DDR4 (3200MHz)';
@@ -1139,7 +1342,7 @@ function initEventListeners() {
       };
     }
 
-    // 4. Inferencia de Discos SSD / Almacenamiento
+    // 6. Inferencia de Discos SSD / Almacenamiento
     if (/nvme|ssd|m\.2|sata|hdd|disco|almacenamiento/i.test(normalized)) {
       let brand = detectedBrand || 'Kingston';
       let cap = '1 TB SSD NVMe PCIe Gen4';
@@ -1156,11 +1359,11 @@ function initEventListeners() {
       };
     }
 
-    // 5. Inferencia de Placas Base
+    // 7. Inferencia de Placas Base
     if (/b550|b450|a320|b650|x670|b760|h610|z790|h510|b660|placa\s*base|motherboard/i.test(normalized)) {
       return {
         brand: detectedBrand || 'Gigabyte',
-        type: 'Placa Base / Motherboard',
+        type: 'Placa Base',
         cpu: /b550|b450|a320|b650|x670/i.test(normalized) ? 'Socket AMD AM4 / AM5' : 'Socket Intel LGA 1700 / LGA 1200',
         ram: /ddr5|b650|z790/i.test(normalized) ? 'Ranuras DDR5 Dual Channel' : 'Ranuras DDR4 Dual Channel (Hasta 128GB)',
         storage: 'Ranuras M.2 NVMe PCIe + Puertos SATA 6Gb/s',
@@ -1168,7 +1371,7 @@ function initEventListeners() {
       };
     }
 
-    // 6. Inferencia de Fuentes de Poder
+    // 8. Inferencia de Fuentes de Poder
     if (/fuente|psu|power\s*supply|80\s*plus|bronze|gold|rm\d{3}|cv\d{3}|toughpower/i.test(normalized)) {
       return {
         brand: detectedBrand || 'Corsair',
@@ -1177,30 +1380,6 @@ function initEventListeners() {
         ram: 'Protecciones OVP / UVP / SCP / OTP',
         storage: 'Potencia 650W / 750W Watts Reales',
         motherboard: 'Conector ATX 24 pines, EPS 8 pines, PCIe'
-      };
-    }
-
-    // 7. Inferencia de GPU
-    if (/rtx|gtx|radeon|rx\s*\d|geforce|gpu|tarjeta\s*de\s*video/i.test(normalized)) {
-      return {
-        brand: detectedBrand || (/radeon|rx/i.test(normalized) ? 'AMD' : 'NVIDIA'),
-        type: 'Tarjeta de Video (GPU)',
-        cpu: 'GPU Dedicada Alto Rendimiento',
-        ram: '8 GB / 12 GB GDDR6 VRAM',
-        storage: 'PCIe 4.0 x16',
-        motherboard: '3x DisplayPort, 1x HDMI'
-      };
-    }
-
-    // 8. Inferencia de Procesadores (CPU)
-    if (/ryzen|core\s*i\d|intel\s*core|amd\s*ryzen|xeon|celeron|pentium|athlon/i.test(normalized)) {
-      return {
-        brand: /ryzen|athlon|amd/i.test(normalized) ? 'AMD' : 'Intel',
-        type: 'Procesador (CPU)',
-        cpu: rawClean.toUpperCase(),
-        ram: 'Controlador de Memoria Dual Channel DDR4/DDR5 Integrado',
-        storage: 'Memoria Caché L3 de Alta Velocidad',
-        motherboard: /ryzen|athlon/i.test(normalized) ? 'Socket AMD AM4 / AM5' : 'Socket Intel LGA 1700'
       };
     }
 
@@ -1216,7 +1395,7 @@ function initEventListeners() {
       };
     }
 
-    // 10. Inferencia Heurística General de Marcas de PC
+    // 10. Inferencia Heurística General de Marcas
     if (/epson/i.test(normalized)) {
       return {
         brand: 'Epson',
@@ -1230,6 +1409,13 @@ function initEventListeners() {
     }
 
     return null;
+  }
+
+  // Exponer globalmente para permitir uso en todos los módulos y pruebas
+  if (typeof window !== 'undefined') {
+    window.quickInferTipoEquipo = quickInferTipoEquipo;
+    window.getStandardTipoEquipo = getStandardTipoEquipo;
+    window.findClientSpecsMatch = findClientSpecsMatch;
   }
 
   // Auto-detección en tiempo real de Especificaciones de Fábrica
@@ -1294,7 +1480,8 @@ function initEventListeners() {
     const formCompInt = document.getElementById('formCompInterfaz');
 
     // 1. Asignar y adaptar tipo de equipo
-    const targetType = data.type || data.tipo_equipo || (formTipo ? formTipo.value : 'PC de Escritorio');
+    const rawTargetType = data.type || data.tipo_equipo || (formTipo ? formTipo.value : 'PC de Escritorio');
+    const targetType = getStandardTipoEquipo(rawTargetType);
     if (formTipo) {
       formTipo.value = targetType;
       adaptFormFieldsByType(targetType);
@@ -1308,7 +1495,7 @@ function initEventListeners() {
 
     // 3. Clasificación y Llenado según Componente vs Computadora
     const typeLower = targetType.toLowerCase();
-    const isComponent = typeLower.includes('disco') || typeLower.includes('ssd') || typeLower.includes('hdd') || typeLower.includes('ram') || typeLower.includes('gpu') || typeLower.includes('tarjeta de video') || typeLower.includes('cpu') || typeLower.includes('procesador') || typeLower.includes('placa base') || typeLower.includes('fuente de poder') || typeLower.includes('psu') || typeLower.includes('cooler');
+    const isComponent = typeLower.includes('disco') || typeLower.includes('ssd') || typeLower.includes('hdd') || typeLower.includes('ram') || typeLower.includes('gpu') || typeLower.includes('tarjeta de video') || typeLower.includes('cpu') || typeLower.includes('procesador') || typeLower.includes('placa base') || typeLower.includes('fuente de poder') || typeLower.includes('psu') || typeLower.includes('cooler') || typeLower.includes('refrigeración') || typeLower.includes('disipador');
 
     if (isComponent) {
       if (typeLower.includes('disco') || typeLower.includes('ssd') || typeLower.includes('hdd') || typeLower.includes('almacenamiento')) {
@@ -1329,6 +1516,9 @@ function initEventListeners() {
       } else if (typeLower.includes('fuente de poder') || typeLower.includes('psu')) {
         if (formCompCap) formCompCap.value = '650 Watts / 750 Watts';
         if (formCompInt) formCompInt.value = '80 Plus Bronze / Gold, Full Modular';
+      } else if (typeLower.includes('cooler') || typeLower.includes('refrigeración') || typeLower.includes('refrigeracion') || typeLower.includes('disipador')) {
+        if (formCompCap) formCompCap.value = data.cpu || 'Disipador por Aire / Refrigeración Líquida AIO';
+        if (formCompInt) formCompInt.value = data.motherboard || 'Socket Multi-Plataforma Intel LGA 1700 / AMD AM5 / AM4';
       }
     } else {
       // Computadora completa / Laptop / Servidor / Impresora
@@ -1437,12 +1627,39 @@ function initEventListeners() {
 
   // Catálogo completo de sugerencias de modelos para autocompletado táctil
   const POPULAR_SUGGESTION_MODELS = [
-    // COMPONENTES Y HARDWARE POPULAR
-    { model: 'Memoria RAM Kingston FURY Beast 16GB DDR4', type: 'Memoria RAM', icon: '🧠' },
-    { model: 'Memoria RAM Kingston HyperX Fury 16GB', type: 'Memoria RAM', icon: '🧠' },
+    // PROCESADORES / CPU
+    { model: 'Procesador Intel Core i5-12400F 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i5-13400 10 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i5-14400 10 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i7-13700 16 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i7-14700 20 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i9-14900K 24 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador Intel Core i3-12100 4 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 5 5600 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 5 5600X 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 7 5700X 8 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 7 5700X3D 8 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 5 7600 AM5', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 7 7800X3D AM5', type: 'Procesador (CPU)', icon: '⚡' },
+    { model: 'Procesador AMD Ryzen 9 7900X AM5', type: 'Procesador (CPU)', icon: '⚡' },
+
+    // TARJETAS DE VIDEO / GPU
+    { model: 'Tarjeta de Video NVIDIA GeForce RTX 4060 8GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+    { model: 'Tarjeta de Video NVIDIA GeForce RTX 4070 12GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+    { model: 'Tarjeta de Video NVIDIA GeForce RTX 4080 Super 16GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+    { model: 'Tarjeta de Video NVIDIA GeForce RTX 3060 12GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+    { model: 'Tarjeta de Video NVIDIA GeForce RTX 3050 8GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+    { model: 'Tarjeta de Video AMD Radeon RX 6600 8GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+    { model: 'Tarjeta de Video AMD Radeon RX 7600 8GB', type: 'Tarjeta de Video (GPU)', icon: '🎮' },
+
+    // MEMORIAS RAM
+    { model: 'Memoria RAM Kingston FURY Beast 16GB DDR4 (3200MHz)', type: 'Memoria RAM', icon: '🧠' },
+    { model: 'Memoria RAM Kingston FURY Beast 32GB DDR5 (5600MHz)', type: 'Memoria RAM', icon: '🧠' },
     { model: 'Memoria RAM Corsair Vengeance LPX 16GB DDR4', type: 'Memoria RAM', icon: '🧠' },
     { model: 'Memoria RAM Crucial Pro 16GB DDR5 5600MHz', type: 'Memoria RAM', icon: '🧠' },
     { model: 'Memoria RAM G.Skill Trident Z RGB 32GB DDR4', type: 'Memoria RAM', icon: '🧠' },
+
+    // DISCOS Y ALMACENAMIENTO
     { model: 'SSD Kingston NV2 1TB NVMe PCIe 4.0', type: 'Disco / Almacenamiento', icon: '💾' },
     { model: 'SSD Kingston NV3 1TB NVMe PCIe 4.0', type: 'Disco / Almacenamiento', icon: '💾' },
     { model: 'SSD Kingston A400 480GB SATA 2.5"', type: 'Disco / Almacenamiento', icon: '💾' },
@@ -1450,84 +1667,48 @@ function initEventListeners() {
     { model: 'SSD Samsung 990 PRO 2TB PCIe NVMe', type: 'Disco / Almacenamiento', icon: '💾' },
     { model: 'SSD WD Blue SN580 1TB NVMe M.2', type: 'Disco / Almacenamiento', icon: '💾' },
     { model: 'SSD Crucial P3 Plus 1TB NVMe M.2', type: 'Disco / Almacenamiento', icon: '💾' },
-    { model: 'Tarjeta Gráfica NVIDIA GeForce RTX 4060 8GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
-    { model: 'Tarjeta Gráfica NVIDIA GeForce RTX 3060 12GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
-    { model: 'Tarjeta Gráfica AMD Radeon RX 6600 8GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
-    { model: 'Tarjeta Gráfica AMD Radeon RX 7600 8GB', type: 'Tarjeta Gráfica (GPU)', icon: '🎮' },
-    { model: 'Procesador AMD Ryzen 5 5600 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
-    { model: 'Procesador AMD Ryzen 7 5700X 8 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
-    { model: 'Procesador AMD Ryzen 5 7600 AM5', type: 'Procesador (CPU)', icon: '⚡' },
-    { model: 'Procesador Intel Core i5-12400F 6 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
-    { model: 'Procesador Intel Core i5-13400 10 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
-    { model: 'Procesador Intel Core i7-13700 16 Núcleos', type: 'Procesador (CPU)', icon: '⚡' },
-    { model: 'Placa Base Gigabyte B550M AORUS ELITE', type: 'Placa Base / Motherboard', icon: '🧩' },
-    { model: 'Placa Base ASUS TUF Gaming B550-PLUS', type: 'Placa Base / Motherboard', icon: '🧩' },
-    { model: 'Placa Base ASUS TUF Gaming B760M-PLUS', type: 'Placa Base / Motherboard', icon: '🧩' },
-    { model: 'Placa Base MSI PRO B650M-A WiFi', type: 'Placa Base / Motherboard', icon: '🧩' },
-    { model: 'Placa Base ASUS Prime H610M-K', type: 'Placa Base / Motherboard', icon: '🧩' },
+
+    // PLACAS BASE, FUENTES Y COOLERS
+    { model: 'Placa Base Gigabyte B550M AORUS ELITE', type: 'Placa Base', icon: '🧩' },
+    { model: 'Placa Base ASUS TUF Gaming B550-PLUS', type: 'Placa Base', icon: '🧩' },
+    { model: 'Placa Base ASUS TUF Gaming B760M-PLUS', type: 'Placa Base', icon: '🧩' },
+    { model: 'Placa Base MSI PRO B650M-A WiFi', type: 'Placa Base', icon: '🧩' },
     { model: 'Fuente Corsair RM750e 750W 80 Plus Gold', type: 'Fuente de Poder (PSU)', icon: '🔌' },
     { model: 'Fuente Corsair CV650 650W 80 Plus Bronze', type: 'Fuente de Poder (PSU)', icon: '🔌' },
     { model: 'Fuente Thermaltake Smart 600W 80 Plus', type: 'Fuente de Poder (PSU)', icon: '🔌' },
+    { model: 'Disipador DeepCool AK400 Zero Dark', type: 'Refrigeración / Cooler', icon: '❄️' },
+    { model: 'Disipador Thermalright Peerless Assassin 120 SE', type: 'Refrigeración / Cooler', icon: '❄️' },
 
-    // EQUIPOS Y LAPTOPS
-    { model: 'Laptop Gamer Victus by HP 15', type: 'Laptop Gamer', icon: '⚡' },
-    { model: 'HP ProBook 450 G8', type: 'Laptop Empresarial', icon: '💻' },
-    { model: 'HP EliteBook 840 G8', type: 'Laptop Ejecutiva', icon: '💻' },
-    { model: 'HP Pavilion 15', type: 'Laptop Personal', icon: '💻' },
-    { model: 'HP 240 G8', type: 'Laptop Básica', icon: '💻' },
-    { model: 'HP OMEN 16 Gaming', type: 'Laptop Gamer', icon: '⚡' },
-    { model: 'Dell OptiPlex 7080', type: 'Escritorio PC', icon: '🖥️' },
-    { model: 'Dell OptiPlex 3080', type: 'Escritorio PC', icon: '🖥️' },
-    { model: 'Dell Latitude 5420', type: 'Laptop Corporativa', icon: '💻' },
-    { model: 'Dell Latitude 3420', type: 'Laptop Corporativa', icon: '💻' },
-    { model: 'Dell Inspiron 15', type: 'Laptop Personal', icon: '💻' },
-    { model: 'Dell Vostro 3400', type: 'Laptop Oficina', icon: '💻' },
-    { model: 'Dell XPS 13', type: 'Ultrabook Premium', icon: '💻' },
-    { model: 'Lenovo ThinkPad T14', type: 'Laptop Corporativa', icon: '💻' },
-    { model: 'Lenovo ThinkPad T490', type: 'Laptop Corporativa', icon: '💻' },
-    { model: 'Lenovo ThinkPad E14', type: 'Laptop Oficina', icon: '💻' },
-    { model: 'Lenovo ThinkCentre M70q', type: 'Mini PC Escritorio', icon: '🖥️' },
-    { model: 'Lenovo IdeaPad 3', type: 'Laptop Personal', icon: '💻' },
-    { model: 'Lenovo Legion 5', type: 'Laptop Gamer', icon: '⚡' },
-    { model: 'ASUS TUF Gaming F15', type: 'Laptop Gamer', icon: '⚡' },
-    { model: 'ASUS ROG Strix G15', type: 'Laptop Gamer', icon: '⚡' },
-    { model: 'ASUS VivoBook 15', type: 'Laptop Personal', icon: '💻' },
-    { model: 'Acer Nitro 5', type: 'Laptop Gamer', icon: '⚡' },
-    { model: 'Acer Aspire 5', type: 'Laptop Personal', icon: '💻' },
-    { model: 'Apple MacBook Air M1', type: 'Laptop Apple', icon: '🍎' },
-    { model: 'Apple MacBook Air M2', type: 'Laptop Apple', icon: '🍎' },
-    { model: 'Apple MacBook Pro 14', type: 'Laptop Apple', icon: '🍎' },
-    { model: 'Apple iMac 24 M1', type: 'All-in-One Apple', icon: '🍎' },
-    { model: 'Epson EcoTank L3250', type: 'Impresora Multifuncional', icon: '🖨️' },
-    { model: 'Epson EcoTank L3150', type: 'Impresora Multifuncional', icon: '🖨️' },
-    { model: 'Epson EcoTank L4260', type: 'Impresora WiFi Dúplex', icon: '🖨️' },
-    { model: 'Epson EcoTank L6270', type: 'Impresora Red Dúplex', icon: '🖨️' },
-    { model: 'Epson EcoTank L805', type: 'Impresora Fotográfica', icon: '🖨️' },
-    { model: 'HP LaserJet Pro M404', type: 'Impresora Láser', icon: '🖨️' },
-    { model: 'HP LaserJet Pro MFP M428', type: 'Multifuncional Láser', icon: '🖨️' },
-    { model: 'HP LaserJet P1102', type: 'Impresora Láser', icon: '🖨️' },
-    { model: 'HP Smart Tank 580', type: 'Impresora Multifuncional', icon: '🖨️' },
-    { model: 'HP Laser 107a', type: 'Impresora Láser', icon: '🖨️' },
-    { model: 'Canon PIXMA G2110', type: 'Impresora Tinta', icon: '🖨️' },
-    { model: 'Canon PIXMA G3110', type: 'Impresora WiFi', icon: '🖨️' },
-    { model: 'Canon imageCLASS MF3010', type: 'Multifuncional Láser', icon: '🖨️' },
-    { model: 'Brother DCP-T520W', type: 'Impresora WiFi', icon: '🖨️' },
-    { model: 'Brother DCP-T720DW', type: 'Impresora ADF WiFi', icon: '🖨️' },
-    { model: 'Brother HL-1212W', type: 'Impresora Láser WiFi', icon: '🖨️' },
-    { model: 'Kyocera ECOSYS M2040dn', type: 'Copiadora Red', icon: '🖨️' },
-    { model: 'Switch Cisco Catalyst 2960-X', type: 'Switch Administrable', icon: '🌐' },
-    { model: 'Switch Cisco Catalyst 9200', type: 'Switch Capa 3', icon: '🌐' },
-    { model: 'MikroTik CRS326 Gigabit Switch', type: 'Switch Gestión', icon: '🌐' },
-    { model: 'MikroTik RouterBOARD RB750Gr3', type: 'Router Balanceador', icon: '🌐' },
-    { model: 'Ubiquiti UniFi Switch 24 PoE', type: 'Switch PoE Red', icon: '🌐' },
-    { model: 'Ubiquiti UniFi AP U6 Pro', type: 'Access Point WiFi 6', icon: '📡' },
-    { model: 'TP-Link JetStream SG1024', type: 'Switch Rack 24P', icon: '🌐' },
-    { model: 'TP-Link Omada EAP650', type: 'Access Point Techo', icon: '📡' },
-    { model: 'Servidor Dell PowerEdge R740', type: 'Servidor Rack 2U', icon: '🗄️' },
-    { model: 'Servidor Dell PowerEdge R640', type: 'Servidor Rack 1U', icon: '🗄️' },
-    { model: 'Servidor HPE ProLiant DL380 Gen10', type: 'Servidor Rack', icon: '🗄️' },
-    { model: 'Proyector Epson PowerLite E20', type: 'Proyector Aula', icon: '📽️' },
-    { model: 'Proyector BenQ MW560', type: 'Proyector WXGA', icon: '📽️' }
+    // COMPUTADORAS & LAPTOPS
+    { model: 'Laptop Gamer Victus by HP 15', type: 'Laptop', icon: '💻' },
+    { model: 'HP ProBook 450 G8', type: 'Laptop', icon: '💻' },
+    { model: 'HP EliteBook 840 G8', type: 'Laptop', icon: '💻' },
+    { model: 'HP Pavilion 15', type: 'Laptop', icon: '💻' },
+    { model: 'HP ProDesk 400 G6 Microtower', type: 'PC de Escritorio', icon: '🖥️' },
+    { model: 'Dell OptiPlex 7080 Tower', type: 'PC de Escritorio', icon: '🖥️' },
+    { model: 'Dell OptiPlex 3080 SFF', type: 'PC de Escritorio', icon: '🖥️' },
+    { model: 'Dell Latitude 5420', type: 'Laptop', icon: '💻' },
+    { model: 'Dell Latitude 3420', type: 'Laptop', icon: '💻' },
+    { model: 'Dell XPS 13', type: 'Laptop', icon: '💻' },
+    { model: 'Lenovo ThinkPad T14 Gen 2', type: 'Laptop', icon: '💻' },
+    { model: 'Lenovo ThinkPad E14', type: 'Laptop', icon: '💻' },
+    { model: 'Lenovo ThinkCentre M70q Tiny', type: 'Mini PC', icon: '📦' },
+    { model: 'Lenovo Legion 5', type: 'Laptop', icon: '💻' },
+    { model: 'ASUS TUF Gaming F15', type: 'Laptop', icon: '💻' },
+    { model: 'Apple MacBook Air M1', type: 'Laptop', icon: '🍎' },
+    { model: 'Apple MacBook Air M2', type: 'Laptop', icon: '🍎' },
+    { model: 'Apple iMac 24 M1', type: 'All-in-One', icon: '🖥️' },
+
+    // IMPRESORAS, REDES & MONITORES
+    { model: 'Epson EcoTank L3250', type: 'Impresora / Multifuncional', icon: '🖨️' },
+    { model: 'Epson EcoTank L4260', type: 'Impresora / Multifuncional', icon: '🖨️' },
+    { model: 'HP LaserJet Pro M404', type: 'Impresora / Multifuncional', icon: '🖨️' },
+    { model: 'Canon PIXMA G3110', type: 'Impresora / Multifuncional', icon: '🖨️' },
+    { model: 'Switch Cisco Catalyst 2960-X', type: 'Switch de Red', icon: '🌐' },
+    { model: 'Ubiquiti UniFi AP U6 Pro', type: 'Access Point Wi-Fi', icon: '📡' },
+    { model: 'Servidor Dell PowerEdge R740', type: 'Servidor', icon: '🗄️' },
+    { model: 'Monitor Dell P2422H 24" IPS', type: 'Monitor / Pantalla', icon: '🖥️' },
+    { model: 'Monitor LG UltraGear 24" 144Hz', type: 'Monitor / Pantalla', icon: '🖥️' }
   ];
 
   function getCombinedModelSuggestions(query = '') {
@@ -1712,13 +1893,29 @@ function initEventListeners() {
     });
 
     formModelo.addEventListener('input', (e) => {
-      renderModelDropdown(e.target.value);
-      clearTimeout(specLookupTimeout);
       const val = e.target.value;
+      renderModelDropdown(val);
+
+      // Inferencia y adaptación inteligente inmediata mientras el usuario escribe (0ms)
+      if (val && val.trim().length >= 2) {
+        const inferredType = quickInferTipoEquipo(val);
+        const formTipo = document.getElementById('formTipoEquipo');
+        if (inferredType && formTipo && formTipo.value !== inferredType) {
+          formTipo.value = inferredType;
+          adaptFormFieldsByType(inferredType);
+        }
+        const detectedBrand = detectBrandFromText(val);
+        const formFab = document.getElementById('formFabricante');
+        if (detectedBrand && formFab && (!formFab.value || formFab.value === 'Genérico')) {
+          formFab.value = detectedBrand;
+        }
+      }
+
+      clearTimeout(specLookupTimeout);
       if (val && val.trim().length >= 3) {
         specLookupTimeout = setTimeout(() => {
           triggerModelSpecsAutofill(val, false);
-        }, 700);
+        }, 600);
       }
     });
 
@@ -2326,6 +2523,9 @@ function getDeviceTypeInfo(tipo) {
   if (t.includes('servidor') || t.includes('server')) {
     return { icon: 'fa-server', class: 'servidor', label: 'Servidor', category: 'Computadoras' };
   }
+  if (t.includes('procesador') || t.includes('cpu') || t.includes('ryzen') || t.includes('intel core')) {
+    return { icon: 'fa-microchip', class: 'cpu', label: 'Procesador (CPU)', category: 'Componentes' };
+  }
   if (t.includes('tarjeta de video') || t.includes('gpu') || t.includes('gráfica') || t.includes('grafica') || t.includes('geforce') || t.includes('radeon') || t.includes('rtx') || t.includes('gtx') || t.includes('quadro') || t.includes('arc')) {
     return { icon: 'fa-gamepad', class: 'gpu', label: 'GPU Dedicada', category: 'Componentes' };
   }
@@ -2334,9 +2534,6 @@ function getDeviceTypeInfo(tipo) {
   }
   if (t.includes('disco') || t.includes('almacenamiento') || t.includes('ssd') || t.includes('nvme') || t.includes('hdd') || t.includes('m.2')) {
     return { icon: 'fa-hard-drive', class: 'disco', label: 'Almacenamiento', category: 'Componentes' };
-  }
-  if (t.includes('procesador') || t.includes('cpu') || t.includes('ryzen') || t.includes('intel core')) {
-    return { icon: 'fa-microchip', class: 'cpu', label: 'Procesador CPU', category: 'Componentes' };
   }
   if (t.includes('placa base') || t.includes('motherboard') || t.includes('mainboard') || t.includes('tarjeta madre')) {
     return { icon: 'fa-chess-board', class: 'motherboard', label: 'Placa Base', category: 'Componentes' };
@@ -2348,6 +2545,33 @@ function getDeviceTypeInfo(tipo) {
     return { icon: 'fa-snowflake', class: 'cooler', label: 'Refrigeración', category: 'Componentes' };
   }
   return { icon: 'fa-desktop', class: 'desktop', label: tipo || 'PC de Escritorio', category: 'Computadoras' };
+}
+
+function getCompactTypeLabel(tipo) {
+  if (!tipo) return 'Equipo';
+  const t = tipo.trim();
+  const map = {
+    'Tarjeta de Video (GPU)': 'GPU (Video)',
+    'Procesador (CPU)': 'Procesador (CPU)',
+    'Disco / Almacenamiento': 'Disco / SSD',
+    'Placa Base': 'Placa Base',
+    'Placa Base / Motherboard': 'Placa Base',
+    'Fuente de Poder (PSU)': 'Fuente (PSU)',
+    'Refrigeración / Cooler': 'Refrigeración',
+    'Impresora / Multifuncional': 'Impresora',
+    'Switch de Red': 'Switch Red',
+    'Access Point Wi-Fi': 'Access Point',
+    'Audífonos / Diadema': 'Audífonos',
+    'Mouse / Puntero': 'Mouse',
+    'Monitor / Pantalla': 'Monitor',
+    'PC de Escritorio': 'PC Escritorio',
+    'Teclado / Mouse / Periférico': 'Periférico'
+  };
+  return map[t] || t;
+}
+
+if (typeof window !== 'undefined') {
+  window.getCompactTypeLabel = getCompactTypeLabel;
 }
 
 function setFilterCategory(category) {
@@ -2756,8 +2980,8 @@ function renderTable(items) {
           <span class="placa-badge" style="display: inline-block !important; width: auto !important; max-width: 100% !important; white-space: normal !important; word-break: break-word !important; overflow: visible !important; text-overflow: unset !important; line-height: 1.35 !important; text-align: center !important;" onclick="copyText('${escapeHTML(item.placa_base || '')}', 'Placa Base')" title="Clic para copiar">${highlightMatch(item.placa_base || 'N/A', currentSearchQuery)}</span>
         </td>
         <td class="cell-tipo">
-          <span class="tipo-badge ${tipoClass}">
-            <i class="fa-solid ${tipoIcon}"></i> ${highlightMatch(item.tipo_equipo || 'Equipo', currentSearchQuery)}
+          <span class="tipo-badge ${tipoClass}" title="${escapeHTML(item.tipo_equipo || 'Equipo')}">
+            <i class="fa-solid ${tipoIcon}"></i> <span class="badge-label">${highlightMatch(getCompactTypeLabel(item.tipo_equipo || 'Equipo'), currentSearchQuery)}</span>
           </span>
         </td>
         <td class="cell-specs">
