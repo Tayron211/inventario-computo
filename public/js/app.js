@@ -976,10 +976,25 @@ function initEventListeners() {
   // Inferencia Ultra-Rápida e Intuitiva de Tipo de Hardware (0ms mientras el usuario escribe)
   function quickInferTipoEquipo(text) {
     if (!text || typeof text !== 'string') return null;
-    const t = text.trim().toLowerCase();
+    let t = text.trim().toLowerCase();
+    // Normalizar errores comunes de tipeo o puntuaciones ("i.presora" -> "impresora", "inpresora", etc.)
+    t = t.replace(/i[.\s_-]+presora/g, 'impresora')
+         .replace(/inpresora/g, 'impresora')
+         .replace(/imprecora/g, 'impresora')
+         .replace(/impres[ao]r[as]?/g, 'impresora');
     if (t.length < 2) return null;
 
-    // 1. PROCESADOR / CPU (MÁXIMA PRIORIDAD para que nunca se confunda con GPU o PC)
+    // 1. IMPRESORAS & CONSUMIBLES (Alta prioridad)
+    if (/\b(?:impresora|multifuncional|fotocopiadora|plotter|printer|scanner|esc[aá]ner)\b/i.test(t) ||
+        /\b(?:impre|ecotank|smart\s*tank|ink\s*tank|laserjet|deskjet|pixma|inkbenefit|imageclass|ecosys|designjet|surecolor)\b/i.test(t) ||
+        /\b(?:l\d{3,4}|m\d{3,4}|p1102|g[1234567]\d{3}|dcp[ -]?t?\d{3,4}|hl[ -]?\d{4}|mf3010|m2040dn)\b/i.test(t) ||
+        /\b(?:t[oó]ner|toner|cartucho|tinta|t544|t664|t504|t534|gt51|gt52|gt53|gi-190|gi-11|85a|58a|105a|35a|36a|78a|79a|48a|26a|tk-1175|tn-1060)\b/i.test(t) ||
+        /\b(?:epson|brother|kyocera|ricoh|xerox|lexmark|konica)\b/i.test(t)) {
+      if (/\b(?:proyector|projector|powerlite)\b/i.test(t)) return 'Proyector';
+      return 'Impresora / Multifuncional';
+    }
+
+    // 2. PROCESADOR / CPU (MÁXIMA PRIORIDAD para que nunca se confunda con GPU o PC)
     if (/\b(?:procesador|cpu|microprocesador)\b/i.test(t) ||
         /\b(?:intel\s*core|core\s*i[3579]|core\s*ultra|i[3579][ -]?\d{4,5}[a-z]?|xeon|celeron|pentium)\b/i.test(t) ||
         /\b(?:amd\s*ryzen|ryzen\s*[3579]|ryzen\s*\d{4}[a-z]?|threadripper|athlon)\b/i.test(t) ||
@@ -989,40 +1004,35 @@ function initEventListeners() {
       }
     }
 
-    // 2. TARJETA DE VIDEO (GPU)
+    // 3. TARJETA DE VIDEO (GPU)
     if (/\b(?:tarjeta\s*de\s*video|tarjeta\s*gr[aá]fica|tarjeta\s*grafica|placa\s*de\s*video|gpu\s*dedicada|gpu|vram)\b/i.test(t) ||
         /\b(?:rtx\s*\d{3,4}|gtx\s*\d{3,4}|geforce\s*rtx|geforce\s*gtx|geforce|radeon\s*rx|rx\s*[567]\d{2,3}|quadro|rtx\s*a\d{3,4}|intel\s*arc\s*a\d)\b/i.test(t)) {
       return 'Tarjeta de Video (GPU)';
     }
 
-    // 3. MEMORIA RAM
+    // 4. MEMORIA RAM
     if (/\b(?:memoria\s*ram|ram|ddr[345]|sodimm|so-dimm|dimm|fury\s*beast|hyperx|valueram|vengeance|ripjaws|trident\s*z|flare\s*x)\b/i.test(t)) {
       return 'Memoria RAM';
     }
 
-    // 4. DISCO / ALMACENAMIENTO (SSD, NVMe, HDD)
-    if (/\b(?:disco\s*duro|disco\s*s[oó]lido|disco\s*externo|ssd|nvme|m\.2|sata\s*ssd|hdd|almacenamiento|kingston\s*a400|kingston\s*nv[23]|sn[578]\d0|9[789]0\s*pro|bx500|mx500|p3\s*plus|t500|kc3000|barracuda|ironwolf)\b/i.test(t)) {
+    // 5. DISCO / ALMACENAMIENTO (SSD, NVMe, HDD)
+    if (/\b(?:disco\s*duro|disco\s*s[oó]lido|disco\s*externo|disco|ssd|nvme|m\.2|sata\s*ssd|hdd|almacenamiento|kingston\s*a400|kingston\s*nv[23]|sn[578]\d0|9[789]0\s*pro|bx500|mx500|p3\s*plus|t500|kc3000|barracuda|ironwolf)\b/i.test(t)) {
       return 'Disco / Almacenamiento';
     }
 
-    // 5. PLACA BASE / MOTHERBOARD
+    // 6. PLACA BASE / MOTHERBOARD
     if (/\b(?:placa\s*base|placa\s*madre|tarjeta\s*madre|motherboard|mainboard|b550m?|b450m?|b650m?|b760m?|h610m?|a320m?|a520m?|z790|z690|x670e?|x570)\b/i.test(t)) {
       return 'Placa Base';
     }
 
-    // 6. FUENTE DE PODER (PSU)
+    // 7. FUENTE DE PODER (PSU)
     if (/\b(?:fuente|psu|power\s*supply|80\s*plus|rm\d{3}[a-z]?|cv\d{3}|cx\d{3}|toughpower|smart\s*\d{3}w)\b/i.test(t)) {
       return 'Fuente de Poder (PSU)';
     }
 
-    // 7. REFRIGERACIÓN / COOLER
+    // 8. REFRIGERACIÓN / COOLER
     if (/\b(?:cooler|disipador|refrigeraci[oó]n|water\s*cooling|enfriamiento|aio|deepcool|ak\d{3}|ag\d{3}|peerless\s*assassin|hyper\s*212|kraken|masterliquid|liquid\s*freezer)\b/i.test(t)) {
       return 'Refrigeración / Cooler';
-    }
-
-    // 8. IMPRESORAS & CONSUMIBLES
-    if (/\b(?:impresora|multifuncional|fotocopiadora|ecotank|smart\s*tank|laserjet|pixma|inkbenefit|toner|t[oó]ner|cartucho|tinta)\b/i.test(t)) {
-      return 'Impresora / Multifuncional';
     }
 
     // 9. MONITORES & PANTALLAS
@@ -1190,36 +1200,36 @@ function initEventListeners() {
     { keywords: ['imac 24', 'imac m1', 'imac m3'], brand: 'Apple', type: 'All-in-One', cpu: 'Apple M1 / M3 (8-Core CPU, 8-Core GPU)', ram: '8 GB / 16 GB Memoria Unificada', storage: '256 GB / 512 GB SSD', motherboard: 'Apple iMac Logic Board' },
 
     // ==========================================
-    // 9. IMPRESORAS & MULTIFUNCIONALES
+    // 9. IMPRESORAS & MULTIFUNCIONALES (Sin campos de PC como SSD o CPU)
     // ==========================================
-    { keywords: ['l575', 'l555', 'l565', 'l355', 'l365', 'l375', 'l380', 'l395', 'l455', 'l475', 'l495', 'l210', 'l220', 'l110', 'l120', 'l1300'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R (4 Colores)', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L500/L300 Series Controller Board', consumible: 'Tinta Epson T664' },
-    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l1250', 'l1210', 'l5190', 'l5290', 'l5590'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
-    { keywords: ['l4260', 'l4160', 'l4150', 'l6161', 'l6171', 'l6191', 'l6270', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Dual Engine (Duplex Automático)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Board', consumible: 'Tinta Epson T504' },
-    { keywords: ['l805', 'l1800', 'l800', 'l810', 'l850'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
-    { keywords: ['l8050', 'l18050'], brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson High-Speed 6-Color Photo Print Engine', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo EcoTank Controller Board', consumible: 'Tinta Epson 108' },
-    { keywords: ['laserjet m404', 'laserjet m402', 'm404dw', 'm404n'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB Flash', motherboard: 'HP LaserJet Pro Formatter Board', consumible: 'Tóner HP 58A' },
-    { keywords: ['laserjet m428', 'm428fdw', 'm428dw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Dual Core 1200MHz Formatter Engine', ram: '512 MB DDR3', storage: '512 MB Flash', motherboard: 'HP MFP Formatter Board', consumible: 'Tóner HP 58A' },
-    { keywords: ['laserjet p1102', 'p1102w', 'm1132', 'm1212'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP RISC 266MHz Processor', ram: '8 MB / 64 MB Buffer', storage: 'Flash ROM', motherboard: 'HP LaserJet P1100 Formatter Board', consumible: 'Tóner HP 85A' },
-    { keywords: ['smart tank 580', 'smart tank 530', 'smart tank 515', 'smart tank 720'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
-    { keywords: ['laser 107a', 'laser 107w', 'laser 135a', 'laser 135w', 'laser 137fnw'], brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP ARM 600MHz Processor', ram: '128 MB Memory', storage: '128 MB Flash', motherboard: 'HP Laser 100 Formatter Board', consumible: 'Tóner HP 105A' },
-    { keywords: ['pixma g2110', 'pixma g3110', 'pixma g3160', 'pixma g4110'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon FINE Print Engine Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon PIXMA MegaTank Mainboard', consumible: 'Tinta Canon GI-190' },
-    { keywords: ['imageclass mf3010', 'mf3010', 'lbp6030'], brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon On-Demand SURF Laser Processor', ram: '64 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon imageCLASS Laser Formatter Board', consumible: 'Tóner Canon 125' },
-    { keywords: ['dcp-t520w', 'dcp-t510w', 'dcp-t720dw', 'hl-1212w', 'dcp-1617nw'], brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
-    { keywords: ['ecosys m2040dn', 'm2040dn', 'm2135dn'], brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: 'Cortex-A9 800MHz Processor', ram: '512 MB RAM', storage: 'Flash Memory', motherboard: 'Kyocera ECOSYS System Controller Board', consumible: 'Tóner Kyocera TK-1175' },
+    { keywords: ['l575', 'l555', 'l565', 'l355', 'l365', 'l375', 'l380', 'l395', 'l455', 'l475', 'l495', 'l210', 'l220', 'l110', 'l120', 'l1300'], brand: 'Epson', type: 'Impresora / Multifuncional', consumible: 'Tinta Epson T664' },
+    { keywords: ['l3250', 'l3210', 'l3150', 'l3110', 'l1250', 'l1210', 'l5190', 'l5290', 'l5590'], brand: 'Epson', type: 'Impresora / Multifuncional', consumible: 'Tinta Epson T544' },
+    { keywords: ['l4260', 'l4160', 'l4150', 'l6161', 'l6171', 'l6191', 'l6270', 'l14150'], brand: 'Epson', type: 'Impresora / Multifuncional', consumible: 'Tinta Epson T504' },
+    { keywords: ['l805', 'l1800', 'l800', 'l810', 'l850'], brand: 'Epson', type: 'Impresora / Multifuncional', consumible: 'Tinta Epson T673' },
+    { keywords: ['l8050', 'l18050'], brand: 'Epson', type: 'Impresora / Multifuncional', consumible: 'Tinta Epson 108' },
+    { keywords: ['laserjet m404', 'laserjet m402', 'm404dw', 'm404n'], brand: 'HP', type: 'Impresora / Multifuncional', consumible: 'Tóner HP 58A' },
+    { keywords: ['laserjet m428', 'm428fdw', 'm428dw'], brand: 'HP', type: 'Impresora / Multifuncional', consumible: 'Tóner HP 58A' },
+    { keywords: ['laserjet p1102', 'p1102w', 'm1132', 'm1212'], brand: 'HP', type: 'Impresora / Multifuncional', consumible: 'Tóner HP 85A' },
+    { keywords: ['smart tank 580', 'smart tank 530', 'smart tank 515', 'smart tank 720'], brand: 'HP', type: 'Impresora / Multifuncional', consumible: 'Tinta HP GT53 / GT52' },
+    { keywords: ['laser 107a', 'laser 107w', 'laser 135a', 'laser 135w', 'laser 137fnw'], brand: 'HP', type: 'Impresora / Multifuncional', consumible: 'Tóner HP 105A' },
+    { keywords: ['pixma g2110', 'pixma g3110', 'pixma g3160', 'pixma g4110'], brand: 'Canon', type: 'Impresora / Multifuncional', consumible: 'Tinta Canon GI-190' },
+    { keywords: ['imageclass mf3010', 'mf3010', 'lbp6030'], brand: 'Canon', type: 'Impresora / Multifuncional', consumible: 'Tóner Canon 125' },
+    { keywords: ['dcp-t520w', 'dcp-t510w', 'dcp-t720dw', 'hl-1212w', 'dcp-1617nw'], brand: 'Brother', type: 'Impresora / Multifuncional', consumible: 'Tinta Brother BTD60BK / BT5001' },
+    { keywords: ['ecosys m2040dn', 'm2040dn', 'm2135dn'], brand: 'Kyocera', type: 'Impresora / Multifuncional', consumible: 'Tóner Kyocera TK-1175' },
 
     // ==========================================
     // 10. REDES, SERVIDORES & PERIFÉRICOS
     // ==========================================
-    { keywords: ['catalyst 2960', 'catalyst 9200', 'cisco 2960', 'cisco switch'], brand: 'Cisco', type: 'Switch de Red', cpu: 'Cisco Enterprise MIPS/ARM Switch Engine', ram: '512 MB DRAM', storage: '128 MB Flash Memory', motherboard: 'Cisco Catalyst 24/48 Puertos Gigabit PoE+ / SFP+' },
-    { keywords: ['crs326', 'crs328', 'rb750gr3', 'rb3011', 'mikrotik router'], brand: 'MikroTik', type: 'Switch de Red', cpu: 'Marvell Dual Core 800MHz (RouterOS / SwOS)', ram: '512 MB RAM', storage: '16 MB Flash', motherboard: 'MikroTik Cloud Gigabit Switch / Router Board' },
-    { keywords: ['unifi switch', 'unifi ap', 'u6 pro', 'u6-pro', 'ubiquiti'], brand: 'Ubiquiti', type: 'Switch de Red', cpu: 'Ubiquiti UniFi ARM Processor', ram: '512 MB DDR3', storage: '256 MB Flash', motherboard: 'Ubiquiti UniFi Managed Gigabit Board (PoE+)' },
+    { keywords: ['catalyst 2960', 'catalyst 9200', 'cisco 2960', 'cisco switch'], brand: 'Cisco', type: 'Switch de Red' },
+    { keywords: ['crs326', 'crs328', 'rb750gr3', 'rb3011', 'mikrotik router'], brand: 'MikroTik', type: 'Switch de Red' },
+    { keywords: ['unifi switch', 'unifi ap', 'u6 pro', 'u6-pro', 'ubiquiti'], brand: 'Ubiquiti', type: 'Switch de Red' },
     { keywords: ['poweredge r740', 'poweredge r730', 'poweredge r640', 'dell server'], brand: 'Dell', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R @ 2.40GHz (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC Registered', storage: '4x 1.2 TB SAS 10K RPM (PERC H730P RAID)', motherboard: 'Dell PowerEdge Server Motherboard (iDRAC9)' },
     { keywords: ['proliant dl380', 'proliant dl360', 'hpe proliant'], brand: 'HP', type: 'Servidor', cpu: '2x Intel Xeon Silver 4210R (20 Núcleos, 40 Hilos)', ram: '64 GB DDR4 ECC SmartMemory', storage: '4x 1.2 TB SAS 12G (HPE Smart Array RAID)', motherboard: 'HPE ProLiant Server Board (iLO 5)' },
-    { keywords: ['p2422h', 'se2422h', 'dell monitor p24'], brand: 'Dell', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) @ 60Hz-75Hz', ram: 'Tiempo de respuesta 5ms', storage: 'Puertos HDMI / DisplayPort / VGA', motherboard: 'Ajuste de Altura, Inclinación y Giro Pivot' },
-    { keywords: ['e24 g4', 'p24v g4', 'hp monitor e24'], brand: 'HP', type: 'Monitor / Pantalla', cpu: 'Panel IPS Full HD (1920x1080) Micro-Edge', ram: 'Frecuencia 75Hz con HP Eye Ease', storage: 'Entradas HDMI / DisplayPort / VGA', motherboard: 'Soporte VESA 100x100mm' },
-    { keywords: ['ultragear 24', 'ultragear 27', 'lg ultragear'], brand: 'LG', type: 'Monitor / Pantalla', cpu: 'Panel IPS Gaming Full HD (144Hz / 165Hz)', ram: 'AMD FreeSync Premium / 1ms MBR', storage: 'Dual HDMI, DisplayPort', motherboard: 'Base Regulable Gaming' },
-    { keywords: ['g203', 'g502', 'g305', 'mx master', 'logitech mouse'], brand: 'Logitech', type: 'Mouse / Puntero', cpu: 'Sensor Óptico HERO / Conexión USB o Lightspeed', ram: '8000 DPI / Plug & Play', storage: 'Cable USB Blindado o Receptor USB Unifying', motherboard: 'Compatible con Windows / macOS / Linux' },
-    { keywords: ['redragon kumara', 'redragon keyboard', 'teclado mecanico'], brand: 'Redragon', type: 'Teclado', cpu: 'Switches Mecánicos Outemu / Anti-Ghosting', ram: 'RGB Chroma Configurable', storage: 'Cable USB Mallado Tipo C', motherboard: 'Estructura Reforzada en Aluminio y ABS' }
+    { keywords: ['p2422h', 'se2422h', 'dell monitor p24'], brand: 'Dell', type: 'Monitor / Pantalla' },
+    { keywords: ['e24 g4', 'p24v g4', 'hp monitor e24'], brand: 'HP', type: 'Monitor / Pantalla' },
+    { keywords: ['ultragear 24', 'ultragear 27', 'lg ultragear'], brand: 'LG', type: 'Monitor / Pantalla' },
+    { keywords: ['g203', 'g502', 'g305', 'mx master', 'logitech mouse'], brand: 'Logitech', type: 'Mouse / Puntero' },
+    { keywords: ['redragon kumara', 'redragon keyboard', 'teclado mecanico'], brand: 'Redragon', type: 'Teclado' }
   ];
 
   function findClientSpecsMatch(query) {
@@ -1317,10 +1327,10 @@ function initEventListeners() {
       return {
         brand: printerConsumable.brand,
         type: 'Impresora / Multifuncional',
-        cpu: 'Microcontrolador RISC / SoC Integrado',
-        ram: '128 MB Memoria de Buffer',
-        storage: 'Memoria Flash Firmware',
-        motherboard: `${printerConsumable.brand} Controller Board`,
+        cpu: '',
+        ram: '',
+        storage: '',
+        motherboard: '',
         consumible: printerConsumable.consumable
       };
     }
@@ -1400,10 +1410,10 @@ function initEventListeners() {
       return {
         brand: 'Epson',
         type: 'Impresora / Multifuncional',
-        cpu: 'Microcontrolador RISC Epson ESC/P-R',
-        ram: '128 MB Buffer',
-        storage: 'Memoria Flash',
-        motherboard: 'Epson Controller Formatter Board',
+        cpu: '',
+        ram: '',
+        storage: '',
+        motherboard: '',
         consumible: 'Tinta Epson EcoTank'
       };
     }
@@ -1493,50 +1503,91 @@ function initEventListeners() {
       formFab.value = brandName;
     }
 
-    // 3. Clasificación y Llenado según Componente vs Computadora
+    // 3. Clasificación y Llenado según Categoría (Impresora vs Componente vs Computadora)
     const typeLower = targetType.toLowerCase();
-    const isComponent = typeLower.includes('disco') || typeLower.includes('ssd') || typeLower.includes('hdd') || typeLower.includes('ram') || typeLower.includes('gpu') || typeLower.includes('tarjeta de video') || typeLower.includes('cpu') || typeLower.includes('procesador') || typeLower.includes('placa base') || typeLower.includes('fuente de poder') || typeLower.includes('psu') || typeLower.includes('cooler') || typeLower.includes('refrigeración') || typeLower.includes('disipador');
+    const isPrinter = typeLower.includes('impresora') || typeLower.includes('multifuncional') || typeLower.includes('fotocopiadora') || typeLower.includes('plotter');
+    const isStorage = typeLower.includes('disco') || typeLower.includes('ssd') || typeLower.includes('hdd') || typeLower.includes('almacenamiento') || typeLower.includes('nvme');
+    const isRam = typeLower.includes('ram') || typeLower.includes('memoria');
+    const isGpu = typeLower.includes('gpu') || typeLower.includes('tarjeta de video');
+    const isCpu = typeLower.includes('cpu') || typeLower.includes('procesador');
+    const isMotherboard = typeLower.includes('placa base') || typeLower.includes('motherboard');
+    const isPsu = typeLower.includes('fuente de poder') || typeLower.includes('psu');
+    const isCooler = typeLower.includes('cooler') || typeLower.includes('refrigeración') || typeLower.includes('refrigeracion') || typeLower.includes('disipador');
+    const isComponent = isStorage || isRam || isGpu || isCpu || isMotherboard || isPsu || isCooler || typeLower.includes('componente');
+    const isComputer = typeLower.includes('pc de escritorio') || typeLower.includes('laptop') || typeLower.includes('all-in-one') || typeLower.includes('mini pc') || typeLower.includes('servidor') || typeLower.includes('computadora');
 
-    if (isComponent) {
-      if (typeLower.includes('disco') || typeLower.includes('ssd') || typeLower.includes('hdd') || typeLower.includes('almacenamiento')) {
+    if (isPrinter) {
+      // Impresora: NUNCA asignar valores a campos de CPU, RAM, SSD/HDD o Placa Base
+      if (formDisk) formDisk.value = '';
+      if (formCpu) formCpu.value = '';
+      if (formRam) formRam.value = '';
+      if (formPlaca) formPlaca.value = '';
+      if (formCompCap) formCompCap.value = '';
+      if (formCompInt) formCompInt.value = '';
+      if (formCons && (data.consumible || data.tinta_toner)) {
+        formCons.value = data.consumible || data.tinta_toner;
+      }
+    } else if (isComponent) {
+      // Componentes independientes: Llenar solo formCompCap y formCompInt, limpiar CPU/RAM/Disco
+      if (formDisk) formDisk.value = '';
+      if (formCpu) formCpu.value = '';
+      if (formRam) formRam.value = '';
+      if (formPlaca) formPlaca.value = '';
+      if (formCons) formCons.value = '';
+
+      if (isStorage) {
         if (formCompCap) formCompCap.value = data.storage || data.almacenamiento || '1 TB SSD NVMe PCIe Gen4';
         if (formCompInt) formCompInt.value = data.motherboard || data.placa_base || 'M.2 NVMe PCIe Gen4 x4 (2280)';
-      } else if (typeLower.includes('ram') || typeLower.includes('memoria')) {
+      } else if (isRam) {
         if (formCompCap) formCompCap.value = data.ram || data.ram_total || '16 GB DDR4 (3200MHz)';
         if (formCompInt) formCompInt.value = data.motherboard || data.placa_base || 'DIMM Desktop (288-pin) XMP';
-      } else if (typeLower.includes('gpu') || typeLower.includes('tarjeta de video')) {
+      } else if (isGpu) {
         if (formCompCap) formCompCap.value = data.ram || data.ram_total || '8 GB GDDR6 VRAM';
         if (formCompInt) formCompInt.value = data.storage || data.motherboard || 'PCIe 4.0 x16 (3x DP, 1x HDMI)';
-      } else if (typeLower.includes('cpu') || typeLower.includes('procesador')) {
+      } else if (isCpu) {
         if (formCompCap) formCompCap.value = data.cpu || data.procesador || 'Multi-Core High-Speed';
         if (formCompInt) formCompInt.value = data.motherboard || data.placa_base || 'Socket Compatible LGA / AM4';
-      } else if (typeLower.includes('placa base') || typeLower.includes('motherboard')) {
+      } else if (isMotherboard) {
         if (formCompCap) formCompCap.value = data.cpu || 'Chipset B550 / B760';
         if (formCompInt) formCompInt.value = data.motherboard || data.placa_base || 'Micro-ATX, Ranuras M.2 NVMe PCIe';
-      } else if (typeLower.includes('fuente de poder') || typeLower.includes('psu')) {
+      } else if (isPsu) {
         if (formCompCap) formCompCap.value = '650 Watts / 750 Watts';
         if (formCompInt) formCompInt.value = '80 Plus Bronze / Gold, Full Modular';
-      } else if (typeLower.includes('cooler') || typeLower.includes('refrigeración') || typeLower.includes('refrigeracion') || typeLower.includes('disipador')) {
+      } else if (isCooler) {
         if (formCompCap) formCompCap.value = data.cpu || 'Disipador por Aire / Refrigeración Líquida AIO';
         if (formCompInt) formCompInt.value = data.motherboard || 'Socket Multi-Plataforma Intel LGA 1700 / AMD AM5 / AM4';
       }
-    } else {
-      // Computadora completa / Laptop / Servidor / Impresora
+    } else if (isComputer) {
+      // Computadora completa armada (PC, Laptop, Servidor, All-in-One)
+      if (formCompCap) formCompCap.value = '';
+      if (formCompInt) formCompInt.value = '';
+      if (formCons) formCons.value = '';
       if (formCpu && (data.cpu || data.procesador)) formCpu.value = data.cpu || data.procesador;
       if (formRam && (data.ram || data.ram_total)) formRam.value = data.ram || data.ram_total;
       if (formDisk && (data.storage || data.almacenamiento)) formDisk.value = data.storage || data.almacenamiento;
       if (formPlaca && (data.motherboard || data.placa_base) && data.motherboard !== 'N/A' && data.placa_base !== 'N/A') {
         formPlaca.value = data.motherboard || data.placa_base;
       }
+    } else {
+      // Otros (Periféricos, Redes, Monitores)
+      if (formDisk) formDisk.value = '';
+      if (formCpu) formCpu.value = '';
+      if (formRam) formRam.value = '';
+      if (formPlaca) formPlaca.value = '';
+      if (formCompCap) formCompCap.value = '';
+      if (formCompInt) formCompInt.value = '';
+      if (formCons) formCons.value = '';
     }
 
     // 4. Consumibles para impresoras
-    if (formCons && (data.consumible || data.tinta_toner)) {
+    if (formCons && isPrinter && (data.consumible || data.tinta_toner)) {
       formCons.value = data.consumible || data.tinta_toner;
       if (badgeConsAuto) {
         badgeConsAuto.style.display = 'inline-flex';
         badgeConsAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Consumible Auto-Detectado`;
       }
+    } else if (!isPrinter && badgeConsAuto) {
+      badgeConsAuto.style.display = 'none';
     }
 
     if (badgeAuto) {
@@ -1544,7 +1595,20 @@ function initEventListeners() {
       badgeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Ficha Cargada (${brandName})`;
     }
 
-    const fieldsToAnimate = [formTipo, formFab, formCpu, formRam, formDisk, formPlaca, formCons, formCompCap, formCompInt].filter(Boolean);
+    // Adaptar inmediatamente visibilidad de los campos en el formulario
+    adaptFormFieldsByType(targetType);
+
+    // Animar únicamente los campos relevantes a la categoría detectada
+    let fieldsToAnimate = [formTipo, formFab].filter(Boolean);
+    if (isPrinter) {
+      if (formCons) fieldsToAnimate.push(formCons);
+    } else if (isComponent) {
+      if (formCompCap) fieldsToAnimate.push(formCompCap);
+      if (formCompInt) fieldsToAnimate.push(formCompInt);
+    } else if (isComputer) {
+      [formCpu, formRam, formDisk, formPlaca].filter(Boolean).forEach(f => fieldsToAnimate.push(f));
+    }
+
     fieldsToAnimate.forEach(f => {
       f.classList.remove('input-autofill-glow');
       void f.offsetWidth;
@@ -1900,8 +1964,10 @@ function initEventListeners() {
       if (val && val.trim().length >= 2) {
         const inferredType = quickInferTipoEquipo(val);
         const formTipo = document.getElementById('formTipoEquipo');
-        if (inferredType && formTipo && formTipo.value !== inferredType) {
-          formTipo.value = inferredType;
+        if (inferredType && formTipo) {
+          if (formTipo.value !== inferredType) {
+            formTipo.value = inferredType;
+          }
           adaptFormFieldsByType(inferredType);
         }
         const detectedBrand = detectBrandFromText(val);
@@ -3392,27 +3458,60 @@ function adaptFormFieldsByType(selectedType) {
 
   // 3. Placa Base de PC (Solo en computadoras armadas / completas)
   if (groupPlacaBase) {
-    groupPlacaBase.style.display = (isComputer && !isComponent) ? 'block' : 'none';
+    const showPlaca = isComputer && !isComponent;
+    groupPlacaBase.style.setProperty('display', showPlaca ? 'block' : 'none', 'important');
+    if (!showPlaca) {
+      const inputPlaca = document.getElementById('formPlacaBase');
+      if (inputPlaca && !isMotherboard) inputPlaca.value = '';
+    }
   }
 
   // 4. Hardware Interno de PC (CPU, RAM, Discos en bloque - Solo en computadoras)
   if (sectionHardware) {
-    sectionHardware.style.display = (isComputer && !isComponent) ? 'block' : 'none';
+    const showHardware = isComputer && !isComponent;
+    sectionHardware.style.setProperty('display', showHardware ? 'block' : 'none', 'important');
+    if (!showHardware) {
+      const formCpu = document.getElementById('formProcesador');
+      const formRam = document.getElementById('formRamTotal');
+      const formDisk = document.getElementById('formAlmacenamiento');
+      if (formCpu && !isCpu) formCpu.value = '';
+      if (formRam && !isRam) formRam.value = '';
+      if (formDisk && !isStorage) formDisk.value = '';
+    }
   }
 
   // 5. Periféricos y Monitores Asociados (Solo en computadoras completas)
   if (sectionPerifericos) {
-    sectionPerifericos.style.display = (isComputer && !isComponent) ? 'block' : 'none';
+    const showPerif = isComputer && !isComponent;
+    sectionPerifericos.style.setProperty('display', showPerif ? 'block' : 'none', 'important');
+    if (!showPerif) {
+      const formMon = document.getElementById('formMonitor');
+      const formPer = document.getElementById('formPerifericos');
+      if (formMon) formMon.value = '';
+      if (formPer) formPer.value = '';
+    }
   }
 
   // 6. Consumible / Tinta / Tóner (ÚNICA Y EXCLUSIVAMENTE en Impresoras)
   if (groupConsumible) {
-    groupConsumible.style.display = isPrinter ? 'block' : 'none';
+    groupConsumible.style.setProperty('display', isPrinter ? 'block' : 'none', 'important');
+    if (!isPrinter) {
+      const formCons = document.getElementById('formConsumible');
+      if (formCons) formCons.value = '';
+      const badgeCons = document.getElementById('badgeConsumibleAuto');
+      if (badgeCons) badgeCons.style.display = 'none';
+    }
   }
 
   // 7. Mostrar/Ocultar Sección de Componente Independiente
   if (sectionComponente) {
-    sectionComponente.style.display = isComponent ? 'block' : 'none';
+    sectionComponente.style.setProperty('display', isComponent ? 'block' : 'none', 'important');
+    if (!isComponent) {
+      const formCap = document.getElementById('formCompCapacidad');
+      const formInt = document.getElementById('formCompInterfaz');
+      if (formCap) formCap.value = '';
+      if (formInt) formInt.value = '';
+    }
   }
 
   // 8. Personalización Dinámica de Campos Específicos para cada Componente
@@ -3701,9 +3800,31 @@ async function handleFormSubmit(e) {
     notas: (document.getElementById('formNotas').value || '').trim()
   };
 
-  if (compCapacidad && !payload.almacenamiento_resumen) payload.almacenamiento_resumen = compCapacidad;
-  if (compCapacidad && payload.tipo_equipo.includes('Memoria RAM') && !payload.ram_total) payload.ram_total = compCapacidad;
-  if (compCapacidad && payload.tipo_equipo.includes('Procesador') && !payload.procesador) payload.procesador = `${payload.modelo} ${compCapacidad}`.trim();
+  const isComputerPayload = /pc de escritorio|laptop|all-in-one|mini pc|servidor|computadora/i.test(payload.tipo_equipo);
+  if (!isComputerPayload) {
+    if (!payload.tipo_equipo.includes('Disco') && !payload.tipo_equipo.includes('Almacenamiento')) {
+      payload.almacenamiento_resumen = compCapacidad && payload.tipo_equipo.includes('Disco') ? compCapacidad : '';
+    } else if (compCapacidad) {
+      payload.almacenamiento_resumen = compCapacidad;
+    }
+    if (!payload.tipo_equipo.includes('Memoria RAM')) {
+      payload.ram_total = '';
+    } else if (compCapacidad) {
+      payload.ram_total = compCapacidad;
+    }
+    if (!payload.tipo_equipo.includes('Procesador')) {
+      payload.procesador = '';
+    } else if (compCapacidad) {
+      payload.procesador = `${payload.modelo} ${compCapacidad}`.trim();
+    }
+    if (!payload.tipo_equipo.includes('Placa Base')) {
+      payload.placa_base = 'N/A';
+    }
+  } else {
+    if (compCapacidad && !payload.almacenamiento_resumen) payload.almacenamiento_resumen = compCapacidad;
+    if (compCapacidad && payload.tipo_equipo.includes('Memoria RAM') && !payload.ram_total) payload.ram_total = compCapacidad;
+    if (compCapacidad && payload.tipo_equipo.includes('Procesador') && !payload.procesador) payload.procesador = `${payload.modelo} ${compCapacidad}`.trim();
+  }
 
   if (parsedMonitores !== undefined) {
     payload.monitores = parsedMonitores;

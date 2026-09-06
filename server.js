@@ -1530,14 +1530,14 @@ const HARDWARE_MODELS_CATALOG = [
   // ==========================================
   // IMPRESORAS POPULARES (EPSON, HP, CANON, BROTHER, KYOCERA)
   // ==========================================
-  { pattern: /l575|l555|l565|l355|l365|l375|l380|l395|l455|l475|l495|l210|l220|l110|l120|l1300/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R (4 Colores)', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L500/L300 Series Controller Board', consumible: 'Tinta Epson T664' },
-  { pattern: /l3250|l3210|l3150|l3110|l1250|l1210|l5190|l5290|l5590/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
-  { pattern: /l4260|l4160|l4150|l6161|l6171|l6191|l6270|l14150/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Dual Engine (Duplex Automático)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank PrecisionCore Controller Board', consumible: 'Tinta Epson T504' },
-  { pattern: /l800|l805|l810|l850|l1800/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
-  { pattern: /l8050|l18050/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson High-Speed 6-Color Photo Print Engine', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo EcoTank Controller Board', consumible: 'Tinta Epson 108' },
-  { pattern: /m1100|m1120|m2140|m2170|m3170|m3180/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore Monocromático de Alta Velocidad', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank Mono Controller Board', consumible: 'Tinta Epson T534' },
-  { pattern: /wf[- ]?c5790|wf[- ]?c5290|wf[- ]?c5710|wf[- ]?c5890/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'PrecisionCore 4-Color WorkForce Enterprise Engine', ram: '512 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson WorkForce Pro Controller Board', consumible: 'Tinta Epson T941 / T942' },
-  { pattern: /epson/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson Controller Formatter Board', consumible: 'Tinta Epson EcoTank' },
+  { pattern: /l575|l555|l565|l355|l365|l375|l380|l395|l455|l475|l495|l210|l220|l110|l120|l1300/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T664' },
+  { pattern: /l3250|l3210|l3150|l3110|l1250|l1210|l5190|l5290|l5590/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T544' },
+  { pattern: /l4260|l4160|l4150|l6161|l6171|l6191|l6270|l14150/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T504' },
+  { pattern: /l800|l805|l810|l850|l1800/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T673' },
+  { pattern: /l8050|l18050/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson 108' },
+  { pattern: /m1100|m1120|m2140|m2170|m3170|m3180/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T534' },
+  { pattern: /wf[- ]?c5790|wf[- ]?c5290|wf[- ]?c5710|wf[- ]?c5890/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T941 / T942' },
+  { pattern: /epson/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson EcoTank' },
 
   // SWITCHES DE RED & ROUTERS (CISCO, MIKROTIK, TP-LINK, UBIQUITI, ARUBA, HP, D-LINK)
   { pattern: /catalyst\s*2960[- ]?x|2960[- ]?x/i, brand: 'Cisco', type: 'Switch de Red', cpu: 'APM86392 600MHz Dual Core', ram: '512 MB DRAM', storage: '128 MB Flash Memory', motherboard: 'Cisco Catalyst 2960-X Mainboard (24/48 Puertos Gigabit PoE+ / SFP+)' },
@@ -1689,26 +1689,26 @@ const HARDWARE_MODELS_CATALOG = [
   // ==========================================
   // IMPRESORAS & MULTIFUNCIONALES
   // ==========================================
-  { pattern: /ecotank\s*l3250|ecotank\s*l3210/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3200 Series Controller Board', consumible: 'Tinta Epson T544' },
-  { pattern: /ecotank\s*l3150|ecotank\s*l3110/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Microcontrolador RISC Epson ESC/P-R', ram: '128 MB Buffer', storage: 'Memoria Flash Firmware', motherboard: 'Epson EcoTank L3100 Series Controller Board', consumible: 'Tinta Epson T544' },
-  { pattern: /ecotank\s*l4260|ecotank\s*l4160|ecotank\s*l4150/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson ESC/P-R Dual Engine (Duplex Automático)', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank L4000 Series Controller Board', consumible: 'Tinta Epson T504' },
-  { pattern: /ecotank\s*l6270|ecotank\s*l6171/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'PrecisionCore Print Head Controller (ADF)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson EcoTank L6000 Series Controller Board', consumible: 'Tinta Epson T504' },
-  { pattern: /ecotank\s*l14150/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson PrecisionCore A3+ Multi-Engine', ram: '512 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Wide-Format Controller Board', consumible: 'Tinta Epson T504' },
-  { pattern: /ecotank\s*l805|ecotank\s*l1800/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: 'Epson 6-Color Photographic Micro Piezo Engine', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Epson Photo Controller Board', consumible: 'Tinta Epson T673' },
+  { pattern: /ecotank\s*l3250|ecotank\s*l3210/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T544' },
+  { pattern: /ecotank\s*l3150|ecotank\s*l3110/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T544' },
+  { pattern: /ecotank\s*l4260|ecotank\s*l4160|ecotank\s*l4150/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T504' },
+  { pattern: /ecotank\s*l6270|ecotank\s*l6171/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T504' },
+  { pattern: /ecotank\s*l14150/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T504' },
+  { pattern: /ecotank\s*l805|ecotank\s*l1800/i, brand: 'Epson', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Epson T673' },
 
-  { pattern: /laserjet\s*pro\s*m404|laserjet\s*pro\s*m402/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Custom 1200MHz High-Speed Processor', ram: '256 MB DDR3', storage: '512 MB NAND Flash', motherboard: 'HP LaserJet Pro M400 Series Formatter Board', consumible: 'Tóner HP 58A' },
-  { pattern: /laserjet\s*pro\s*mfp\s*m428|laserjet\s*m428/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP Dual Core 1200MHz Formatter Engine', ram: '512 MB DDR3', storage: '512 MB Flash (HP Sure Start)', motherboard: 'HP MFP Formatter Board', consumible: 'Tóner HP 58A' },
-  { pattern: /laserjet\s*p1102|laserjet\s*m1132|laserjet\s*m1212/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP RISC 266MHz Processor', ram: '8 MB / 64 MB Buffer', storage: 'Flash ROM', motherboard: 'HP LaserJet P1100 Series Formatter Board', consumible: 'Tóner HP 85A' },
-  { pattern: /laserjet\s*107|laserjet\s*mfp\s*135|laserjet\s*mfp\s*137/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP ARM 600MHz Processor', ram: '128 MB Memory', storage: '128 MB Flash', motherboard: 'HP Laser 100 Series Formatter Board', consumible: 'Tóner HP 105A' },
-  { pattern: /smart\s*tank\s*515|smart\s*tank\s*530|smart\s*tank\s*580|smart\s*tank\s*720/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: 'HP 980MHz Sensor RISC SoC (Wi-Fi BLE)', ram: '256 MB Buffer', storage: 'Memoria Flash', motherboard: 'HP Smart Tank Main Controller Board', consumible: 'Tinta HP GT53 / GT52' },
+  { pattern: /laserjet\s*pro\s*m404|laserjet\s*pro\s*m402/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner HP 58A' },
+  { pattern: /laserjet\s*pro\s*mfp\s*m428|laserjet\s*m428/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner HP 58A' },
+  { pattern: /laserjet\s*p1102|laserjet\s*m1132|laserjet\s*m1212/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner HP 85A' },
+  { pattern: /laserjet\s*107|laserjet\s*mfp\s*135|laserjet\s*mfp\s*137/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner HP 105A' },
+  { pattern: /smart\s*tank\s*515|smart\s*tank\s*530|smart\s*tank\s*580|smart\s*tank\s*720/i, brand: 'HP', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta HP GT53 / GT52' },
 
-  { pattern: /pixma\s*g2110|pixma\s*g3110|pixma\s*g3160|pixma\s*g4110/i, brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon FINE Print Engine Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon PIXMA MegaTank Mainboard', consumible: 'Tinta Canon GI-190' },
-  { pattern: /imageclass\s*mf3010|lbp6030/i, brand: 'Canon', type: 'Impresora / Multifuncional', cpu: 'Canon On-Demand SURF Laser Processor', ram: '64 MB Buffer', storage: 'Memoria Flash', motherboard: 'Canon imageCLASS Laser Formatter Board', consumible: 'Tóner Canon 125' },
+  { pattern: /pixma\s*g2110|pixma\s*g3110|pixma\s*g3160|pixma\s*g4110/i, brand: 'Canon', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Canon GI-190' },
+  { pattern: /imageclass\s*mf3010|lbp6030/i, brand: 'Canon', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner Canon 125' },
 
-  { pattern: /dcp[- ]?t510w|dcp[- ]?t520w|dcp[- ]?t710w|dcp[- ]?t720dw/i, brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother High-Speed Piezo Controller', ram: '128 MB Buffer', storage: 'Memoria Flash', motherboard: 'Brother InkBenefit Tank Mainboard', consumible: 'Tinta Brother BTD60BK / BT5001' },
-  { pattern: /hl[- ]?1212w|dcp[- ]?1617nw|hl[- ]?1112/i, brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother 200MHz Laser Controller', ram: '32 MB Buffer', storage: 'Flash ROM', motherboard: 'Brother Laser Engine Board', consumible: 'Tóner Brother TN-1060' },
-  { pattern: /hl[- ]?l2360dw|dcp[- ]?l2540dw|mfc[- ]?l2700dw/i, brand: 'Brother', type: 'Impresora / Multifuncional', cpu: 'Brother ARM9 266MHz Processor (Duplex)', ram: '64 MB RAM', storage: 'Flash Memory', motherboard: 'Brother High-Yield Laser Formatter Board', consumible: 'Tóner Brother TN-2370' },
-  { pattern: /ecosys\s*m2040dn|ecosys\s*m2135dn|ecosys\s*p2040dw/i, brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: 'Kyocera Cortex-A9 800MHz Multi-Task Processor', ram: '512 MB RAM (expandible a 1.5GB)', storage: 'Memoria Flash', motherboard: 'Kyocera ECOSYS Long-Life Formatter Board', consumible: 'Tóner Kyocera TK-1175' },
+  { pattern: /dcp[- ]?t510w|dcp[- ]?t520w|dcp[- ]?t710w|dcp[- ]?t720dw/i, brand: 'Brother', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tinta Brother BTD60BK / BT5001' },
+  { pattern: /hl[- ]?1212w|dcp[- ]?1617nw|hl[- ]?1112/i, brand: 'Brother', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner Brother TN-1060' },
+  { pattern: /hl[- ]?l2360dw|dcp[- ]?l2540dw|mfc[- ]?l2700dw/i, brand: 'Brother', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner Brother TN-2370' },
+  { pattern: /ecosys\s*m2040dn|ecosys\s*m2135dn|ecosys\s*p2040dw/i, brand: 'Kyocera', type: 'Impresora / Multifuncional', cpu: '', ram: '', storage: '', motherboard: '', consumible: 'Tóner Kyocera TK-1175' },
 
   // ==========================================
   // DELL OPTIPLEX (DESKTOPS)
@@ -1945,17 +1945,17 @@ async function lookupHardwareSpecsOnline(modelText) {
       source: 'Base de Datos de Impresoras',
       brand: printerConsumable.brand,
       type: 'Impresora / Multifuncional',
-      cpu: 'Microcontrolador SoC Integrado',
-      ram: '128 MB Memoria de Buffer',
-      storage: 'Memoria Flash Firmware',
-      motherboard: `${printerConsumable.brand} Controller Board`,
+      cpu: '',
+      ram: '',
+      storage: '',
+      motherboard: '',
       consumible: printerConsumable.consumable,
       fabricante: printerConsumable.brand,
       tipo_equipo: 'Impresora / Multifuncional',
-      procesador: 'Microcontrolador SoC Integrado',
-      ram_total: '128 MB Memoria de Buffer',
-      almacenamiento: 'Memoria Flash Firmware',
-      placa_base: `${printerConsumable.brand} Controller Board`
+      procesador: '',
+      ram_total: '',
+      almacenamiento: '',
+      placa_base: ''
     };
   }
 
@@ -1965,11 +1965,12 @@ async function lookupHardwareSpecsOnline(modelText) {
   // 4. Inferencia Heurística basada en marcas, tipo de dispositivo y snippets de Internet
   const combinedText = (clean + ' ' + normalized + ' ' + (onlineSnippet || '')).toLowerCase();
   
-  let brand = 'Genérico';
-  if (/nvidia/i.test(combinedText)) brand = 'NVIDIA';
-  else if (/amd|radeon/i.test(combinedText)) brand = 'AMD';
-  else if (/intel/i.test(combinedText)) brand = 'Intel';
-  else if (/kingston|hyperx|fury/i.test(combinedText)) brand = 'Kingston';
+  let brand = detectBrandFromText(clean) || detectBrandFromText(normalized) || 'Genérico';
+  if (brand === 'Genérico') {
+    if (/nvidia/i.test(combinedText)) brand = 'NVIDIA';
+    else if (/amd|radeon/i.test(combinedText)) brand = 'AMD';
+    else if (/intel/i.test(combinedText)) brand = 'Intel';
+    else if (/kingston|hyperx|fury/i.test(combinedText)) brand = 'Kingston';
   else if (/corsair/i.test(combinedText)) brand = 'Corsair';
   else if (/samsung/i.test(combinedText)) brand = 'Samsung';
   else if (/crucial|ballistix|micron/i.test(combinedText)) brand = 'Crucial';
@@ -2008,6 +2009,7 @@ async function lookupHardwareSpecsOnline(modelText) {
   else if (/d[- ]?link/i.test(combinedText)) brand = 'D-Link';
   else if (/aruba/i.test(combinedText)) brand = 'Aruba';
   else if (/synology/i.test(combinedText)) brand = 'Synology';
+  }
 
   // Clasificación Inteligente de Tipo: 
   // Nivel 1: Evaluar directamente lo escrito por el usuario (Prioridad Absoluta)
@@ -2148,10 +2150,10 @@ async function lookupHardwareSpecsOnline(modelText) {
     storage = '4x Bahías Hot-Plug SAS / SSD (Hardware RAID)';
     motherboard = `${brand} Enterprise Server Board (Remote Management BMC)`;
   } else if (type === 'Impresora / Multifuncional') {
-    cpu = 'Microcontrolador SoC Impresora';
-    ram = '128 MB Buffer';
-    storage = 'Memoria Flash Firmware';
-    motherboard = `${brand} Formatter Controller Board`;
+    cpu = '';
+    ram = '';
+    storage = '';
+    motherboard = '';
     consumible = (autoDetectPrinterConsumables(clean) || autoDetectPrinterConsumables(normalized))?.consumable || 'Tinta / Tóner Estándar';
   } else {
     // Computadoras / Laptops
