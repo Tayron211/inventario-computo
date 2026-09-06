@@ -4811,63 +4811,12 @@ body {
     gap: 8px;
   }
 
-  /* MODALES PERFECTOS EN CELULARES (0ms Delay, 120 FPS GPU Composited) */
+  /* MODALES EN CELULARES */
   .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
-  }
-
-  .modal-card {
-    max-height: 92dvh;
-    border-radius: 18px 18px 0 0;
-    width: 100%;
-    margin: 0;
-    transform: translate3d(0, 24px, 0) scale(0.99);
-    opacity: 0;
-    transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.11s ease;
-  }
-
-  .modal-overlay.active .modal-card {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 1;
-  }
-
-  .modal-header-styled {
-    padding: 12px 14px;
-  }
-
-  .modal-header-styled h3 {
-    font-size: 1rem;
-  }
-
-  .modal-body {
-    padding: 12px 14px;
-  }
-
-  .modal-scrollable {
-    padding: 12px 14px;
-  }
-
-  .modal-footer {
-    padding: 10px 14px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
-    gap: 8px;
-    background: var(--bg-surface-elevated);
-    border-top: 1px solid var(--gray-700);
+    padding: 10px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-  }
-
-  .modal-footer .btn {
-    flex: 1;
-    padding: 11px 12px;
-    font-size: 0.88rem;
+    align-items: center;
     justify-content: center;
-    min-height: 44px;
   }
 }
 
@@ -5755,13 +5704,16 @@ tr.row-highlight-pulse {
   .page-view-container {
     transition: opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1), transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
   }
-  /* Ventanas y modales compactos y elegantes en teléfonos (Transición suave y sutil) */
+  /* Ventanas y modales en teléfonos (Tamaño exterior preservado, contenido 100% visible sin cortes) */
   .modal-overlay {
     padding: 10px !important;
     background: rgba(4, 4, 8, 0.75) !important;
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
     transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.26s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .modal-card {
@@ -5777,6 +5729,9 @@ tr.row-highlight-pulse {
     opacity: 0 !important;
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1) !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
   }
 
   [data-theme="light"] .modal-card {
@@ -5788,6 +5743,7 @@ tr.row-highlight-pulse {
   .modal-card.modal-lg {
     max-width: 94% !important;
     max-height: 86vh !important;
+    max-height: 86dvh !important;
   }
 
   .modal-overlay.active .modal-card {
@@ -5795,85 +5751,308 @@ tr.row-highlight-pulse {
     opacity: 1 !important;
   }
 
-  /* Encabezado compacto con indicador táctil (Swipe pill) */
+  /* Formulario contenedor flex vertical que no desborda */
+  .modal-card form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Encabezado compacto: margen derecho reservado para el botón cerrar sin cortes ni colisiones */
   .modal-header-styled {
-    padding: 10px 16px 12px 16px !important;
+    padding: 10px 42px 10px 14px !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
     user-select: none;
     touch-action: pan-y !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
   }
   .modal-header-styled::before {
     content: '';
     display: block;
-    width: 36px;
+    width: 32px;
     height: 4px;
     background: rgba(255, 255, 255, 0.28);
     border-radius: 4px;
-    margin: 0 auto 8px auto;
+    margin: 0 auto 6px auto;
   }
   [data-theme="light"] .modal-header-styled::before {
     background: rgba(15, 23, 42, 0.2);
   }
   .modal-header-styled .header-icon {
-    font-size: 1.15rem !important;
+    font-size: 1.1rem !important;
     margin-bottom: 2px !important;
   }
   .modal-header-styled h3 {
-    font-size: 1.02rem !important;
+    font-size: 0.98rem !important;
     font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
   }
   .modal-header-styled p {
-    font-size: 0.74rem !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    margin-top: 2px !important;
   }
   .modal-close-btn {
-    top: 10px !important;
-    right: 14px !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     font-size: 1.35rem !important;
+    z-index: 10 !important;
   }
 
-  /* Cuerpo y scroll con deslizamiento táctil nativo (Swipe/Scroll) */
+  /* Cuerpo con desplazamiento táctil suave sin cortar ningún campo */
   .modal-body {
-    padding: 12px 16px !important;
+    padding: 10px 12px !important;
     touch-action: pan-y !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   .modal-scrollable {
-    padding: 12px 16px !important;
+    padding: 10px 12px 14px 12px !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-y !important;
     overscroll-behavior-y: contain !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  /* Pie de ventana compacto */
-  .modal-footer {
-    padding: 10px 16px !important;
+  /* Cuadrícula de formulario: 1 columna fluida para celular */
+  .form-grid,
+  .form-grid.form-grid-sub {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
     gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
-  .modal-footer .btn {
-    padding: 7px 14px !important;
-    font-size: 0.84rem !important;
-    border-radius: 8px !important;
+  .form-grid > * {
+    grid-column: 1 / -1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  /* Campos de formulario */
+  /* Campos de formulario: 100% visibles, márgenes ergonómicos */
   .form-group {
-    margin-bottom: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-bottom: 7px !important;
+    gap: 3px !important;
+    box-sizing: border-box !important;
   }
   .form-group label {
-    font-size: 0.78rem !important;
-    margin-bottom: 3px !important;
+    font-size: 0.76rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 2px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 4px !important;
+    max-width: 100% !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
   }
+  .form-control,
   .form-group input,
   .form-group select,
   .form-group textarea {
-    padding: 7px 11px !important;
-    font-size: 0.85rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 7px 10px !important;
+    font-size: 0.84rem !important;
     border-radius: 8px !important;
+    line-height: 1.35 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
-  .form-row {
-    gap: 8px !important;
+  input::placeholder,
+  textarea::placeholder {
+    text-overflow: ellipsis !important;
+    font-size: 0.78rem !important;
+    opacity: 0.65 !important;
+  }
+
+  /* Input con botón de acción (Auto-llenar / Cámara): Nunca se monta ni corta */
+  .input-with-action {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 5px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .input-with-action input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .btn-input-action {
+    flex-shrink: 0 !important;
+    padding: 6px 9px !important;
+    font-size: 0.76rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+  .btn-input-action i {
+    font-size: 0.78rem !important;
+  }
+
+  /* Títulos de sección en formulario */
+  .form-section-title {
+    font-size: 0.76rem !important;
+    padding-bottom: 4px !important;
+    margin-top: 10px !important;
+    margin-bottom: 7px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    word-break: break-word !important;
+  }
+
+  /* Chips de modelos frecuentes adaptados */
+  .quick-models-container {
+    padding: 7px 9px !important;
     margin-bottom: 8px !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .quick-models-title {
+    font-size: 0.72rem !important;
+    margin-bottom: 4px !important;
+  }
+  .quick-models-chips {
+    gap: 4px !important;
+    max-width: 100% !important;
+  }
+  .model-chip {
+    font-size: 0.70rem !important;
+    padding: 3px 7px !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .auto-badge {
+    font-size: 0.68rem !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Ficha técnica (Details modal): Cajas y textos que no desbordan */
+  .specs-detail-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .spec-box {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 8px 10px !important;
+    border-radius: 7px !important;
+  }
+  .spec-box-title {
+    font-size: 0.70rem !important;
+    margin-bottom: 3px !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+  .spec-box-val {
+    font-size: 0.84rem !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    min-width: 0 !important;
+  }
+  .spec-box-val.mono {
+    font-size: 0.80rem !important;
+    word-break: break-all !important;
+  }
+  .component-card-grid,
+  .component-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Pie de ventana (Botones de acción): Totalmente visibles, adaptables y nunca cortados */
+  .modal-footer {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    padding: 8px 12px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: var(--bg-surface-elevated) !important;
+    border-top: 1px solid var(--gray-700) !important;
+  }
+  .modal-footer .btn {
+    flex: 1 1 0 !important;
+    min-width: 72px !important;
+    max-width: 100% !important;
+    padding: 9px 8px !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+    min-height: 40px !important;
+  }
+  .modal-footer .btn i {
+    font-size: 0.82rem !important;
+    flex-shrink: 0 !important;
+  }
+  .modal-footer .btn.w-100 {
+    flex: 1 1 100% !important;
+    width: 100% !important;
   }
 }
 
