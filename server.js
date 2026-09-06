@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 
 // Endpoint de salud y keep-alive para evitar hibernación en Render
-app.get('/api/ping', (req, res) => {
+app.all(['/api/ping', '/ping', '/healthz', '/health'], (req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.status(200).send('pong');
 });
