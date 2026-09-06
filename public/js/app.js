@@ -2213,7 +2213,7 @@ function clearEquipmentForm() {
   if (formBloque) formBloque.value = 'Bloque A (Área Administrativa)';
 
   const formUbicacion = document.getElementById('formUbicacion');
-  if (formUbicacion) formUbicacion.value = 'CAE';
+  if (formUbicacion) formUbicacion.value = 'Soporte Técnico';
 
   const formUbicacionCustom = document.getElementById('formUbicacionCustom');
   if (formUbicacionCustom) {
@@ -3256,7 +3256,7 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
 
   const bloquesMap = {
     'Bloque A (Área Administrativa)': [
-      'CAE', 'Soporte Técnico', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
+      'Soporte Técnico', 'CAE', 'Tópico', 'Lactario', 'Guardería', 'Psicopedagógico', 'ATP', 
       'Admisión', 'Finanzas', 'Defensoría', 'Garita'
     ],
     'Bloque A (Aulas y Laboratorios)': [
@@ -3310,7 +3310,7 @@ function populateFormAmbientes(selectedBloque, currentAmbienteValue = '') {
       formUbicacionCustom.value = currentAmbienteValue;
     }
   } else if (list.length > 0) {
-    formUbicacion.value = list[0];
+    formUbicacion.value = list.includes('Soporte Técnico') ? 'Soporte Técnico' : list[0];
   }
 }
 
@@ -3636,11 +3636,11 @@ async function handleFormSubmit(e) {
 
   const id = (document.getElementById('formEquipmentId').value || '').trim();
   const formBloqueVal = document.getElementById('formBloque') ? document.getElementById('formBloque').value : '';
-  let finalUbicacion = document.getElementById('formUbicacion') ? document.getElementById('formUbicacion').value : '';
+  let finalUbicacion = (document.getElementById('formUbicacion') ? document.getElementById('formUbicacion').value : '') || 'Soporte Técnico';
   const formUbicacionCustom = document.getElementById('formUbicacionCustom');
 
   if (finalUbicacion === '__custom__' || formBloqueVal === 'Personalizado') {
-    finalUbicacion = (formUbicacionCustom ? formUbicacionCustom.value.trim() : '') || 'Sin Asignar';
+    finalUbicacion = (formUbicacionCustom ? formUbicacionCustom.value.trim() : '') || 'Soporte Técnico';
   }
 
   const monitorVal = document.getElementById('formMonitor') ? document.getElementById('formMonitor').value.trim() : '';

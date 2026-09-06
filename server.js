@@ -2248,7 +2248,7 @@ app.post('/api/inventory', async (req, res) => {
     mac_address: body.mac_address || [body.mac_ethernet, body.mac_wifi, body.mac_bluetooth].filter(Boolean).join(' | '),
     ip_red: body.ip_red || '',
     usuario_actual: body.usuario_actual || '',
-    ubicacion: body.ubicacion || 'Sin asignar',
+    ubicacion: (body.ubicacion && body.ubicacion !== 'Sin asignar' && body.ubicacion.trim()) ? body.ubicacion.trim() : 'Soporte Técnico',
     estado: body.estado || 'Operativo',
     consumible: body.consumible || body.tinta_toner || '',
     notas: body.notas || '',
@@ -3146,7 +3146,7 @@ app.get('/api/export-excel', async (req, res) => {
     // Poblado de Datos en todas las hojas categorizadas
     items.forEach((item) => {
       const bloque = getBloqueName(item);
-      const amb = toUpper(item.ubicacion || 'CAE');
+      const amb = toUpper(item.ubicacion || 'Soporte Técnico');
       const host = toUpper(item.hostname || 'PC-EQUIPO');
       const user = toUpper(item.usuario_actual || 'ADMIN');
       const status = toUpper(item.estado || 'OPERATIVO');
